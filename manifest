@@ -1,0 +1,83 @@
+;read these first
+
+COPYING
+README
+INSTALL
+
+;the program
+
+tex2page
+tex2page.lisp
+tex2page.tex
+tex2page.sty
+tex2page.css
+
+;just \eval
+
+eval4tex.tex
+
+;the documentation
+
+index.tex
+tex2page-doc-mac.tex
+tex2page.bib
+like-plt-logo.tex
+ursa-major.tex
+tex2page.1
+t2p.png
+story.log
+story.hlog
+faq.tex
+celeb.tex
+
+tex2pagedeprecated.tex
+plainsection.tex
+plainitemize.tex
+
+texi2p.tex
+texinfo.t2p
+x11rgb.scm
+x11rgb.tex
+
+;slideshow
+
+t2pslides.tex
+
+manifest
+history
+
+;example
+
+texample.tex
+mpexample.tex
+story.tex
+
+;html to Info
+
+t2p2info
+
+;ports
+
+configure
+scmxlate-tex2page
+dialects/*-tex2page
+dialects/*.scm
+dialects/*.lsp
+dialects/make-guile-version
+
+x11rgb.lisp
+
+tex2page.bat
+
+;some useful TeX files
+
+*fonts.tex
+2col.tex
+8pt.tex
+
+;sample .t2p files
+
+t2p-example/*.t2p
+t2p-example/scshdoc.tex
+
+;last change: 2013-03-10

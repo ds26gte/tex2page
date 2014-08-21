@@ -1,0 +1,23 @@
+% .t2p file for main.texi (the GPLed portion of
+% *Open Source Development with CVS*, by Karl Fogel).
+
+% Create a main.t2p file alongside main.texi with
+% contents
+%        \input osdwcvs.t2p 
+
+
+\let\PRIMsection\section
+
+\input texinfo.t2p
+
+% main.texi doesn't number its chapters, although the
+% printed book seems to.  Let's number them... 
+
+\let\unnumbered\chapter
+
+% Let's start each section on a new HTML page
+
+\def\section#1
+{\eject\PRIMsection{#1}\label{#1}}
+
+

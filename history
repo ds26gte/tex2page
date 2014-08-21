@@ -1,0 +1,4389 @@
+Last change 2014-06-19
+
+Jun 19, 2014
+
+For SBCL, have both straight and compiled code use *posix-argv*
+
+Feb 8, 2013
+
+\nocite citations, if not supplied, should trigger unresolved
+message.
+
+Jan 25, 2013
+
+Added bvfonts.tex, for the Arkandis Baskervald font.
+
+May 4, 2012
+
+Setting flag \TZPredirect now allows reader to explicitly click
+target URL if browser (viz., IE) fails to automatically redirect.
+
+Flag \TZPredirectseconds specifies seconds until automatic redirect.
+
+Internal change: Use proc name ctl-seq-no-arg-expand-once instead
+of the inscrutable find-def-0arg (which doesn't have the same
+signature as find-def anyway).
+
+Apr 27, 2012
+
+Added config for Allegro Common Lisp.
+
+Apr 26, 2012
+
+configure: no need to modify source to change how argument file
+is determined when creating compiled executable for SBCL.  Embed
+the difference within source itself via eval-when.
+
+Apr 25, 2012
+
+Have the version string for CL TeX2page be ascii, and ergo, the
+entire tex2page.lisp file be ascii, so it doesn't cause error
+when loading in an environment where the user did not or could
+not set LANG appropriately.
+
+Apr 21, 2012
+
+s/MzScheme/Racket/g
+
+dialects/chicken-tex2page: s/getenv/get-environment-variable.
+Rpt by Timothy Beyer.
+
+configure suggests SBCL if available.
+
+Nov 26, 2011
+
+No need to change font-family when going italic inside monospace.
+
+Added a tex2page.css for font experimentation.  (Can't use
+@import inside \cssblock within document source because @import
+has to precede all other css within a css file.)
+
+NB: @font-face with ../-style urls works in Chrome but not in
+Firefox.
+
+NB: Non-breaking hyphen in monospace (Ubuntu Mono, Inconsolata,
+Droid Sans Mono, maybe all monospace fonts) works in Firefox but
+not in Chrome.  I could use regular hyphens thruout I guess, but
+hopefully Chrome will improve.
+
+Aug 28, 2010
+
+Guile config updated (works with ver 1.8.7).
+
+\hyperref[label]{text} from hyperref.sty (Volkan Yazici).  LaTeX2HTML's
+\hyperref should be probably be retired, as it conflicts with another instance
+of \hyperref from hyperref.sty.
+
+Dec 20, 2009
+
+\TZPtextext.  Set to 0 to disable TeX's pseudoligatures for quotes and
+dashes. Useful if using XeTeX with a Unicode font without mapping=tex-text.
+
+Oct 10, 2009
+
+initialize-globals should be called before first call to
+actual-tex-filename, because latter relies on *global-texframe* for
+reading hdir.  Fix from Mike Sperber.
+
+Aug 28, 2009
+
+Put all required globalization inside a single procedure
+initialize-globals, so tex2page-string can be called without error on
+small strings by users (such as Shriram Krishnamurthi).
+
+June 6, 2009
+
+Use better definition for system for SBCL.  (Nikodemus Siivola)
+
+May 13, 2009
+
+configure: Make an executable fasl for SBCL.
+
+May 7, 2009
+
+\TZPredirect
+
+May 5, 2009
+
+Make tex2page.tex leaner.  Shunt unnecessary stuff into
+tex2pagedeprecated.tex.
+
+Apr 29, 2009
+
+Delay determination of *latex-prog-name* and *tex-output-format* until
+first use (which is inside call-tex), so user has chance to reset
+*tex-prog-name* -- either through \eval or by setting \TZPtexprogname.
+
+Apr 24, 2009
+
+Use flag \TZPslides to trigger slides.  t2pslides.tex: Make it work for
+CL too.  Introduce a flag \TZPcommonlisp as a conditional when
+calling CL and Scheme code.
+
+Apr 22, 2009
+
+configure script bugs fixed: (rpt by Taylor Venable)
+
+Apr 21, 2009
+
+Improve text translations of math, viz. matrices, \over, \left/\right.
+
+Apr 16, 2009
+
+Bring config up-to-date for Petite (and presumably full) Chez Scheme.
+
+Apr 14, 2009
+
+\i \j \l \L  (\j = #x237 doesn't render on lynx yet.)
+\t.
+
+Apr 13, 2009
+
+Use combining diacritical marks for \" \^ etc.
+
+\, \> \; \! \thinspace \negthinspace (dimens from TeXbook, p 167)
+
+Apr 12, 2009
+
+\textindent
+
+Apr 11, 2009
+
+Use #x2388 (a character that somewhat signals "at work" and also renders
+on lynx) to flag missing pieces in the output HTML (xrefs, toc, bib,
+index) that will presumably be picked up by running TeX2page again.
+
+Translate \hskip properly, for both +ve and -ve args, by moving a zwnj
+inside a span.  (Previously was outputting a integral number of nbsp's
+for +ve arg.)  But text-based browsers (lynx) can't see the effect.
+Make \kern == \hskip.  Should do \lower and \raise too: Later.
+
+When outputting content within \htmlheadonly to aux file, sub #\space
+for #\newline.  This is because (most?) Schemes write out a newline
+within a string as \n, which CL reads as n.  (Again: This wouldn't be a
+problem if only the Scheme or the CL version of TeX2page is used on any
+given doc, but see entry from Apr 10, 2009.)
+
+Code displays should use horiz scrollbar when wider than (<body>'s)
+max-width.
+
+Bring config up-to-date for Chicken Scheme.
+
+Visible space is now rendered as a lowered counterbore (#x2334, looks
+like sq cup but with shorter sides), as in TeX.  (Was red middot.)
+
+Consolidate translation of TeX logos: Use 'position: relative' when
+lowering or raising, so HTML interlineskip is respected.
+
+Apr 10, 2009
+
+Added support for Armed Bear Common Lisp.
+
+Last-modification-time is written to aux file along with epoch year
+(typically 1970 for Scheme and always 1900 for CL), so Scheme and CL can
+use their own time procedures without offsets, and only need to add/sub
+70 years when reading an aux file created by the other language (which
+nobody would, I guess, except me, as I test the same document with
+different versions of TeX2page).  Since last-mod-time is read from the
+aux file only once during each run, doing the calculation here is more
+efficient than contaminating TeX2page's every time calculation with it.
+
+Bring config up-to-date for Gauche and Gambit.
+
+Use fontch.tex's names such as \TM \degree.  But see also xunicode.sty.
+
+Translate manmac.tex's \bull as #x25fe.
+
+Apr 9, 2009
+
+In-text verbatim should not line-break on hyphen: so use #x2011 there
+instead of the usual #x2d.
+
+Translate \imath and \jmath as italicized #x131 and #x237 for now, as
+the correct translations #x1d6a4 and #x1d6a5 are not palatable to
+browsers yet.
+
+Apr 8, 2009
+
+When setting <p>'s CSS property text-indent from \parindent, use points
+(= pixels) instead of ems, so that the <td> width (which can only be
+specified in pixels) used by plain TeX's \item can perfectly match
+\parindent.
+
+scmxlate-generated CL version of tex2page also puts everything in
+package "TEX2PAGE".
+
+Apr 7, 2009
+
+plain's \item and \itemitem should not indent first line of paragraph
+(beyond what the whole paragraph is already indented).
+
+Add \beginchapter for convenience.  The first \beginchapter causes an
+HTML pagebreak only if the doc uses a titling macro.  Every subsequent
+\beginchapter causes an HTML pagebreak.  (No such implicit pagebreaks in
+print.)
+
+tex2page.lisp: Package-ize it.  Add an appendix in the manual describing
+the CL version of tex2page.
+
+More Unicode, using charts from
+http://www.unicode.org/charts/index.html .
+
+TeXbook, Appendix F, sec 4: \hbar \imath (?) \jmath (?) \ell (looped)
+\top \bot \| (better) \flat \natural \sharp (more musical) \diamondsuit
+(white) \heartsuit (white)
+
+App F6: \coprod \oint \bigcap \bigcup \bigsqcup \bigvee \bigwedge
+\bigodot \bigotimes \bigoplus \biguplus
+
+App F7: \mp \setminus (better) \star \diamond \uplus \sqcap \sqcup
+\triangleleft \triangleright \wr \oslash \odot \amalg
+
+App F8: \prec \preceq \sqsubseteq \vdash \smile \frown \succ \succeq \sqsupseteq \dashv \mid
+(better) \parallel (better) \asymp  \bowtie \propto \models \doteq
+
+App F10: \mapsto \hookleftarrow \leftharpoonup \leftharpoondown
+\rightleftharpoons \longmapsto \hookrightarrow \rightharpoonup
+\rightharpoondown \updownarrow \Updownarrow \nearrow \searrow \swarrow
+\nwarrow
+
+App F14: \owns
+
+Variegated \not
+
+Apr 6, 2009
+
+Better Unicode translations for \varphi \ll \gg \simeq \circ
+
+Apr 5, 2009
+
+At long last, TeX2page once again works out of the box in PLT Scheme,
+viz.  mzscheme 4.1.5 [3m].  Thanks to Sam Tobin-Hochstadt for patiently
+explaining the new PLT command-line in person.
+
+Apr 3, 2009
+
+Add user-settable *tex-prog-name* (can be "tex", "etex", "pdftex",
+"pdfetex", "xetex", "luatex").  From this, the LaTeX program name can be
+deduced, and we can also avoid a call to dvips (for image aux files) if
+the output is known to be PDF.
+
+Apr 2, 2009
+
+Introduce a variable *outer-p* that is true only when a macro is called
+at "top level".  This is useful for \eval because its behavior at the
+TeX top level is different from its behavior inside a macro body, and we
+need to eventually duplicate this behavior in TeX2page.  (This is not
+quite TeX's \outer, which causes a macro to bomb if used anywhere but
+the top level.)
+
+In TeX, when \eval is called inside a macro body, it cannot make its
+contents verbatim, and so must use \controlsequences that convert to
+special characters.
+
+Apr 1, 2009
+
+If no blank line after code displays, implicitly \noindent.
+
+When calling kpsewhich use the option-ender "--", as the options given
+to tex2page (--help, --version) are not intended as options for
+kpsewhich.
+
+Default stylesheet: Use a light gray background for <pre>.  Highlight
+links in yellow when hovering over them.
+
+Prefer TEX2PAGEINPUTS as environment variable for path for TeX2page over
+TIIPINPUTS.  (Didn't realize env vars *could* contain digits!)
+
+Mar 29, 2009
+
+Fork off a CL-specific version, tex2page.lisp, whose version number is
+suffixed with λ².
+
+Add lmfonts.tex to allow UTF-8 in source docs when XeTeX is used.
+
+Mar 21, 2009
+
+Making {lstlisting} like {verbatim} for now.  Ignore \lstset.
+
+When math fragments are LaTeXed, use package amsmath.
+
+\providecommand should be given proper defn instead of a non-robust one
+when processing {thebibliography}.  Was causing error if sensitive
+material found in optional argument.  (rpt by Volkan Yazici)
+
+Mar 20, 2009
+
+Removed some uses of mutable pairs in preparation for port to PLT 4.
+
+Mar 19, 2009
+
+Added defn for \ifhmode to avoid "Extra \fi" error.  (rpt by Volkan Yazici)
+
+Also improved 'system' translation for SBCL.  Moved defn of
+tex-string->html-string ahead of number->footnote-symbol because latter
+uses it as an argument, and scmxlate doesn't know to put #' for a
+forward-referenced function name.
+
+Added support for Clozure CL.
+
+Mar 2, 2008
+
+tex2page.tex: SLaTeX-compatible definitions weren't being
+loaded in LaTeX.  (Leslie Polzer)
+
+Aug 3, 2007
+
+Every generated HTML page (not just the first) should have
+robots content=index.  (Eli Barzilay)
+
+Jun 9, 2007
+
+Separate chapter ToC entries (if subentries present) by
+medskip only if using TeX-like layout.  Otherwise just use
+regular <p> as that is plenty wide for HTML.
+
+May 22, 2007
+
+Mike Sperber: Keep \htmlonly \endhtmlonly \imgdef in the
+always-loaded area of tex2page.tex
+
+Feb 21, 2007
+
+t2pslides.tex: Make right mouse click go to previous slide.
+
+Feb 17, 2007
+
+Allow \includegraphics to pick up .jpeg as it does .jpg.  (The TeX source
+must say \DeclareGraphicsRule{.jpeg}{jpg}{*}{}.  tex2page currently will
+skip \DeclareGraphicsRule.)
+
+Jun 23, 2006
+
+Use just one flag \TZPmathimage (instead of one for
+displayed and another for in-text math).  (Since TeX2page
+already uses ascii for in-text math whenever it can, having
+two flags is excessive.)
+
+\cong \ni \propto \in \notin \approx
+
+Math displays use <div class=mathdisplay>, whose top and
+bottom margin values are copied from
+\{above,below}displayskip when using TeX-like layout.
+
+TeX2page boolean flags treat 0, n, N, f, F as false and
+everything else as true.
+
+Jun 21, 2006
+
+Translate ' and '' as prime and double-prime in math mode.
+Add a definition for \textdegree (for non-LaTeX) in
+tex2page.tex.
+
+Jun 18, 2006
+
+Even if \TZPtextmathimage is set, emit in-text math as text (i.e.,
+non-image) if it can be deduced that it is simple enough.
+
+Jun 16, 2006
+
+An empty \halign line (i.e., simply "\cr") should produce
+some vertical space.  To this end, insert a trailing &nbsp;
+in an \halign line that has no &.
+
+May 27, 2006
+
+do-write-to-toc-aux: set up \TIIPcurrentnodename and \@currentlabel so
+subsequent \label can DTRT.
+
+HTML-only macro \TIIPanchor: Sets up an anchor so a subsequent \label can
+resolve to it.
+
+May 26, 2006
+
+\futurenonspacelet
+
+May 23, 2006
+
+At \bye, store \headline and \footline in jobname-Z-A.scm,
+so the first page (in particular the header of the first
+page) can get benefit of them in the next run.
+
+May 22, 2006
+
+If text immediately follows $$display math$$ with no blank
+lines in between, it should not be indented.
+
+TeX-like layout (happens when \let\TZPtexlayout=1) also
+involves headlines and footlines being somewhat TeX-like,
+i.e., simple page numbers, but using \TIIPfolio for \folio.
+
+HTML-only command \TIIPfolio is used like \folio, but typesets twin links
+to the adjacent pages.
+
+Have ctlseq \@currentlabel (rather than toks
+\TIIPrecentlabelvalue) hold the current label value, as in
+LaTeX.  Perhaps useful for user macros.
+
+Toks \TIIPrecentlabelname changed to ctlseq
+\TIIPcurrentnodename
+
+May 21, 2006
+
+Macro arglist of ` \par' should be treated correctly.  The space matches
+but does not eat a newline, so the succeeding \par has a chance to succeed.
+Space before \par is useful so that #1 in `#1 \par' does not match trailing
+space.  (So section titles captured thus do not get stored in .toc files
+with trailing spaces, necessitating an \unskip.)
+
+Define \bgroup and \egroup to expand to { and } resply, instead of directly
+doing what the latter do.  This allows \ifx\cs\bgroup to work after say
+\futurelet\cs\csii{ .
+
+Use the more descriptive name \xrtag for \tag
+
+\htmlspan: Creates a <span ...> with its argument.  <span> ends when
+enclosing group does.
+
+Similarly, \htmldiv
+
+Use \writenumberedtocline (an Eplain std name) for \writetotoc.
+
+\writenumberedcontentsline
+
+May 20, 2006
+
+\uppercase
+
+*operating-system*: Distinguish between unix and cygwin, because in the
+latter a full pathname returned by kpsewhich has to have its prefix
+massaged sometimes before (Mz?)Scheme's file access procedures can
+recognize it.
+
+May 19, 2006
+
+\char can be followed by \the\acount
+
+May 18, 2006
+
+Load ~/.tex2page.t2p and .tex2page.t2p if possible, before
+jobname.t2p.
+
+May 17, 2006
+
+Index: make the page numbers links, not the item itself.  Also, use
+suffixes to differentiate occurrences of same pagno on the same index
+entry.  (Unlike in print, it makes sense to distinguish between such
+entries, because HTML pages are larger.)
+
+get-ctl-seq shouldn't ignore immediately following space if
+format is Texinfo.  (@center on a line by itself would fail
+otherwise.)
+
+Let \tracingcommands, \tracingmacros be counts, as in TeX.
+
+\TZPraggedright
+
+May 16, 2006
+
+\TZPtexlayout
+\afterassignment
+
+May 15, 2006
+
+\sl: font-style: oblique
+\sf: font-family: sans-serif
+
+Use flags to control things like colophon look, math rendering (image or
+ascii), and image conversion.  Flags are just TeX control sequences, and
+are set using \let, \def, etc.  It is all right that these control
+sequences have no meaning for TeX, thus we avoid having to define extra
+macros for TeX that do nothing but prevent "undefined" errors.
+
+May 14, 2006
+
+\footnote mark argument should be translated only once,
+that translation being used for both the in-body and
+in-footnote mark.  (This allows user to define own
+footnote macro where the mark is, say, a control
+sequence that is an \edef that captures the current
+value of a counter.)
+
+May 13, 2006
+
+\chapter should reset footnote counter.
+
+\noexpand (in \edef macro bodies)
+
+Disable image generation for $math$ while printing footnote mark.
+
+\vfootnote
+
+May 12, 2006
+
+Do something better with \edef, \xdef than just letting them be \def, \gdef
+respectively.  E.g.,
+
+\newcount\cnt
+\advance\cnt by 12
+\edef\xii{\the\cnt}
+\def\xxiv{\the\cnt}
+\advance\cnt by 12
+\xii\ \& \xxiv
+
+should work correctly.
+
+\vskip translates to <div> of appropriate height (ignoring plus/minus part
+of skip though).
+
+May 11, 2006
+
+\csname ... \endcsname should be able to enclose any characters.
+\expandafter should be able to expand thusly defined control sequences.
+E.g.,
+
+\def\eeedef{\expandafter\expandafter\expandafter\def}
+\def\[#1]{\csname #1\endcsname}
+\eeedef\[---]{apples}
+\eeedef\[***]{oranges}
+\[---] \& \[***]
+
+should be HTMLized correctly.
+
+\futurelet
+
+May 5, 2006
+
+%comments should be ignored whilst reading macro arguments.
+
+May 4, 2006
+
+Implicit ignore-spaces after alphabetic control sequence shouldn't extend
+past the macro body that it's in.
+
+Allow \par to signify blankline-parsep in \def parameter list.
+
+May 2, 2006
+
+\tag should write the tag value as (already-expanded) HTML, not TeX, string
+into aux file.
+
+\folio
+
+May 1, 2006
+
+\writetotoc
+
+Apr 24, 2006
+
+Define \@ldc@l@r to do do-color (like \color), so t2p won't
+choke on \let\color\@ldc@l@r (which is needed to be done in plain TeX +
+miniltx sometimes to prevent infinite loops).
+
+Apr 23, 2006
+
+\htmlimageconversionprogram.  Allow choice of ImageMagick for image conv.
+
+Apr 22, 2006
+
+Remove \color definition from tex2page.tex.  Ask user to rely on miniltx +
+color.sty instead.
+
+Setting @'s catcode to 11 (or non-11) should change how tex2page reads ctrl
+sequences.  \input miniltx sets @ catcode to 11.  So too does
+\makeatletter.  \makeatother and \resetatcatcode (not quite right but ok
+for most situations) set it back to 12.
+
+Apr 21, 2006
+
+Remove \iffileexists as synonym for \IfFileExists, as it clashes with
+eplain's definition.
+
+Apr 12, 2006
+
+Better parsing (away) of \magnification, \magstep[half], and \font, even if
+they don't do anything for HTML.  (Previously, \font was just reading till
+end-of-line.)
+
+eTeX's \ifdefined
+
+Apr 11, 2006
+
+Eplain's \verbatim ... |endverbatim.
+
+Apr 10, 2006
+
+Eplain's \hlstart{url}{} ... \hlend.
+
+Apr 4, 2006
+
+\globaldefs
+
+\definexref (but ignoring the 3rd arg), \refn (aka \xrefn), \xrdef (from
+Eplain).
+
+Mar 29, 2006
+
+Define \hoffset, \voffset, \emergencystretch, \hfuzz, etc., as dimens; and
+\hyphenpenalty, \exhyphenpenalty, \doublehyphendemerits,
+\finalhyphendemerits, etc., as counts; just so tex2page can skip
+assignations to them. (Ctlseqs previously defined as eat-integers and
+eat-dimens should be better translated as counts and dimens now.)
+
+Define \magstep, \skewchar, \textfont, etc., for tex2page to skip them.
+
+Don't define \end in terms of \bye in case some user macros define \bye in
+terms of \end.
+
+Mar 27, 2006
+
+tex2page.tex: Vertical skip after \section should be small.
+
+Keep a copy of eval4tex.tex in the tex2page distribution.
+
+Put babel/*.t2p files in a separate tarball.  They are not authoritative
+anyway.
+
+Feb 27, 2006
+
+make-guile-version: Don't let Guile's values for *anno-domini-at-0*
+*january-number* be clobbered.  (Rptd by marco dot bakera at udo dot edu.)
+
+Jan 31, 2006
+
+\fmtname, \fmtversion
+
+Jan 30, 2006
+
+\smartdoublequotes: " preceding digit should be ``
+
+Jan 29, 2006
+
+\smartdoublequotes, \emailliketext
+
+Jan 25, 2006
+
+In {schemedisplay}, allow $$ (i.e., the scheme-math-escape characters used
+to enclose empty space) to typeset as nothing, just like SLaTeX does.
+Shriram Krishnamurthi uses this to insert empty space to split symbols in
+SLaTeX, and wanted tex2page to honor it.  (This is a possible kludge,
+because $...$ enclosing nothing, i.e., $$, is treated as a math-display
+opener by TeX, and hence fails, possibly correctly so.  But it seems OK to
+make an exception for SLaTeX displays, because there is no tradition of
+using doubled math-escape characters there to indicate math displays.)
+
+Have copyright year-range (displayed by --version argument) use closing
+year from *tex2page-version* (which my text editor automatically sets on
+writing the file), instead of it requiring hardwiring by lazy me every time
+I change tex2page for the first time in a calendar year.
+
+Oct 23, 2005
+
+do-includegraphics-web bugfix.  Was ignoring \includegraphics calls that
+didn't have optional arg.
+
+Oct 22, 2005
+
+Set/store dimens as scaled points (1pt = 65536sp), not necessarily integral
+as in TeX, but certainly not as integral pixels!
+
+\number\dimenctlseq prints as number of scaled points (cf. \the\dimenctlseq
+which prints as number of points followed by "pt").
+
+Recognize \hsize as a predefined dimen (with value 6.5in).
+
+\epsf[xy]size are dimens.
+
+\dimenctlseq=<dimen>  should eat any following space.
+
+Oct 21, 2005
+
+Clean up t2pslides.tex (and corresp hook in tex2page).
+
+Have \the\dimenctlseq print with a trailing "pt".
+
+Oct 19, 2005
+
+Add some @media print rules in the generated CSS file, so printing from the
+browser provides something nicer, e.g., justified text, no navig bar.
+Also, translate \noindent as <p class=noindent>.  For print, every <p>
+without class=noindent will have a text-indent.  (Parskips are much smaller
+in print than in HTML, to go with usual print style (of course some
+computer manuals tend to use significant parskip and no parindent, but they
+are not the norm).)
+
+Oct 14, 2005
+
+Mention pdf(e)(la)tex in the manual.  Perhaps I should give pride of place
+to the PDF-producing versions of TeX over its DVI-producing versions?  Has
+pdfTeX obsoleted DVI TeX by now?
+
+Oct 13, 2005
+
+Don't use <br> to translate {med,big}skip.  Use <p class=medskip> etc
+instead, where the class medskip etc have margin-{top,bottom}.  Make sure
+successive {med,big}skips combine to produce increasing space.
+
+Oct 12, 2005
+
+Use "advanced" HTML entities like &#8212 (for em-dash, instead of "--").
+There is no need to give the user option to choose to use or not use these.
+I think most browsers support them now, or replace them appropriately with
+crude ascii on their own (lynx does this) without tex2page having to do it
+for them.
+
+Oct 10, 2005
+
+A footnote mark should have the underline that indicates it's a hyperlink
+directly below the mark, not below the baseline.
+
+Oct 8, 2005
+
+t2pslides.tex: 1. Don't load slide-specific css additions via the .js file.
+This may be nice in that it kept the slide-specific css separate from the
+"regular" css, but it also loaded it after any user-specified css.  This
+prevented the user from modifying how the slides looked -- e.g., changing
+bg/fg color.  This is really important because in some rooms and on some
+walls it makes sense to reverse-video, and the user should be able to
+specify that naturally in their source.
+
+2. Now: the css from t2pslides is added in order, so subsequent (user-defined)
+cssblocks can override it.
+
+3. Disable navigation bar via css only when the .js file is linked.  (This does
+the mildly useful thing of providing some form of navigation after the
+first run of tex2page.)
+
+4.  Set dimens \hsize and \textwidth to 11in for HTML.  This so that that
+image sizes that use fractions of \hsize can scale reasonably on slides.
+Print hsize, 6.5in, is paper width (8.5in) - 2in.  I therefore chose screen
+hsize to be typical monitor width (13in) - 2in.  The user can of course
+reset their slides' \hsize.  I just felt that the default hsize (6.5in) was
+producing too tiny images.  (May need to revisit this -- perhaps lengths
+defined as fractions of \hsize should be converted to HTML percentages.)
+
+Oct 7, 2005
+
+Don't just ignore \newdimen -- do keep track of the lengths in the dimen
+ctlseqs.  This allows meaningful \includegraphics options such as
+width=.5\dimenctlseq.  (If a dimen ctlseq is used but not defined, assume
+it to be 6.5 in, i.e., the default \hsize.)
+
+Don't choke on options in \includegraphics's bracketed argument that aren't
+width and height.  (Skip over commas too.)  However, the HTML translation
+will only be able to use width and height.
+
+Oct 6, 2005
+
+Allow \includegraphics in non-LaTeX source too.  To generate image in Web
+page, use an auxiliary TeX little file that loads miniltx.tex and
+graphicx.sty (which is presumably what the big source document also did).
+
+If \includegraphics's argument is a .jpg or .png, directly translate to HTML
+<img> without going via a TeX little file.
+
+Sept 11, 2005
+
+Add citation for Inkscape.
+
+tex2page.tex: \inputepsf does whatever is needed to provide the macro
+\epsfbox.  (This is `\input epsf' for dvi-generating TeX but something else
+for pdftex.)
+
+June 14, 2005
+
+t2pslides.tex: //-style comment before div#title was disabling rest of css.
+
+June 10, 2005
+
+like-plt-logo.tex: close the port for lambda.mp by calling \verbwritefile
+on a different (dummy) file.  This is so lambda.mp file exists when being
+\verbatiminput by mpexample.tex.  (The problem manifests itself (as it should)
+in MzScheme 299.106, not in 205.  I wonder why.)
+
+Apr 30/May 1, 2005
+
+*ignore-active-space?*, \\TIIPobeylinestrictly.
+
+Several corrections to t2p-example/r5rs.t2p.  Primarily: don't imagize
+{grammar} in all of chapter 7, just for the section 7.2 (which contains the
+denotational semantics).  The grammar in section 7.1.3 appeared truncated
+-- reported by Sebastian Egner.  This was because the .dvi version of the
+grammar was more than one page, and only the first page was imagized.
+Luckily, we don't really need an image for this grammar, as the ascii
+version was just fine.  However, I still need to consider what to do for
+"long" images.
+
+\prime  = <small>/</small>, not just /.
+
+Do a decent \addcontentsline, at least for {chapter} for now.
+
+Add a <p> (vertical space) after bottom nav bar.
+
+get-pixels: treat 1em = 10pt, and 1ex = 4.5pt.
+
+ignorespaces shouldn't if #\space is active.
+
+tex-def-char shouldn't make the char active! (A catcode assignment earlier
+in the current group typically takes care of this.)  \defcsactive should
+therefore call activate-cdef.
+
+activate-cdef should add a group-postlude undoing itself.
+
+\obeyspaces, \obeylines explicitly call activate-cdef on #\space and
+#\newline resply.
+
+Apr 26, 2005
+
+Make *bib-aux-file-suffix* and *index-file-suffix* be "-Z-I" and "-Z-B"
+respectively to match the other aux file names.  (Makes for easy rmoval to
+start things from scratch.)
+
+\verbwritefile: If arg file has no ext, assume .tex.  (Because TeX assumes
+.tex in such situations.)
+
+\scminput and \verbatiminput should assume .tex if no extension provided.
+
+eval4tex.tex, picscheme.tex, and related doc moved to a separate
+distribution called eval4tex.  They can be used without tex2page (unless it
+be for converting the doc to HTML).
+
+tex2page.tex loads eval4tex.tex (if available) for the \eval macro.
+tex2page processes \eval as before, except it now reads an embedded |
+(pipe) as escape (catcode 0).  This allows the user to insert arguments
+fashioned from outside into the Scheme code.
+
+Apr 7, 2005
+
+do-display-math and do-intext-math arity bug: weren't treating LaTeX \( ...
+\) and \[ ... \] correctly.  Bug report and fix from Mike Sperber.
+
+Mar 30, 2005
+
+MzScheme magic line shouldn't have '-vm -f $0' in addition to '-C $0'!  I
+don't know what I was thinking when reading man mzscheme.
+
+Mar 15, 2005
+
+Make configure script generic, i.e., w/o references to tex2page.  Can be
+used for any package that is configured w/ scmxlate.  (Included henceforth
+in scmxlate package as 'sample.configure'.)
+
+Mar 14, 2005
+
+make node names for footnotes consistent with other tex2page-generated node
+names (i.e., begins with "node_").  Also use fn mark as part of node name
+for numbered footnotes, using temp-strings only for non-numbered footnotes.
+This makes for numbered footnotes to have correspondingly numbered node
+names, as for sections, and lets t2p2txt produce intuitive fn marks.
+
+Mar 12, 2005
+
+t2p2info: create several Info subfiles instead of one huge file.
+Number of Info pages is same as number of HTML pages plus 1.
+
+Mar 11, 2005
+
+Simple scripts t2p2txt and t2p2info replace hoyve[.vim] and hisfir[.vim].
+These rely on lynx -dump instead of complicated massaging of the .html
+source via vim.
+
+Simple script t2p2man (instead of t2p2man.tex) to convert t2p-generated
+.html pages into a man page.
+
+Mar 8, 2005
+
+tex2page-doc.tex:  Replace \input tex2page-version with
+\eval{(display *tex2page-version*)}, so we don't have to maintain
+tex2page-version.tex.
+
+dump-groupoid procedure: if argument is #f, dump to bitbucket.
+
+t2pslides.tex: generate a separate overriding stylesheet for slides, which
+is loaded via the .js file.  To view the slides as regular HTML pages (with
+nav bars), we just need to delete the .js file.  The only difference
+between these and HTML pages that were generated without loading
+t2pslides.tex is that the former don't contain <!doctype>.  But that
+doesn't seem to affect how they look one whit.
+
+Mar 7, 2005
+
+\htmldoctype -- used to specify something other than the default doctype.
+An empty argument disables the doctype declaration.  This is needed for the
+slides, because javascript and doctype don't seem to sit well together on
+the same HTML page.
+
+Mar 6, 2005
+
+Move almost all slideshow-related code from tex2page to t2pslides.tex.
+
+Rename texinfo2p.tex to texi2p.tex (basename within 8 chars!).
+
+Mar 5, 2005
+
+Get good alt= for math imgs, so we have something reasonable to look at
+in lynx.
+
+Removed colophon and math-style settings from t2p2man.tex.  The loading or
+not of t2p2man.tex should make no difference to the look of the HTML files.
+t2p2man.tex's only function is that a man page is generated in addition.
+
+Mar 4, 2005
+
+variable *afterbye* to store thunks that should be thawed after \bye.
+
+t2p2man.tex: Allow multiple-HTML-page document to also produce a man page.
+Unfortunately, this does require sed to remove the nav bars, but perhaps
+because this sed call doesn't contain backslashes, it seems to be ok.
+
+Have two separate commands, \manpagesection and \manpagedescription,
+instead of a single two-argument \manpage, because most users will be
+satisfied with default man sec = 1.
+
+Mar 3, 2005
+
+t2p2man.tex: remove the problematic sed completely.  Create an always
+indexable man page that can also be printed with [tg]roff (however
+shabbily).  (We could get a better printout from the tex source, but what
+if somebody only had the generated man page?)
+
+Mar 2, 2005
+
+t2p2man.tex: sed's -e argument in this file apparently should not be quoted
+in cygwin, but must be quoted in other unices.
+
+Mar 1, 2005
+
+Allow \endinput to be followed by \fi without complaining about incomplete
+\if's.  Also: do not error for incomplete \if's at \bye; just warn.
+
+Have \htmlcolophon put !colophon in jobname-Z-A.scm.  This allows
+\htmlcolophon{last-page} to occur anywhere in the document.
+
+t2p2man.tex.  \input'ing t2p2man will not only produce the HTML version of
+the TeX source but also a man page, _if_ the HTML consists of a single
+page.  Uses lynx.  t2p2man.tex defines the macro
+\manpage{man-section}{one-line-description}.  The created man page is
+jobname.n where n = man-section.  If \manpage isn't called, man-section is
+assumed to be 1, and an unindexable man page is created.
+
+Feb 27, 2005
+
+jobname-Z-S.css should be linked before other stylesheets.
+
+Move all slideshow-related css code from tex2page to t2pslides.tex.
+
+insert-tex-if procedure added.  Lets me insert conditionals in \eval that
+are closed outside \eval (with \else and \fi).
+
+Ensure generated .css file is cleanly different for presentation and
+non-presentation output.
+
+Rename mozpoint.tex to t2pslides.tex, as the file isn't quite compatible
+with MozPoint.
+
+Rename texinfo.t2p to texinfo2p.tex.
+
+Feb 26, 2005
+
+Signal need for rerun if slideshow setup is not finished.  The first run
+will never be enough since we need to know the last pageno.
+
+Feb 25, 2005
+
+mozpoint.tex -- allow mouse click to move to next slide.
+
+Feb 22, 2005
+
+mozpoint.tex -- a tex2page-friendly wrapped version of MozPoint's
+mozpoint.js.  Inputting this in your source creates MozPoint slides, which
+are HTML pages that can be used as a slideshow.
+
+Sept 11, 2004
+
+make-external-title should do its thing while fluid-letting
+*outputting-external-title?* to true, so font/size/color switches
+don't show up on the external title.
+
+Sep 10, 2004
+
+Add FAQ entry for getting TeX2page to work on Linux and Cygwin.
+
+make-guile-tex2page: set execute permission for resultant my-tex2page
+script.
+
+Sep 8, 2004
+
+Add prose about "./configure --dialect=guile" being a rapid
+configuration option for GNU users (Linux, Cygwin).  Have "./configure
+--help" suggest guile and clisp (both widely available on GNU systems) if
+they are available.
+
+In Windows, if $TERM is cygwin, treat OS as Unix.
+
+Sep 6, 2004
+
+Include c:\cygwin\bin\gs.exe as a possible pathname for the Windows
+Ghostscript executable.
+
+Sep 5, 2004
+
+Doc file org cleanup -- separate files for plt logo mp file and ursa major
+texbook code.  Also: ensure that tex'ing of tex2page-doc.tex will work
+without relying on tex2page also being run.
+
+Don't generate error saying last page number not found, if document only
+has one page.
+
+Aug 31, 2004
+
+Some eplain-friendliness: \sidx, \readindexfile, \hookaction
+
+Nov 8, 2003
+
+\schemeinput, \plainfootnote, {abstract}
+
+Sep 27, 2003
+
+Allow \setcounter and \addtocounter to work on
+counters corresponding to the LaTeX sections, i.e.,
+section, subsection, etc.  Need for this pointed out by
+Matthew Flatt.
+
+Sep 19, 2003
+
+Procedure call-with-html-output-going-to added that
+encapsulates fluid-letting *html*.  This so modulized
+versions of tex2page can indirectly fluid-let *html*
+from .t2p file.  Bug showed up while Matthias Felleisen
+was converting HtDP with PLT-module version of tex2page.
+
+Aug 17, 2003
+
+Improve \title for tex2page.tex, so that \\ in it
+works.
+
+Aug 16, 2003
+
+\htmladvancedentities
+
+Added \textbackslash, \textbar -- bug rpt robby @
+cis.ksu.edu.  Also: \text{less, greater, asciicircum,
+asciitilde, registered, visiblespace, emdash, endash,
+exclamdown, questiondown, quotedblleft, quotedblright,
+quoteleft, quoteright, bullet, periodcentered,
+trademark}.
+
+Aug 15, 2003
+
+Allow {tabular} row's \\ to be last thing in a file.
+Bug report by robby @ cis.ksu.edu.
+
+Store external-title candidates as HTML rather than TeX
+strings.  These are loaded back before input file is
+processed in a subsequent run, so they shouldn't
+depend on any TeX definitions made in the file.
+Bug report by robby @ cis.ksu.edu.
+
+Aug 3, 2003
+
+Allow *'d versions of sectioning commands to go
+into ToC, unless format is LaTeX.
+
+July 22, 2003
+
+When making an image for an \epsfbox call, put
+\epsfxsize and \epsfysize in the little .tex file,
+instead of trying to scale the little .dvi file post
+facto using <img> attributes.  This is because if
+the unscaled image is too big, the .dvi may have
+clipped it.  Bug report from Greg Troxel.
+
+July 20, 2003
+
+texinfo.t2p: Added @top (some .texi files use it).
+
+July 19, 2003
+
+\epsfig added.  Found missing by Greg Troxel.
+
+Beef up configure.  Uses wget to get scmxlate if latter
+not already on your system.
+
+July 18, 2003
+
+Have tex2page generate default stylesheet info.
+User-specified style sheet info will augment or
+override it.
+
+configure makes my-tex2page for most dialects.
+Easier than going explicitly through scmxlate, but
+probably only works on Unix?
+
+make-guile-tex2page added.  It creates my-tex2page for
+Guile without the user needing to use scmxlate.
+
+July 17, 2003
+
+copy-tdef, copy-cdef cause problems in CL because
+procedures of same name are generated when structs
+tdef and cdef are created.  (Chris Beggy bug
+report, running CMUCL.)
+
+Scsh: eval should happen in (interaction-environment),
+not (scheme-report-environment 5), or tex2page
+definitions can't be referred. (Chris Beggy bug
+report.)
+
+Scsh (0.6.2-only bug?): close-input-port of
+open-input-string doesn't work.  But work around
+it by using call-with-input-string in the source, which
+is more readable anyway.
+
+June 21, 2003
+
+For MzScheme, revert to using (require (lib
+"process.ss")) etc instead of -l process.ss etc,
+as this keeps the file self-sufficient when
+loaded from Scheme prompt.
+
+June 19, 2003
+
+When tex2page errors, allow user to type `e' to edit
+the file containing the error at the error location,
+just like TeX does.  For the editor, use the
+environment variable TEXEDIT (it must have %d and
+%s); the env var EDITOR; or vi (in that
+order).
+
+Added man page tex2page.1.
+
+June 18, 2003
+
+Windows: Include g:\cygwin\bin\gs.exe as one of the
+possible pathnames for the Ghostscript executable.
+
+Correct tex2page.bat to reflect new 'main'-style
+invocation.
+
+June 7, 2003
+
+tex2page-doc-mac.tex:
+\IfFileExists{t2p4plt}{\input ./t2p4plt }{} can fail if
+there is a t2p4plt.tex in TEXINPUTS but not in curr
+dir.  Use \IfFileExists{./t2p4plt}{/input ./t2p4plt }{}
+instead.
+
+June 5, 2003
+
+When processing texinfo file, better error if
+texinfo.t2p not found.
+
+Wang Yin contributes babel/chinese.t2p.
+
+June 4, 2003
+
+From Wang Yin:
+  \def\gobble#1{}
+  \expandafter\gobble\string\TeX
+returns nothing, instead of "TeX".
+
+This is because previous definition of do-string was
+printing its argument without disabling the \.
+Wang Yin suggests \string should toss back its argument
+into input stream after disabling \.
+
+This bugfix essentially does that, except that keeping
+around a token for a disabled backslash causes too much
+disruption in basic procedures like emit.  I've
+decided to toss back (for \TeX),
+
+  \TIIPbackslash *invisible-space* TeX
+
+\TIIPbackslash is a ctl-seq that outputs
+a verbatim \.
+
+Another Wang Yin bug report:
+
+\expandafter inside \csname ... \endcsname doesn't
+work.
+
+\csname\expandafter\gobble Tsection\endcsname{This
+is ok}
+
+\csname\expandafter\gobble\string\section\endcsname{This
+is ok}
+
+This is an exmaple of a more general problem.  No
+control sequences inside \csname were being expanded,
+when all of them should be.  Fixed.  However, \csname
+should allow the creation of control sequences with
+any characters whatsoever, not just letters.  That is
+yet unimplemented.
+
+Created babel/ subdirectory for i18n .t2p files.
+
+June 2, 2003
+
+Added german.t2p as a sample i18n file.
+
+June 1, 2003
+
+From Wang Yin: Abstract out the English names used in
+the various (LaTeX) header names and the navigation
+bar, so they can be internationalized by user.
+
+Not sure if abstracting out words is enough for
+navigation bar, as some natlangs may need to
+refashion the sentence entirely.  It's apparently
+enough for Chinese, which I think is SVO (look at me
+bandying terms like I have a clue) like English.
+Hopefully manipulating
+  *navigation-sentence-begin* (default = "Go to ")
+  *navigation-page-name* (default = " page")
+  *navigation-sentence-end* (default = "")
+is enough to accommodate non-SVO langs too.  For a
+lang that uses constructions like "Page 42 consult",
+I would use
+  *navigation-sentence-begin* = "Page "
+  *navigation-page-name* = ""
+  *navigation-sentence-end* = " consult"
+That should even be enough for "topic" langs like
+Japanese, I think.
+
+I18n also entails changing *month-names*, and in some
+(Scheme) dialects *short-month-names*, and
+*week-day-names*.
+
+May 30, 2003
+
+Don't use 1/65536 notation for rational fractions
+as Chicken complains.
+
+Don't call procedure `main' explicitly in script -- let
+the command-line magic do it.  This lets us load the
+script as a file of definitions only (for easier
+debugging on the repl).
+
+Can't use `delay' as a struct slot name, as it's a
+reserved word (only Gambit complained).  s/lay/fer/.
+
+Use date of last change instead of version numbers,
+which are too anguish-making to cook up.
+
+v 4r13a
+
+May 29, 2003
+
+Added Gauche config.
+
+v 4r13
+
+May 28, 2003
+
+Add scripts eval4tex and eval4tex.bat.  These are
+the same as tex2page and tex2page.bat except that
+the names make more sense when tex2page is being used
+to process \eval for print-only tex documents.
+
+Procedure eval-for-tex-only added.  .eval4tex files
+call this, so when tex2page operates on them, it
+can avoid doing some unnecessary things.
+
+picscheme: Change path to be more mp-like with '** (mp's ..)
+and '--, instead of using the toggler arguments 'curve
+and 'line.  This allows us to more easily tack on directions
+to the left and right of element points on the path.
+
+v 4r12
+
+May 27, 2003
+
+tex2page: Don't update timestamp when inputting files
+created with \verbwritefile.
+
+picscheme.tex: Treat points as single entities instead of
+dealing with x- and y-parts separately.  Furthermore,
+let those single entities be complex numbers, as it
+lets us mimic MetaPost's manipulation of points using
+ordinary arithmetic.
+
+v 4r11a
+
+May 26, 2003
+
+Update picscheme.tex to output MetaPost rather than
+TeX.  (Pictures done entirely in TeX, except for
+the really small ones, can overwhelm most TeXs.)
+
+v 4r11
+
+May 21, 2003
+
+Don't assume *tabular-stack* is non-empty when popping.
+This gives meaningful error message when
+\end{tabularblock} occurs by itself.  Bug reported
+by Richard C. Cobbe.
+
+v 4r10a
+
+Comment in html file mentions source file name, e.g.,
+
+Generated from source-file-name.tex by tex2page, v 4r10
+
+This pattern can be grepped by text-editor macros to
+perform a convenient autoredirect to the source file
+when the html file is visited (e.g., as a
+consequence of requesting an edit of the html file from
+a browser such as lynx).
+
+v 4r9b
+
+May 17, 2003
+
+hisfir.vim generates Info file from TeX2page output.
+
+v 4r9a
+
+May 13, 2003
+
+added `syntax-case' to default Scheme keywords
+
+v 4r9
+
+May 12, 2003
+
+Disable \scm and \verb for external title.
+
+tex2page.tex: Allow \subject's argument to perform
+catcode changes.
+
+v 4r8f1
+
+Apr 22, 2003
+
+Undo {htmlonly} def of v 4r8e, because it
+invalidates non-env use of \htmlonly in LaTeX.
+If user wants env use, they can explicitly add
+
+\let\htmlonly\relax \let\endhtmlonly\relax
+\usepackage{comment}
+\excludecomment{htmlonly}
+
+after they've loaded tex2page.{tex,sty}.
+
+v 4r8f
+
+Apr 18, 2003
+
+Matthew Flatt, using John Clements's tool, helps locate
+bad application in (little used) do-advancetally code.
+Also helps me remove obsolete code.
+
+v 4r8e
+
+Apr 17, 2003
+
+tex2page.tex's \htmlonly ... \endhtmlonly definition as
+\iffalse ... \fi doesn't work for \begin{htmlonly} ...
+\end{htmlonly}.  Added a LaTeX-specific definition.
+Use of plain TeX's \line won't work in LaTeX.  Use
+\@@line instead.  Bugs from Matthias's run of recent
+HtDP.
+
+v 4r8d
+
+Apr 4, 2003
+
+Ignoring spaces after \index{...} is causing problems
+when \index{...} is the last thing in a macro
+body (Matthew Flatt).  So let's not do it.
+
+v 4r8c
+
+Mar 15, 2003
+
+Run MetaPost on all \verbwritten .mp files.
+
+v 4r8b
+
+Feb 17, 2003
+
+Signal need for rerun if last pageno is not determined
+(needed to disable next button on last page, and to
+avoid navigation bar if only one page is output).
+
+Feb 16, 2003
+
+css.t2p: <em> inside .verbatim sets
+font-family: serif, so metavariables in verbatim show
+up as roman italic, not tt italic.  |||ly, for
+for <em> inside .scheme, except the color of the
+meta-text is also set, to black.  |||ly, for <i> inside
+<tt>.
+
+.footnoterule, .colophon classes added.  Links (<a
+...>) inside .colophon are gray (like rest of
+colophon).
+
+Feb 15, 2003
+
+texinfo.t2p: @appendixsec, -subsec, -subsubsec added.
+
+@contents implies a \chapter* or \section*{Contents}.
+In contrast, @printindex does not have an
+implicit section header.
+
+@titlepage is set in \large font.  Note that switches
+don't survive an HTML page \eject.  May need to
+something about this.  At least make the navigation bar
+immune to them by making css.t2p's .navigation have
+font-size: medium.
+
+v 4r8a
+
+Feb 10, 2003
+
+Include alt= inside <img ...> so validators don't
+complain.
+
+v 4r8
+
+Feb 9, 2003
+
+Assume jobname-Z-S.css in first run itself, so preview
+of HTML doesn't have to wait till second run to see
+CSS's influence.
+
+Use CSS to determine sizes of \tiny ... \Huge.
+
+Feb 8/9
+
+Allow `\input texinfo' to trigger texinfo-specific
+conversion without need for a jobname.t2p that
+\input-s texinfo.t2p.
+
+Feb 8
+
+`system' definition for scsh not quite working.  So
+redefine kpsewhich using `run' in scsh config file.
+
+v 4r7
+
+Feb 8, 2003
+
+Exploit time primitives in MIT Scheme.
+
+Exploit availability of strftime, localtime,
+string-index, string-rindex in Guile.
+
+texinfo.t2p: @settitle
+
+\tiny, \scriptsize, \footnotesize
+
+Feb 7, 2003
+
+texinfo.t2p: better @set, @value, @uref.
+
+do-url should read balanced braces.
+
+\large, \Large, \LARGE, \huge.
+
+read-till-next-sharp should know to skip #\newline even
+if it is active.
+
+Feb 6, 2003
+
+For plt, generate _two_ module files, tex2page.ss
+and tex2page-aux.ss, so that
+
+    (require <approp libname of tex2page.ss>)
+    (tex2page file)
+
+works in any context, not just toplevel.
+Robby Findler and Matthew Flatt.
+
+v 4r6
+
+Feb 5, 2003
+
+When ignoring \\ for external title, ignore immediately
+following whitespace.  Needed for titles like
+
+\title{The Origin of Consciousness in the Break-\\
+Down of the Bicameral Mind}
+
+v 4r5b
+
+Feb 4, 2003
+
+Fixed activate-cdef, do-inputindex bugs
+encountered by Robby Findler.
+
+!`  ?`
+
+v 4r5a
+
+Feb 3, 2003
+
+\color[RGB] defined (for plain) in tex2page.tex.
+
+Use kpsewhich only if TIIPINPUTS is not set.
+
+v 4r5
+
+Feb 2, 2003
+
+Allow calls to \index in text after the Index.
+(This adds !index to the aux file.)
+
+Feb 1, 2003
+
+Allow for use of kpsewhich to find tex files.
+
+\IfFileExists.
+
+Put navig bar on top of 1st page also -- it's
+ergonomic if not aesthetic.
+
+\color[...]{...} should ignore imly follg space.
+
+Use <table> to make \item \itemitem more true to
+TeX.
+
+Bugfix for \\ in \urlh's 2nd arg.
+
+rgb.txt misses some names entirely, or doesn't list
+capitalized forms of some other all-lower-case
+names.  x11rgb.scm should generate them anyway.
+
+Support \theindex explicitly instead of relying
+on \inputindex.
+
+\defcsactive can take args.
+
+Jan 31/Feb 1, 2003
+
+#\newline active for texinfo.t2p, so we don't have to
+make tex2page proper keep track of texinfo
+newlines at all.  Added \TIIPnewline so formats like
+texinfo can do what #\newline does without there being
+a newline.
+
+Deactivation of an active char should be
+effective only for current group.
+
+v 4r4
+
+Jan 31, 2003
+
+Gray bugfix: [gray]{n} == [cmyk]{0,0,0,1-n}
+_not_ [cmyk]{0,0,0,n}.
+
+tex2page.tex: defs for \ProvidesFile and
+\DefineNamedColor, which makes
+latex/graphics/dvipsnam.def \input'able in plain tex.
+So cmyk.t2p not needed anymore.  However, you will need
+to make dvipsnam.def somehow accessible to tex2page, as
+the latter can't use TEXINPUTS.  (Must do something
+about this: Not being able to use TEXINPUTS is
+lame, although the manual gamely pretends otherwise.)
+
+s/rgb.t2p/x11rgb.tex/.  It's only needed by tex
+anyway, as browsers (at least ie & netscape)
+already predefine them.  x11rgb.scm generates
+x11rgb.tex.
+
+v 4r3
+
+Jan 30, 2003
+
+color[RGB].  This takes values in [0,255] where
+color[rgb] takes [0,1].  (Not yet defined in
+tex2page.tex, but recent color.sty has it)
+
+rgb.t2p
+
+\color{col} == \color[named]{col}
+
+\definecolor (as def in color.sty)
+
+\color[gray]{g} (as def in color.sty)
+
+Jan 29, 2003
+
+\color[rgb]{R,G,B} and
+\color[cmyk]{C,M,Y,K} (as defined in color.sty)
+
+\yen \circledR \ttraggedright
+
+v 4r2a
+
+\k \th \TH \dh \DH \v \pounds \textdegree
+\registered \trademark
+
+diacritic and advanced-entities cleanup
+
+\makehtmlimage rather than \htmlimage, because
+latter is used by latex2html to mean sth else
+
+v 4r2
+
+Jan 28, 2003
+
+\epsfxsize \epsfysize
+
+improved reading of <dimen> for image sizing
+(get-pixels)
+
+v 4r1
+
+Jan 28, 2003
+
+\htmlimage{...} (in lieu of \htmlimg ... \endhtmlimg).
+\htmlimgformat renamed to \htmlimageformat
+
+Jan 27, 2003
+
+\pdfximage
+
+eat-dimen made more robust
+
+\r
+
+v 4r
+
+Jan 26, 2003
+
+Allow spaces in labels but collapse consecutive
+spaces to one
+
+\eqno \eqalignno \displaylines \noalign.
+(\leqno \leqalignno treated eqv to the non-L
+varities 4now)
+
+Adding code for non-image {equation},
+{eqnarray[*]}, \nonumber.  (Will take effect
+if \htmlmathstyle{no-image})
+
+\raggedleft, ie, flush right.  (\raggedright one gets
+anyway in HTML)
+
+Jan 25, 2003
+
+Use structs to hold TeX defs.
+
+\def argument pick-up vastly improved, eg:
+
+#{ treated;
+
+groups embeddable in non-single-token args (but take
+care to not misread escaped braces);
+
+with \def\junk#1rep{...}, the call
+\junk9arbrecrep correctly gets #1 = 9arbrec
+
+v 4q9b
+
+Jan 25, 2003
+
+(plain-TeX) \item and \itemitem
+
+\verb temporarily sets \hyphenchar\tentt = -1
+
+v 4q9a
+
+Jan 24, 2003
+
+Defn of \section in tex2page.tex should include
+\goodbreak above.
+
+\string
+
+\typein
+
+Allow \global\read
+
+\read-1 (unlike \read16) should _not_ prompt user.
+
+v 4q9
+
+Jan 23, 2003
+
+\index{...} should ignore spaces after it.
+
+Don't have tex2page.tex load btxmac.tex.  User
+should load btxmac.tex explicitly if they use BibTeX.
+
+\begin definition corrected in tex2page.tex, so that it
+can take arguments (eg, \begin{thebibliography}{10}...)
+
+\read should read complete groups even if they take up
+more than one line.
+
+\write should write braces.
+
+v 4q8
+
+Jan 22, 2003
+
+hyperref package's \href (== \urlh), \hypertarget, \hyperlink
+added.
+
+v 4q7d
+
+Jan 21, 2003
+
+\xspace, from LaTeX package xspace.sty, treated.
+Suggested by Martin Gasbichler.
+
+Jan 20/21, 2003
+
+Obscure bug: If input doc is (pathologically) named
+jobname.html, the first html page it generates is named
+something other than jobname.html so as not to clobber
+the input file, but navigation bars still used to
+refer to jobname.html.  Fixed this.
+
+v 4q7c
+
+Jan 20, 2003
+
+Ensure *input-line-no* is fairly accurate.
+
+T2p log should mention number of pages output even for
+error, and "No pages output" if no input file.
+
+v 4q7b
+
+Jan 19, 2003
+
+Print +/- lines for error context.
+
+v 4q7a
+
+Jan 18, 2003
+
+write-log should keep better track of the lengths
+of the numbers (pageno's) it displays.
+
+Don't refresh bibliog or index just because .aux
+or .idx files exist.  \bibliography or \printindex must
+also have been called.
+
+TeX2page error message shows error context lines,
+whose number is specified by count register
+\errorcontextlines.
+
+Variant of \eval called \evalq added.  Argument of
+\evalq doesn't produce any output that needs to
+be TeX'd, so we can avoid generating an unnecessary
+temp file.
+
+Use string port instead of -Z- file for \eval in
+HTML-only.
+
+v 4q7
+
+Jan 15, 2003
+
+\[sub]*section* should not generate ToC entry!
+Martin Gasbichler.
+
+v 4q6b
+
+Jan 11, 2003
+
+\inputlineno
+
+v 4q6a
+
+Jan 10, 2003
+
+write-log only breaks at #\newline, separation-space,
+and separation-newline; the latter two are used by
+tex2page code to produce good potential
+linebreaks in the log.
+
+v 4q6
+
+Jan 8, 2003
+
+\ifx should use string=? on its args' expansions.
+Added \empty (\def\empty{}), typically used by
+\ifx to check for empty arg.
+
+\ensuremath
+
+\text[tt,bf,it,sl] inside math mode shd temporarily
+suspend math mode.  (RT Happe found a problem in the
+Scsh manual where hyphen inside a \texttt inside math
+mode was coming out as minus.)
+
+v 4q5
+
+Jan 5, 2003
+
+A braced filename should be allowed to contain
+control sequences.
+
+Allegro CL cmdline info added to cl config
+
+Jan 3, 2003
+
+Added a FAQ
+
+v 4q4
+
+Jan 1, 2003
+
+TeX IO added:
+\newwrite \openout \closeout \write
+\newread \openin \closein \ifeof \read
+
+Input stream #16 is stdin, output #16 is
+stdout.
+
+\write18 executes arg as OS command.   This is behavior
+of tetex's tex with -shell-escape option.  (Old spec
+for etex suggested \system command -- don't know if
+it got shelved)
+
+Dec 30, 2002
+
+{table} and {figure} are quite similar so can share
+code
+
+If last-mod-time changed in this run, that means source
+files changed, so force calls to bibtex and makeindex
+even if .bbl and .ind files exist
+
+No need to htmlize labels, since they are not used for
+node names anyway (except for \tag and \bibitem, which
+are now corrected to use node_tag_Temp_n and node_bib_n
+as nodenames)
+
+v 4q3
+
+Dec 30, 2002
+
+use *html-node-prefix* instead of %_ when generating
+node names, because %cc is specially translated into
+another character by some browsers.  *html-node-prefix*
+is set to "node_", which shd be harmless.
+Problem report by RT Happe  (rthappe at web.de)
+
+v 4q2
+
+Dec 29, 2002
+
+\htmlmathstyle (image or not for in-text and/or
+displayed math)
+
+allow \epsfbox an optional bracket arg (this
+contains bb info that overrides what's in the eps file)
+
+v 4q1
+
+Dec 28, 2002
+
+\convertMPtoPDF
+
+convert any EPS-file-based image lazily,
+as it is possible that the EPS file becomes
+ready only later in the document
+
+\verbwritefile is the only way to specify
+a dribble file.  Retire \scmwritefile, \scmwrite,
+but keep \scmdribble as it does something usefully
+extra
+
+fluid *dumping-nontex?* added, so dump-till-end-env
+can be used for dumping both tex and non-tex text
+
+\verbatiminput (LaTeX's verbatim pkg uses this name)
+preferred name for fmr \verbinput.  Now uses
+get-filename-possibly-braced (described below)
+
+get-filename-possibly-braced, for when a filename can
+be supplied either as a {filename}
+<space>filename.
+
+Dec 27, 2002
+
+If \verbwritefile names an .mp file, run metapost
+on it later so any image that requires an EPS file
+from it can get it.
+
+t2p is tolerant of an \epsfbox's and \verbinput's
+arg file being missing since it's possible it will be
+created by the next run, but tex isn't so tolerant.
+You have to force it to go into scrollmode so the rest
+of the file has the opportunity to be tex'd thereby
+producing any aux files needed for the next run
+
+*imgpreamble-inferred* so tex2page can
+automatically add things to the image preamble if
+it can tell they will be needed even if the user didn't
+specify them
+
+Generate single MFpic .tex file for each
+\opengraphsfile (instead of for each \mfpic).
+Allows MetaPost output to be shared by TeX and TeX2page
+
+\verb*
+
+Dec 26, 2002
+
+call external programs at \bye time, since
+all the aux files are present by then, instead
+of waiting till beginning of next run
+
+{verbatim*}, space set as a visible something
+
+texp2age's \epsfbox should ensure epsf.tex is loaded
+in aux file, if imgpreamble didn't already take care
+of it
+
+\verbwrite works for TeX too (in addn to TeX2page)
+
+Prefer \verbwritefilescmwritefile instead of
+\verbfilename
+
+v 4q
+
+Dec 25, 2002
+
+Bring bib/*, hoyve/*, and t2p-example/css.t2p to
+top-level for easier use.
+
+Make more general document about \eval,
+eval4tex-doc.tex, from picscheme-doc.tex
+
+Make picscheme.tex R5RS so tex2page in any
+Scheme dialect can read it.  (CL won't tho.)
+
+Dec 24, 2002
+
+\eval should be usable by TeX docs that don't use
+tex2page features and aren't intended for conversion to
+HTML.  So allow the running of TeX on a general TeX
+jobname.ext to produce jobname.eval4tex, which is
+guaranteed to be processable by tex2page even if
+jobname.ext itself isn't.  tex2page jobname.eval4tex
+produces all the \eval aux files needed for a second
+run of tex on jobname.ext to get the right
+replacements for the \eval calls.
+
+Reincorporate picscheme as a .t2p file.  (I had
+separated picscheme from tex2page in 16 Jan 2001.) Make
+picscheme.tex contain the \eval{...the picscheme
+Scheme code...}.  picscheme's eval4tex.tex defines just
+the \eval macro from tex2page.tex.
+
+When dumping to aux tex file,
+keep % and its following newline, because
+joining such lines can cause too large
+lines for TeX.
+
+v 4p15a
+
+Dec 24, 2002
+
+Don't rely on strings in .log file to run
+Metapost for MFpic
+
+v 4p15
+
+Dec 22, 2002
+
+\noslatexlikecomments
+
+MFpic: Metapost should be called on argument of
+\opengraphsfile, whatever that is.
+
+Dec 21, 2002
+
+eat-dimen when using get-filename should
+not eat brace characters.
+
+Introduce *scm-variables* for variables.
+Make sure tex2page's tables of builtins, keywords,
+and variables are always disjoint.
+
+When outputting external title (from \title)
+disable \urlh (1st arg only), \resizebox.
+
+v 4p14b
+
+Dec 20, 2002
+
+Old-style, no-longer-supported (tex-def ? #f ...) calls
+replaced by (tex-def ? ':prim ...)
+
+v 4p14a
+
+Dec 18, 2002
+
+do-include-external-labels should use different
+pathnames to external labels file for loading it
+and for having HTML file refer to it, because these
+could happen in different directories.  (Matthew
+Flatt encountered this bug.)
+
+v 4p14
+
+Dec 18, 2002
+
+Flag unbound labels from external files
+(\inputexternallabels).
+
+Dummy defs for \slatexlikecomments (Paul Steckler while
+building tex2page-doc.pdf), \inputexternallabels,
+\includeexternallabels in tex2page.tex.
+
+v 4p13
+
+Dec 15, 2002
+
+\scmvariable (also \setvariable for slatex
+compatibility) added.
+
+v 4p12a
+
+Dec 15, 2002
+
+Doc additions: external label files, slatex.
+
+Use structs (instead of raw vectors) for labels.
+
+SCM port cleanup.
+
+v 4p12
+
+Dec 14, 2002
+
+\includeexternallabels: uses labels of external
+document without further qualification.  (Contrast
+\inputexternallabels.)
+
+\TIIPendgraf: useful for inserting any missing
+</p> when writing .t2p macros
+
+Dec 13, 2002
+
+\ifcase
+
+get-number should error if it didn't find
+a number
+
+\time, \day, \month, \year, \today.
+In no \date specified, LaTeX \maketitle will
+use \today.
+
+v 4p11
+
+Dec 12, 2002
+
+Remove pre-built CL version of tex2page as different
+CL impls yield different files, and they can be built
+easily using Scmxlate.
+
+When displaying verbatim lines, tack on an &nbsp;
+in front of each #\newline.  This ensures blank
+lines have something in them.  From Matthias
+Felleisen's experience, truly blank lines inside <pre>
+seem to disappear on a Mac browser.
+
+Rename \colophon to \htmlcolophon and define a no-op
+for it in tex2page.tex
+
+v 4p10
+
+Dec 11, 2002
+
+\colophon controls placement and detail of colophon.
+
+No need to sort unresolved references when spitting
+them out in the log.  Order of appearance in
+document is good enough, maybe better.
+
+Italicize colophon and the default navigation
+bar (although css.t2p explicitly italicizes nav bar).
+
+Scsh port cleanup.
+
+Rework snoop-actual-char and get-actual-char so
+that
+  #\newline                             [Unix]
+  #\return #\newline                    [Dos]
+  #\return (followed by non-#\newline)  [Mac]
+are all treated as #\newlines.  Ie, internally,
+tex2page massages its input files into having Unix-style
+end-of-lines.  This, coupled with the fact that
+the Scheme newline procedure is used to output
+newlines, should ensure that the end-of-line
+format used by input files is irrelevant, and
+the output file will always have the newline convention
+of the prevailing OS.
+
+Matthias Felleisen says some blank lines (inside <pre>)
+aren't showing up on the browser.  He uses a Mac.
+Perhaps the above is enough to alleviate that?
+
+\usepackage also calls probably-latex.  probably-latex
+does its thing only if it is at the top-level (not
+inside groups), thus reducing the chance of
+misidentification by control sequences that happen to
+look like LaTeX.
+
+Dec 10, 2002
+
+\definitelylatex added.  This is so that images being
+processed before LaTeX can be determined don't use the
+wrong format.  One could use \evalh to set *tex-format*
+via Scheme, but this could fail in compiled forms of
+tex2page.
+
+chicken-tex2page changes from Felix Winkelmann
+to facilitate compiling.
+
+STKlos port cleaned up for current version 0.53.
+
+Use clues about CMUCL command-line options
+from Edi Weitz and Andreas Hinze.
+
+v 4p9
+
+Dec 7, 2002
+
+get-raw-token shouldn't eat space after
+\controlsequence.  This wrongly collapses
+\controlsequence with following token in \halign.
+
+\beginsection should do-end-para
+
+Generate impl-specific shell-magic lines
+for the various CLs.
+
+Add SBCL support.
+
+v 4p8
+
+Dec 6, 2002
+
+Disable do-switch and do-function when outputting
+<title>...</title>.  This should make most uses
+of \externaltitle unnecessary.
+
+v 4p7
+
+Dec 5, 2002
+
+Don't store *title* as converted string, because it may
+be unused, and you don't want to do images in it
+more than needed.
+
+Bugfix: \htmlimgformat should recalculate *img-file-extn*
+
+\resizebox
+
+Allow default extension of .eps for file argument
+of \includegraphics
+
+v 4p6a
+
+Dec 3, 2002
+
+TeX2page crosses the road to add a port for Chicken.
+
+do-function (called by \texttt, \emph, and the like)
+should eat any token (incl group), not just a group.
+
+Added \newif, \ifodd.
+
+v 4p6
+
+Dec 1, 3002
+
+Add hoyve.vim to generate text-editor-friendly
+hypertext from .html files.  hoyve.vim can be used
+independently of tex2page to convert arbitrary
+*.html files to *.txt + tags.
+
+Nov 30, 2002
+
+texinfo.t2p cleanup.  Eats the \input texinfo
+correctly now.
+
+get-raw-token, used by \halign procedures,
+should not ignore %.
+
+Nov 29, 2002
+
+Guile port change: Guile 1.6.0's eval can't be
+called with just one argument.
+
+Nov 27, 2002
+
+Make MIT Scheme port up-to-date -- current version,
+7.7.1, has syntactic closure macros.
+
+Make Bigloo version less noisy.
+
+Nov 26, 2002
+
+Added bugs/ subdirectory.
+
+Nov 24, 2002
+
+Add a defn for file-or-directory-modify-seconds
+for Chez.  Also works for the similar SXM.
+
+v 4p5c
+
+Nov 23, 2002
+
+\includegraphics added -- brought to my attention by
+Zvezdan Petkovic.
+
+eat-star returns true if it ate a star.  So now
+starrable control-sequences can do something different
+when starred.
+
+Nov 22, 2002
+
+Port to CMUCL.  Sam Steingold suggested CMUCL's
+ext:run-program as (near) analog of CLISP's shell.
+
+Nov 21, 2002
+
+Update scmxlate confign.
+
+v 4p5b
+
+Nov 19, 2002
+
+scm-get-type: check if string starts with hash (eg, #t,
+#f) before checking numberness, so CL version doesn't
+error.
+
+Nov 17, 2002
+
+Added makefile for my own use.
+
+Added @lisp ... @end lisp to texinfo.t2p.
+
+v 4p5a
+
+Nov 14, 2002
+
+Move texinfo-related code to texinfo.t2p instead
+of cluttering tex2page with it.  People wanting
+to convert texinfo to HTML are probably going to
+use texi2html or even makeinfo anyway.  (Note
+however that the Scheme code in texinfo.t2p is
+necessarily dialect-dependent.  Also note: if
+filename.ext is a texi file, we should have
+filename.t2p explicitly input texinfo.t2p.  No
+more automatic detection of the texinfo format
+from \input texinfo.  Got to remove the initial
+crud tho.)
+
+Some texinfo.t2p improvements: @anchor; @node -- read
+up to first #\, or EOL.  To do:  @macro?  Stop
+ignoring @menu?
+
+do-evalt should ensure scratch-tex-file is deleted
+before writing to it.
+
+v 4p5
+
+Nov 10, 2002
+
+%_toc_start and %_index_start anchors didn't have
+a closing </a>.
+
+Abstractify the output generation in preparation for an
+output format -- .txt -- other than .html.  A .hfmt
+file is used to determine the output format.  Default
+is still html.  Search for the .hfmt as we do for the
+.hdir .  .txt format is plain-text embedded with
+tags.  With a tags file, it allows quick consultation
+within one's text editor.
+
+v 4p4k8
+
+Oct 27, 2002
+
+Don't use 0 as temp output channel for Z-sec-temp.tex
+(the temp file used to make \section argument robust).
+Use \scratchfileport instead, since we already have it
+for \eval.  Using 0 seems to interfere with slatex.sty's
+\newwrite's
+
+Bigloo port corrections
+
+v 4p4k7
+
+Oct 5, 2002
+
+\par's inside "blocks" (center, flushleft, flushright)
+are treated as row-separators in the corresp html table.
+(This allows minipages separated by pars inside blocks
+to come out right.)
+
+v 4p4k6
+
+Sep 15, 2002
+
+Skip \end<non-lbrace> within \texonly ... \endtexonly.
+This allows `tex2page tex2page' to work without
+bombing, even tho it produces zero output.  tex2page.tex
+has an \end##1 inside \texonly ... \endtexonly.
+(Bug report by Matthias Felleisen.)
+
+v 4p4k5
+
+Aug 18, 2002
+
+\item relies on non-empty *tabular-stack*, which
+wasn't being updated by \itemize and \enumerate
+(as it was and is by \description).  (Bug introduced in
+v 4p4k4.)
+
+Make *global* variables assume decent values so they
+produce meaningful results when tex-string->html-string
+is called outside the fluid scope of tex2page.
+(Shriram Krishnamurthi)
+
+v 4p4k4
+
+Jul 13, 2002
+
+{description} xlated to <dl> instead of <ul>
+to avoid bullet/indentation unsightliness when
+people are doing creative (ie, irritating) things with \item.
+
+Recognize switches \Huge
+
+(David H Laidlaw)
+
+v 4p4k3
+
+Jun 17, 2002
+
+number->roman of 0 is "0", for cases where
+a section number is 0.  Suggestion & code
+from Matthew Flatt.
+
+v 4p4k2
+
+Jun 16, 2002
+
+!using-chapters bugfix.  (Shriram Krishnamurthi)
+
+v 4p4k1
+
+Jun 15, 2002
+
+Introduced load-tex2page-data-file: Don't use load to
+process aux files because it doesn't work well with PLT
+modules.  (Shriram Krishnamurthi, Paul Steckler,
+Matthew Flatt)
+
+v 4p4k
+
+Jun 13, 2002
+
+Corrections to plt (module) port.
+
+Include story.log and bib/bigbib.bib in distr.
+
+Mar 26, 2002
+
+Comment starting in column 0 with single semicolon
+treated compatibly with slatex
+
+Mar 24, 2002
+
+Allow #... tokens to be special-symboled
+(bug showed up in HtDP where they set #t = true
+and #f = false)
+
+\bgcolor{...}, a switch (like \color{...}, \bf)
+
+Mar 23, 2002
+
+Use native hashtables for mz and cl
+
+Include file-mod and human-time functions
+for scsh, scheme48
+
+Mar 22, 2002
+
+Include the \defun macro in tex2page.tex
+
+v 4p4j
+
+Mar 16, 2002
+
+While configuration details specific to tex2page
+stay in this distribution, the programs that
+use it to perform the to-Scheme-dialect and
+to-CL porting have been extracted away into
+a separate distribution, scmxlate
+
+bigbib in Scheme format for ez manip
+
+Mar 8, 2002
+
+*in-para?* shd be fluid-let to #f by
+tex2page procedure
+
+v 4p4i
+
+Mar 3, 2002
+
+Added procs output-html-{pre,post}amble
+so user can create subpages easily.
+
+A figure may have >1 captions, and each caption
+increments the figure counter.
+
+Mar 2, 2002
+
+Unresolved label refs should still typeset label
+text, instead of label name.
+
+Feb 27, 2002
+
+"Part" heading is centered.
+
+Feb 25, 2002
+
+Ignore \enlargethispage[*].  (Paul Steckler.)
+
+Feb 24, 2002
+
+Nudge user if they make >1 consecutive call to
+TeX2page without a valid input document.
+
+\noad to nix self-promotion.
+
+Treat SLaTeX boxes like minipages so they can be
+horizontally stacked (as they were intended).
+
+tex2page banner displays Scheme/CL version and OS (so
+jobname.hlog has more info for debugging).
+
+tex2page tex2page-doc.tex automatically calls t2p
+on texample.tex and story.tex too.
+
+CLISP: For newer versions that already define getenv,
+nix the definition of getenv in terms of
+system::getenv!  (Causes stack o/f.)
+
+v 4p4h
+
+Feb 23, 2002
+
+Define \tag, \tagref appropriately in tex2page.tex
+for LaTeX.  (Robby Findler bugreport.)
+
+Feb 18, 2002
+
+Be careful about invoking expand-tex-macro inside
+false \if branch!
+
+Feb 10, 2002
+
+TeX lion surfs the Web.
+
+Recognize par (newline) after %comment.
+
+v 4p4g
+
+Feb 2, 2002
+
+Reorg doc so it is excerptable into the MzLib manual.
+Added script make-tex2page-module-for-plt which
+creates tex2page.ss.
+
+Jan 31, 2002
+
+index count was being preserved across
+calls to tex2page procedure.  Would cause error
+if tex2page is run as a multiply called procedure
+within Scheme rather than as a script.
+
+Port to Scheme48 -- no script yet tho.
+
+v 4p4f
+
+Jan 27, 2002
+
+Use quick-sort instead of stupid-sort.  tex2page is
+being used for some fairly big documents for this
+optimization to pay off.
+
+v 4p4e
+
+Jan 7, 2002
+
+Guile's load is actually load-relative-to-loading-file
+rather than the usual load-relative-to-cwd, which in
+Guile is supplied as primitive-load.  Info from Marius
+Vollmer.  Added fix.
+
+Jan 5, 2002
+
+People are bound to call tex2page with --help or
+--version or with no argument.  Say something apt.
+
+v 4p4d
+
+Dec 28, 2001
+
+Ensure that \begin...\end are concentric with
+<p>...</p>.
+
+v 4p4c
+
+Dec 24, 2001
+
+\InputIfFileExists
+
+\schemeresult
+
+Colophon on last page of document.
+
+v 4p4b
+
+Dec 16, 2001
+
+tex2page now uses low-level define-syntax as
+implemented in MzScheme.  makeport.scm will convert
+this to defmacro for dialects that need it.  Thing to
+note: Petite and SXM's low-level define-syntax is
+almost like MzScheme's but with a slightly less
+convenient semantics for the procedure
+datum->syntax-object.  makeport.scm takes care of this.
+
+v 4p4a
+
+Dec 13, 2001
+
+Allow t2p to run in MzScheme v200alpha1 and
+higher (in addition to v103).
+
+v 4p4
+
+Dec 9, 2001
+
+Quote characters (` ' , ,@) treated like keywords
+for syntax highlighting, rather than as background
+punctuation (like parens).  Suggested by Robby Findler.
+
+SLaTeX's {schemeresponse} supported.  Requested by
+Matthew Flatt.
+
+v 4p3a
+
+Nov 11, 2001
+
+dump image source -> tex-to-img
+abstracted into call-with-image-port
+
+\mathp{...} produces image $...$ even if
+images are disabled for in-text math
+
+\urlp wasn't enclosing text in {}
+
+16 Oct 2001
+
+- is not long enough on some browsers, ie, it's
+just right for hyphen, but not for minus.  So use
+tt - for mathmode -
+
+v 4p3
+
+12 Oct 2001
+
+Make \rm work correctly in math-mode.
+
+Fix last-modification-time bug where correct time
+is not written into aux file, causing every other
+run of t2p to recalculate
+
+v 4p2
+
+15 Sept 2001
+
+Proc make-reusable-math-image-as-needed supplied
+
+9 Sept 2001
+
+{picture} produces inline (not displayed) image.
+
+8 Sept 2001
+
+Bibitem label \cite{...} changed to cite{...} because
+Windows Netscape munges \ to / (?!).
+
+Failed \refs show label instead of *** (for ease of
+debugging)
+
+4 Sept 2001
+
+dump-till-end-env should recognize %comments
+
+3 Sept 2001
+
+Define proc do-tag in terms of do-tag-aux so latter
+can be used to code kludges in .t2p file
+
+2 Sept 2001
+
+Little LaTeX temp files use "report"
+documentclass if big document uses chapters (otherwise
+"article").
+
+1 Sept 2001
+
+*label-port* wasn't being closed at \bye.
+Causes incomplete labels file when running procedure
+tex2page (without exiting Scheme).  Bug found by
+Gerry Sussman
+
+v 4p1
+
+13 July 2001
+
+\usepackage can take an opt arg
+
+bugfix: htmlize-label to canonically translate labels
+(see 4p) everywhere they are used, not just
+at get-label
+
+sundry do-end-para bugfixes (this is probably a
+neverending process :-< -- unfortunately the price
+to pay for wanting </p> )
+
+v 4p
+
+6 July 2001
+
+\& produces &amp; not &.  Fix from Matthew Flatt.
+
+get-label does smarter translation of TeX labels
+into something that wouldn't choke HTML.  Characters
+treated specially: (any amount of consecutive) space;
+#\?, #\:, #\;, #\#, and #\_ (because it is used to
+code the other specials).  Fix from Matthew Flatt.
+
+June 2001
+
+\subsection, etc, take opt [arg]
+
+{equation}, {eqnarray}
+
+6 May 2001
+
+<hr> shd occur between </p> ... <p>
+
+Ensure bibitem <tr><td> are closed by </td></tr>
+
+Use closing </p> so document renders ok with stylesheets --
+Will Fitzgerald, fitzgerald2inetmi.com
+
+v 4o4b
+
+8 Apr 2001
+
+Scsh port corrections -- also from Eric Marsden
+
+v 4o4a
+
+6 Apr 2001
+
+CLISP port corrections from Eric Marsden
+
+v 4o4
+
+10 Mar 2001
+
+\TIIPobeyspacestrictly
+
+v 4o3
+
+8 Mar 2001
+
+\setconstant added.  (Matthew Flatt wanted it.)
+
+v 4o2
+
+3 Mar 2001
+
+Allow ignorespaces to eat (at most) one space
+when space is active.  This is so spaces introduced
+between \ctlseq and # when expanding a macro don't
+show up when macro is called inside obeyspace
+
+\htmladdimg takes optional alignment arg
+
+v 4o1
+
+20 Feb 2001
+
+`\^^M and `\^^I accepted as args to \catcode
+
+Redefine \obeyspaces &c, \obeylines to
+use char-definitions for #\space and #\newline
+
+jobname-Z-C.css directly written in aux-dir.  This
+fixes bug where changes in cssblock were not taking
+effect because aux-dir/jobname-Z-C.css was not
+being updated after 1st run
+
+v 4o
+
+18 Feb 2001
+
+Don't have tex2page use jobname.aux for its
+bibtex-related aux info.  Use jobname--h.aux instead.
+This is so that LaTeX's more extensive use of
+jobname.aux doesn't get clobbered.  (I thought it would
+be neat to be able to say 'bibtex jobname' regardless
+of whether LaTeX or tex2page was run previously, but
+this isn't worth making the user have to run
+LaTeX an unpredictable number of times.) Problem
+pointed out by Matthew Flatt
+
+17 Feb 2001
+
+@ is not a Scheme token delimiter.  Comma
+is, and comma is optionally followable by
+an @
+
+Given filename f, first try f.tex then f,
+regardless of whether f already contains
+an extension
+
+12 Feb 2001
+
+Allow {minipage}s to be set side-by-side within
+{center}, {flushleft} and {flushright}, not just
+w/i {figure} and {table}
+
+Different TeX documents can cross-reference each other.
+`\inputexternallabels another-jobname' allows referring
+to labels defined in another-jobname.  Use
+\refexternal{another-jobname}{label} to refer to label
+`label' in another-jobname.  Labels now use a separate
+aux file jobname-Z-L.scm instead of being part of
+jobname-Z-A.scm
+
+Do typeset invalid buttons of the navigation bar (as
+phantom or grayed text).  This so the valid buttons
+occur at the same familiar physical spot as the reader
+rapidly click-flips pages.  Suggested by Matthias
+Felleisen.
+
+{tabular}s whose argument contain | get
+visible border and grid; others don't
+
+v 4n3
+
+10 Feb 2001
+
+\notimestamp disables "Last modified..." and the
+attendant self-promotion
+
+<img>s have border=0 so they don't look clunky
+when they are (part of) links.
+
+Treat 'minipage, 'figure, 'table as a possible
+entries in *tabular-stack* so \\'s inside minipages
+inside figure don't mess up table cells
+
+Unnumbered sections don't increase their own counter
+but must zero the counters of subsections below them
+in depth
+
+9 Feb 2001
+
+\newdimen if only to stop dimen ctlseqs from
+messing parsing
+
+v 4n2
+
+6 Feb 2001
+
+\pageref{<tag>} outputs the number of
+the HTML page, as opposed to an ornament
+
+v 4n1
+
+5 Feb 2001
+
+\sectiondnumber <seclvl>  returns value
+of section-counter at level <seclvl>.  (For
+use with \ifnum in .t2p file to do fine-tuning
+based on prevailing section.)
+
+v 4n
+
+5 Feb 2001
+
+\newtoks (with corresp change for \the)
+
+Use toks \TIIPrecentlabelname and
+\TIIPrecentlabelvalue to keep track of labels and their
+values, so a \label with a group will identify the
+current anchor.
+
+4 Feb 2001
+
+Clean up labeling of sections.  Only numbered sections
+can be labeled in the LaTeX sense.  So a \label after
+an unnumbered subsection will point to an enclosing,
+numbered, section.  However all sections have HTML
+anchors, so the section and its ToC entry can
+point to each other.
+
+Set \\ as space in headings, allowing HTML
+discretion on newlines
+
+\TIIPlatexenvasimage
+
+3 Feb 2001
+
+Save label context before processing
+footnote text and restore it after
+
+Each cell in {tabular} is an implicit group
+
+\addtocounter
+
+Take care that \index replaces newlines in
+its args into spaces when writing \indexentry
+(makeindex barfs otherwise)
+
+|seealso
+
+index: use |( but not |) as latter is meaningless
+for html
+
+avoid spread-out space in math scripts so as to
+prevent unsightly linebreaks
+
+2 Feb 2001
+
+include navigation links for "contents" and
+"index", if these are present in the document
+
+\cdots
+
+obeylines obeywhitespace can be described with
+global flags instead of making them part of
+the group structure
+
+obeyspace should permeate through boxes
+
+get-dimen sometimes (as opposed to just reading
+past them)
+
+Put space around some math binops
+
+Put space around em-dash since o/w it looks
+too confusing in HTML
+
+\leftdisplays (eplain)
+
+\epsfbox == \epsffile
+
+'footnote' style class.  Use in style sheet to
+set size of footnote text
+
+v 4m4
+
+1 Feb 2001
+
+{minipage}s can be horizontally stacked inside
+{figure} or {table} (Matthias request).
+
+\caption now uses <caption> so {minipage}s won't
+throw off <table> symmetry for {figure} and {table}
+
+Took out obnoxious hard-wired hrules from {figure} and
+{table}.  If user wants them, they can put them
+in explicitly.
+
+Files not found by \input or \include mentioned in log
+(Matthias Felleisen request)
+
+\epsffile
+
+v 4m3
+
+31 Jan 2001
+
+\, (math ctl-seq for "thin" space)
+
+resolve \let's when dumping LaTeX environments, so aliases for
+these work correctly
+
+figures and tables can have a section-number as prefix.  Their
+counters are defined the same way as the user-defined "theorem"
+counters.
+
+\footnotenumber instead of hardwired-in-Scheme counter for
+footnotes
+
+\TIIPeatstar
+
+v 4m2
+
+29 Jan 2001
+
+tex-def-prim sped up: it doesn't need to check if its
+arg ctlseq is already defined
+
+v 4m1
+
+27 Jan 2001
+
+*math-primitive-texframe* for prim math
+ctl seqs (instead of do-math-ctl-seq's cond-dispatching
+on strings)
+
+24 Jan 2001
+
+Use *primitive-texframe* (below user-definable
+*global-texframe*) instead of do-tex-prim's
+cond-dispatching on strings
+
+23 Jan 2001
+
+\eval uses string ports and eval (dialects that
+don't have string ports will still use scratch files)
+
+v 4m
+
+22 Jan 2001
+
+\expandafter
+
+resolve \let's when looking for \endrawhtml.  This
+allows us to \let \otherctlseq = \endrawhtml.
+(Maybe it's a good idea to resolve \let's
+elsewhere too.)
+
+v 4L7
+
+21 Jan 2001
+
+environment variable TIIPINPUTS contains
+the input directories for the .tex and .t2p
+files that tex2page needs.  This is analogous
+to TeX's TEXINPUTS.  Unfortunately, tex2page
+can't simply use TEXINPUTS because modern TeX's
+have a complicated TEXINPUTS spec that is a bit
+too much for Scheme to handle
+
+\evalh does not waste time producing unnecessary TeX
+aux file.  \eval inside \htmlonly behaves like
+\evalh
+
+v 4L6
+
+21 Jan 2001
+
+\input texinfo causes rest of document to
+be treated as Texinfo.  However, the file
+jobname.t2p should take care to define
+Texinfo macros, or the file texinfo.t2p
+(provided) should be copied to the working
+directory
+
+Put one or two &nbsp;'s in expansion
+of \{left,center,right}line so empty
+argument gives empty line
+
+v 4L5
+
+20 Jan 2001
+
+Inside false branch of \if, some ctl seqs shd
+be treated specially.  \let is one these
+
+Add capability to recognize texinfo.  But actual
+definitions go into texinfo.t2p.  eplain.texi is
+torture text.
+
+19 Jan 2001
+
+\csname...\endcsname
+
+v 4L4
+
+18 Jan 2001
+
+Ported to Pocket Scheme
+
+\cssblock ... \endcssblock to specify html style info.
+Contents are written into jobname-Z-C.css in cwd.  This
+avoids need to remember to link explicit stylesheet --
+you just \input the .tex file containing the css block.
+For pathname reasons, .tex files are easier to
+reuse than .css files
+
+v 4L3
+
+18 Jan 2001
+
+Ported to SXM
+
+17 Jan 2001
+
+Make \secnumdepth, \tocdepth true count registers
+(so you can \advance, etc, on them)
+
+v 4L2
+
+17 Jan 2001
+
+\ifmmode
+\number
+\multiply \divide
+
+{latexonly} (== {texonly} )
+
+v 4L1
+
+16 Jan 2001
+
+\newcount, \advance (by), \the.  Works with
+\ifnum.  More standard and works just as well
+as \edef-based counts in .t2p files (although the
+latter are cheaper in real TeX?).
+
+Can't depend on char->integer producing
+ascii number.  E.g., Scsh's char->integer
+returns 1000 more than what most other Scheme's
+char->integer does
+
+Ported to Scsh
+
+Put PicScheme in a distr of its own
+
+v 4L
+
+15 Jan 2001
+
+add-def-thunk (used internally only 4now, for stuff
+like \language and \pageno).  def's (internal) args
+parameter can now be :thunk if expansion is contained
+in a thunk.  (This is in addition to :prim (for \let to a prim)
+and dotted-pair (for regular \def and \let to a non-prim).
+
+\advancetally \globaladvancetally.  With \edef, these
+provide cheap count registers (previously
+s/tally/cheapcount/ in tex2page.tex).  While I've
+always used cheap counts in tex2page.tex, now tex2page
+recognizes them.  They are useful in .t2p for doing
+easy arithmetic calculations that are so often called
+for
+
+\pageno with \ifnum and an \edef lets me
+selectively convert some environments on some pages
+into images (e.g., just the regexp tabbing in the
+mzscheme doc)
+
+v 4k7
+
+13 Jan 2001
+
+Parts numbered in uppercase roman
+
+Started using MrEd and other PLT docs as torture
+te[sx]ts
+
+For target directory, also look at ./.tex2page.hdir.
+Order: ./jobname.hdir, then ./.tex2page.hdir, then
+~/.tex2page.hdir
+
+Captions centered
+
+Read faulty .ind without aborting
+
+If documentclass is report or book, set
+*using-chapters?* (so \tableofcontents will use right
+pagination (which will save a run for correcting
+xrefs) even on first run).
+
+v 4k6
+
+12 Jan 2001
+
+Target diry is looked for in jobname.hdir,
+then ~/.tex2page.hdir.  If neither exists,
+use current diry.
+
+.hdir file can contain control sequence
+\jobname
+
+v 4k5
+
+12 Jan 2001
+
+Following discussions with Matthias Felleisen, Robby
+Findler: Revamp aux directory concept.  jobname.hdir
+contains name of "target directory", into which
+all tex2page output (generated .html, .gif, dump files)
+go.  Exceptions: jobname.aux and jobname.bbl,
+because they can be shared with TeX
+
+If jobname.hdir doesn't exist, generated files stay
+in current directory
+
+NB: URLs are relative to target directory; TeX files
+are relative to current directory
+
+11 Jan 2001
+
+Use variable *comment-char* instead of hard-wiring
+#\% as comment char (useful for formats like texinfo)
+
+v 4k4
+
+11 Jan 2001
+
+Section titles weren't pointing back to toc correctly
+(bug introduced when adding aux-dir feature.  Pointed
+out by Matthew Flatt).
+
+v 4k3
+
+10 Jan 2001
+
+Call bibtex, makeindex from within tex2page
+if needed
+
+9 Jan 2001
+
+\inputcss supersedes \htmlstylesheet
+
+In proc tex2page, jobname.t2p file loaded after (do-start)
+
+CLISP shell procedure needs "cmd /c" before some
+Windows commands
+
+v 4k2
+
+9 Jan 2001
+
+Aux dir fixes.
+
+picscheme.tex.  Allows cleaner separation between
+tex2page and picscheme, which is now really
+a separate module.  A document \input's picscheme.tex
+in order to use picscheme, whether it's going to
+be processed by TeX or tex2page.
+
+.no-tex2page-aux-dir (more accurate name than
+.no-tex2page-aux)
+
+v 4k1
+
+8 Jan 2001
+
+.no-tex2page-aux suppresses creation of aux-file
+subdirectory .tex2page-aux (Robby Findler: PLT's
+HelpDesk may have problems with a subdirectoried
+document)
+
+Index file basename is jobname--h (no longer
+jobname-Z-I)
+
+v 4k
+
+7 Jan 2001
+
+use .tex2page-aux directory (if possible) to keep aux files
+so cwd doesn't drown in clutter.  Requested by
+Matthias Felleisen
+
+starting t2p-example/texinfo.t2p (not ready yet)
+
+\cite arg can contain balanced braces
+
+v 4j
+
+6 Jan 2001
+
+Now allowing LaTeX \include \includeonly.  Image files named
+by \include'd file, so they can be recycled regardless
+of \includeonly modification
+
+\begin{rawhtml} shouldn't open a group
+because \end{rawhtml} doesn't close it
+
+\input ./file-in-cwd won't affect
+overall timestamp.  \input file-in-cwd
+will
+
+Log was showing up on Unix consoles in quanta of
+full lines.  Use flush-output to make it
+more fluent
+
+v 4i1
+
+5 Jan 2001
+
+clean up \part numbering.  When \part changes,
+\section's and below get 0'd, although \chapter's
+don't.  Also, \part's are always bolded in the
+toc, regardless of whether anything else occurs in the
+toc.  (Still it's weird to use \part's with \section's
+but no \chapter's -- I am not sure I won't be needing
+to change this part (!) of the code again soon...)
+
+htus.t2p
+
+v 4i
+
+5 Jan 2001
+
+Process aux TeX files in plain or LaTeX depending
+on big file's format
+
+\slatexlikecomments makes comments inside \scm
+use TeX commands, including nested calls to \scm
+
+SLaTeX \setspecialsymbol \unsetspecialsymbol
+\defschememathescape \undefschememathescape
+
+LaTeX \newtheorem -- both \newtheorem{env}{caption}[within]
+and \newtheorem{env}[numbered_like]{caption}
+
+v 4h
+
+3 Jan 2001
+
+LaTeX \part {picture} \typeout \\* (ignore the *)
+
+\tableofcontents shouldn't contain tocentry for
+itself
+
+LaTeX2HTML \htmladdimg \hyperref \htmlref
+
+SLaTeX {schemebox} -- like {schemedisplay} for now
+
+.t2p file input'ed at file beginning for both plain and
+LaTeX.  In particular, .t2p file is now input'ed
+at \documentclass rather than at \begin{document}
+
+Added some more LaTeX/LaTeX2HTML/SLaTeX support to tackle
+HtDP
+
+1 Jan 2001
+
+dumping (math, image) into aux tex files
+subroutinized more cleanly so many commands that need
+dumping can use them abstractly
+
+do-ignorespaces ignores any number of spaces
+and one newline, but when it sees a second newline,
+it should push back a newline, so a ctl seq at
+the end of a par doesn't swallow up the par
+
+31 Dec 2000
+
+\catcode.  13 or \active makes following char a
+chardef, anything else undoes the chardef
+
+v 4g1
+
+26 Dec 2000
+
+\ifnum
+
+\language.  = 256, from TeX2page's POV.  In TeX, it's
+typically 0 and almost always <<<= 255.  We can use
+\ifnum\language to tell, without the help of any
+non-primitive, if the containing document is
+being processed with TeX or with TeX2page.  This
+provides an alternative to \texonly, \htmlonly.  Less
+robust, but doesn't rely on external macros
+
+Rewrite footnote impl to make trace/error of
+stuff inside them show an appropriate line number.
+(This allows unbalanced braces (\p+}+) to
+work in footnotes)
+
+use string ports instead of temp files if dialect
+allows
+
+25 Dec 2000
+
+v 4g
+
+Conditionals added: \if \ifx \iffalse \iftrue \else
+\fi
+
+\tag{TAG} for arbitrarily located anchors that url{#TAG}
+can refer to.  Has meaning only for HTML
+
+v 4f2
+
+24 Dec 2000
+
+\message, \errmessage
+
+logging made more TeX-like.
+
+bibitem keys made into labels that look like
+cite{key} so they look nice in the log
+(the previous %_bib_key was weird-looking)
+
+\bye in a (however nested) \input file
+treated correctly (ie, causes entire document
+to be stopped cold at that point)
+
+fixed eat-dimen bug: was intrusively eating space
+after tossed-back string
+
+v 4f1
+
+23 Dec 2000
+
+\romannumeral (also \Romannumeral)
+
+\enumerate marks more latex-like (1 = decimal, 2 =
+lower-alpha, 3 = lower-roman, 4 = upper-alpha).
+Put this info in tex2page.css so HTML reflects it.
+
+v 4f
+
+22 Dec 2000
+
+Reading of .ind file entries, always a kludge, improved
+somewhat.  Have been reading \(sub)*item using next
+\(sub)*item, \expandhtmlindex, or \see as
+delimiters.  If entry itself contains \(sub)*item
+verbatim, this causes problems.  So use brace-counting
+to disallow such \(sub)*item's from being delimiters.
+
+Error recovery aids added:
+\tracingall \tracingcommands \tracingmacros
+
+\tracingcommands n (n > 0) traces every "primitive"
+ctl seq processed by t2p
+
+\tracingmacros n (n > 0) shows every macro expansion done
+by t2p
+
+\tracingall == \tracingcommands 1 \tracingmacros 1
+
+t2p's log file is jobname.hlog, aux file is
+jobname-Z-A.scm
+
+21 Dec 2000
+
+\imgpreamble...\endimgpreamble is loaded only
+when tex2page calls tex on the image subfile.
+It isn't loaded when you call tex on the
+entire doc
+
+\ref is defined differently in eplain vs latex &
+tex2page.tex.  So tex2page.tex defines \tagref
+\let\ref\tagref only if it can determine format isn't eplain.
+
+20 Dec 2000
+
+tex2page.tex defn for {enumerate} uses
+different item markers for first three levels.
+(1 = num; 2 = lowercase alpha; 3 = uppercase alpha)
+
+\eject triggers new HTML page
+
+PicScheme document separate from TeX2page,
+since either can be used without the other
+
+v 4e
+
+19 Dec 2000
+
+tocdepth for LaTeX.
+\secnumdepth, \tocdepth for Plain
+
+Depth values are as follows.  It's illogical but
+this is how LaTeX does it
+
+0 = chapter
+1 = section whether or not there are chapters
+2 = subsection
+etc
+
+18 Dec 2000
+
+Recognize mfpic diagrams.
+
+v 4d
+
+17 Dec 2000
+
+Allow tex2page to talk to BibTeX directly without
+having to run document separately through (La)TeX.
+Thus, a tex2page document doesn't _have_ to
+be processable by (La)TeX anymore, if all you
+want is Web pages.  Previously, this didn't use
+to hold for tex2page docs whose bibliographies
+were gen'd by BibTeX.
+
+v 4c5c
+
+13 Dec 2000
+
+#\tab isn't R5RS! -- define *tab* = (integer->char 9)
+
+Move porting-related clutter into subdiry "dialects"
+
+v 4c5b
+
+11 Dec 2000
+
+\tocentry corrected to allow catcode changes.
+Bug reported by Robert Bruce Findler, robby@cs.rice.edu
+
+\chapter, like \section, also allows catcode changes
+in its arg
+
+v 4c5a
+
+10 Dec 2000
+
+Linux teTeX doesn't accept filename .sec-temp although
+Windows MiKTeX does.  Changed it to Z-sec-temp
+
+v 4c5
+
+10 Dec 2000
+
+allow \section arguments to do catcode changes
+
+v 4c4
+
+9 Dec 2000
+
+Allow |see in \index
+
+Dec 6, 2000
+
+Fixed bug wherein \end{document} was triggering
+\end inside a group, because \begin{document} was
+opening a group.
+
+v 4c3
+
+Dec 3, 2000
+
+fixed \halign bug that was ignoring
+spaces within table cells
+
+v 4c2
+
+Nov 23, 2000
+
+\tableofcontents shd generate unnumbered sec/chap
+header in LaTeX
+
+\begin/\end has implicit grouping _except_
+for {htmlonly}
+
+v 4c1
+
+Nov 22, 2000
+
+\maketitle (uses \title, \author, \data which may
+use \\, \and, \thanks)
+
+v 4c
+
+Nov 22, 2000
+
+{alltt}
+
+v 4b
+
+Nov 20, 2000
+
+\bibliography should generate an unnumbered section or
+chapter header in LaTeX
+
+v 4a
+
+Nov 16, 2000
+
+\eval{...} outputs its argument into an <auxiliary-file>.scm
+and loads its corresponding <auxiliary-file>.tex.  Use an
+external (Scheme) program to make a useful transformation
+of <auxiliary-file>.scm to <auxiliary-file>.tex.
+
+The Scheme program picscheme allows the
+specification of LaTeX-like pictures but via easier
+Scheme programming.  Works for both DVI and HTML.
+
+\eval and picscheme available separately (ie, as
+a pure TeX adjunct with no regard for HTML conversion)
+but also as part of tex2page
+
+\parskip inside \verb should be 0 so lines don't
+stretch ungainlily
+
+v 3u7
+
+Nov 11, 2000
+
+eat-dimen bugfix
+
+\nohtmlmathimg, \nohtmlmathintextimg, \nohtmlmathdisplayimg,
+\htmlimgformat
+
+install directions streamlined.
+
+v 3u6
+
+Nov 10, 2000
+
+\end (and \begin) treated cleanly
+
+\figure's * option caught (and discarded)
+
+\title, \@title interaction corrected
+
+definitely-latex shd propagate immediately
+into next generation of aux file
+
+v 3u5a
+
+Nov 7, 2000
+
+\newenvironment's 2nd opt arg recognized
+
+Trivial \begin/\end for Plain TeX
+
+Non-BibTeX-generated {thebibliography} defined
+better
+
+v 3u5
+
+Nov 6, 2000
+
+\newcommand's second optional arg now recognized.
+(The first opt arg (default = 0) is the number
+of args; the second opt arg is the default value of
+the defined command's own optional arg.) Omission
+reported by Eric Marsden, emarsden@lass.fr
+
+Images can be in PNG and JPEG formats too.
+Unfortunately, I can't get PNG images to be
+transparent. :-(
+
+\verbc -- used to introduce single verbatim
+chars.  Useful for writing about computers where you
+want most of the text to be normal but occasionally a
+special character pops up that needs to be "escaped".
+
+v 3u4
+
+Oct 31, 2000
+
+Following 2 functionalities were defined for
+tex2page but not for TeX:
+
+Allow {thebibliography} to be used in plain TeX,
+ie, user devises their own bibliography without
+recourse to BiBTeX.
+
+Define \urlp for TeX.
+
+v 3u3
+
+Sep 19, 2000
+
+\scminput was using call-with-input-file/buffered
+incorrectly.
+
+v 3u2
+
+Apr 27, 2000
+
+Fixed bug where |ctlseq inside \scm{...} wasn't
+being recognized
+
+v 3u1
+
+Apr 23, 2000
+
+Default bgcolor is e5e5e5 (gray90)
+
+Use grouping inside braced verbatim so
+calls to switches inside them can close
+properly
+
+% is ignored in URLs only if it's followed
+by whitespace (because of BibTeX).  Otherwise
+it is a legit URL char.
+
+tex2page.sty is now just a LaTeX-convenient
+filename for tex2page.tex.
+
+Fixed cleanup of image-related .tex temp files.
+
+<p> after <h>eadings, so Lynx users can relieve
+themselves of eyeball strain.
+
+v 3u
+
+Apr 12, 2000
+
+Treat spaces in labels sanely.
+
+Treat escape char (default: \) cleanly and
+abstractly.
+
+v 3t7
+
+Apr 1, 2000
+
+Cygwin support, for MzScheme, Petite and CLISP.
+
+If no stylesheets used, at least set body's
+bgcolor=#ffffff and text=#000000.
+
+Make \title work for both Plain and LaTeX.
+Added \externaltitle.
+
+v 3t6
+
+Feb 19, 2000
+
+Split tex2page.tex into a Plain-TeX-specific macro
+file tex2page.tex and a LaTeX package file
+tex2page.sty.  (tex2page.tex loads tex2page.sty.)
+
+\author, \title, \date save arg in \@author, etc,
+for use with \maketitle.  (Therefore allow @
+as first char in ctl-seq names.)
+
+v 3t5
+
+Feb 13, 2000
+
+Let makeindex make index.  Also reuse existing sorted
+index file.
+
+v 3t4
+
+Feb 10, 2000
+
+\schemeeval allows evaluation of arbitrary Scheme
+expressions in the input document.  This allows you to
+use Scheme as tex2page's extension language, in
+addition to tex2page's mimicry of TeX.  In
+particular, you can directly use the Scheme procedures
+defined in "tex2page" to give you extremely
+fine-grained control over the HTML output, something
+not possible with the TeX-style macros.  Note that
+these Scheme extensions are for HTML only.  TeX, when
+*it* is processing your document, will ignore the
+Scheme.  (That's the advantage of having the poorer
+TeX-style macros: they can be used by both the HTML
+generator and by real TeX.)
+
+The Scheme extensions are best used to provide
+HTML-specific definitions of complicated TeX macros
+whose TeX bodies are either difficult or impossible to
+simulate in HTML on a token-for-token basis.
+
+This addition renders tex2page mistie-rious
+(mistie = Markup In Scheme That Is Extensible).
+
+*
+
+secnumdepth & \setcounter
+
+v 3t3
+
+Feb 9, 2000
+
+sMALL cAPS
+
+unactivating char should only affect current
+group and its subgroups
+
+{tableplain} to help make manipulable boxes
+
+v 3t2
+
+Feb 8, 2000
+
+\char
+
+make \let properly shadowing
+
+\table,\figure + \caption (with labeling)
+
+v 3t1
+
+Feb 7, 2000
+
+Support active characters
+
+Add huge gobs of LaTeX support, using the scsh
+docs (Olin Shivers) as test cases
+
+LaTeX files automatically load \jobname.t2p,
+if available (useful for HTMLizing 3rd-party
+LaTeX docs w/o modifying them)
+
+\nohtmlmathimg to avoid generating trivial math images
+in nonmath text
+
+v 3t
+
+Feb 5, 2000
+
+Plain's \halign and LaTeX's tabular}
+
+v 3s1
+
+Feb 4, 2000
+
+Allow do-it-yourself (ie, w/o bibtex) bibliographies
+
+\[re]newcommand, \[re]newenvironment
+
+Image-related control sequences now have "img" as
+characteristic substring.
+
+v 3s
+
+Jan 31, 2000
+
+Sections link back to toc.  Use timestamp
+to self-promote.
+
+v 3r2
+
+Jan 30, 2000
+
+Don't link stylesheets known to be unavailable
+
+Use log file generated by tex2page as the page linked
+to when reader encounters errors in the Web document
+
+LaTeX-related typos corrected (Serge Sivkov)
+
+v. 3r1
+
+Jan 29, 2000
+
+wipe mess created by \providecommand (a BibTeX cmd)
+
+v. 3r
+
+Jan 15, 2000
+
+Right-align bibitem numbers.
+
+Not all browsers support the ligatures, so
+make use of latter depend on a flag
+
+Change name to tex2page, because old name
+tex2html is being used by another, similar program
+
+v. 3q
+
+Jan 9, 2000
+
+ligatures (`` '' -- ---)
+
+\aftergroup ctlseqs shdnt eat space
+
+Petite port corrections (Breanndan O Nuallain)
+
+label impl cleaned up
+
+\nocapdot
+
+\sidemargin, \vertmargin (for plain TeX)
+
+Scrap use as CGI script
+
+\item shdn't start <p>aragraph
+
+v. 3p
+
+1999 Oct 9
+
+Allow calls to tex from tex2html to fail with a
+message to log, so expert user
+can do something idiosyncratic about it.
+
+v. 3o
+
+1999 Sep 20
+
+Top of 1st page shouldn't have navigation bar.
+
+\htmlpagelabel & \htmlpageref
+
+\iffileexists
+
+v. 3n
+
+1999 Sep 17
+
+Error messages mention file and line number, so users
+can find out where they made their TeX (syntax) errors.
+
+v. 3m
+
+1999 Sep 15
+
+<, > in math stuff shd be &lt; &gt;
+
+% comments out ensuing newline too!
+
+v. 3l
+
+1999 May 1
+
+\mathdg ~= $$ like \mathg ~= $.  \pmatrix, \eqalign, and \frac
+treated.  (\frac is a prefix form of \over.)
+
+Use <meta> tag to (hopefully) disallow search-engine
+indexing for all but the first page.
+
+v. 3k
+
+1999 Apr 4
+
+Bibliography typeset as a table.
+
+Ported to Petite Chez Scheme.
+
+v. 3j
+
+1999 Mar 15
+
+Accept \bibliographystyle of alpha (in addn to plain)
+
+In addition to displaying tex2html advice/warnings on
+stdout, also write them into log file,
+.Z-L-\jobname.log
+
+Use hidable names .Z-T-\jobname.tex for saved TOC, and
+.Z-A-\jobname.scm for the aux file used by tex2html.
+
+Use \jobname-Z-G-n.gif and \jobname-Z-GD-n.gif for GIF
+files for easy identification of all the web files
+pertaining to a single document
+
+v. 3i
+
+1999 Mar 7
+
+Regenerate .toc file every time to avoid staleness.  If
+necessary, use toc.save file to save toc from previous
+run.
+
+\tableofcontents in DVI mentions page numbers now.
+Level 1 toc lines made more prominent in both HTML and
+DVI.
+
+Fixed \chapter - \label sequencing bug, where the
+\label was erroneously pointing before the \chapter's
+\htmlpagebreak.
+
+\urlh has subcommand \1 (in addition to \\) for
+convenience.
+
+v. 3h
+
+1999 Feb 28
+
+Allow \url's arg to have % followed by newline.  This
+is because BibTeX sometimes splits long URLs in this
+fashion.
+
+v. 3g
+
+1999 Feb 27
+
+Removed 2nd pass as too time-consuming -- rely on .aux file
+instead to store info from previous pass.  Tell user if they
+need to rerun
+
+Revamped verbatim and added literate-programming support
+
+Footnotes on same (HTML) page instead of in separate
+endnote-style section
+
+\{left,center,right}line redefined to be robust vis-a-vis
+catcode changes in their argument
+
+\ignorenextinputtime
+
+v. 3f
+
+Feb 14, 1999
+
+Deals with the fact that 0 is Sunday in MzScheme but 1
+in CL and SCM.
+
+callclscript.bat added for CL on Windows.
+
+v. 3e
+
+Feb 11, 1999
+
+\cite's optional arg and \nocite supported.
+
+\paragraph, \subparagraph.
+
+v. 3d
+
+Feb 7, 1999
+
+\urlh has a subcommand \\ for convenience.
+
+Support for BiBTeX (\cite, \bibliography).  Use it in
+tex2html.doc.
+
+Use MiKTeX's netpbm for Windows.
+
+\controlsequence at end of paragraph shouldn't eat paragraph
+separating space!
+
+v. 3c
+
+Feb 1, 1999
+
+Added support for ruled tables as defined in TeXsis's
+TXSruled.tex.
+
+v. 3b
+
+Jan 29, 1999
+
+\htmlheadonly ... \endhtmlheadonly to force things before
+</head> in the HTML output.  Use \input FILE inside
+{htmlheadonly} to include contents of FILE.
+
+Use separate page for footnotes only if multiple pages were
+used for main text (i.e., \htmlpagebreak was called
+explicitly or implicitly (via \chapter)).
+
+Use \rawhtml ... \endrawhtml instead of \rawhtml{...}
+(because the enclosed can be quite extensive).
+
+v. 3a
+
+Jan 27, 1999
+
+Add navigation bar at top of page too, for easy flipping of
+pages.
+
+Paragraph-end should be signaled for any contiguous
+stretch of whitespace that contains at least 2
+newlines. (Previously, 2 _successive_ newlines needed,
+which is very intolerant of extra spaces and also fails
+in DOS with its intervening #\returns.)
+
+Removed hardwiring of color-coding information from
+tex2html the program.  Instead, use \htmlstylesheet to
+specify a stylesheet.  Sample stylesheet tex2html.css
+provided.
+
+v. 2u
+
+Jan 24, 1999
+
+Use <u>...</u> for diacritic'd letters not in ISO 8859-1
+
+Fixed \appendix bug (the alphabetic section number wasn't
+propagating to the subsections)
+
+Allow extra flanking blanks inside \ref and \label
+
+v. 2t
+
+23 Jan 1999
+
+Fixed cross-referencing bug due to gensym count not
+being same across passes.
+
+Mention timezone (if poss) in document date
+
+Scheme comments are in regular text font (not the unreadable
+fixed-width)
+
+Treat \section within \chapter like LaTeX does
+
+<title> should appear on every HTML page
+
+v. 2s
+
+15 Jan 1999
+
+\end not followed by { = \bye
+
+\{sub}*section* bug fixed
+
+Bat file generated for Windows has approp eolns
+
+v. 2r
+
+\endinput, \end{document} should stop current file from
+being read further
+
+Eat \documentstyle{...}[...]
+
+Don't overwrite input file if it has extension .html! (Shriram)
+
+Better diagnostic if input file doesn't exist (Shriram)
+
+Nov. 17, 1998
+
+v. 2q
+
+Added \chapter, \appendix.  Support for *'d versions of \chapter
+and \section added to tex2html.tex (in addition to the
+HTML converter).
+
+\setkeyword (SLaTeX) == \scmkeyword
+
+Oct 12, 1998
+
+v. 2p
+
+\input{filename} in addition to \input filename
+read past \documentclass{...}
+\verb like \p
+file-or-directory-modify-seconds (instead of file-modify-seconds)
+(All Shriram Krishnamurthi's suggestions)
+
+\quad
+mzscheme-unix-preamble-tex2html added to manifest
+(forgot to before)
+
+Aug 16, 1998
+
+v. 2o
+
+Some SLaTeX compatibility added.  \scheme == \scmp.
+{schemedisplay} == \scmverbatim.  (Shriram
+Krishnamurthi's suggestions.)
+
+LaTeX \begin/\end, \section* accepted.  (Also Shriram's
+sugg.)
+
+May 8, 1998
+
+v. 2n
+
+Output modification time only on first page.
+
+Automatically generate separate HTML page for end notes.
+
+\color takes rrggbb instead of #rrggbb (thus avoiding
+catcode problems when \color is used inside macro args).
+
+May 2, 1998
+
+v. 2m
+
+Ported to STk
+
+Modification time is that of the most recently modified
+constituent file, not the main file
+
+April 29, 1998
+
+v. 2l
+
+diacritics
+
+April 26, 1998
+
+v. 2k
+
+\color takes color name or #rrggbb and produces color
+in HTML doc.
+
+\htmlpagebreak splits doc into smaller HTML pages with
+navigation bars at the end of each subpage.
+
+April 18, 1998
+
+v. 2j
+
+\rawhtml allowed outside \htmlonly
+
+Ports to CLISP and Allegro CL 4.3 (Linux).
+
+April 16, 1998
+
+v. 2i
+
+Ported to MIT Scheme.
+
+\ delimits TeX filenames.
+
+v. 2h
+
+April 14, 1998
+
+Ported to Guile.
+
+v. 2g
+
+April 13, 1998
+
+Now accepting \aftergroup!
+
+\b[egin]group, \e[nd]group
+
+Generic porting mechanism.  Ports (again) to Gambit and SCM.
+
+(Got rid of string-port bad habit.)
+
+v. 2f
+
+April 8, 1998
+
+Made groups TeX-like.  They correspond to frames, with
+each allowing its own definitions.  There is a global
+frame where definitions can be made via \global.
+
+\itemize, \enumerate, \item.
+
+v. 2e
+
+April 2, 1998
+
+Added install.bat for Windows 95.
+
+Reverting to using string-ports instead of aux files to
+store cross-reference information.  (Safer to pass info
+across passes via strings than via files.)
+
+v. 2d
+
+April 1, 1998
+
+Disabled 2nd pass for CGI
+
+v. 2c
+
+April 1, 1998
+
+CGI script speed (crucial!) improved, by the simple
+expedient of writing directly to stdout instead of via temp
+file.
+
+Can now be used as Windows 95 .bat file.
+
+v. 2b
+
+March 30, 1998
+
+Fixed spacing bug after alphabetic control sequences
+that had crept back...
+
+v. 2a
+
+Mar 28, 1998
+
+Makes a second pass if cross-references unresolved.
+
+Indexing capability added.
+
+Last modification time is now that of the source TeX file,
+not the time of conversion to HTML.  (The latter makes
+little sense, esp. if tex2html was called as a CGI script.)
+
+tex2html is now also a CGI script.  Call with TeX file as
+"extra path information".
+
+Much more TeXly treatment of \def.  I.e., arbitrary argument
+delimitation.
+
+\setverbatimescapechar allows chars other than `|' to be
+the escape char within verbatim.
+
+Removed (Scheme) define-macros for portability.
+
+v. 1l
+
+Mar 22, 1998
+
+Added \tableofcontents.
+
+Scheme verbatim recognizes #|...|# style comments.
+
+Removed dependence on MzScheme-specific format, [f]printf,
+string-ports and hash-tables.
+
+v. 1k
+
+Mar 19, 1998
+
+\sectiond, allows arbitrary-depth sections in both TeX and HTML
+
+v. 1j
+
+Mar 16, 1998
+
+em-dash HTMLizes as `--'; en-dash as `-'.
+
+Arbitrarily deep \sub...section's allowed.
+
+Added \bibitem for convenience.
+
+v. 1i
+
+Mar 8, 1998
+
+\gifdef for frequently used GIFs.
+
+Fixed bug to do with ungetting grouped TeXt.
+
+v. 1h
+
+Mar 7, 1998
+
+Threw out \gifmagnification.  Just use \magnification
+inside GIF preamble to magnify GIFs.
+
+Threw out puzzling \ifx\inhtml? and \htmldef.  Substituted
+with the more transparent \texonly, \htmlonly, and \rawhtml.
+
+v. 1g
+
+Mar 6, 1998
+
+Footnote marks are now links in both footnote and body text
+--- they point to each other.
+
+Space after control sequences ignored (usually this isn't a
+problem in HTML, but sometimes it is).
+
+\copyright, \P, \S, \TeX, &c.
+
+v. 1f
+
+Mar 5, 1998
+
+Sections, \label and \ref more print-like, with numbers.
+(Previously, HTML \ref's printed as ugly alphanumerics.)
+
+Threw out \title command.  External (i.e., bookmarkable)
+title of HTML page is now just its file name.
+
+Using buffered input port as a single concept (struct)
+instead of riskily as two arguments.
+
+v. 1e
+
+Mar 4, 1998
+
+Runs only on MzScheme for now.
+
+\{left,center,right}line treated reasonably.
+
+Footnotes: plain's \footnote as well as \numfootnote.
+
+\label enhanced to work as normal people might expect.
+Crufty \anchor no longer needed.
+
+Section commands are now \outer.
+
+\{end}mathpreamble is now obsolete.  Use \{end}gifpreamble
+for both math and pictures.
+
+v. 1d
+
+Feb 1, 1998
+
+added \htmlgif...\endhtmlgif for identifying arbitrary
+portions of the TeX source that need to be converted into
+GIFs.  Uses \gifpreamble...\endgifpreamble.  (Cf. math GIFs
+and \mathpreamble...\endmathpreamble.)
+
+added the cross-referencing commands, \url, \urlh, and
+\urlhd.  (\urlhd is the same as \href.)
+
+v. 1c
+
+May 7, 1997
+
+math gifs are "transparent", i.e., they take on the ambient
+background color.
+
+v. 1b
+
+May 6, 1997
+
+allow separate sizing of math gif files.  reuse math gif files
+whenever possible.  clean up math gif intermediate files.  (John
+Polking's suggestions.)
+
+v. 1a
+
+May 2, 1997
+
+tex2html does full math.  Converts them into GIFs, following
+latex2html's lead.  (For John Polking.)
+
+Ported to SCM/SLIB
+
+v. 0d
+
+Apr 26, 1997
+
+Common Lisp port added.  tested on Allegro Common Lisp and
+CLISP
+
+added \scmverbatimfile as Lisp-code variant of \verbatimfile
+
+Lisp tokens are now recognized in any case (up, low, mix).
+| now read as singleton token (much woe otherwise with some
+Schemes).  \\ inside "" recognized correctly.
+
+v. 0c
+
+Apr 24, 1997
+
+extensible mechanism added for porting to various Scheme
+dialects (currently: MzScheme, Gambit)
+
+v. 0b
+
+April 20, 1997
+
+using \ifx\inhtml? instead of \ifhtml for more robust
+preprocessing
+
+(Scheme) code can be color-coded
+
+version 0a
+
+April 17, 1997
+
+first public release

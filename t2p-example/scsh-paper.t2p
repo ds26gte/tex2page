@@ -1,0 +1,136 @@
+% scsh-paper.t2p
+% Dorai Sitaram
+% Feb 6, 2000
+
+% This file contains the tex2page macros needed to process
+% the scsh LaTeX document scsh-n.n.n/doc/scsh-paper.tex.
+% Copy (or link) this file alongside scsh-paper.tex and run
+% tex2page scsh-paper
+
+\htmlmathstyle{no-image}
+
+\let\clearpage\relax
+\let\cleardoublepage\relax
+\let\pagebreak\relax
+
+\let\PRIMsection\section
+
+\let\subsectionORIG\subsection
+\let\subsubsectionORIG\subsubsection
+
+%\let\PRIMtableofcontents\tableofcontents
+%\def\tableofcontents{\section*{Contents}\PRIMtableofcontents}
+
+\def\notenum#1{\def\savenotenum{#1}}
+\def\project#1{\def\saveproject{#1}}
+%\let\PRIMtitle\title
+%\def\title#1{\PRIMtitle{#1}\def\savetitle{#1}}
+%\def\author#1{\def\saveauthor{#1}}
+%\def\date#1{\def\savedate{#1}}
+
+\def\maketitle{
+\leftline{\sc massachusetts institute of technology}
+\smallskip
+%\centerline{Laboratory for Computer Science}
+%note: ~ is needed in the \makehtmlimage arg because the aux tex file should
+%contain something other than a \special for it to
+%produce anything
+\leftline{\makehtmlimage{\special{psfile=mitlogo.ps}~}\
+Laboratory for Computer Science}
+\smallskip
+\leftline{\saveproject\ Note \savenotenum\ \qquad \TIIPdate}
+\hr
+\subject{\TIIPtitle}
+\smallskip
+{\def\\{\egroup\break\bgroup}
+\centerline{\bf\TIIPauthor}}
+%\smallskip
+%\bigskip
+%\bigskip
+}
+
+\let\PRIMfigure\figure
+\let\PRIMendfigure\endfigure
+
+\def\figure{\par\hrule\PRIMfigure}
+\def\endfigure{\PRIMendfigure\hrule\par}
+
+\let\PRIMdocument\document
+
+\def\document{\PRIMdocument
+
+%\def\headingquote##1##2{
+%%\eject
+%\TIIPendgraf
+%\rawhtml<div align=right><table ><tr><td><em>
+%\endrawhtml
+%##1
+%\rawhtml</em><br>\endrawhtml
+%~~~~~~---##2
+%\TIIPendgraf
+%\rawhtml</td></tr></table></div>\endrawhtml}
+
+\def\headingquote##1##2{{
+\obeylines\raggedleft\let\\\relax{\it ##1}
+---##2}}
+
+%\def\section{\def\section{\vfill\eject\PRIMsection}%
+%\PRIMsection}
+
+\newcount\firstsectionp
+\firstsectionp=1
+
+\def\section{\ifnum\firstsectionp=1
+\global\firstsectionp=0
+\else\vfill\eject\fi
+\PRIMsection}
+
+
+
+
+%headings.tex redefines \[sub]*section, which
+%emit unwanted output, pointed out by Martin
+%Gasbichler.  Let's therefore restore original
+%definitions for these commands.  
+
+\let\subsection\subsectionORIG
+\let\subsubsection\subsubsectionORIG
+
+%\let\ttchars\relax
+\let\ttt\tt
+\def\cd##1{{\tt\def\\{\char`\\}\defcsactive\${\char`\$}%
+\defcsactive\&{\char`\&}##1}}
+\def\cddollar{\undefcsactive\$}
+%\def\ex#1{{\tt #1}}
+\def\l##1{lambda (##1)}
+\def\lx##1{lambda {##1}}
+%\def\var#1{{\it #1\/}}
+\def\vari##1##2{\mbox{\undefcsactive\$${\it
+##1}_{##2}$}}
+%\def\vari#1#2{\mbox{{\it #1\/}\undefcsactive\$$_{#2}$}}
+
+%\renewcommand{\proto}[3]{{\tt(#1 {\it #2})} \qquad (#3)}
+\def\proto##1##2##3{{\tt(##1 {\it ##2})} \qquad (##3)}
+
+\def\setupcode{\tt%
+\def\\{\char`\\}%
+\defcsactive\${\$}%
+\def\evalto{==> }%
+\defcsactive\%{\%}\obeywhitespace}
+
+\newenvironment{code}{\begin{quote}\bgroup\setupcode\GOBBLEOPTARG}
+{\egroup\end{quote}}
+
+\newenvironment{codebox}{\begin{tableplain}\bgroup\setupcode\GOBBLEOPTARG}
+{\egroup\end{tableplain}}
+
+\newenvironment{tightcode}{\begin{code}}{\end{code}}
+
+\renewenvironment{inset}{\begin{quote}}{\end{quote}}
+\renewenvironment{leftinset}{\begin{quote}}{\end{quote}}
+\renewenvironment{tightinset}{\begin{quote}}{\end{quote}}
+\newenvironment{tightleftinset}{\begin{quote}}{\end{quote}}
+
+\renewenvironment{column}{\end{center}\bgroup\let\\\break}
+{\egroup\begin{center}}
+}

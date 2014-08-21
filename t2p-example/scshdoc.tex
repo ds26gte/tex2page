@@ -1,0 +1,65 @@
+\def\sv{0.6.2}
+
+
+\title{Online versions of the Scsh documentation}
+
+\subsubsection*{The documents}
+
+\nocite{scsh-paper,scsh-man}
+
+\bibliographystyle{plain}
+\bibliography{../bigbib}
+
+\subsubsection*{Generating them}
+
+\enumerate
+\item  Get and unpack 
+\urlh{http://www.scsh.net}{Scsh}.  
+This will create a directory \p{scsh-|sv} 
+(modulo version number).  
+
+\item  Get and install 
+\urlh{../tex2page-doc.html}{TeX2page}.  This will create a 
+directory \p{tex2page}.   
+
+(TeX2page is known to install on Scsh on Unix.  
+However, for the least installation hassle,
+consider
+running TeX2page on
+\urlh{http://www.plt-scheme.org/software/mzscheme}{MzScheme}.
+TeX2page runs ``out of the box'' on MzScheme on any
+operating system.)
+
+\item  Put a copy or link of
+\p{tex2page/t2p-example/scsh-paper.t2p} in
+\p{scsh-|sv/doc/scsh-paper}.  Alternatively, ensure that 
+\p{scsh-paper.t2p} is in one of the directories
+mentioned in the environment variable
+\p{TIIPINPUTS}.  (The \p{TIIPINPUTS} value looks like
+the \p{PATH} value, ie, it is a list of directories,
+colon-separated in Unix and semicolon-separated in
+Windows.)
+
+\item  Put a copy or link of \p{tex2page/t2p-example/man.t2p} 
+in \p{scsh-|sv/doc/scsh-manual}.  Alternatively,
+ensure that \p{man.t2p} is in \p{TIIPINPUTS}.
+
+\item  In each of the directories \p{scsh-|sv/doc}
+and \p{scsh-|sv/doc/scsh-manual}, create a file \p{.tex2page.hdir}
+that contains the word \p{html}.  This tells TeX2page to
+create the HTML files in a subdirectory \p{html}.  (This
+step is optional, but helps to avoid cluttering
+the source directory.)
+
+\item  Cd to \p{scsh-|sv/doc/scsh-paper} and run \p{tex2page scsh-paper}.
+(Do it twice to resolve cross-references.)
+
+\item  Cd to \p{scsh-|sv/doc/scsh-manual} and run \p{tex2page man}.
+(Do it twice.)
+
+\item  Browse \p{scsh-|sv/doc/scsh-paper/html/scsh-paper.html} and 
+\p{scsh-|sv/doc/scsh-manual/html/man.html} using your 
+favorite HTML browser.  
+\endenumerate
+
+\bye

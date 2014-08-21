@@ -1,0 +1,19 @@
+\makehtmlimage{
+\newdimen\unit
+\def\point#1 #2 {\rlap{\kern#1\unit
+    \raise#2\unit\hbox{$
+      \scriptstyle\bullet\;(#1,#2)$}}}
+\unit=\baselineskip
+\centerline{\vtop{\hrule
+  \hbox{\vrule height10\unit depth9.4\unit \kern2\unit
+    \hbox{%
+      \point 0 0 % Alioth (Epsilon Ursae Majoris), mag 1.79
+      \point 0 8 % Dubhe (Alpha Ursae Majoris),    mag 1.81
+      \point 0 -8 % Alkaid (Eta Ursae Majoris),    mag 1.87
+      \point -1 -2.5 % Mizar (Zeta Ursae Majoris), mag 2.26
+      \point 4 7 % Merak (Beta Ursae Majoris),     mag 2.37
+      \point 4 2 % Phekda (Gamma Ursae Majoris),   mag 2.44
+      \point 1 1.5 % Megrez (Delta Ursae Majoris), mag 3.30
+      }%    Src: Atlas of the Universe; Astronomy Data Book
+    \kern7\unit \vrule}\hrule}}
+}

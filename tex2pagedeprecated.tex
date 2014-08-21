@@ -1,0 +1,301 @@
+% The following, most of which duplicates LaTeX behavior in plain TeX,
+% really should go away, perhaps into a utility macro file
+
+\ifx\shipout\UnDeFiNeD\endinput\fi
+
+\input plainsection
+
+\edef\atcatcodebeforetexzpage{%
+  \noexpand\catcode`\noexpand\@=\the\catcode`\@}
+\catcode`\@11
+
+%
+
+\def\itemize{\par\begingroup
+  \advance\leftskip\parindent
+  \smallbreak
+  \def\item{\smallbreak\noindent
+  \llap{$\bullet$\enspace}\ignorespaces}}
+
+\def\enditemize{\smallbreak\smallbreak\endgroup\par}
+
+\newtally\enumeratelevel
+
+\def\enumerate{\par\begingroup
+  \advancetally\enumeratelevel1%
+  \newtally\enumeratenumber
+  \advance\leftskip\parindent
+  \smallbreak
+  \def\item{\smallbreak\noindent
+    \advancetally\enumeratenumber1%
+    \ifnum\enumeratelevel=1
+      \edef\enumeratemark{\enumeratenumber}\else
+    \ifnum\enumeratelevel=2
+      \count255=\enumeratenumber
+      \advance\count255 by -1 \advance\count255 by `a
+      \edef\enumeratemark{\noexpand\char\the\count255 }\else
+    \ifnum\enumeratelevel=3
+      \edef\enumeratemark{\Romannumeral\enumeratenumber}\else
+    \ifnum\enumeratelevel=4
+      \count255=\enumeratenumber
+      \advance\count255 by -1 \advance\count255 by `A
+      \edef\enumeratemark{\noexpand\char\the\count255 }\else
+    \edef\enumeratemark{\enumeratenumber}\fi\fi\fi\fi
+    \edef\@currentlabel{\enumeratemark}% needed?
+    \llap{\enumeratemark.\enspace}\ignorespaces}}
+
+\def\endenumerate{\smallbreak\smallbreak\endgroup\par}
+
+%
+
+% plain's \{left,center,right}line can't handle catcode change
+% within their argument
+
+\def\leftline{\line\bgroup\bgroup
+  \aftergroup\leftlinefinish
+  \let\dummy=}
+
+\def\leftlinefinish{\hss\egroup}
+
+\def\centerline{\line\bgroup\bgroup
+  \aftergroup\leftlinefinish
+  \hss\let\dummy=}
+
+\def\rightline{\line\bgroup\hss\let\dummy=}
+
+%
+% definitions (useful in reference manuals)
+
+\def\defun#1{\def\defuntype{#1}%
+\medbreak
+\line\bgroup
+  \hbox\bgroup
+    \aftergroup\enddefun
+    \vrule width .5ex \thinspace
+    \vrule \enspace
+    \vbox\bgroup\setbox0=\hbox{\defuntype}%
+      \advance\hsize-\wd0
+      \advance\hsize-1em
+      \obeylines
+      \parindent=0pt
+      \aftergroup\egroup
+      \strut
+      \let\dummy=}
+
+\def\enddefun{\hfil\defuntype\egroup\smallskip}
+
+%
+
+%\def\hr{\smallskip\line{\leaders\hbox{~.~}\hfill}\smallskip}
+
+%
+
+% don't let caps disable end-of-sentence spacing -- assumes we won't use
+% dots after caps for abbrevs
+
+\def\nocapdot{%
+\count255=`\A
+\loop
+\sfcode\the\count255=1000
+\ifnum\count255<`\Z
+\advance\count255 by 1
+\repeat
+}
+
+% " -->  `` or ''
+
+\def\smartdoublequotes{%
+  \defcsactive\"{\futurelet\smartdoublequotesI
+    \smartdoublequotesII}%
+  \def\smartdoublequotesII{%
+    \ifcat\noexpand\smartdoublequotesI a``\else
+    \if\noexpand\smartdoublequotesI 0``\else
+    \if\noexpand\smartdoublequotesI 1``\else
+    \if\noexpand\smartdoublequotesI 2``\else
+    \if\noexpand\smartdoublequotesI 3``\else
+    \if\noexpand\smartdoublequotesI 4``\else
+    \if\noexpand\smartdoublequotesI 5``\else
+    \if\noexpand\smartdoublequotesI 6``\else
+    \if\noexpand\smartdoublequotesI 7``\else
+    \if\noexpand\smartdoublequotesI 8``\else
+    \if\noexpand\smartdoublequotesI 9``\else
+    ''\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi}%
+}
+
+%
+
+\def\emailliketext{\nocapdot\smartdoublequotes}
+
+%
+
+\def\gobbleencl{\bgroup
+  \def\do##1{\catcode`##1=12 }\dospecials
+  \catcode`\{1 \catcode`\}2 \catcode`\^^M=9
+  \futurelet\gobbleenclQnext\gobbleenclQii}
+
+\def\gobbleenclQii{\ifx\gobbleenclQnext\bgroup
+    \let\gobbleenclQnext\gobblegroupQii
+  \else\let\gobbleenclQnext\gobbleenclQiii\fi
+  \gobbleenclQnext}
+
+\def\gobbleenclQiii#1{%
+  \def\gobbleenclQiv##1#1{\egroup}%
+  \gobbleenclQiv}
+
+%
+
+\let\strike\fiverm % can be much better!
+%
+
+% \packindex declares that subitems be bundled into one
+% semicolon-separated paragraph
+
+\def\packindex{%
+  \def\theindex{\begingroup
+    \parskip0pt \parindent0pt
+    \def\item{\par\hangindent20pt \hangafter1 }%
+    \def\subitem{\unskip; }%
+    \def\subsubitem{\unskip; }%
+    \def\see{\bgroup\it see \aftergroup\gobblegroup\let\dummy=}%
+    \let\indexspace\medskip}}
+
+% Use \printindex instead of \inputindex if you want
+% the section heading ``Index'' automatically generated.
+
+\def\printindex{\csname beginsection\endcsname Index\par
+  \inputindex}
+
+\ifx\pdfoutput\UnDeFiNeD\else
+  %but remember to \input epsf or supp-pdf as appropriate
+  \def\epsfbox#1{\convertMPtoPDF{#1}{1}{1}}%
+\fi
+
+\def\r#1{{\accent23 #1}}
+
+\def\verbc{\begingroup
+  \verbsetup\afterassignment\verbcI
+  \let\verbcII=}
+
+\def\verbcI{{\verbfont\verbcII}\endgroup}
+
+\let\E\verbc
+
+% The current font is cmtt iff fontdimen3 = 0 _and_
+% fontdimen7 != 0
+
+\def\noncmttQspecific{\let\noncmttQspecificQdoit y%
+  \ifdim\the\fontdimen3\the\font=0.0pt
+    \ifdim\the\fontdimen7\the\font=0.0pt
+      \let\noncmttQspecificQdoit n\fi\fi
+  \ifx\noncmttQspecificQdoit y%
+    \defcsactive\<{\relax\char`\<}%
+    \defcsactive\>{\relax\char`\>}%
+    \defcsactive\-{\variablelengthhyphen}%
+  \fi}
+
+% In a nonmonospaced font, - followed by a letter
+% is a regular hyphen.  Followed by anything else, it is a
+% typewriter hyphen.
+
+\def\variablelengthhyphen{\futurelet\variablelengthhyphenI
+  \variablelengthhyphenII}
+
+\def\variablelengthhyphenII{\ifcat\noexpand\variablelengthhyphenI
+ a-\else{\tt\char`\-}\fi}
+
+% uppercase version of \romannumeral
+
+\def\Romannumeral{\afterassignment\RomannumeralI\count255=}
+
+\def\RomannumeralI{\uppercase\expandafter{\romannumeral\the\count255 }}
+
+%
+
+\def\quote{\bgroup\narrower\smallbreak}
+\def\endquote{\smallbreak\egroup}
+
+% \mailto{ADDRESS} becomes
+% <a href="mailto:ADDRESS">ADDRESS</a> in HTML, and
+% ADDRESS in DVI.
+
+\let\mailto\url
+
+%\def\rawhtml{\errmessage{Can't occur outside
+%  \string\htmlonly}}
+%\def\endrawhtml{\errmessage{Can't occur outside
+%  \string\htmlonly}}
+
+\let\rawhtml\iffalse
+\let\endrawhtml\fi
+
+\let\htmlheadonly\iffalse
+\let\endhtmlheadonly\fi
+
+\let\cssblock\iffalse
+\let\endcssblock\fi
+
+\def\inputcss#1 {\relax}
+\let\htmladdimg\gobblegroup
+
+\def\htmlref{\bgroup\aftergroup\gobblegroup\let\dummy=}
+
+%
+
+\let\htmlcolophon\gobblegroup
+\let\htmldoctype\gobblegroup
+\let\htmlmathstyle\gobblegroup
+
+\let\slatexlikecomments\relax
+\let\noslatexlikecomments\relax
+
+\let\imgpreamble\iffalse
+\let\endimgpreamble\fi
+
+\def\inputexternallabels#1 {\relax}
+\def\includeexternallabels#1 {\relax}
+
+\let\evalh\gobblegroup
+\let\evalq\gobblegroup
+
+\ifx\TZPcommonlisp\UnDeFiNeD
+\let\TZPcommonlisp=0
+\fi
+
+\let\htmlpagebreak\relax
+
+\let\htmlpagelabel\gobblegroup
+
+\def\htmlpageref{\errmessage{Can't occur except inside
+  \string\htmlonly}}
+
+% Miscellaneous stuff
+
+%\def\hr{$$\hbox{---}$$}
+\def\hr{\medbreak\centerline{---}\medbreak}
+%\def\hr{\par\centerline{$*$}\par}
+
+\let\htmlimageformat\gobblegroup
+\let\htmlimageconversionprogram\gobblegroup
+
+\let\externaltitle\gobblegroup
+\let\ignorenextinputtimestamp\relax
+
+%
+
+\let\htmladvancedentities\relax
+\let\n\noindent
+\let\p\verb
+\let\q\scm
+\let\f\numberedfootnote
+\let\scmp\scm
+\let\numfootnote\numberedfootnote
+\let\writetotoc\writenumberedtocline
+\let\tag\xrtag
+\let\scmfilename\verbwritefile
+\let\scmwrite\verbwrite
+
+%
+
+\atcatcodebeforetexzpage
+
+% end of file

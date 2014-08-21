@@ -1,0 +1,179 @@
+#!/bin/sh
+
+# Last modified: 2013-02-08
+
+# Set scmxlate to the pathname of scmxlate/scmxlate.scm
+# on your system, if you know it.  Otherwise let
+# this script figure it out.
+
+scmxlate=
+
+# Modify searchpathforscmxlate if you think a
+# different set of directories should be
+# searched for scmxlate/scmxlate.scm.
+
+searchpathforscmxlate=".. ../.. ../../.. $HOME /usr/local /opt"
+
+findscmxlate() {
+  test "$scmxlate" && return
+  echo Trying to find scmxlate/scmxlate.scm on your machine.
+  echo This may take a while.
+  for f in $searchpathforscmxlate
+  do
+    scmxlate=`find $f -name scmxlate.scm -print|sed 1q`
+    test "$scmxlate" && return
+  done
+  echo Couldn\'t find scmxlate/scmxlate.scm on your machine.
+  echo Trying to get it off the Internet.
+  wget http://www.ccs.neu.edu/~dorai/scmxlate/scmxlate.tar.bz2
+  test -f scmxlate.tar.bz2 &&\
+  bunzip2 scmxlate.tar.bz2 &&\
+  tar xf scmxlate.tar &&\
+  scmxlate=scmxlate/scmxlate.scm
+
+  test "$scmxlate" && return
+  echo Unable to get scmxlate off the Internet.
+  echo scmxlate is available at
+  echo http://www.ccs.neu.edu/~dorai/scmxlate/index.html
+  echo You may want to get and install scmxlate manually,
+  echo then try configure again.
+  exit
+}
+
+adieu() {
+  for f in `cat dialects/files-to-be-ported.scm`
+  do
+    if test -f my-$f
+    then
+      echo File my-$f created.
+      echo You may rename it to $f and
+      echo \ \ put it in your PATH.
+    fi
+  done
+}
+
+makeit() {
+  case "$dialect" in
+    abcl|allegro|clisp|clozure|cmucl|ecl|sbcl)
+    :;;
+    *)
+    findscmxlate;;
+  esac
+  #echo Ignore questions on console.
+  case "$dialect" in
+    sbcl)
+    sbcl --eval '(require :sb-executable)' \
+    --eval '(sb-executable:make-executable "my-tex2page" 
+    (list (compile-file "tex2page.lisp")))' \
+    --eval '(sb-ext:quit)'
+    rm tex2page.fasl
+    echo Resulting file is \'my-tex2page\'.
+    echo You may want to rename it.;;
+
+    abcl|allegro|clisp|clozure|cmucl|ecl)
+    echo \":\"\; export LISP=$dialect > my-tex2page
+    cat tex2page.lisp >> my-tex2page
+    chmod +x my-tex2page
+    echo Resulting file is \`my-tex2page\'.
+    echo You may want to rename it.;;
+
+    bigloo)
+    echo bigloo|bigloo -eval '(load "'$scmxlate'")';;
+
+    chicken)
+    echo chicken|csi $scmxlate;;
+
+    gambit)
+    echo gambit|gsi $scmxlate;;
+
+    gauche)
+    echo gauche|gosh -l $scmxlate;;
+
+    guile)
+    echo guile|guile -l $scmxlate;;
+
+    mitscheme)
+    echo mitscheme|scheme -load $scmxlate;;
+
+    petite)
+    echo petite|petite $scmxlate;;
+
+    plt)
+    echo If you are not a PLT developer, you probably shouldn\'t
+    echo be needing to do this.
+    echo plt|racket -f $scmxlate;;
+
+    scm)
+    echo scm|scm -f $scmxlate;;
+
+    scsh)
+    echo scsh|scsh -s $scmxlate;;
+
+    sxm)
+    echo sxm|sxi $scmxlate;;
+
+    *)
+    echo Dialect $dialect not supported!
+    exit;;
+  esac
+  #adieu
+}
+
+echodialectsuggestions() {
+  clisppresent=
+  eclpresent=
+  guilepresent=
+  sbclpresent=
+  test "`which clisp 2>/dev/null|grep -v ' '`"  &&\
+  clisppresent=yes
+  test "`which ecl 2>/dev/null|grep -v ' '`" &&\
+  eclpresent=yes
+  test "`which guile 2>/dev/null|grep -v ' '`"  &&\
+  guilepresent=yes
+  test "`which sbcl 2>/dev/null|grep -v ' '`"  &&\
+  sbclpresent=yes
+  if test "$clisppresent" -o "$eclpresent" -o "$guilepresent"
+  then
+    echo
+    echo Note: The following looks promising on your system:
+    echo
+    test "$guilepresent" &&\
+    echo \ \ ./configure --dialect=guile
+    test "$eclpresent" &&\
+    echo \ \ ./configure --dialect=ecl
+    test "$clisppresent" &&\
+    echo \ \ ./configure --dialect=clisp
+    test "$sbclpresent" &&\
+    echo \ \ ./configure --dialect=sbcl
+  fi
+}
+
+echohelp() {
+  echo List of dialects supported:
+  echo
+  cat dialects/dialects-supported.scm | grep -v "^ *;"
+
+  echo
+  echo If your dialect D is listed above, type
+  echo \ \ ./configure --dialect=D
+  echodialectsuggestions
+  exit
+}
+
+if test 1 -eq `echo $1|grep "^--dialect="|sed 1q|wc -l`
+then
+  dialect=`echo $1|sed 's/--dialect=//'`
+  if test "$dialect" = "racket"
+  then
+    echo Program runs out of the box on Racket!
+    echo You don\'t need to configure anything!
+    exit
+  fi
+  if test "$dialect" = "guile" -a -f ./dialects/make-guile-version
+  then
+    ./dialects/make-guile-version
+  else
+    makeit
+  fi
+else echohelp
+fi

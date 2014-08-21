@@ -1,0 +1,50 @@
+% btxdoc.t2p
+% Dorai Sitaram
+% Nov 11, 2000
+
+% last change 2006-05-31
+
+% This file contains the tex2page macros needed to process
+% the document btxdoc.tex ("BibTeXing", by Oren Patashnik).
+% Copy (or link) this file alongside btxdoc.tex and run
+%
+% tex2page btxdoc
+
+\let\TZPtexlayout=1
+
+\headline={\the\footline}
+
+\let\TZPtextmathimage 0
+\let\TZPdisplaymathimage 0
+%\htmlmathstyle{no-image}
+%\dontuseimgforhtmlmath
+
+%\let\kern\relax
+
+\def\TZPtitle{BibTeXing}
+
+% html uses a \simplerBibTeX than the more complicated
+% \BibTeX defined in btxdoc.tex
+\def\simplerBibTeX{B{\small IB}\TeX} 
+
+\title{\simplerBibTeX ing}
+
+% ignore \title in btxdoc.tex
+\def\title#1{}  
+
+% every section but the first starts a new page
+
+\let\ORIGsection\section
+\newcount\firstsection
+\firstsection=1
+
+\def\section{\ifnum\firstsection=1
+\global\firstsection=0
+\else\eject\fi
+\ORIGsection}
+
+\let\ORIGdocument\document
+
+\def\document{\ORIGdocument
+\let\BibTeX\simplerBibTeX
+}

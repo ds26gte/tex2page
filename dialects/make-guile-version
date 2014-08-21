@@ -1,0 +1,141 @@
+#!/bin/sh
+
+# Jul 18, 2003
+
+sed -e 's/	/ /g' tex2page |\
+sed -e 's/^ *$/END_OF_CURR_EXP/' > my-tex2page
+
+ignoredef() {
+  for f in "$@"
+  do
+    sed -e '/^(define \ *'$f' *$/,/^END_OF_CURR_EXP/d' my-tex2page |\
+    sed -e '/^(define \ *'$f' \ *.*$/,/^END_OF_CURR_EXP/d' > .sedtmp
+    mv .sedtmp my-tex2page
+  done
+}
+
+rename() {
+  sed -e 's/'$1'/'$2'/g' my-tex2page > .sedtmp
+  mv .sedtmp my-tex2page
+}
+
+uncall() {
+  for f in "$@"
+  do
+    sed -e '/^('$f'/,/^END_OF_CURR_EXP/d' my-tex2page > .sedtmp
+    mv .sedtmp my-tex2page
+  done
+}
+
+ignoredef \
+'\*anno-domini-at-0\*' '\*january-number\*' \
+'\*scheme-version\*' '\*return\*' '\*tab\*' \
+call-with-input-string \
+eval1 \
+get-arg1 get-time-zone \
+strftime-like string-index \
+with-output-to-port \
+main
+
+rename '(define-syntax' '(almost-define-syntax'
+
+uncall require trace 
+
+sed -e '/^#!/,/^END_OF_CURR_EXP/d' my-tex2page > .sedtmp
+mv .sedtmp my-tex2page
+
+cat > guile.preamble <<EOF
+#!/bin/sh
+exec guile -e main -s \$0 \"\$@\"
+!#
+
+(define *anno-domini-at-0* 1900)
+(define *january-number* 0)
+(define *return* #\return)
+(define *tab* #\tab)
+(define andmap and-map)
+(define current-seconds current-time)
+(define date-day tm:mday)
+(define date-hour tm:hour)
+(define date-minute tm:min)
+(define date-month tm:mon)
+(define date-year tm:year)
+(define eof the-eof-object)
+(define flush-output force-output)
+(define ormap or-map)
+(define seconds->date localtime)
+(define strftime-like strftime)
+(define string-reverse-index string-rindex)
+
+(define *scheme-version* 
+  (string-append "Guile " (version)))
+
+(define eval1
+  (lambda (e)
+    (eval e (interaction-environment))))
+
+(define-macro unless
+  (lambda (b . ee)
+    \`(if (not ,b) (begin ,@ee))))
+
+(define-macro when
+  (lambda (b . ee)
+    \`(if ,b (begin ,@ee))))
+
+(define-macro fluid-let
+  (lambda (xvxv . ee)
+    (let ((xx (map car xvxv))
+          (vv (map cadr xvxv))
+          (old-xx (map (lambda (xv)
+                         (string->symbol
+                          (string-append "%__"
+                                         (symbol->string (car xv))))) xvxv))
+          (res '%_*_res))
+      \`(let ,(map (lambda (old-x x) \`(,old-x ,x)) old-xx xx)
+         ,@(map (lambda (x v)
+                  \`(set! ,x ,v)) xx vv)
+         (let ((,res (begin ,@ee)))
+           ,@(map (lambda (x old-x) \`(set! ,x ,old-x)) xx old-xx)
+           ,res)))))
+
+(define file-or-directory-modify-seconds
+  (lambda (f) (vector-ref (stat f) 9)))
+
+(define read-line
+  (lambda (i)
+    (let ((c (peek-char i)))
+      (if (eof-object? c)
+        c
+        (let loop ((r (quote ())))
+          (let ((c (read-char i)))
+            (if (or (eof-object? c) (char=? c #\newline))
+              (list->string (reverse! r))
+              (loop (cons c r)))))))))
+
+(define-macro almost-define-syntax
+  (lambda (name proc)
+     \`(define-macro ,name
+         (lambda _args
+           (let ((datum->syntax (lambda (x y) y))
+                 (syntax->datum (lambda (x) x)))
+              (,proc (cons 'defstruct _args)))))))
+
+(define main
+  (lambda (args)
+    (tex2page
+      (and (>= (length args) 2)
+           (list-ref args 1)))))
+EOF
+
+sed -e '1s/^/DUMMY_LINE\n/' my-tex2page |\
+sed -e '1r guile.preamble' |\
+sed -e '1d' |\
+sed -e 's/^END_OF_CURR_EXP.*$//' > .sedtmp
+mv .sedtmp my-tex2page
+chmod +x my-tex2page
+
+rm -f guile.preamble
+
+echo File my-tex2page created.
+echo You may rename it to tex2page and
+echo \ \ put it in your PATH.

@@ -1,0 +1,1347 @@
+% sicm.t2p
+% tex2page macro file for SICM's book.tex
+% Dorai Sitaram
+% 20 May 2001
+
+% Reuse the CSS used by SICP
+
+\input sicp-css.t2p
+
+
+\evalh{(set! *tex-format* 'latex)}
+
+%\dontuseimgforhtmlmath %makes debugging ez
+
+\dontuseimgforhtmlmathintext
+
+% MITP doesn't want it, so 
+
+\notimestamp
+
+% convert a {figure} as a unit into image
+
+%\evalh{
+%(tex-def-prim "\\figure" 
+%              (lambda () (do-latex-env-as-image-aux "figure")))
+%}
+
+% Some additional sub-macros used by \maketitle
+
+\def\publisher#1{\def\SAVEpublisher{#1}}
+
+% Redefine \maketitle to make use of the above sub-macros
+
+\def\maketitle{\begingroup
+\let\\\break
+\evalh{(do-end-para)}
+\rawhtml<h1>\endrawhtml
+\TIIPtitle
+\rawhtml</h1>\endrawhtml
+\bigskip\bigskip
+\leftline{\TIIPauthor}
+\bigskip\bigskip\bigskip
+\leftline{\SAVEpublisher}
+\endgroup}
+
+
+
+%
+
+\let\ORIGtableofcontents\tableofcontents
+
+\def\utableofcontents{%
+\evalh{(set! *use-img-for-math?* #f)}%
+\ORIGtableofcontents
+\evalh{(set! *use-img-for-math?* #t)}%
+}
+
+% SICP sets its displayed material flushleft
+
+\leftdisplays
+
+% Epigraphs
+
+\def\epigraph{
+\evalh{(do-end-para)}
+\begingroup
+\rawhtml
+<div align=right> 
+<table width=60%><tr><td>
+<span class=epigraph>
+\endrawhtml}
+
+\def\endepigraph{
+\evalh{(do-end-para)}%
+\rawhtml
+</span>
+</td></tr></table>
+</div>
+\endrawhtml
+\endgroup\par}
+
+% Define an {exercise} environment that is numbered
+% within chapters
+
+\newtheorem{exercise}{Exercise}[chapter]
+
+\let\ORIGexercise\exercise
+
+\evalh{(define *exercise-labels* '())}
+
+\def\exercise#1{\ORIGexercise
+\evalh{
+(let ((lbl (gen-temp-string)))
+  (do-label-aux lbl)
+  (set! *exercise-labels* (cons lbl *exercise-labels*)))
+}{\bf #1}\break}
+
+% \expart
+
+\def\expart#1{{\bf#1}.\enspace}
+
+\def\expartstart{\linebreak\expart}
+
+
+
+
+% \ind \indcode \indprim \indsf \indcodeplus are
+% various value-added ways of calling \index
+
+\evalh{
+
+; \ind{entry}[subentry]
+; \indcode{entry}[subentry] ; set in \tt
+; \indprim{entry}[subentry] ; ,, add (primitive procedure)
+; \indsf{entry}[subentry] ; ,, add (special form)
+; \indcodeplus{entry}{...text...}[subentry] ; ,, add ...text...
+
+(define toss-back-index-text
+   (lambda (s)
+     ;escape occurrences of ! within the index argument(s)
+     (let loop ((i (- (string-length s) 1)))
+       (unless (< i 0)
+         (let ((c (string-ref s i)))
+           (toss-back-char c)
+           (case c
+             ((#\!) (toss-back-char #\")))
+           (loop (- i 1)))))))
+
+(tex-def-thunk "\\ind"
+  (lambda ()
+    (when (char=? (snoop-actual-char) #\*)
+      (get-actual-char))
+    (let* ((arg (ungroup (get-group)))
+           (opt-arg (get-bracketed-text-if-any)))
+      (toss-back-char #\})
+      (when opt-arg
+        (toss-back-index-text opt-arg)
+        (toss-back-char #\!))
+      (toss-back-index-text arg)
+      (toss-back-string "\\index{"))) ;}
+  *global-texframe*)
+
+(tex-def-thunk "\\indcode"
+   (lambda ()
+     (when (char=? (snoop-actual-char) #\*)
+       (get-actual-char))
+     (let* ((arg (ungroup (get-group)))
+            (opt-arg (get-bracketed-text-if-any)))
+       (toss-back-char #\})
+       (when opt-arg
+         (toss-back-index-text opt-arg)
+         (toss-back-char #\!))
+       (toss-back-char #\})
+       (toss-back-index-text arg)
+       (toss-back-string "\\tt ")
+       (toss-back-char #\{)
+       (toss-back-char #\@)
+       (toss-back-index-text arg)
+       (toss-back-char #\{)
+       (toss-back-string "\\index")))
+   *global-texframe*)
+
+(tex-def-thunk "\\indprim"
+   (lambda ()
+     (when (char=? (snoop-actual-char) #\*)
+       (get-actual-char))
+     (let* ((arg (ungroup (get-group)))
+            (opt-arg (get-bracketed-text-if-any)))
+       (toss-back-char #\})
+       (when opt-arg
+         (toss-back-index-text opt-arg)
+         (toss-back-char #\!))
+       (toss-back-string "(primitive procedure)")
+       (toss-back-char #\space)
+       (toss-back-char #\})
+       (toss-back-index-text arg)
+       (toss-back-string "\\tt ")
+       (toss-back-char #\{)
+       (toss-back-char #\@)
+       (toss-back-index-text arg)
+       (toss-back-char #\{)
+       (toss-back-string "\\index")))
+   *global-texframe*)
+
+(tex-def-thunk "\\indsf"
+   (lambda ()
+     (when (char=? (snoop-actual-char) #\*)
+       (get-actual-char))
+     (let* ((arg (ungroup (get-group)))
+            (opt-arg (get-bracketed-text-if-any)))
+       (toss-back-char #\})
+       (when opt-arg
+         (toss-back-index-text opt-arg)
+         (toss-back-char #\!))
+       (toss-back-string "(special form)")
+       (toss-back-char #\space)
+       (toss-back-char #\})
+       (toss-back-index-text arg)
+       (toss-back-string "\\tt ")
+       (toss-back-char #\{)
+       (toss-back-char #\@)
+       (toss-back-index-text arg)
+       (toss-back-char #\{)
+       (toss-back-string "\\index")))
+   *global-texframe*)
+ 
+(tex-def-thunk "\\indcodeplus"
+  (lambda ()
+    (when (char=? (snoop-actual-char) #\*)
+      (get-actual-char))
+    (let* ((arg (ungroup (get-group)))
+           (arg2 (ungroup (get-group)))
+           (opt-arg (get-bracketed-text-if-any)))
+      (toss-back-char #\})
+      (when opt-arg
+        (toss-back-index-text opt-arg)
+        (toss-back-char #\!))
+      (toss-back-index-text arg2)
+      (toss-back-char #\space)
+      (toss-back-char #\})
+      (toss-back-index-text arg)
+      (toss-back-string "\\tt ")
+      (toss-back-char #\{)
+      (toss-back-char #\@)
+      (toss-back-index-text arg)
+      (toss-back-char #\{)
+      (toss-back-string "\\index")))
+  *global-texframe*)
+ 
+; \indsee{entry}[subentry]{other} ; see other
+; \indseealso{entry}[subentry]{other} ; see also other
+
+(define def-ind-see
+   (lambda (see)
+     (tex-def-thunk (string-append "\\ind" see)
+       (lambda ()
+         (let* ((entry (ungroup (get-group)))
+                (subentry (get-bracketed-text-if-any))
+                (other (get-group)))
+           (toss-back-char #\})
+           (toss-back-index-text other)
+           (toss-back-string see)
+           (toss-back-char #\|)
+           (when subentry
+             (toss-back-index-text subentry)
+             (toss-back-char #\!))
+           (toss-back-string entry)
+           (toss-back-char #\{)
+           (toss-back-string "\\index")))
+       *global-texframe*)))
+
+(def-ind-see "see")
+(def-ind-see "seealso")
+}
+
+%
+
+% Use the index tex2page generates, not the print-oriented
+% index.tex
+
+\def\listofexercises{
+\prefacesection{List of Exercises}
+\evalh{
+(set! *exercise-labels* (reverse *exercise-labels*))
+(for-each
+  (lambda (lbl)
+    (do-ref-aux lbl #f #f)
+    (emit "<br>")
+    (emit-newline))
+  *exercise-labels*)
+}
+%
+% following is kludge to force index-inclusion
+% the canonical way after list of exercises, instead
+% of relying on the hand-tuned job used for the
+% print version
+%
+\input indexcrossrefs
+\chapter*{Index}
+\begin{epigraph}
+Any inaccuracies in this index may be explained by the fact that it
+has been prepared with the help of a computer.
+\par
+\attribution{%$
+\ind{Knuth, Donald E.}%
+Donald E. Knuth,
+{\em Fundamental Algorithms} (Volume 1 of
+{\em The Art of\/ Computer Programming})}
+\end{epigraph}
+\par
+\begin{small}
+Each index entry links to the first
+occurrence of that entry in the book.  Bracketed numbers
+(starting from 2)
+following the index entry link to the
+second and subsequent occurrences.
+\end{small}
+\inputindex
+\def\include##1{}}
+
+%
+
+\imgpreamble
+\usepackage{fleqn}
+\setlength{\mathindent}{0pt}
+%\usepackage{mathptm}
+\usepackage{epsfig}
+\input{ourdefs}
+%\def\bfOmega{\Omega} %some TeXs don't have these
+%\def\bfomega{\omega}
+%\def\bfalpha{\alpha}
+\addtolength{\textwidth}{13.5em}
+\let\ORIGdocument\document
+\def\ind#1{\futurelet\indONE\indTWO}
+\def\indTWO{\ifx\indONE[\let\indTHREE\indFOUR
+\else\let\indTHREE\relax\fi\indTHREE}
+\def\indFOUR[#1]{}
+%\def\ind#1[#2]{}%
+%\newcommand{\ind}[1][1]{}
+\def\document{\ORIGdocument\LARGE}
+\input{temp-chap}
+\input{temp-equation}
+\input{temp-figure}
+\endimgpreamble
+
+
+\evalh{
+(for-each
+  (lambda (f)
+    (if (file-exists? f) (delete-file f))
+    (call-with-output-file f newline))
+  '("temp-chap.tex" "temp-equation.tex" "temp-figure.tex"))
+}
+
+% redefine \chapter so it stores chapter number in
+% temp-chap.tex
+
+\let\ORIGchapter\chapter
+
+\def\chapter{%
+\evalh{
+(let ((chap-num (string->number 
+                  (section-counter-value 0))))
+  ;footnotes numbered afresh for each chapter
+  (set-gcount! "\\footnotenumber" 0)
+  (if (file-exists? "temp-chap.tex") 
+      (delete-file "temp-chap.tex"))
+  (call-with-output-file "temp-chap.tex"
+    (lambda (o)
+      (display "\\setcounter{chapter}{" o)
+      (display (+ 1 chap-num) o)
+      (display "}" o)
+      (newline o))))
+}\ORIGchapter}
+
+\evalh{
+(tex-def-dotted-count "sicmequation" 0)
+(tex-def-dotted-count "sicmfigure" 0)
+}
+
+\evalh{
+(define *after-1-127* 0)
+(define *after-2-75* 0)
+(define *after-5-400* 0)
+
+(define update-eq-num
+  (lambda (chap-num eq-num-prev)
+    (case chap-num
+      ((1) (case eq-num-prev
+             ((25)
+              ;(printf "doing chain rule~%")
+              (tex2page-string "\\ind{Variation}[chain rule]")
+              (tex2page-string "\\ind{Chain rule}[var@for variations]"))))
+      ((3) (case eq-num-prev
+             ((18)
+              (tex2page-string "\\ind{Lagrangian}[Hamiltonian and]")
+              (tex2page-string "\\ind{Hamiltonian}[Lagrangian and]"))))
+      ((5) (case eq-num-prev
+             ((4)
+              (tex2page-string "\\ind{Generalized momentum}[transformation of]"))
+             ((19)
+              (tex2page-string "\\ind{Compositional canonical}"))
+             ((40)
+              (tex2page-string "\\ind{Action-angle coordinates}[harmonic oscillator in]")
+              (tex2page-string "\\ind{Hamiltonian}[for harmonic oscillator, in action-angle coordinates]")
+              (tex2page-string "\\ind{Harmonic oscillator}[Hamiltonian in action-angle coordinates]"))
+             ((460)
+              (tex2page-string "\\ind{Lie derivative}[Lie transform and]")
+              (tex2page-string "\\ind{Lie transforms}[Lie derivative and]")
+              (tex2page-string "\\ind{Exponential(s)}[of Lie derivative]")))))
+    (case chap-num
+      ((1) (case eq-num-prev
+             ((59 193 204) 2)
+             ((22 189 216) 3)
+             ((200) 4)
+             ((127)
+              (cond ((= *after-1-127* 2) 1)
+                    (else
+                      (set! *after-1-127* (+ *after-1-127* 1))
+                      0))) ;or -1?
+             (else 1)))
+      ((2) (case eq-num-prev
+             ((134 145) 2)
+             ((52 105 126 129) 3)
+             ((113 147) 4)
+             ((75)
+              (cond ((= *after-2-75* 1) 1)
+                    (else
+                      (set! *after-2-75* (+ *after-2-75* 1))
+                      0)))
+             (else 1)))
+      ((3) (case eq-num-prev
+             ((4 51 124) 2)
+             ((112 121) 3)
+             ((87) 4)
+             ((104) 6)
+             (else 1)))
+      ((5) (case eq-num-prev
+             ((23 32 58 114 131 136 150 153 155 157
+               182 196 239 255 281 287 457) 2)
+             ((92 146 193 200 203 206 209 278 291
+               304 356 402) 3)
+             ((108 251 258 263 268 273 283) 4)
+             ((400)
+              (cond ((= *after-5-400* 1) 1)
+                    (else
+                      (set! *after-5-400* (+ *after-5-400* 1))
+                      0)))
+             (else 1)))
+      ((8) (case eq-num-prev
+             ((20) 2)
+             (else 1)))
+      (else 1))
+    ))
+}
+
+\def\equation{%
+\evalh{
+(if (file-exists? "temp-equation.tex") 
+    (delete-file "temp-equation.tex"))
+(let* ((chap-num-str (section-counter-value 0))
+       (chap-num (string->number chap-num-str))
+       (counter (table-get *dotted-counters*
+                           "sicmequation"))
+       (eq-num-prev (counter.value counter))
+       (eq-id (string-append (section-counter-value 0) "."
+                             (number->string (+ 1 eq-num-prev)))))
+  (call-with-output-file "temp-equation.tex"
+                         (lambda (o)
+                           (display "\\setcounter{equation}{" o)
+                           (display eq-num-prev o)
+                           (display "}" o)
+                           (newline o)))
+  (set!counter.value counter (+ eq-num-prev (update-eq-num chap-num eq-num-prev)))
+  (do-tag-aux (string-append "EQUATION_" eq-id)
+              eq-id))
+}%
+\TIIPlatexenvasimage{equation}} 
+
+\def\eqnarray{\evalh{
+(let ((star? (and (char=? (snoop-actual-char) #\*)
+                 (get-actual-char))))
+  (toss-back-string 
+    (if star? "\\eqnarraystar "
+        "\\eqnarraynostar ")))
+}}
+
+\def\eqnarraystar{\TIIPlatexenvasimage{eqnarray*}}
+
+
+\def\eqnarraynostar{%
+\evalh{
+(if (file-exists? "temp-equation.tex") 
+    (delete-file "temp-equation.tex"))
+(let* ((chap-num-str (section-counter-value 0))
+       (chap-num (string->number chap-num-str))
+       (counter (table-get *dotted-counters* "sicmequation"))
+       (eq-num-prev (counter.value counter))
+       (eq-id (string-append chap-num-str "."
+                             (number->string (+ 1 eq-num-prev)))))
+  (call-with-output-file "temp-equation.tex"
+                         (lambda (o)
+                           (display "\\setcounter{equation}{" o)
+                           (display eq-num-prev o)
+                           (display "}" o)
+                           (newline o)))
+  (set!counter.value counter 
+                    (+ eq-num-prev
+                       (update-eq-num chap-num eq-num-prev)))
+  (do-tag-aux (string-append "EQUATION_" eq-id)
+              eq-id))
+}%
+\TIIPlatexenvasimage{eqnarray}} 
+
+\def\figure{%
+\evalh{
+(if (file-exists? "temp-figure.tex") 
+    (delete-file "temp-figure.tex"))
+(let* ((chap-num-str (section-counter-value 0))
+       (chap-num (string->number chap-num-str))
+       (counter (table-get *dotted-counters*
+                           "sicmfigure"))
+       (fig-num-prev (counter.value counter))
+       (fig-id (string-append chap-num-str "."
+                              (number->string (+ 1 fig-num-prev)))))
+  (call-with-output-file "temp-figure.tex"
+                         (lambda (o)
+                           (display "\\setcounter{figure}{" o)
+                           (display fig-num-prev o)
+                           (display "}" o)
+                           (newline o)))
+  (case chap-num
+    ((2) (case fig-num-prev
+           ((4) (tex2page-string "\\ind{Nutation of top}")
+                (tex2page-string "\\ind{Axisymmetric top}"))
+           ((5) (tex2page-string "\\ind{Precession}[of top]")
+                (tex2page-string "\\ind{Axisymmetric top}[precession of]"))))
+    ((4) (case fig-num-prev
+           ((4) (tex2page-string "\\ind{Quartet}")))))
+  (set!counter.value counter
+                     (+ fig-num-prev
+                        (case chap-num
+                          ((4) (case fig-num-prev
+                                 ((11 15 17 21) 2)
+                                 (else 1)))
+                          (else 1))))
+  (do-tag-aux (string-append "FIGURE_" fig-id)
+              fig-id))
+}%
+\TIIPlatexenvasimage{figure}} 
+
+% Redefine \section so that it starts a fresh page
+
+\let\ORIGsection\section
+
+\def\section{\vfill\eject\ORIGsection}
+
+%
+
+\def\prefacesection{\chapter*}
+
+\def\subheading{\subsubsection*}
+
+% Disable kludges; they aren't relevant for HTML
+
+\def\pagekludge#1{}
+
+% {lisp} environment encloses Scheme code.  The optional
+% `*' is irrelevant for HTML, so let's eat it
+
+\def\lisp{\expandafter\lispII\TIIPeatstar}
+
+\def\lispII{\par\begingroup\obeywhitespace\tt}
+
+\def\endlisp{\endgroup\par\TIIPeatstar}
+
+% \its slants argument.  Used for Scheme output in the {lisp}
+% environment
+
+\let\its\textit
+
+%
+
+% The very first \special in SICM is papyrocentric
+
+\let\ORIGspecial\special
+\def\special#1{}
+
+\let\frontmatter\ORIGfrontmatter
+
+\def\frontmatter{%
+\global\let\special\ORIGspecial
+\ORIGfrontmatter}
+
+%
+
+\let\ORIGdocument\document
+\def\document{\ORIGdocument
+\let\ee\endequation
+\let\eea\endeqnarray
+\def\caret{\rawhtml^\endrawhtml}
+}
+
+%
+
+\evalh{
+(for-each
+  make-reusable-math-image-as-needed
+  '("\\alpha" "\\Gamma" "\\gamma" "\\Delta" "\\delta" "\\epsilon" 
+    "\\zeta" "\\eta" "\\Theta" "\\theta" 
+    "\\Lambda" "\\lambda" "\\nu" "\\Xi" "\\xi" "\\Pi" "\\pi"
+    "\\rho"
+    "\\Sigma" "\\sigma" "\\tau" "\\Phi" "\\varphi"
+    "\\chi" "\\Xi" "\\xi" "\\psi" "\\Omega" "\\omega" "\\int" "\\partial"
+    "\\mapsto"))
+}
+
+\evalh{
+(apply for-each
+       make-reusable-math-image-as-needed
+       ((lambda (twosomes)
+          (let loop ((twosomes twosomes) (lhs '()) (rhs '()))
+            (if (null? twosomes) (list lhs rhs)
+                (loop (cddr twosomes) (cons (car twosomes) lhs)
+                      (cons (cadr twosomes) rhs)))))
+        '(
+
+          "\\barE" "\\bar E"
+          "\\barF" "\\bar F"
+          "\\barf" "\\bar f"
+          "\\barG" "\\bar G"
+          "\\barp" "\\bar p"
+          "\\barq" "\\bar q"
+          "\\barGamma" "\\bar{\\Gamma}"
+          "\\barphi" "\\bar{\\varphi}"
+
+          "\\calC" "\\cal C"
+          "\\calD" "\\cal D"
+          "\\calE" "\\cal E"
+          "\\calF" "\\cal F"
+          "\\calI" "\\cal I"
+          "\\calL" "\\cal L"
+          "\\calP" "\\cal P"
+          "\\calS" "\\cal S"
+          "\\calT" "\\cal T"
+          "\\calV" "\\cal V"
+
+          "\\dotc" "\\dot c"
+          "\\dotQ" "\\dot Q"
+          "\\dotp" "\\dot p"
+          "\\dotq" "\\dot q"
+          "\\dotqprime" "\\dot q'"
+          "\\dotr" "\\dot r"
+          "\\dotx" "\\dot x"
+          "\\doty" "\\dot y"
+          "\\dotz" "\\dot z"
+          "\\dotbfx" "\\dot{\\mbox{\\bf x}}"
+          "\\dotvecX" "\\dot{\\vec X}"
+          "\\dotvecx" "\\dot{\\vec x}"
+          "\\dottheta" "\\dot{\\theta}"
+          "\\dotlambda" "\\dot{\\lambda}"
+          "\\dotphi" "\\dot{\\varphi}"
+          "\\dotpsi" "\\dot{\\psi}"
+          "\\dotvecxi" "\\dot{\\vec{\\xi}}"
+
+          "\\ddotq" "\\ddot{q}"
+
+          "\\hatb" "\\hat b"
+          "\\hatC" "\\hat C"
+          "\\hatc" "\\hat c"
+          "\\hate" "\\hat e"
+          "\\hatH" "\\hat H"
+          "\\hatJ" "\\hat J"
+          "\\hato" "\\hat o"
+          "\\hatr" "\\hat r"
+          "\\hatx" "\\hat x"
+          "\\haty" "\\hat y"
+          "\\hatz" "\\hat z"
+          "\\hatone" "\\hat 1"
+          "\\hattheta" "\\hat{\\theta}"
+          "\\hatnu" "\\hat{\\nu}"
+          "\\hatomega" "\\hat{\\omega}"
+
+          "\\tildep" "\\tilde p"
+          "\\tildeq" "\\tilde q"
+          "\\tildeeta" "\\tilde{\\eta}"
+
+          "\\veca" "\\vec a"
+          "\\vecF" "\\vec F"
+          "\\vecL" "\\vec L"
+          "\\veco" "\\vec o"
+          "\\vecp" "\\vec p"
+          "\\vecq" "\\vec q"
+          "\\vecr" "\\vec r"
+          "\\vecu" "\\vec u"
+          "\\vecv" "\\vec v"
+          "\\vecx" "\\vec x"
+          "\\vecy" "\\vec y"
+          "\\vecX" "\\vec X"
+          "\\vecxi" "\\vec{\\xi}"
+          "\\vecomega" "\\vec{\\omega}"
+          "\\vecnabla" "\\vec{\\nabla}"
+
+          "\\widetildeC" "\\widetilde C"
+          "\\widetildeF" "\\widetilde F"
+          "\\widetildeJ" "\\widetilde J"
+          "\\widetildeL" "\\widetilde L"
+          "\\widetildeS" "\\widetilde S"
+          "\\widetilder" "\\widetilde r"
+          "\\widetildeT" "\\widetilde T"
+          "\\widetildeV" "\\widetilde V"
+          "\\widetildex" "\\widetilde x"
+          "\\widetildey" "\\widetilde y"
+          "\\widetildephi" "\\widetilde{\\varphi}"
+          "\\widetildebfJ" "\\widetilde{\\bf J}"
+
+          )))
+}
+
+
+%\def\partialqd{\partial_2}
+
+\evalh{
+(tex-def-thunk "\\dot"
+               (lambda ()
+                 (let ((arg (string-trim-blanks (ungroup (get-token)))))
+                   (cond 
+                     ((string=? arg "c")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotc"))
+                     ((string=? arg "Q")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotQ"))
+                     ((string=? arg "p")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotp"))
+                     ((string=? arg "q")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotq"))
+                     ((string=? arg "q'")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotqprime"))
+                     ((string=? arg "r")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotr"))
+                     ((string=? arg "x")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotx"))
+                     ((string=? arg "y")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\doty"))
+                     ((string=? arg "z")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotz"))
+                     ((string=? arg "\\mbox{\\bf x}")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotbfx"))
+                     ((string=? arg "\\vec{X}")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotvecX"))
+                     ((string=? arg "\\vec{x}")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotvecx"))
+                     ((string=? arg "\\theta")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dottheta"))
+                     ((string=? arg "\\lambda")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotlambda"))
+                     ((string=? arg "\\varphi")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotphi"))
+                     ((string=? arg "\\psi")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotpsi"))
+                     ((string=? arg "\\vec{\\xi}")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\dotvecxi"))
+                     (else (terror 'nil 'dot " " arg)))))
+               *global-texframe*)
+(tex-def-thunk "\\ddot"
+               (lambda ()
+                 (let ((arg (string-trim-blanks (ungroup (get-token)))))
+                   (cond ((string=? arg "q")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\ddotq"))
+                         ((string=? arg "\\theta")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\ddottheta"))
+                         ((string=? arg "\\varphi")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\ddotphi"))
+                         (else (terror 'nil 'ddot " " arg)))))
+               *global-texframe*)
+(tex-def-thunk "\\bar"
+               (lambda ()
+                 (let ((arg (string-trim-blanks (ungroup (get-token)))))
+                   (cond 
+                     ((string=? arg "F")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\barF"))
+                     ((string=? arg "f")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\barf"))
+                     ((string=? arg "G")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\barG"))
+                     ((string=? arg "p")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\barp"))
+                     ((string=? arg "q")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\barq"))
+                     ((string=? arg "\\theta")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\bartheta"))
+                     ((string=? arg "\\Gamma")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\barGamma"))
+                     ((string=? arg "\\varphi")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\barphi"))
+                     ((string=? arg "\\LE")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\barE"))
+                     (else (terror 'nil 'bar " " arg)))))
+               *global-texframe*)
+(tex-def-thunk "\\hat"
+               (lambda ()
+                 (let ((arg (string-trim-blanks (ungroup (get-token)))))
+                   (cond 
+                     ((string=? arg "a")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hata"))
+                     ((string=? arg "b")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatb"))
+                     ((string=? arg "C")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatC"))
+                     ((string=? arg "c")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatc"))
+                     ((string=? arg "e")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hate"))
+;                     ((string=? arg "F")
+;                      (toss-back-char *invisible-space*)
+;                      (toss-back-string "\\hatF"))
+                     ((string=? arg "H")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatH"))
+                     ((string=? arg "J")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatJ"))
+                     ((string=? arg "o")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hato"))
+                     ((string=? arg "r")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatr"))
+                     ((string=? arg "v")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatv"))
+                     ((string=? arg "x")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatx"))
+                     ((string=? arg "y")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\haty"))
+                     ((string=? arg "z")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatz"))
+                     ((string=? arg "1")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatone"))
+                     ((string=? arg "\\theta")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hattheta"))
+                     ((string=? arg "\\nu")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatnu"))
+                     ((string=? arg "\\omega")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatomega"))
+                     ((string=? arg "\\nabla")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\hatnabla"))
+                     (else (terror 'nil 'hat " " arg)))))
+               *global-texframe*)
+(tex-def-thunk "\\vec"
+               (lambda ()
+                 (let ((arg (string-trim-blanks (ungroup (get-token)))))
+                   (cond ((string=? arg "a")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\veca"))
+                         ((string=? arg "F")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecF"))
+                         ((string=? arg "L")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecL"))
+                         ((string=? arg "o")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\veco"))
+                         ((string=? arg "p")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecp"))
+                         ((string=? arg "q")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecq"))
+                         ((string=? arg "r")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecr"))
+                         ((string=? arg "u")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecu"))
+                         ((string=? arg "v")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecv"))
+                         ((string=? arg "X")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecX"))
+                         ((string=? arg "x")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecx"))
+                         ((string=? arg "y")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecy"))
+                         ((string=? arg "\\xi")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecxi"))
+                         ((string=? arg "\\omega")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecomega"))
+                         ((string=? arg "\\nabla")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\vecnabla"))
+                         (else (terror 'nil 'vec " " arg)))))
+               *global-texframe*)
+(tex-def-thunk "\\tilde"
+               (lambda ()
+                 (let ((arg (string-trim-blanks (ungroup (get-token)))))
+                   (cond 
+                     ((string=? arg "p")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\tildep"))
+                     ((string=? arg "q")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\tildeq"))
+                     ((string=? arg "\\eta")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\tildeeta"))
+                     (else (terror 'nil 'tilde " " arg)))))
+               *global-texframe*)
+(tex-def-thunk "\\widetilde"
+               (lambda ()
+                 (let ((arg (string-trim-blanks (ungroup (get-token)))))
+                   (cond 
+                     ((string=? arg "C")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetildeC"))
+                     ((string=? arg "F")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetildeF"))
+                     ((string=? arg "J")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetildeJ"))
+                     ((string=? arg "L")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetildeL"))
+                     ((string=? arg "r")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetilder"))
+                     ((string=? arg "S")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetildeS"))
+                     ((string=? arg "T")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetildeT"))
+                     ((string=? arg "V")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetildeV"))
+                     ((string=? arg "x")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetildex"))
+                     ((string=? arg "y")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetildey"))
+                     ((string=? arg "\\varphi")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetildephi"))
+                     ((string=? arg "\\bf J")
+                      (toss-back-char *invisible-space*)
+                      (toss-back-string "\\widetildebfJ"))
+                     (else (terror 'nil 'widetilde " " arg)))))
+               *global-texframe*)
+(tex-def-thunk "\\cal"
+               (lambda ()
+                 (let ((arg (string-trim-blanks (ungroup (get-token)))))
+                   (cond 
+                     ((string=? arg "C")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\calC"))
+                     ((string=? arg "D")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\calD"))
+                         ((string=? arg "E")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\calE"))
+                         ((string=? arg "F")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\calF"))
+                         ((string=? arg "I")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\calI"))
+                         ((string=? arg "L")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\calL"))
+                         ((string=? arg "P")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\calP"))
+                         ((string=? arg "S")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\calS"))
+                         ((string=? arg "T")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\calT"))
+                         ((string=? arg "V")
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string "\\calV"))
+                         (else (terror 'nil 'cal " " arg)))))
+               *global-texframe*)
+}
+
+% some manual labels
+
+\evalh{
+
+(!label "eq_C_alternate-driven-pendulum-Lagrangian" 13 "EQUATION_1.120" "1.120")
+(!label "eq_C_analytic-size" 74 "EQUATION_6.51" "6.51")
+(!label "eq_C_approximate-solution-pendulum" 73 "EQUATION_6.9" "6.9")
+(!label "eq_C_BCH-identity" 69 "EQUATION_5.475" "5.475")
+(!label "eq_C_canonical-point-with-F" 63 "EQUATION_5.216" "5.216")
+(!label "eq_C_canonical-using-JT" 59 "EQUATION_5.24" "5.25")
+(!label "eq_C_canonical3" 59 "EQUATION_5.20" "5.20")
+(!label "eq_C_composition-quaterions" 33 "EQUATION_2.147" "2.147")
+(!label "eq_C_condition-on-C" 59 "EQUATION_5.52" "5.52")
+(!label "eq_C_condition-on-K" 59 "EQUATION_5.53" "5.53")
+(!label "eq_C_ct1" 61 "EQUATION_5.109" "5.109")
+(!label "eq_C_ct4" 61 "EQUATION_5.109" "5.112")
+(!label "eq_C_def-Fbar-S" 65 "EQUATION_5.409" "5.409")
+(!label "eq_C_dp-Hamiltonian-as-Poisson-series" 75 "EQUATION_6.53" "6.53")
+(!label "eq_C_driven-rotor" 53 "EQUATION_4.41" "4.41")
+(!label "eq_C_energy-state-function" 15 "EQUATION_1.140" "1.140")
+(!label "eq_C_equality-of-areas" 60 "EQUATION_5.83" "5.83")
+(!label "eq_C_exponential-corrector" 68 "EQUATION_5.467" "5.467")
+(!label "eq_C_F-from-line-integrals" 63 "EQUATION_5.174" "5.174")
+(!label "eq_C_f11" 63 "EQUATION_5.147" "5.147")
+(!label "eq_C_f12" 63 "EQUATION_5.147" "5.148")
+(!label "eq_C_f13" 63 "EQUATION_5.147" "5.149")
+(!label "eq_C_f21" 63 "EQUATION_5.204" "5.204")
+(!label "eq_C_f22" 63 "EQUATION_5.205" "5.204")
+(!label "eq_C_Fbar-to-ps" 65 "EQUATION_5.413" "5.413")
+(!label "eq_C_fcci" 59 "EQUATION_5.27" "5.27")
+(!label "eq_C_final-condition-on-K" 59 "EQUATION_5.54" "5.54")
+(!label "eq_C_first-inverse-canonical" 63 "EQUATION_5.217" "5.217")
+(!label "eq_C_full-dp-generator" 75 "EQUATION_6.56" "6.56")
+(!label "eq_C_function-compositional-canonical" 59 "EQUATION_5.31" "5.31")
+(!label "eq_C_fundamental-poisson-brackets" 59 "EQUATION_5.61" "5.61")
+(!label "eq_C_gen->ham" 63 "EQUATION_5.168" "5.168")
+(!label "eq_C_ham-eq-in-Ds" 59 "EQUATION_5.15" "5.15")
+(!label "eq_C_hamilton-jacobi-1" 65 "EQUATION_5.360" "5.360")
+(!label "eq_C_hamilton-jacobi-2" 65 "EQUATION_5.361" "5.361")
+(!label "eq_C_hamiltonian-constraint-as-poisson-bracket" 59 "EQUATION_5.63" "5.63")
+(!label "eq_C_hamiltonian-dp-resonances" 75 "EQUATION_6.54" "6.54")
+(!label "eq_C_hamiltonian-rotating-frame" 63 "EQUATION_5.234" "5.234")
+(!label "eq_C_harmonic-generator-integral" 65 "EQUATION_5.371" "5.371")
+(!label "eq_C_harmonic-hamiltonian-1" 65 "EQUATION_5.383" "5.383")
+(!label "eq_C_harmonic-solution" 65 "EQUATION_5.373" "5.373")
+(!label "eq_C_hjharmx" 65 "EQUATION_5.378" "5.378")
+(!label "eq_C_hjx" 65 "EQUATION_5.374" "5.374")
+(!label "eq_C_integrated-integral-invariant" 60 "EQUATION_5.88" "5.88")
+(!label "eq_C_invariance-of-omega" 60 "EQUATION_5.73" "5.73")
+(!label "eq_C_IteratedDerivatives" 67 "EQUATION_5.452" "5.452")
+(!label "eq_C_IYTH" 63 "EQUATION_5.159" "5.159")
+(!label "eq_C_K-for-rotating-coordinates" 54 "EQUATION_5.57" "5.57")
+(!label "eq_C_Lie1" 66 "EQUATION_5.422" "5.422")
+(!label "eq_C_linear-stability-inverted-equilibrium" 75 "EQUATION_6.87" "6.87")
+(!label "eq_C_mul-func" 79 "EQUATION_8.3" "8.3")
+(!label "eq_C_omega-form" 60 "EQUATION_5.71" "5.71")
+(!label "eq_C_OmegaSquared" 63 "EQUATION_5.263" "5.263")
+(!label "eq_C_partial2H" 37 "EQUATION_3.16" "3.16")
+(!label "eq_C_passive-1" 37 "EQUATION_3.53" "3.53")
+(!label "eq_C_pert-limit" 73 "EQUATION_6.22" "6.22")
+(!label "eq_C_phase-space-coordinates" 79 "EQUATION_8.6" "8.6")
+(!label "eq_C_piat" 59 "EQUATION_5.34" "5.34")
+(!label "eq_C_poincare-1" 65 "EQUATION_5.382" "5.382")
+(!label "eq_C_poincare-2" 65 "EQUATION_5.383" "5.383")
+(!label "eq_C_PoincareCartanIntegralInvariant" 61 "EQUATION_5.121" "5.121")
+(!label "eq_C_PoincareCartanRelativeIntegralInvariant" 61 "EQUATION_5.122" "5.122")
+(!label "eq_C_point-canonical-transformation" 58 "EQUATION_5.6" "5.6")
+(!label "eq_C_Poisson->derivative" 37 "EQUATION_3.79" "3.79")
+(!label "eq_C_Poisson-bracket-identity" 60 "EQUATION_5.76" "5.76")
+(!label "eq_C_polar-canonical-transformation" 59 "EQUATION_5.32" "5.32")
+(!label "eq_C_polar-central-hamiltonian" 40 "EQUATION_3.99" "3.99")
+(!label "eq_C_preservesinnerproduct" 58 "EQUATION_5.10" "5.10")
+(!label "eq_C_ptuple" 79 "EQUATION_8.5" "8.5")
+(!label "eq_C_p_U_x-p_U_y" 63 "EQUATION_5.164" "5.164")
+(!label "eq_C_rcentint" 62 "EQUATION_5.139" "5.139")
+(!label "eq_C_relation-F1-F2" 63 "EQUATION_5.195" "5.195")
+(!label "eq_C_relation-for-p-from-pprime" 63 "EQUATION_5.222" "5.222")
+;(!label "eq_C_relation-of-p-pprime" 1000 "EQUATION_9.999" "9.999")
+(!label "eq_C_rotation-matrix-from-primitive" 33 "EQUATION_2.118" "2.118")
+(!label "eq_C_second-inverse-canonical" 63 "EQUATION_5.218" "5.218")
+(!label "eq_C_size-osc-region" 73 "EQUATION_6.24" "6.24")
+(!label "eq_C_solution-in-primes" 73 "EQUATION_6.17" "6.17")
+(!label "eq_C_special-extended-hamiltonian" 61 "EQUATION_5.103" "5.103")
+(!label "eq_C_SymplecticMatrixCondition" 59 "EQUATION_5.46" "5.46")
+(!label "eq_C_the-meaning-of-canonical" 59 "EQUATION_5.19" "5.19")
+(!label "eq_C_time-independent-W-HJ" 65 "EQUATION_5.365" "5.365")
+(!label "eq_C_tranformed-Hamiltonian-with-resonance" 75 "EQUATION_6.60" "6.60")
+(!label "eq_C_transformation-from-prime-1" 73 "EQUATION_6.18" "6.18")
+(!label "eq_C_transformation-from-prime-2" 73 "EQUATION_6.19" "6.19")
+(!label "eq_C_transformation-to-prime-1" 73 "EQUATION_6.20" "6.20")
+(!label "eq_C_transformation-to-prime-2" 73 "EQUATION_6.21" "6.21")
+(!label "eq_C_transformed-H+" 75 "EQUATION_6.75" "6.75")
+(!label "eq_C_transformed-Hamiltonian-by-W" 72 "EQUATION_6.8" "6.8")
+(!label "eq_C_transformed-resonance-Hamiltonian" 75 "EQUATION_6.64" "6.64")
+(!label "eq_C_twist-map" 52 "EQUATION_4.39" "4.39")
+(!label "eq_C_useful-relation-f" 60 "EQUATION_5.74" "5.74")
+(!label "eq_C_variation-Fbar" 65 "EQUATION_5.411" "5.411")
+(!label "eq_C_variation-of-action" 12 "EQUATION_1.33" "1.33")
+(!label "eq_C_variation-of-action1" 64 "EQUATION_5.347" "5.347")
+(!label "eq_C_variational-equations" 40 "EQUATION_3.144" "3.144")
+(!label "eq_C_variational-relation" 60 "EQUATION_5.72" "5.72")
+(!label "eq_C_variationS-to-p-at-endpoints" 65 "EQUATION_5.410" "5.410")
+(!label "eq_C_vtuple" 79 "EQUATION_8.4" "8.4")
+(!label "eq_C_xiat" 59 "EQUATION_5.33" "5.33")
+(!label "eq_C_XITH" 63 "EQUATION_5.157" "5.157")
+(!label "eq_C_XITH1" 63 "EQUATION_5.158" "5.158")
+(!label "eq_C_YITH" 63 "EQUATION_5.156" "5.156")
+(!label "fig_C_3-lobe-ep" 63 "FIGURE_5.5" "5.5")
+(!label "fig_C_3-lobe-int" 63 "FIGURE_5.7" "5.7")
+(!label "fig_C_action-angle-section" 52 "FIGURE_4.11" "4.11")
+(!label "fig_C_area2" 1000 "FIGURE_5.2" "5.2")
+(!label "fig_C_canonical-map" 1000 "FIGURE_5.1" "5.1")
+(!label "fig_C_commensurate-torus-motion" 52 "FIGURE_4.10" "4.10")
+(!label "fig_C_dpend-inverted-summary" 75 "FIGURE_6.15" "6.15")
+(!label "fig_C_dpend-inverted-theory" 75 "FIGURE_6.14" "6.14")
+(!label "fig_C_dpend-pert-joint" 75 "FIGURE_6.10" "6.10")
+(!label "fig_C_dpend-pert-joint2" 75 "FIGURE_6.11" "6.11")
+(!label "fig_C_dpend-pert-plus" 75 "FIGURE_6.9" "6.9")
+(!label "fig_C_dpend-pert-second" 75 "FIGURE_6.13" "6.13")
+(!label "fig_C_dpend-pert-sect" 75 "FIGURE_6.10" "6.10")
+(!label "fig_C_dpend-pert-sect2" 75 "FIGURE_6.11" "6.11")
+(!label "fig_C_fixed-points" 53 "FIGURE_4.15" "4.15")
+(!label "fig_C_frequencies-of-visitation-0.971635406" 54 "FIGURE_4.23" "4.23")
+(!label "fig_C_harmonic-ep" 63 "FIGURE_5.4" "5.4")
+(!label "fig_C_hh-traj2" 42 "FIGURE_3.16" "3.16")
+(!label "fig_C_homoclinic-intersection" 51 "FIGURE_4.7" "4.7")
+(!label "fig_C_homoclinic-iteration" 51 "FIGURE_4.8" "4.8")
+(!label "fig_C_homoclinic5" 51 "FIGURE_4.9" "4.9")
+(!label "fig_C_homoclinic5-section" 51 "FIGURE_4.9" "4.9") ;no disambig frm abv!
+(!label "fig_C_kepler-ep" 63 "FIGURE_5.3" "5.3")
+(!label "fig_C_lie-transform" 65 "FIGURE_5.9" "5.9")
+(!label "fig_C_pendulum-blowup" 1000 "FIGURE_6.3" "6.3")
+(!label "fig_C_pendulum-convergence" 1000 "FIGURE_6.1" "6.1")
+(!label "fig_C_pendulum-error" 73 "FIGURE_6.2" "6.2")
+(!label "fig_C_pendulum-higher-order" 73 "FIGURE_6.5" "6.5")
+(!label "fig_C_pendulum-overlap" 75 "FIGURE_6.12" "6.12")
+(!label "fig_C_pendulum-resonance" 75 "FIGURE_6.8" "6.8")
+(!label "fig_C_pendulum-second-order" 73 "FIGURE_6.7" "6.7")
+(!label "fig_C_pendulum-secular-wander" 73 "FIGURE_6.6" "6.6")
+(!label "fig_C_pendulum-skeleton" 73 "FIGURE_6.4" "6.4")
+(!label "fig_C_poincare-birkhoff-c1" 53 "FIGURE_4.16" "4.16")
+(!label "fig_C_poincare-birkhoff-c2" 53 "FIGURE_4.18" "4.18")
+(!label "fig_C_poincare-birkhoff-radial" 53 "FIGURE_4.14" "4.14")
+(!label "fig_C_poincare-birkhoff-s1" 53 "FIGURE_4.17" "4.17")
+(!label "fig_C_poincare-birkhoff-s2" 53 "FIGURE_4.19" "4.19")
+(!label "fig_C_poincare-birkhoff-t5" 53 "FIGURE_4.12" "4.12")
+(!label "fig_C_poincare-birkhoff-t5e" 53 "FIGURE_4.12" "4.12")
+(!label "fig_C_quartet" 50 "FIGURE_4.5" "4.5")
+(!label "fig_C_roots" 50 "FIGURE_4.4" "4.4")
+(!label "fig_C_rosette-int" 63 "FIGURE_5.6" "5.6")
+(!label "fig_C_tube" 64 "FIGURE_5.8" "5.8")
+(!label "fig_C_vw-manifolds" 51 "FIGURE_4.6" "4.6")
+
+
+(!label "eq_C_Dp-from-Lagrange" 37 "EQUATION_3.1" "3.1")
+(!label "eq_C_Dp-in-t-q-p" 37 "EQUATION_3.7" "3.7")
+(!label "eq_C_Dq-in-t-q-p" 37 "EQUATION_3.8" "3.8")
+(!label "eq_C_E-of-theta" 30 "EQUATION_2.66" "2.66")
+(!label "eq_C_F-to-C" 13 "EQUATION_1.74" "1.74")
+(!label "eq_C_Hamilton-Dp" 37 "EQUATION_3.13" "3.13")
+(!label "eq_C_Hamilton-Dq" 37 "EQUATION_3.17" "3.17")
+(!label "eq_C_Hamilton-variational" 37 "EQUATION_3.74" "3.74")
+(!label "eq_C_InverseProperties" 37 "EQUATION_3.5" "3.5")
+(!label "eq_C_L-central-polar" 13 "EQUATION_1.67" "1.67")
+(!label "eq_C_La" 28 "EQUATION_2.53" "2.53")
+(!label "eq_C_Lagrange" 13 "EQUATION_1.54" "1.54")
+(!label "eq_C_Lagrange-equation" 12 "EQUATION_1.18" "1.18")
+(!label "eq_C_Lagrange-equation-with-eta" 17 "EQUATION_1.177" "1.177")
+(!label "eq_C_Lagrange-equations-from-LE" 16 "EQUATION_1.172" "1.172")
+(!label "eq_C_Lagrange-equations-with-coordinate-constraint" 17 "EQUATION_1.181" "1.181")
+(!label "eq_C_Lagrange-equations-with-psi" 17 "EQUATION_1.212" "1.212")
+(!label "eq_C_Lagrange-equations-with-psi-augmentation" 17 "EQUATION_1.214" "1.214")
+(!label "eq_C_Lagrangian-action-in-coordinates" 10 "EQUATION_1.11" "1.11")
+(!label "eq_C_Lagrangian-augmented-by-psi" 17 "EQUATION_1.213" "1.213")
+(!label "eq_C_Lagrangian-augmented-with-lambda" 17 "EQUATION_1.182" "1.182")
+(!label "eq_C_Lagrangian-harmonic-oscillator" 11 "EQUATION_1.16" "1.16")
+(!label "eq_C_Lc" 28 "EQUATION_2.55" "2.55")
+(!label "eq_C_NewtonianLagrangian" 13 "EQUATION_1.89" "1.89")
+(!label "eq_C_PoissonBracketAntisymmetric" 38 "EQUATION_3.87" "3.87")
+(!label "eq_C_PoissonBracketJacobi" 38 "EQUATION_3.92" "3.92")
+(!label "eq_C_Routhian-py" 40 "EQUATION_3.113" "3.115")
+(!label "eq_C_Routhian-x" 40 "EQUATION_3.113" "3.113")
+(!label "eq_C_Routhian-y" 40 "EQUATION_3.113" "3.114")
+(!label "eq_C_action-equation-1" 17 "EQUATION_1.226" "1.226")
+(!label "eq_C_action-equation-2" 17 "EQUATION_1.229" "1.229")
+(!label "eq_C_action-requirement" 13 "EQUATION_1.68" "1.68")
+(!label "eq_C_ang-mom-iner-ten" 28 "EQUATION_2.52" "2.52")
+(!label "eq_C_arnold-equation-1" 17 "EQUATION_1.231" "1.231")
+(!label "eq_C_arnold-equation-2" 17 "EQUATION_1.230" "1.230")
+(!label "eq_C_composition-orientation-1" 33 "EQUATION_2.144" "2.144") ;rpt in ex 2.18?
+(!label "eq_C_composition-orientation-2" 33 "EQUATION_2.145" "2.145") ;v s
+(!label "eq_C_composition-quaternions" 33 "EQUATION_2.146" "2.147")
+(!label "eq_C_condition-W" 72 "EQUATION_6.7" "6.7")
+(!label "eq_C_constraint-on-eta" 17 "EQUATION_1.180" "1.180")
+(!label "eq_C_damped" 44 "EQUATION_3.159" "3.159")
+(!label "eq_C_def-Routhian" 40 "EQUATION_3.105" "3.105")
+(!label "eq_C_def-chart" 10 "EQUATION_1.5" "1.5")
+(!label "eq_C_def-gamma-bar" 16 "EQUATION_1.167" "1.167")
+(!label "eq_C_def-py-Routhian" 40 "EQUATION_3.105" "3.105")
+(!label "eq_C_defgamma" 10 "EQUATION_1.6" "1.6")
+(!label "eq_C_definition-of-deltaq" 12 "EQUATION_1.20" "1.20")
+(!label "eq_C_delta-Dq" 12 "EQUATION_1.21" "1.21")
+(!label "eq_C_derivative-as-poisson-bracket" 38 "EQUATION_3.79" "3.79")
+(!label "eq_C_determinants-and-traces" 44 "EQUATION_3.152" "3.152")
+(!label "eq_C_eigenequations" 25 "EQUATION_2.28" "2.28")
+(!label "eq_C_euler-alternate" 27 "EQUATION_2.40" "2.40")
+(!label "eq_C_euler-angles-from-omega" 32 "EQUATION_2.96" "2.96")
+(!label "eq_C_evolution-of-M" 32 "EQUATION_2.94" "2.94")
+(!label "eq_C_f-bar-to-f" 16 "EQUATION_1.165" "1.165")
+(!label "eq_C_full-Lagrangian-with-constraints" 13 "EQUATION_1.95" "1.95")
+(!label "eq_C_gamma-in-Lyapunov" 43 "EQUATION_3.140" "3.140")
+(!label "eq_C_general-constraint-on-variations" 17 "1.179" "1.179")
+(!label "eq_C_general-transformation-with-W" 72 "EQUATION_6.4" "6.4")
+(!label "eq_C_generalized-position-transformation" 13 "EQUATION_1.76" "1.76")
+(!label "eq_C_generalized-velocity-transformation" 13 "EQUATION_1.77" "1.77")
+(!label "eq_C_ham-derivation-1" 37 "EQUATION_3.14" "3.14")
+(!label "eq_C_ham-derivation-2" 37 "EQUATION_3.15" "3.15")
+(!label "eq_C_ham-eq-Dp-again" 37 "EQUATION_3.60" "3.60")
+(!label "eq_C_ham-eq-Dq-again" 37 "EQUATION_3.58" "3.58")
+(!label "eq_C_hamilton-principle-from-constraints" 13 "EQUATION_1.97" "1.97")
+(!label "eq_C_hamilton-principle-with-constraints" 8 "EQUATION_1.4" "1.4");bogue?
+(!label "eq_C_inertia-tensor-transformation" 24 "EQUATION_2.24" "2.24")
+(!label "eq_C_inertia_U_tensor" 23 "EQUATION_2.14" "2.14")
+(!label "eq_C_instantaneous-angular-velocity" 22 "EQUATION_2.11" "2.11")
+(!label "eq_C_legendre-mumble" 37 "EQUATION_3.68" "3.68")
+(!label "eq_C_more-general-constraint" 13 "EQUATION_1.98" "1.98")
+(!label "eq_C_more-general-lagrange-equations-with-constraints" 13 "EQUATION_1.100" "1.100")
+(!label "eq_C_more-general-lagrangian-with-constraints" 13 "EQUATION_1.99" "1.99")
+(!label "eq_C_more-general-newton-equations-with-constraints" 13 "EQUATION_1.101" "1.101")
+(!label "eq_C_newton" 13 "EQUATION_1.51" "1.51")
+(!label "eq_C_newton-equations-with-constraints" 13 "EQUATION_1.87" "1.87")
+(!label "eq_C_non-holonomic-1" 17 "EQUATION_1.225" "1.225")
+(!label "eq_C_non-holonomic-2" 17 "EQUATION_1.234" "1.234")
+(!label "eq_C_omega-prime-in-terms-of-A" 26 "EQUATION_2.38" "2.38")
+(!label "eq_C_p-in-terms-of-Dq" 37 "EQUATION_3.2" "3.2")
+(!label "eq_C_partial1H" 37 "EQUATION_3.11" "3.11")
+(!label "eq_C_phi-psi-relation" 17 "EQUATION_1.208" "1.208")
+(!label "eq_C_polar-rectangular-velocities" 13 "EQUATION_1.65" "1.65")
+(!label "eq_C_polar-relationship" 13 "EQUATION_1.62" "1.62")
+(!label "eq_C_polar-relationship-paths" 13 "EQUATION_1.63" "1.63")
+(!label "eq_C_positions-constituents" 26 "EQUATION_2.32" "2.32")
+(!label "eq_C_pot-in-moments" 31 "EQUATION_2.72" "2.72")
+(!label "eq_C_principal-1" 25 "EQUATION_2.26" "2.26")
+(!label "eq_C_principal-2" 25 "EQUATION_2.27" "2.27")
+(!label "eq_C_properties-of-L-1" 13 "EQUATION_1.56" "1.56")
+(!label "eq_C_properties-of-L-2" 13 "EQUATION_1.57" "1.57")
+(!label "eq_C_property-of-A" 32 "EQUATION_2.90" "2.90")
+(!label "eq_C_relation-of-p-pprime" 58 "EQUATION_5.3" "5.3")
+(!label "eq_C_relationship-H-1" 58 "EQUATION_5.7" "5.7")
+(!label "eq_C_relationship-p" 58 "EQUATION_5.5" "5.5")
+(!label "eq_C_relationship-v" 58 "EQUATION_5.1" "5.1")
+(!label "eq_C_rigid-potential" 31 "EQUATION_2.74" "2.74")
+(!label "eq_C_rigid_U_ang_U_mom" 29 "EQUATION_2.57" "2.57")
+(!label "eq_C_rigid_U_kinetic_U_energy" 29 "EQUATION_2.58" "2.58")
+(!label "eq_C_rot-ang-mom" 28 "EQUATION_2.51" "2.51")
+(!label "eq_C_rotation-matrix-from-primitives" 33 "EQUATION_2.118" "2.118")
+(!label "eq_C_rotational-kinetic-energy-with-ABC" 25 "EQUATION_2.30" "2.30")
+(!label "eq_C_same-integrands" 10 "EQUATION_1.10" "1.10")
+(!label "eq_C_sleeping-top-frequency" 40 "EQUATION_3.104" "3.104")
+(!label "eq_C_stationary-action-condition" 12 "EQUATION_1.34" "1.34")
+(!label "eq_C_total_U_time_U_derivative" 13 "EQUATION_1.112" "1.112")
+(!label "eq_C_transformation-of-L" 13 "EQUATION_1.70" "1.70")
+(!label "eq_C_variation-of-the-action" 12 "EQUATION_1.32" "1.32")
+(!label "eq_C_variation-properties-1" 12 "EQUATION_1.23" "1.23")
+(!label "eq_C_variation-properties-4" 12 "EQUATION_1.26" "1.26")
+(!label "eq_C_variation-properties-5" 12 "EQUATION_1.27" "1.27")
+(!label "fig_C_2bar" 13 "FIGURE_1.3" "1.3")
+(!label "fig_C_Ueff" 40 "FIGURE_3.5" "3.5")
+(!label "fig_C_axi-phi-gt-psi" 40 "FIGURE_3.8" "3.8")
+(!label "fig_C_axi-top-nut" 30 "FIGURE_2.8" "2.8")
+(!label "fig_C_axi-top-theta" 30 "FIGURE_2.5" "2.5")
+(!label "fig_C_axiawake" 40 "FIGURE_3.7" "3.7")
+(!label "fig_C_axisleep" 40 "FIGURE_3.6" "3.6")
+(!label "fig_C_axisymmetric-top" 30 "FIGURE_2.4" "2.4")
+(!label "fig_C_coupled" 17 "FIGURE_1.9" "1.9")
+(!label "fig_C_depend" 19 "FIGURE_1.11" "1.11")
+(!label "fig_C_dpend-fig-4.1" 49 "FIGURE_4.1" "4.1")
+(!label "fig_C_dpend-fig-4.2" 49 "FIGURE_4.2" "4.2")
+(!label "fig_C_dpend-fig-4.3" 49 "FIGURE_4.3" "4.3")
+(!label "fig_C_driven_U_pendulum_U_in_U_phase_U_space" 41 "FIGURE_3.9" "3.9")
+(!label "fig_C_driven_pendulum" 13 "FIGURE_1.2" "1.2")
+(!label "fig_C_driven_pendulum_orbit" 14 "FIGURE_1.7" "1.7")
+(!label "fig_C_dumbbell" 13 "FIGURE_1.5" "1.5")
+(!label "fig_C_evolve" 14 "FIGURE_1.6" "1.6")
+(!label "fig_C_frequencies-of-visitation-0.95" 54 "FIGURE_4.22" "4.22")
+(!label "fig_C_frequencies-of-visitation-0.97" 54 "FIGURE_4.22" "4.22")
+(!label "fig_C_ham-lag" 37 "FIGURE_3.3" "3.3")
+(!label "fig_C_hh-contours" 42 "FIGURE_3.15" "3.15")
+(!label "fig_C_hh-sec1" 42 "FIGURE_3.19" "3.19")
+(!label "fig_C_hh-sec2" 42 "FIGURE_3.20" "3.20")
+(!label "fig_C_hh-sec3" 42 "FIGURE_3.21" "3.21")
+(!label "fig_C_hh-traj1" 42 "FIGURE_3.16" "3.16")
+(!label "fig_C_hh-traj3" 42 "FIGURE_3.17" "3.17")
+(!label "fig_C_hh_U_exp_U_div" 43 "FIGURE_3.23" "3.23")
+(!label "fig_C_hh_U_lin_U_div" 43 "FIGURE_3.24" "3.24")
+(!label "fig_C_hoop" 17 "FIGURE_1.10" "1.10")
+(!label "fig_C_invariant-curve" 54 "FIGURE_4.20" "4.20")
+(!label "fig_C_invariant-curve-expanded" 54 "FIGURE_4.21" "4.21")
+(!label "fig_C_legendre" 37 "FIGURE_3.1" "3.1")
+(!label "fig_C_nonaxi" 42 "FIGURE_3.22" "3.22")
+(!label "fig_C_p2" 37 "FIGURE_3.2" "3.2")
+(!label "fig_C_pendulum-driven-at-high-frequency" 42 "FIGURE_3.14" "3.14")
+(!label "fig_C_pendulum-driven-at-twice-natural-frequency" 42 "FIGURE_3.13" "3.13")
+(!label "fig_C_pendulum-driven-off-resonance" 42 "FIGURE_3.12" "3.12")
+(!label "fig_C_pendulum-phase-plane" 39 "FIGURE_3.4" "3.4")
+(!label "fig_C_pendulum_phase_volume_1" 44 "FIGURE_3.25" "3.25")
+(!label "fig_C_pendulum_phase_volume_2" 44 "FIGURE_3.26" "3.26")
+(!label "fig_C_phase-space-is-not-unique" 41 "FIGURE_3.10" "3.10")
+(!label "fig_C_polyapprox" 11 "FIGURE_1.1" "1.1")
+(!label "fig_C_psection" 42 "FIGURE_3.11" "3.11")
+(!label "fig_C_rigid_U_potential" 31 "FIGURE_2.9" "2.9")
+(!label "fig_C_rigid_U_ref" 26 "FIGURE_2.1" "2.1")
+(!label "fig_C_section" 42 "FIGURE_3.18" "3.18")
+(!label "fig_C_sliding_pendulum" 13 "FIGURE_1.4" "1.4")
+(!label "fig_C_spin-orbit" 31 "FIGURE_2.10" "2.10")
+(!label "fig_C_spin-orbit-chaos" 31 "FIGURE_2.12" "2.12")
+(!label "fig_C_spin-orbit-kick-e0" 31 "FIGURE_2.11" "2.11")
+(!label "fig_C_standard-map-0.6" 45 "FIGURE_3.27" "3.27")
+(!label "fig_C_standard-map-1.4" 45 "FIGURE_3.28" "3.28")
+(!label "fig_C_triaxial" 29 "FIGURE_2.3" "2.3")
+(!label "fig_C_triaxial-error" 29 "FIGURE_2.2" "2.2")
+(!label "fig_C_xypend" 17 "FIGURE_1.8" "1.8")
+
+}
+
+% cover image
+
+\centerline{\urlh{#titlepage}{\htmladdimg{SICM.jpg}}}
+
+\vfill\eject
+
+\tag{titlepage}{-}

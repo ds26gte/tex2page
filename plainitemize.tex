@@ -1,0 +1,52 @@
+% last change 2013-02-03
+
+\ifx\shipout\UnDeFiNeD\endinput\fi
+
+\newskip\itemizeskip
+\itemizeskip=\parindent
+
+\edef\atcatcodebeforedefitemize{%
+  \noexpand\catcode`\noexpand\@=\the\catcode`\@}
+\catcode`\@11
+
+%
+
+\def\itemize{\par\begingroup
+  \advance\leftskip\itemizeskip
+  \smallbreak
+  \def\item{\smallbreak\noindent
+  \llap{$\bullet$\enspace}\ignorespaces}}
+
+\def\enditemize{\smallbreak\smallbreak\endgroup\par}
+
+\newcount\enumeratelevel
+\newcount\enumeratenumber
+
+\def\enumerate{\par\begingroup
+  \advance\enumeratelevel by 1
+  \enumeratenumber=0
+  \advance\leftskip\itemizeskip
+  \smallbreak
+  \def\item{\smallbreak\noindent
+    \advance\enumeratenumber by 1
+    \ifnum\enumeratelevel=1
+      \edef\enumeratemark{\enumeratenumber}\else
+    \ifnum\enumeratelevel=2
+      \count255=\enumeratenumber
+      \advance\count255 by -1 \advance\count255 by `a
+      \edef\enumeratemark{\noexpand\char\the\count255 }\else
+    \ifnum\enumeratelevel=3
+      \edef\enumeratemark{\Romannumeral\enumeratenumber}\else
+    \ifnum\enumeratelevel=4
+      \count255=\enumeratenumber
+      \advance\count255 by -1 \advance\count255 by `A
+      \edef\enumeratemark{\noexpand\char\the\count255 }\else
+    \edef\enumeratemark{\enumeratenumber}\fi\fi\fi\fi
+    \edef\@currentlabel{\enumeratemark}% needed?
+    \llap{\enumeratemark.\enspace}\ignorespaces}}
+
+\def\endenumerate{\smallbreak\smallbreak\endgroup\par}
+
+\atcatcodebeforedefitemize
+
+% end of file

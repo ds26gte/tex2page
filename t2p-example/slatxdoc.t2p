@@ -1,0 +1,19 @@
+\cssblock
+.scheme .variable {
+  font-style: italic;
+} 
+
+\endcssblock
+
+% Redefine \section so that it starts a fresh page
+
+\let\ORIGsection\section
+\def\section{\vfill\eject\ORIGsection}
+
+\imgpreamble
+\input slatex.sty
+\endimgpreamble
+
+\scmkeyword{setq}
+\scmspecialsymbol{$B$}{{\em B}}
+

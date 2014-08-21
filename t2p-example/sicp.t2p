@@ -1,0 +1,452 @@
+% sicp.t2p
+% tex2page macro file for book.tex, SICP2e
+% Dorai Sitaram
+% 30 Jan 2001
+
+% sicp-css.t2p contains cascading-style info 
+
+\input sicp-css.t2p
+
+% Don't use images for in-text math
+
+\dontuseimgforhtmlmathintext
+
+% MITP doesn't want it, so 
+
+\notimestamp
+
+% SICP sets its displayed material flushleft
+
+\leftdisplays
+
+% {smallequation} 
+
+\let\smallequation\displaymath
+\let\endsmallequation\enddisplaymath
+
+% \an{metavariable} 
+
+\def\an#1{\mathg{\langle}{\em#1}\mathg{\rangle}}
+
+% {imgpreamble}
+%
+% Repeat defns \an, \aal, {smallequation} so 
+% they can be used by TeX fragments that
+% are destined to become images 
+%
+% Redefine \document so that images get enlarged 
+
+\imgpreamble
+%\usepackage{times}
+%\usepackage{mathptm}
+\usepackage{epsf}
+\def\epsfsize#1#2{1.3#1}
+\def\an#1{$\langle${\em #1}$\rangle$}
+\def\aal{\alpha{\raise 1pt\hbox{\hskip -4pt{\char'47}}}}
+\let\smallequation\displaymath
+\let\endsmallequation\enddisplaymath
+\let\ORIGparbox\parbox
+\def\KLUDGEDparbox#1{%
+\gdef\parbox##1{\ORIGparbox{9em}}%
+\ORIGparbox{3em}}
+\makeatletter
+\def\Stabular{%
+    \let\parbox\KLUDGEDparbox
+    \par
+    \parindent\z@skip
+    %\small
+    \addvspace{6\p@}%
+    \let\@halignto\@empty
+    \@tabular
+}
+\makeatother
+\let\endStabular\endtabular
+\let\ORIGdocument\document
+\def\document{\ORIGdocument\Large}
+\endimgpreamble
+
+% Figure and table numbers are prefixed 
+% with chapter (depth = 0) number
+
+\evalh{
+(set!counter.within (table-get *dotted-counters* "figure") 0)
+(set!counter.within (table-get *dotted-counters* "table") 0)
+}
+
+\let\figcaption\caption
+
+% text uses \center inside figure, but this is
+% at odds with overall desire for flushleft displays
+
+\let\center\leftline
+
+% Some additional sub-macros used by \maketitle
+
+\def\edition#1{\def\SAVEedition{#1}}
+\def\forewordauthor#1{\def\SAVEforewordauthor{#1}}
+\def\publisher#1{\def\SAVEpublisher{#1}}
+
+% Redefine \maketitle to make use of the above sub-macros
+
+\def\maketitle{\begingroup
+\let\\\break
+\rawhtml<h1>\endrawhtml
+\TIIPtitle
+\rawhtml</h1>\endrawhtml
+\medskip
+\leftline{\SAVEedition}
+\bigskip\bigskip
+\leftline{\TIIPauthor}
+\medskip
+\leftline{foreword by \SAVEforewordauthor}
+\bigskip\bigskip\bigskip
+\leftline{\SAVEpublisher}
+\endgroup}
+
+% Since sicp isn't a standard documentclass, let's
+% help tex2page out by telling it that the document
+% is book-like, ie, will be using chapters.  Saves
+% a re-run, perhaps
+
+\evalh{(set! *using-chapters?* #t)}
+
+% Might as well tell it it's LaTeX
+
+\evalh{(set! *tex-format* 'latex)}
+
+% Redefine \chapter so that it resets the footnote
+% counter
+
+\let\ORIGchapter\chapter
+
+\def\chapter{\global\footnotenumber=0
+\setcounter{figure}{0}%
+\ORIGchapter}
+
+% Define an {exercise} environment that is numbered
+% within chapters
+
+\newtheorem{exercise}{Exercise}[chapter]
+
+\let\ORIGexercise\exercise
+
+\evalh{(define *exercise-labels* '())}
+
+\def\exercise{\ORIGexercise
+\evalh{
+(let ((lbl (gen-temp-string)))
+  (do-label-aux lbl)
+  (set! *exercise-labels* (cons lbl *exercise-labels*)))
+}}
+
+% \expart
+
+\def\expart#1{#1.\enspace}
+
+\def\expartstart{\linebreak\expart}
+
+% Redefine \section so that it starts a fresh page
+
+\let\ORIGsection\section
+
+\def\section{\vfill\eject\ORIGsection}
+
+% Don't number sections deeper than 3
+
+\secnumdepth = 3
+
+% Don't put sections deeper than 2 in ToC
+
+\tocdepth = 2
+
+% Heading aliases
+
+\def\prefacesection{\chapter*}
+\def\subheading{\subsubsection*}
+
+\def\?{-}
+
+% {epigraph} environment.  In-text math is allowed to be imagized 
+% inside epigraphs, so Heraclitus' quote comes out OK.  Use style
+% tag "epigraph" so we can change its look via style-sheet
+
+\def\epigraph{\par\begingroup
+\evalh{(set! *use-img-for-in-text-math?* #t)}
+\rawhtml
+<div align=right> 
+<table width=60%><tr><td>
+<span class=epigraph>
+\endrawhtml}
+
+\def\endepigraph{\rawhtml
+</span>
+</td></tr></table>
+</div>
+\endrawhtml
+\evalh{(set! *use-img-for-in-text-math?* #f)}
+\endgroup\par}
+
+%
+
+\def\list#1#2{\begingroup\quotation\let\item\par}
+\def\endlist{\endquotation\endgroup}
+
+\let\bulletlist\itemize
+\let\endbulletlist\enditemize
+
+%\let\Stabular\tabular
+\def\Stabular{\TIIPlatexenvasimage{Stabular}}
+%\let\Stabular\IMGtabular
+%\let\endStabular\endtabular
+
+% \its slants argument.  Used for Scheme output in the {lisp}
+% environment
+
+\let\its\textit
+
+% Disable kludges; they aren't relevant for HTML
+
+\def\pagekludge#1{}
+\def\linekludge#1{}
+\def\shrinksurroundingspace#1{}
+
+% The calls to \pagebreak aren't relevant for HTML
+
+\let\pagebreak\relax
+
+% Let's define select math ctl-seqs as reusable images
+
+\imgdef\alpha{$\alpha$}
+\imgdef\epsilon{$\epsilon$}
+\imgdef\Theta{$\Theta$}
+\imgdef\theta{$\theta$}
+\imgdef\iota{$\iota$}
+\imgdef\lambda{$\lambda$}
+\imgdef\nu{$\nu$}
+\imgdef\tau{$\tau$}
+\imgdef\pi{$\pi$}
+\imgdef\upsilon{$\upsilon$}
+\imgdef\phi{$\phi$}
+\imgdef\psi{$\psi$}
+
+\imgdef\sqrt{$\surd$}
+\imgdef\TIIPleftarrow{$\leftarrow$}
+\imgdef\TIIPrightarrow{$\rightarrow$}
+\imgdef\TIIPuparrow{$\uparrow$}
+\imgdef\TIIPmapsto{$\mapsto$}
+\imgdef\vdots{$\vdots$}
+\imgdef\int{$\int$}
+\imgdef\TIIPapprox{$\approx$}
+
+\def\mapsto{ \TIIPmapsto\ }
+\def\leftarrow{ \TIIPleftarrow\ }
+\def\rightarrow{ \TIIPrightarrow\ }
+\def\approx{ \TIIPapprox\ }
+
+% {lisp} environment encloses Scheme code.  The optional
+% `*' is irrelevant for HTML, so let's eat it
+
+\def\lisp{\expandafter\lispII\TIIPeatstar}
+
+\def\lispII{\par\begingroup\let\aaup\TIIPuparrow\obeywhitespace\tt}
+
+\def\endlisp{\endgroup\par\TIIPeatstar}
+
+\let\smalltt\tt
+
+% \allowbreak seems to cause parskip
+
+%\let\allowbreak\par 
+
+% \ind \indcode \indprim \indsf \indcodeplus are
+% various value-added ways of calling \index
+
+\evalh{
+
+; \ind{entry}[subentry]
+; \indcode{entry}[subentry] ; set in \tt
+; \indprim{entry}[subentry] ; ,, add (primitive procedure)
+; \indsf{entry}[subentry] ; ,, add (special form)
+; \indcodeplus{entry}{...text...}[subentry] ; ,, add ...text...
+
+(define toss-back-index-text
+   (lambda (s)
+     ;escape occurrences of ! within the index argument(s)
+     (let loop ((i (- (string-length s) 1)))
+       (unless (< i 0)
+         (let ((c (string-ref s i)))
+           (toss-back-char c)
+           (case c
+             ((#\!) (toss-back-char #\")))
+           (loop (- i 1)))))))
+
+(tex-def-thunk "\\ind"
+  (lambda ()
+    (when (char=? (snoop-actual-char) #\*)
+      (get-actual-char))
+    (let* ((arg (ungroup (get-group)))
+           (opt-arg (get-bracketed-text-if-any)))
+      (toss-back-char #\})
+      (when opt-arg
+        (toss-back-index-text opt-arg)
+        (toss-back-char #\!))
+      (toss-back-index-text arg)
+      (toss-back-string "\\index{"))) ;}
+  *global-texframe*)
+
+(tex-def-thunk "\\indcode"
+   (lambda ()
+     (when (char=? (snoop-actual-char) #\*)
+       (get-actual-char))
+     (let* ((arg (ungroup (get-group)))
+            (opt-arg (get-bracketed-text-if-any)))
+       (toss-back-char #\})
+       (when opt-arg
+         (toss-back-index-text opt-arg)
+         (toss-back-char #\!))
+       (toss-back-char #\})
+       (toss-back-index-text arg)
+       (toss-back-string "\\tt ")
+       (toss-back-char #\{)
+       (toss-back-char #\@)
+       (toss-back-index-text arg)
+       (toss-back-char #\{)
+       (toss-back-string "\\index")))
+   *global-texframe*)
+
+(tex-def-thunk "\\indprim"
+   (lambda ()
+     (when (char=? (snoop-actual-char) #\*)
+       (get-actual-char))
+     (let* ((arg (ungroup (get-group)))
+            (opt-arg (get-bracketed-text-if-any)))
+       (toss-back-char #\})
+       (when opt-arg
+         (toss-back-index-text opt-arg)
+         (toss-back-char #\!))
+       (toss-back-string "(primitive procedure)")
+       (toss-back-char #\space)
+       (toss-back-char #\})
+       (toss-back-index-text arg)
+       (toss-back-string "\\tt ")
+       (toss-back-char #\{)
+       (toss-back-char #\@)
+       (toss-back-index-text arg)
+       (toss-back-char #\{)
+       (toss-back-string "\\index")))
+   *global-texframe*)
+
+(tex-def-thunk "\\indsf"
+   (lambda ()
+     (when (char=? (snoop-actual-char) #\*)
+       (get-actual-char))
+     (let* ((arg (ungroup (get-group)))
+            (opt-arg (get-bracketed-text-if-any)))
+       (toss-back-char #\})
+       (when opt-arg
+         (toss-back-index-text opt-arg)
+         (toss-back-char #\!))
+       (toss-back-string "(special form)")
+       (toss-back-char #\space)
+       (toss-back-char #\})
+       (toss-back-index-text arg)
+       (toss-back-string "\\tt ")
+       (toss-back-char #\{)
+       (toss-back-char #\@)
+       (toss-back-index-text arg)
+       (toss-back-char #\{)
+       (toss-back-string "\\index")))
+   *global-texframe*)
+ 
+(tex-def-thunk "\\indcodeplus"
+  (lambda ()
+    (when (char=? (snoop-actual-char) #\*)
+      (get-actual-char))
+    (let* ((arg (ungroup (get-group)))
+           (arg2 (ungroup (get-group)))
+           (opt-arg (get-bracketed-text-if-any)))
+      (toss-back-char #\})
+      (when opt-arg
+        (toss-back-index-text opt-arg)
+        (toss-back-char #\!))
+      (toss-back-index-text arg2)
+      (toss-back-char #\space)
+      (toss-back-char #\})
+      (toss-back-index-text arg)
+      (toss-back-string "\\tt ")
+      (toss-back-char #\{)
+      (toss-back-char #\@)
+      (toss-back-index-text arg)
+      (toss-back-char #\{)
+      (toss-back-string "\\index")))
+  *global-texframe*)
+ 
+; \indsee{entry}[subentry]{other} ; see other
+; \indseealso{entry}[subentry]{other} ; see also other
+
+(define def-ind-see
+   (lambda (see)
+     (tex-def-thunk (string-append "\\ind" see)
+       (lambda ()
+         (let* ((entry (ungroup (get-group)))
+                (subentry (get-bracketed-text-if-any))
+                (other (get-group)))
+           (toss-back-char #\})
+           (toss-back-index-text other)
+           (toss-back-string see)
+           (toss-back-char #\|)
+           (when subentry
+             (toss-back-index-text subentry)
+             (toss-back-char #\!))
+           (toss-back-string entry)
+           (toss-back-char #\{)
+           (toss-back-string "\\index")))
+       *global-texframe*)))
+
+(def-ind-see "see")
+(def-ind-see "seealso")
+}
+
+% Use the index tex2page generates, not the print-oriented
+% index.tex
+
+\def\listofexercises{
+\prefacesection{List of Exercises}
+\evalh{
+(set! *exercise-labels* (reverse *exercise-labels*))
+(for-each
+  (lambda (lbl)
+    (do-ref-aux lbl #f #f)
+    (emit "<br>")
+    (emit-newline))
+  *exercise-labels*)
+}
+%
+% following is kludge to force index-inclusion
+% the canonical way after list of exercises, instead
+% of relying on the hand-tuned job used for the
+% print version
+%
+\input indexcrossrefs
+\chapter*{Index}
+\begin{epigraph}
+Any inaccuracies in this index may be explained by the fact that it
+has been prepared with the help of a computer.
+\par
+\attribution{%$
+\ind{Knuth, Donald E.}%
+Donald E. Knuth,
+{\em Fundamental Algorithms} (Volume 1 of
+{\em The Art of\/ Computer Programming})}
+\end{epigraph}
+\par
+\inputindex
+\def\input##1{}}
+
+% cover image
+
+\centerline{\urlh{#titlepage}{\htmladdimg{cover.jpg}}}
+
+\vfill\eject
+
+\tag{titlepage}{-}

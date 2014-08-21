@@ -1,0 +1,68 @@
+% eval4tex.tex
+% Dorai Sitaram
+% 2002-12-24
+% Last change 2009-05-06 
+
+\ifx\shipout\UnDeFiNeD\endinput\fi
+
+\newcount\evalQauxfilecount
+\evalQauxfilecount=0
+
+{\catcode`\^^M=12 
+\gdef\evalfortexQsetup{%
+  \expandafter\csname newwrite\endcsname \evalfortexQport %
+  \immediate\openout\evalfortexQport \jobname.eval4tex %
+  \newlinechar=`\^^M% 
+  \ifx\TZPcommonlisp 1%
+  \immediate\write\evalfortexQport{
+  (defvar *eval4tex-current-output-port* *standard-output*)
+
+  (defun eval4tex-preamble (f)
+    (setq *standard-output* 
+      (open f :direction :output :if-exists :supersede)))
+
+  (defun eval4tex-postamble ()
+    (princ (code-char 92)) (princ "relax") (terpri)
+    (close *standard-output*)
+    (setq *standard-output* *eval4tex-current-output-port*))
+  }\else \immediate\write\evalfortexQport{
+  (define *eval4tex-current-output-port* (current-output-port))
+
+  (define eval4tex-preamble
+    (lambda (f)
+      (if (file-exists? f) (delete-file f) 0)
+      (current-output-port (open-output-file f))))
+
+  (define eval4tex-postamble
+    (lambda ()
+      (display (integer->char 92))
+      (display "relax") (newline)
+      (close-output-port (current-output-port))
+      (current-output-port *eval4tex-current-output-port*)))
+  }\fi%
+}%
+}
+
+\def\eval{\begingroup
+  \ifx\evalfortexQport\UNDEFINED \evalfortexQsetup\fi
+  \global\advance\evalQauxfilecount by 1
+  \edef\evalQauxfile{\jobname-Z-E-\the\evalQauxfilecount}%
+  \immediate\write\evalfortexQport
+    {(eval4tex-preamble "\evalQauxfile.tex")}%
+  % should the following \input be in a group?
+  {\immediate\openin0=\evalQauxfile.tex 
+   \ifeof0 \immediate\closein0 
+   \else \immediate\closein0 \input \evalQauxfile.tex \fi}%
+  \def\do##1{\catcode`##1=12 }\dospecials
+  \catcode`\{=1 \catcode`\}=2 
+  \catcode`\|=0
+  \catcode`\^^M=12 
+  \newlinechar=`\^^M%
+  \evalQii}
+
+\def\evalQii#1{%
+  \immediate\write\evalfortexQport{#1}%
+  \immediate\write\evalfortexQport{(eval4tex-postamble)}%
+  \endgroup}
+
+% end of file

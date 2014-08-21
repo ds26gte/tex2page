@@ -1,0 +1,32 @@
+% .t2p file for manual.tex (the Chicken Scheme user 
+% manual by Felix Winkelmann).
+
+% Create a manual.t2p file alongside manual.tex with
+% contents
+%         \input chicken.t2p 
+
+
+%\evalh{(set! *tex-format* 'latex)}
+\definitelylatex
+
+\htmlimageformat{png}
+
+\htmlmathstyle{no-in-text-image}
+
+%\externaltitle{CHICKEN -- A practical and portable Scheme
+%system -- User's manual (Version 0, Build 1082)}
+
+\let\sectionORIG\section
+\def\section{\vfill\eject\sectionORIG}
+
+\let\documentORIG\document
+\def\document{%
+\def\urlfootnote##1{\footnote{\url{##1}}}%
+\documentORIG}
+
+\imgpreamble
+\usepackage{graphics}
+\let\documentORIG\document
+\def\document{\documentORIG\LARGE}
+\endimgpreamble
+

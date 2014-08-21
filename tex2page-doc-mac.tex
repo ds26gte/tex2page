@@ -1,0 +1,232 @@
+% last change: 2013-02-03
+
+\ifx\pdfoutput\UnDeFiNeD
+\input txfonts
+%\input ncfonts
+\else
+% use times instead of cm
+\input txfonts
+% use new century schoolbook instead of cm
+%\input ncfonts
+\fi
+
+%\magnification\magstephalf
+\input miniltx
+\input color.sty
+\resetatcatcode
+\input tex2page
+\input btxmac
+
+\input eval4tex
+
+\input path.sty
+
+\input texnames.sty
+\ifx\shipout\UnDeFiNeD\else
+\def\XeTeX{Xe\TeX}
+\def\ConTeXt{Con\TeX t}
+\fi
+
+\inputepsf
+
+\input like-plt-logo
+
+\def\beginmulticols#1{}
+\def\endmulticols{}
+
+\ifx\shipout\UnDeFiNeD\else
+\IfFileExists{mimulcol}{\input mimulcol }{}
+\fi
+
+\advance\hoffset .5truein
+\ifx\shipout\UnDeFiNeD\else
+\advance\hsize -1truein
+\fi
+
+\overfullrule0pt
+
+\ifx\shipout\UnDeFiNeD
+\headline={\folio, ~~ \urlh{#ToC}{ToC}, ~~ \urlh{#Index}{Index}}
+\footline={\the\headline}
+%\footline={\folio, ~~ \urlh{#ToC}{ToC}, ~~ \urlh{#Index}{Index}}
+\fi
+
+\tocdepth 1
+
+\def\meta[#1]{\leavevmode\hbox{\em #1}}
+
+\let\c\centerline
+
+\IfFileExists{./t2p4plt}{\input ./t2p4plt }{}
+
+\def\proto#1#2#3{\noindent
+\hbox{{\tt(#1}\spaceifnotempty{#2}{\it#2}{\tt)}%
+\qquad ;#3}\par}
+
+\def\TZPimageformat{png}
+
+\ifx\shipout\UnDeFiNeD
+\imgdef\ohm{$\Omega$}
+\else
+\def\ohm{$\Omega$}
+\fi
+
+\newdimen\templen
+\newbox\tempbox
+
+\def\spaceifnotempty#1{%
+\setbox\tempbox\hbox{#1}%
+\templen\wd\tempbox
+\ifdim\templen>0pt{\ }\fi}
+
+%\ifx\shipout\UnDeFiNeD\else
+%\def\fontstem#1{\expandafter\fontstemQii\fontname#1 \end}%
+%\def\fontstemQii#1 #2\end{#1 }%
+%\font\twelvebf \fontstem\tenbf at 12pt
+%\fi
+
+% symbol footnotes
+
+\newcount\footnotenumber
+
+\def\fnsymbol#1{%
+% #1 is between 1 and 9 inclusive
+\ifcase#1\or
+*\or
+\dag\or
+\ddag\or
+\S\or
+\P\or
+$\Vert$\or
+**\or
+\dag\dag\or
+\ddag\ddag
+\fi}
+
+\ifx\shipout\UnDeFiNeD
+\else
+\def\bgcolor#1{}%
+\fi
+
+\def\sfootnote{%
+  \global\advance\footnotenumber by 1
+  \ifnum\footnotenumber>9
+    \global\footnotenumber=1
+  \fi
+  \def\sfootnoteQmark{{\bgcolor{yellow}\fnsymbol{\the\footnotenumber}}}%
+  \footnote\sfootnoteQmark}
+
+%
+\ifx\shipout\UnDeFiNeD\else
+\def\raggedleft{%
+  \leftskip 0pt plus 1fil
+  \parfillskip 0pt
+}
+\fi
+%
+
+\def\quote{\bgroup\narrower\smallbreak}
+\def\endquote{\smallbreak\egroup}
+
+% \xrdef, as in Eplain
+
+%\def\xrdef#1{\xrtag{#1}{\folio}}
+
+\let\n\noindent
+
+\let\f\sfootnote
+
+\ifx\TZPcommonlisp 1
+\eval{
+(defun display (&rest ee) (apply #'princ ee))
+}
+\fi
+
+\ifx\shipout\UnDeFiNeD
+\let\maybeendinput\relax
+\else
+\let\maybeendinput\endinput
+\fi
+\maybeendinput
+
+%\parskip=.5em
+\hsize=40em
+
+\let\TZPtexlayout=1
+\parskip=5pt
+
+%\inputcss http://www.w3.org/StyleSheets/Core/Oldstyle
+
+% Some readymade stylesheets are
+% http://www.w3.org/StyleSheets/Core/{Chocolate,
+% Midnight, Modernist, Oldstyle, Steely, Swiss,
+% Traditional, Ultramarine}
+
+\inputcss tex2page.css
+
+\cssblock
+.title {
+/* font-family: papyrus; */
+color: #9b3d3d;
+}
+\endcssblock
+
+\slatexlikecomments
+
+% We want images to be a bit bigger
+
+\imgpreamble
+%  \magnification\magstep1
+  \magnification\magstep2
+\endimgpreamble
+
+\ifx\TZPcommonlisp 1
+\evalq{
+(defun all-blanks? (s)
+  (every (lambda (c) (or (char= c #\space) (char= c #\tab)
+                          (not (graphic-char-p c))))
+        s))
+}
+\else
+\evalq{
+(define all-blanks?
+  (lambda (s)
+    (let loop ((L (string->list s)))
+      (if (null? L) #t
+          (let ((c (car L)))
+            (if (char-whitespace? c) (loop (cdr L))
+                #f))))))
+}
+\fi
+
+\evalq{
+(tex2page "texample")
+(tex2page "mpexample")
+(tex2page "story")
+}
+
+% make it easy for the search engines to find us
+\htmlheadonly
+<meta name=description content="Scheme, Common Lisp script for making Web pages
+from TeX documents">
+
+<meta name=author content="Dorai Sitaram">
+<link rev=made href="mailto:ds26gte at yahoo dot com">
+
+\endhtmlheadonly
+
+\ifx\TZPcommonlisp 1
+\def\spaceifnotempty{\eval{
+(let ((x (ungroup (get-token))))
+  (unless (all-blanks? x)
+    (princ (code-char 92))
+    (princ "space")))}}
+\else
+\def\spaceifnotempty{\eval{
+(let ((x (ungroup (get-token))))
+  (if (not (all-blanks? x))
+      (begin (display (integer->char 92))
+             (display "space"))
+      0))
+}}
+\fi

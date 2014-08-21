@@ -1,0 +1,78 @@
+% eplain.t2p
+% 7 Jan 2001
+
+% last change 2006-05-31
+
+\let\TZPtexlayout=1
+
+\headline={\the\footline}
+
+\input texi2p
+
+\imgpreamble
+\magnification1440
+\input eplain
+\endimgpreamble
+
+% \findex argument has tacit \ in front
+
+\def\findex#1
+{\index{#1@{\tt\TIIPbackslash#1}}}
+
+
+% kludges
+
+\let\PRIMleavevmode\leavevmode
+\let\PRIMkern\kern
+
+\def\kern{
+\let\NEXT\PRIMkern
+\ifnum\pageno=6
+\let\NEXT\comment
+\fi
+\NEXT}
+
+\def\leavevmode{
+\let\NEXT\PRIMleavevmode
+\ifnum\pageno=6
+$\hbox{\frac 23/{64}}$\let\NEXT\relax
+\fi
+\NEXT}
+
+\let\PRIMxref\xref
+\newcount\xrefnr
+
+\def\makeindexdoc#1{See the MakeIndex documentation}
+
+\def\xref{
+\let\NEXT\PRIMxref
+\ifnum\pageno=6
+\global\advance\xrefnr by 1
+\else 
+\global\xrefnr=0
+\fi
+\ifnum\xrefnr=5
+\let\NEXT\makeindexdoc
+\else\ifnum\xrefnr=6
+\let\NEXT\makeindexdoc
+\fi\fi
+\NEXT}
+
+% \title has \TeX which doesn't show up well on external title
+
+\let\settitle\c
+
+\def\TZPtitle{Expanded Plain TeX}
+
+%\def\endtitlepage{\eject\noindent{\bf Contents}\medskip\tableofcontents}
+
+\def\unnumbered#1
+{\let\unnumbered\c
+\NONTEXINFOchapter*{Index}}
+
+%\let\printindexORIG\printindex
+%\def\printindex{\def\printindex#1#2{}
+%\printindexORIG}
+
+%\def\unnumbered#1
+%{}

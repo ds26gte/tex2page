@@ -7,7 +7,7 @@
 % tex2page is available at
 % http://www.ccs.neu.edu/~dorai/tex2page/index.html
 
-% last change: 2013-02-08
+% last change: 2014-08-21
 
 \input tex2page-doc-mac
 
@@ -23,7 +23,7 @@
 \ifx\inpltdist\Undefined
 \ifx\shipout\UnDeFiNeD
 \c{Download
-\urlh{tex2page.tar.bz2}{Version
+\urlh{https://github.com/ds26gte/tex2page}{Version
 \ifx\TZPcommonlisp 1\eval{(princ *tex2page-version*)}\else
 \eval{(display *tex2page-version*)}\fi }}
 %\ifx\shipout\UnDeFiNeD
@@ -1722,7 +1722,6 @@ not need the ligatures, and may indeed, want \p{--} to show up as two hyphens, b
 
 \n In this case, you also have to ensure that the fonts you use in \XeTeX\ do not have \p{mapping=tex-text}.
 
-
 \beginsection Making a slideshow
 
 \index{TZPslides@\p{\TZPslides}}
@@ -2336,7 +2335,7 @@ $\sqrt{ (\Delta x)^2 + (\Delta y)^2 }$.
 You can control whether your math displays should
 be specified as image or text with the
 flag \p{\TZPmathimage}
-(p.~\ref{mathflag}). 
+(p.~\ref{mathflag}).
 \ifx\shipout\UnDeFiNeD
 With \p{\let\TZPmathimage=0},
 the three examples above
@@ -3318,13 +3317,14 @@ the input \TeX\ document.
 \xrdef{download}
 \index{installing \TeX2page}
 %
-Go to the \urlp{\TeX2page
-website}{http://www.ccs.neu.edu/~dorai/tex2page/index.html}
-to download the \TeX2page distribution.
-(The download link immediately follows the title.)
+\TeX2page is available on
+\urlp{GitHub}{https://github.com/ds26gte/tex2page}.
 
-\TeX2page is distributed as a \p{bzip2}'d \p{tar} file,
-\p{tex2page.tar.bz2}.  Unpacking it produces a directory
+\p{
+git clone https://github.com/ds26gte/tex2page
+}
+
+\n produces a directory
 called \p{tex2page}, which contains, among other files:
 the Scheme file \p{tex2page}, the Common Lisp file \p{tex2page.lisp}, the plain \TeX\ file
 \p{tex2page.tex}, and the \LaTeX\ package
@@ -3411,7 +3411,6 @@ Chez~\cite{petite} and Racket~\cite{racket}; and the Common Lisp
 implementations ABCL, Allegro, CLISP, Clozure, CMUCL, ECL, and SBCL.
 \iffalse how about bigloo mitscheme pocketscheme s48 scm scsh
 stklos sxm \fi
-
 
 %fmrly subsub
 \beginsection  Using Scmxlate directly

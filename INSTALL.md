@@ -1,6 +1,6 @@
 # Installing TeX2page
 
-GNSet the tex2page distribution from github:
+Get the tex2page distribution from github:
 
 ```
 git clone https://github.com/ds26gte/tex2page

@@ -7,4 +7,4 @@ http://www.ccs.neu.edu/~dorai/tex2page/index.html
 
 for its capabilities.
 
-See the file [INSTALL](./INSTALL) for instruction in installation.
+See the file [INSTALL.md](./INSTALL.md) for instruction in installation.

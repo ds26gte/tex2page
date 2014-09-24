@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20130325") ;last change
+(define *tex2page-version* "20140923") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -89,11 +89,7 @@
 ;appropriately if needed
 ;
 
-(define *doctype*
-  (string-append
-    "html public "
-    "\"-//W3C//DTD HTML 4.01 Transitional//EN\" "
-    "\"http://www.w3.org/TR/html4/loose.dtd\""))
+(define *doctype* "html")
 
 (define *scheme-version*
   (string-append "Racket " (version)))
@@ -2151,14 +2147,14 @@
 
 (define link-stylesheets
   (lambda ()
-    (emit "<link rel=\"stylesheet\" type=\"text/css\" href=\"")
+    (emit "<link rel=\"stylesheet\" href=\"")
     (emit *jobname*) (emit *css-file-suffix*)
-    (emit "\" title=default>") (emit-newline)
+    (emit "\" title=default />") (emit-newline)
     (for-each
      (lambda (css)
-       (emit "<link rel=\"stylesheet\" type=\"text/css\" href=\"")
+       (emit "<link rel=\"stylesheet\" href=\"")
        (emit css)
-       (emit "\" title=default>") (emit-newline))
+       (emit "\" title=default />") (emit-newline))
      *stylesheets*)))
 
 ;sections
@@ -3854,8 +3850,6 @@
       (tex2page-string link-text)
       (emit-link-stop))))
 
-
-
 (define do-hlstart
   (lambda ()
     (let* ((cat (get-peeled-group))
@@ -4121,7 +4115,7 @@
       (emit-page-node-link-start
         pageno (string-append *html-node-prefix* "idx_" s))
       (emit pageno)
-      ;this shouldn't be needed -- unless \theindex is redefined 
+      ;this shouldn't be needed -- unless \theindex is redefined
       (unless *index-page-mention-alist*
         (set! *index-page-mention-alist* (make-table)))
       (cond ((table-get *index-page-mention-alist* pageno)
@@ -4508,13 +4502,12 @@
 (define output-html-preamble
   (lambda ()
     (when (string? *doctype*)
-      (emit "<!doctype ")
+      (emit "<!DOCTYPE ")
       (emit *doctype*)
       (emit ">")
       (emit-newline))
     (emit "<html>") (emit-newline)
     (emit "<!--") (emit-newline)
-    (emit-newline)
     (emit "Generated from ")
     (emit *main-tex-file*)
     (emit " by tex2page, ")
@@ -4524,11 +4517,9 @@
     (emit *operating-system*) (emit "), ") (emit-newline)
     (emit "(c) Dorai Sitaram, ") (emit-newline)
     (emit *tex2page-website*) (emit-newline)
-    (emit-newline)
-    (emit "-->")
-    (emit-newline)
+    (emit "-->") (emit-newline)
     (emit "<head>") (emit-newline)
-    (emit "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">")
+    (emit "<meta charset=\"utf-8\">")
     (emit-newline)
     (output-external-title)
     (link-stylesheets)
@@ -8247,7 +8238,7 @@
     (fluid-let ((*outer?* #t))
       (let loop ()
         (let ((c (snoop-actual-char)))
-          (cond ((eof-object? c) 
+          (cond ((eof-object? c)
                  #t
                  ;(values)
                  )
@@ -9062,7 +9053,6 @@
       (set! *ligatures?* #f))))
 
 ;;
-
 
 (define fully-qualified-url?
   (lambda (u)

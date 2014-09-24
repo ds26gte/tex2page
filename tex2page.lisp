@@ -37,7 +37,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20140619c") ;last change
+(defparameter *tex2page-version* "20140923c") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -116,10 +116,7 @@
 (defparameter *last-modified* "Last modified")
 (defparameter *html-conversion-by* "HTML conversion by")
 
-(defparameter *doctype*
-  (concatenate 'string "html public "
-               "\"-//W3C//DTD HTML 4.01 Transitional//EN\" "
-               "\"http://www.w3.org/TR/html4/loose.dtd\""))
+(defparameter *doctype* "html")
 
 (defparameter *path-separator* #-windows #\: #+windows #\;)
 
@@ -1597,16 +1594,16 @@
     (dump-till-end-env "cssblock" *css-port*)))
 
 (defun link-stylesheets ()
-  (emit "<link rel=\"stylesheet\" type=\"text/css\" href=\"")
+  (emit "<link rel=\"stylesheet\" href=\"")
   (emit *jobname*)
   (emit *css-file-suffix*)
-  (emit "\" title=default>")
+  (emit "\" title=default />")
   (emit-newline)
   (mapc
    (lambda (css)
-       (emit "<link rel=\"stylesheet\" type=\"text/css\" href=\"")
+       (emit "<link rel=\"stylesheet\" href=\"")
        (emit css)
-       (emit "\" title=default>")
+       (emit "\" title=default />")
        (emit-newline))
    *stylesheets*))
 
@@ -3529,7 +3526,7 @@
 
 (defun output-html-preamble ()
   (when (stringp *doctype*)
-    (emit "<!doctype ")
+    (emit "<!DOCTYPE ")
     (emit *doctype*)
     (emit ">")
     (emit-newline))
@@ -3555,7 +3552,7 @@
   (emit-newline)
   (emit "<head>")
   (emit-newline)
-  (emit "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">")
+  (emit "<meta charset=\"utf-8\">")
   (emit-newline)
   (output-external-title)
   (link-stylesheets)

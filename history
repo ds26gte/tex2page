@@ -1,4 +1,9 @@
-Last change 2014-09-23
+Last change 2014-11-30
+
+Nov 30, 2014
+
+Have \mathbb, \mathcal, \mathfrak exploit Unicode. Issue brought
+up by Paulo Ney de Souza.
 
 Sep 23, 2014
 

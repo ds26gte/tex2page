@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20140923") ;last change
+(define *tex2page-version* "20141130") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -264,8 +264,8 @@
 (define *math-height* #f)
 (define *math-mode?* #f)
 (define *math-needs-image?* #f)
+(define *math-font* #f)
 (define *math-script-mode?* #f)
-(define *math-roman-mode?* #f)
 (define *mfpic-file-num* #f)
 (define *mfpic-file-stem* #f)
 (define *mfpic-port* #f)
@@ -3002,10 +3002,10 @@
        (case sw
          ((:rm)
           (when *math-mode?*
-            (let ((old-math-roman-mode? *math-roman-mode?*))
-              (set! *math-roman-mode?* #t)
+            (let ((old-math-font *math-font*))
+              (set! *math-font* ':rm)
               (lambda ()
-                (set! *math-roman-mode?* old-math-roman-mode?)))))
+                (set! *math-font* old-math-font)))))
          ((:em)
           (emit "<em>")
           (lambda () (emit "</em>")))
@@ -3405,7 +3405,7 @@
 (define do-hyphen
   (lambda ()
     (cond (*math-mode?*
-            (emit (if *math-roman-mode?* "-" "&minus;")))
+            (emit (if (eq? *math-font* ':rm) "-" "&minus;")))
           ((not *ligatures?*) (emit #\-))
           (else (let ((c (snoop-actual-char)))
                   (if (and (char? c) (char=? c #\-))
@@ -8125,6 +8125,45 @@
                   (emit (number->string n 16))
                   (emit ";"))))))
 
+(define tex-math-bb
+  (lambda (c)
+    (case c
+      ((#\C) "&#x2102;")
+      ((#\H) "&#x210d;")
+      ((#\N) "&#x2115;")
+      ((#\P) "&#x2119;")
+      ((#\Q) "&#x211a;")
+      ((#\R) "&#x211d;")
+      ((#\Z) "&#x2124;")
+      (else (string-append "&#x"
+                           (number->string
+                             (+ #x1d538 (- (char->integer c) (char->integer #\A))) 16)
+                           ";")))))
+
+(define tex-math-cal
+  (lambda (c)
+    (string-append "&#x"
+                   (number->string
+                     (+ #x1d4d0 (- (char->integer c) (char->integer #\A))) 16)
+                   ";")))
+
+(define tex-math-frak
+  (lambda (c)
+    (string-append "&#x"
+                   (number->string
+                     (+ #x1d56c (- (char->integer c) (char->integer #\A))) 16)
+                   ";")))
+
+(define emit-math-alpha-char
+  (lambda (c)
+    (case *math-font*
+      ((:rm) (emit c))
+      ((:bf) (emit "<b>") (emit c) (emit "</b>"))
+      ((:bb) (emit (if (char-upper-case? c) (tex-math-bb c) c)))
+      ((:cal) (emit (if (char-upper-case? c) (tex-math-cal c) c)))
+      ((:frak) (emit (if (char-upper-case? c) (tex-math-frak c) c)))
+      (else (emit "<em>") (emit c) (emit "</em>")))))
+
 (define do-tex-char
   (lambda (c)
     (cond ((and *comment-char* (char=? c *comment-char*))
@@ -8179,12 +8218,9 @@
                        (unless *math-script-mode?* (emit #\space))
                        (emit c)
                        (unless *math-script-mode?* (emit #\space)))
-                      (else (if (and (char-alphabetic? c)
-                                     (not *math-roman-mode?*))
-                                (begin (emit "<em>")
-                                  (emit c)
-                                  (emit "</em>"))
-                                (emit c)))))
+                      (else (if (char-alphabetic? c)
+                              (emit-math-alpha-char c)
+                              (emit c)))))
                  ((and *in-small-caps?* (char-lower-case? c))
                   (emit "<small>")
                   (emit (char-upcase c))
@@ -9467,12 +9503,14 @@ Try the commands
       (if (char=? c *esc-char*)
           (let ((x (get-ctl-seq)))
             (emit (cond ((string=? x "\\leq") "&#x2270;")
+                        ((string=? x "\\le") "&#x2270;")
                         ((string=? x "\\prec") "&#x2280;")
                         ((string=? x "\\preceq") "&#x22e0;")
                         ((string=? x "\\subset") "&#x2284;")
                         ((string=? x "\\subseteq") "&#x2288;")
                         ((string=? x "\\sqsubseteq") "&#x22e2;")
                         ((string=? x "\\geq") "&#x2271;")
+                        ((string=? x "\\ge") "&#x2271;")
                         ((string=? x "\\succ") "&#x2281;")
                         ((string=? x "\\succeq") "&#x22e1;")
                         ((string=? x "\\supset") "&#x2285;")
@@ -9484,7 +9522,7 @@ Try the commands
                         ((string=? x "\\approx") "&#x2249;")
                         ((string=? x "\\cong") "&#x2247;")
                         ((string=? x "\\asymp") "&#x226d;")
-                        (t (toss-back-string x) ""))))
+                        (t (toss-back-string x) "/"))))
         (case c
           ((#\< #\> #\=) (get-actual-char)
            (emit (case c
@@ -9588,8 +9626,18 @@ Try the commands
 (tex-def-math-prim "\\matrix" do-relax)
 (tex-def-math-prim "\\eqno" do-eqno)
 
-(tex-def-math-prim "\\mathbf" do-relax)
-(tex-def-math-prim "\\mathrm" do-relax)
+(define do-math-font
+  (lambda (f)
+    (lambda ()
+      (fluid-let ((*math-font* f))
+                 (tex2page-string (get-token))))))
+
+(tex-def-math-prim "\\mathbf" (do-math-font ':bf))
+(tex-def-math-prim "\\mathrm" (do-math-font ':rm))
+(tex-def-math-prim "\\mathbb" (do-math-font ':bb))
+(tex-def-math-prim "\\mathcal" (do-math-font ':cal))
+(tex-def-math-prim "\\mathfrak" (do-math-font ':frak))
+
 (tex-def-math-prim "\\over" do-over)
 (tex-def-math-prim "\\sqrt" (lambda ()
                               (emit "&radic;(")

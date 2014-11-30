@@ -37,7 +37,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20140923c") ;last change
+(defparameter *tex2page-version* "20141130c") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -259,7 +259,7 @@
 (defvar *math-height* nil)
 (defvar *math-mode-p* nil)
 (defvar *math-needs-image-p* nil)
-(defvar *math-roman-mode-p* nil)
+(defvar *math-font* nil)
 (defvar *math-script-mode-p* nil)
 (defvar *mfpic-file-num* nil)
 (defvar *mfpic-file-stem* nil)
@@ -2315,9 +2315,9 @@
      (case sw
        (:rm
         (when *math-mode-p*
-          (let ((old-math-roman-mode-p *math-roman-mode-p*))
-            (setq *math-roman-mode-p* t)
-            (lambda () (setq *math-roman-mode-p* old-math-roman-mode-p)))))
+          (let ((old-math-font *math-font*))
+            (setq *math-font* :rm)
+            (lambda () (setq *math-font* old-math-font)))))
        (:em (emit "<em>") (lambda () (emit "</em>")))
        (:it (emit "<i>") (lambda () (emit "</i>")))
        (:bf (emit "<strong>") (lambda () (emit "</strong>")))
@@ -2641,7 +2641,7 @@
 
 (defun do-hyphen ()
   (cond (*math-mode-p*
-         (emit (if *math-roman-mode-p* "-" "&minus;")))
+         (emit (if (eq *math-font* :rm) "-" "&minus;")))
         ((not *ligatures-p*) (emit #\-))
         (t
          (let ((c (snoop-actual-char)))
@@ -6603,6 +6603,35 @@
              (emit (write-to-string n :base 16))
              (emit ";")))))
 
+(defun tex-math-bb (c)
+  (case c
+    ((#\C) "&#x2102;")
+    ((#\H) "&#x210d;")
+    ((#\N) "&#x2115;")
+    ((#\P) "&#x2119;")
+    ((#\Q) "&#x211a;")
+    ((#\R) "&#x211d;")
+    ((#\Z) "&#x2124;")
+    (t (format nil "&#x~x;"
+               (+ #x1d538 (- (char-int c) (char-int #\A)))))))
+
+(defun tex-math-cal (c)
+  (format nil "&#x~x;"
+          (+ #x1d4d0 (- (char-int c) (char-int #\A)))))
+
+(defun tex-math-frak (c)
+  (format nil "&#x~x;"
+          (+ #x1d56c (- (char-int c) (char-int #\A)))))
+
+(defun emit-math-alpha-char (c)
+  (case *math-font*
+    ((:rm) (emit c))
+    ((:bf) (emit "<b>") (emit c) (emit "</b>"))))
+    ((:bb) (emit (if (upper-case-p c) (tex-math-bb c) c)))
+    ((:cal) (emit (if (upper-case-p c) (tex-math-cal c) c)))
+    ((:frak) (emit (if (upper-case-p c) (tex-math-frak c) c)))
+    (t (emit "<em>") (emit c) (emit "</em>"))))
+
 (defun do-tex-char (c)
   (cond ((and *comment-char* (char= c *comment-char*)) (do-comment))
         ((inside-false-world-p) t)
@@ -6648,9 +6677,9 @@
                    (unless *math-script-mode-p* (emit #\space))
                    (emit c)
                    (unless *math-script-mode-p* (emit #\space)))
-                  (t
-                   (if (and (alpha-char-p c) (not *math-roman-mode-p*))
-                       (progn (emit "<em>") (emit c) (emit "</em>")) (emit c)))))
+                  (t (if (alpha-char-p c)
+                       (emit-math-alpha-char c)
+                       (emit c)))))
                ((and *in-small-caps-p* (lower-case-p c)) (emit "<small>")
                 (emit (char-upcase c)) (emit "</small>"))
                (t (emit c))))))
@@ -7714,6 +7743,8 @@ Try the commands
 (tex-def-math-prim "\\smile" (lambda () (emit "&#x2323;")))
 (tex-def-math-prim "\\frown" (lambda () (emit "&#x2322;")))
 (tex-def-math-prim "\\geq" (lambda () (emit "&ge;")))
+(tex-def-math-prim "\\succ" (lambda () (emit "&#x227b;")))
+(tex-def-math-prim "\\succeq" (lambda () (emit "&#x227d;")))
 (tex-def-math-prim "\\gg" (lambda () (emit "&#x226b;")))
 (tex-def-math-prim "\\supset" (lambda () (emit "&sup;")))
 (tex-def-math-prim "\\supseteq" (lambda () (emit "&supe;")))
@@ -7743,12 +7774,14 @@ Try the commands
     (if (char= c *esc-char*)
         (let ((x (get-ctl-seq)))
           (emit (cond ((string= x "\\leq") "&#x2270;")
+                      ((string= x "\\le") "&#x2270;")
                       ((string= x "\\prec") "&#x2280;")
                       ((string= x "\\preceq") "&#x22e0;")
                       ((string= x "\\subset") "&#x2284;")
                       ((string= x "\\subseteq") "&#x2288;")
                       ((string= x "\\sqsubseteq") "&#x22e2;")
                       ((string= x "\\geq") "&#x2271;")
+                      ((string= x "\\ge") "&#x2271;")
                       ((string= x "\\succ") "&#x2281;")
                       ((string= x "\\succeq") "&#x22e1;")
                       ((string= x "\\supset") "&#x2285;")
@@ -7760,7 +7793,7 @@ Try the commands
                       ((string= x "\\approx") "&#x2249;")
                       ((string= x "\\cong") "&#x2247;")
                       ((string= x "\\asymp") "&#x226d;")
-                      (t (toss-back-string x) ""))))
+                      (t (toss-back-string x) "/"))))
       (case c
         ((#\< #\> #\=) (get-actual-char)
          (emit (ecase c
@@ -7869,9 +7902,20 @@ Try the commands
 
 (tex-def-math-prim "\\eqno" #'do-eqno)
 
+(defun do-math-font (f)
+  (lambda ()
+    (let ((*math-font* f))
+      (tex2page-string (get-token)))))
+
 (tex-def-math-prim "\\mathbf" #'do-relax)
 
-(tex-def-math-prim "\\mathrm" #'do-relax)
+(tex-def-math-prim "\\mathrm" (do-math-font :rm))
+
+(tex-def-math-prim "\\mathbb" (do-math-font :bb))
+
+(tex-def-math-prim "\\mathcal" (do-math-font :cal))
+
+(tex-def-math-prim "\\mathfrak" (do-math-font :frak))
 
 (tex-def-math-prim "\\over" #'do-over); (lambda () (emit "/")))
 

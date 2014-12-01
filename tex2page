@@ -9464,6 +9464,7 @@ Try the commands
 ;8. relations
 
 (tex-def-math-prim "\\leq" (lambda ()(emit "&le;")))
+(tex-def-math-prim "\\leqslant" (lambda () (emit "&#x2a7d;")))
 (tex-def-math-prim "\\prec" (lambda () (emit "&#x227a;")))
 (tex-def-math-prim "\\preceq" (lambda () (emit "&#x227c;")))
 (tex-def-math-prim "\\ll" (lambda () (emit "&#x226a;")))
@@ -9475,6 +9476,7 @@ Try the commands
 (tex-def-math-prim "\\smile" (lambda () (emit "&#x2323;")))
 (tex-def-math-prim "\\frown" (lambda () (emit "&#x2322;")))
 (tex-def-math-prim "\\geq" (lambda () (emit "&ge;")))
+(tex-def-math-prim "\\geqslant" (lambda () (emit "&#x2a7e;")))
 (tex-def-math-prim "\\succ" (lambda () (emit "&#x227b;")))
 (tex-def-math-prim "\\succeq" (lambda () (emit "&#x227d;")))
 (tex-def-math-prim "\\gg" (lambda () (emit "&#x226b;")))

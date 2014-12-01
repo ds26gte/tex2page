@@ -37,7 +37,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20141130c") ;last change
+(defparameter *tex2page-version* "20141201c") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -6626,7 +6626,7 @@
 (defun emit-math-alpha-char (c)
   (case *math-font*
     ((:rm) (emit c))
-    ((:bf) (emit "<b>") (emit c) (emit "</b>"))))
+    ((:bf) (emit "<b>") (emit c) (emit "</b>"))
     ((:bb) (emit (if (upper-case-p c) (tex-math-bb c) c)))
     ((:cal) (emit (if (upper-case-p c) (tex-math-cal c) c)))
     ((:frak) (emit (if (upper-case-p c) (tex-math-frak c) c)))

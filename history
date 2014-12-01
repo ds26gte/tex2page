@@ -2,10 +2,10 @@ Last change 2014-12-01
 
 2014 Dec 1
 
-\left, \right can take |. 
+\left, \right can take |.
 
 Don't load amsmath for math snippets as it breaks \matrix{...}
-(monitor if not loading it breaks something else). 
+(monitor if not loading it breaks something else).
 
 \frac{...}{...} made similar to ...\over.... Suggested by Paulo
 Ney de Souza.
@@ -13,6 +13,8 @@ Ney de Souza.
 {array}: like {tabular} but in math mode.
 
 Use Unicode for \dots, \cdots, \vdots, \ddots.
+
+Added \leqslant, \geqslant. Suggested by Paulo Ney de Souza.
 
 Nov 30, 2014
 

@@ -9621,6 +9621,22 @@ Try the commands
 
 ;end appendix F
 
+;latex sec 3.3.2
+
+(tex-def-math-prim "\\mho" (lambda () (emit "&#x2127;")))
+
+;amssymb
+
+(tex-def-math-prim "\\because" (lambda () (emit "&#x2235;")))
+(tex-def-math-prim "\\geqslant" (lambda () (emit "&#x2a7e;")))
+(tex-def-math-prim "\\leqslant" (lambda () (emit "&#x2a7d;")))
+(tex-def-math-prim "\\therefore" (lambda () (emit "&#x2234;")))
+(tex-def-math-prim "\\Game" (lambda () (emit "&#x2141;")))
+(tex-def-math-prim "\\Finv" (lambda () (emit "&#x2132;")))
+(tex-def-math-prim "\\beth" (lambda () (emit "&#x2136;")))
+(tex-def-math-prim "\\gimel" (lambda () (emit "&#x2137;")))
+(tex-def-math-prim "\\daleth" (lambda () (emit "&#x2138;")))
+
 ;((string=? s "\\vdots" (lambda () (emit ":")))
 
 (tex-def-math-prim "\\eqalign" (lambda () (do-eqalign ':eqalign)))

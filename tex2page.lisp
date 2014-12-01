@@ -7743,7 +7743,6 @@ Try the commands
 ;8. relations
 
 (tex-def-math-prim "\\leq" (lambda () (emit "&le;")))
-(tex-def-math-prim "\\leqslant" (lambda () (emit "&#x2a7d;")))
 (tex-def-math-prim "\\prec" (lambda () (emit "&#x227a;")))
 (tex-def-math-prim "\\preceq" (lambda () (emit "&#x227c;")))
 (tex-def-math-prim "\\ll" (lambda () (emit "&#x226a;")))
@@ -7755,7 +7754,6 @@ Try the commands
 (tex-def-math-prim "\\smile" (lambda () (emit "&#x2323;")))
 (tex-def-math-prim "\\frown" (lambda () (emit "&#x2322;")))
 (tex-def-math-prim "\\geq" (lambda () (emit "&ge;")))
-(tex-def-math-prim "\\geqslant" (lambda () (emit "&#x2a7e;")))
 (tex-def-math-prim "\\succ" (lambda () (emit "&#x227b;")))
 (tex-def-math-prim "\\succeq" (lambda () (emit "&#x227d;")))
 (tex-def-math-prim "\\gg" (lambda () (emit "&#x226b;")))
@@ -7898,6 +7896,24 @@ Try the commands
 (tex-def-prim "\\ddag" (lambda () (emit "&Dagger;")))
 
 ;end appendix F
+
+;latex sec 3.3.2
+
+(tex-def-math-prim "\\mho" (lambda () (emit "&#x2127;")))
+
+;amssymb
+
+(tex-def-math-prim "\\because" (lambda () (emit "&#x2235;")))
+(tex-def-math-prim "\\geqslant" (lambda () (emit "&#x2a7e;")))
+(tex-def-math-prim "\\leqslant" (lambda () (emit "&#x2a7d;")))
+(tex-def-math-prim "\\therefore" (lambda () (emit "&#x2234;")))
+(tex-def-math-prim "\\Game" (lambda () (emit "&#x2141;")))
+(tex-def-math-prim "\\Finv" (lambda () (emit "&#x2132;")))
+(tex-def-math-prim "\\beth" (lambda () (emit "&#x2136;")))
+(tex-def-math-prim "\\gimel" (lambda () (emit "&#x2137;")))
+(tex-def-math-prim "\\daleth" (lambda () (emit "&#x2138;")))
+
+;
 
 (tex-def-math-prim "\\eqalign" (lambda () (do-eqalign :eqalign)))
 

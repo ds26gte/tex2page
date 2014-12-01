@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Last modified: 2013-02-08
+# Last modified: 2014-12-01
 
 # Set scmxlate to the pathname of scmxlate/scmxlate.scm
 # on your system, if you know it.  Otherwise let
@@ -25,10 +25,7 @@ findscmxlate() {
   done
   echo Couldn\'t find scmxlate/scmxlate.scm on your machine.
   echo Trying to get it off the Internet.
-  wget http://www.ccs.neu.edu/~dorai/scmxlate/scmxlate.tar.bz2
-  test -f scmxlate.tar.bz2 &&\
-  bunzip2 scmxlate.tar.bz2 &&\
-  tar xf scmxlate.tar &&\
+  git clone https://github.com/ds26gte/scmxlate
   scmxlate=scmxlate/scmxlate.scm
 
   test "$scmxlate" && return
@@ -63,7 +60,7 @@ makeit() {
   case "$dialect" in
     sbcl)
     sbcl --eval '(require :sb-executable)' \
-    --eval '(sb-executable:make-executable "my-tex2page" 
+    --eval '(sb-executable:make-executable "my-tex2page"
     (list (compile-file "tex2page.lisp")))' \
     --eval '(sb-ext:quit)'
     rm tex2page.fasl

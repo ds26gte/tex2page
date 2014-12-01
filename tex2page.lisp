@@ -122,8 +122,6 @@
 
 (defparameter *directory-separator* #-windows "/" #+windows "\\")
 
-(defparameter *bye-tex* #-windows " \\\\bye" #+windows " \\bye")
-
 (defparameter *int-corresp-to-0* (char-code #\0))
 
 (defparameter *verbatim-visible-space*
@@ -1187,6 +1185,7 @@
       (cond ((string= s "(") (setq *math-delim-left* :lparen))
             ((string= s "[") (setq *math-delim-left* :lbrack))
             ((string= s "\\{") (setq *math-delim-left* :lbrace))
+            ((string= s "|") (setq *math-delim-left* :lvert))
             (t (terror 'do-math-left))))))
 
 (defun do-math-right ()
@@ -1196,6 +1195,7 @@
       (cond ((string= s ")") (setq *math-delim-right* :rparen))
             ((string= s "]") (setq *math-delim-right* :rbrack))
             ((string= s "\\}") (setq *math-delim-right* :rbrace))
+            ((string= s "|") (setq *math-delim-right* :rvert))
             (t (terror 'do-math-right)))
       (egroup))))
 
@@ -3799,15 +3799,15 @@
 
 (defun dump-tex-preamble (o)
   (case *tex-format*
-    (:latex
+    ((:latex)
      (princ "\\documentclass{" o)
      (princ (if *using-chapters-p* "report" "article") o)
      (princ "}" o)
      (terpri o)
      (princ *imgpreamble* o)
-     (terpri o)
-     (princ "\\ifx\\bmatrix\\UNDEFINED" o)
-     (princ "\\usepackage{amsmath}\\fi" o)
+     ;(terpri o)
+     ;(princ "\\ifx\\bmatrix\\UNDEFINED" o)
+     ;(princ "\\usepackage{amsmath}\\fi" o)
      (terpri o)
      (when (member :includegraphics *imgpreamble-inferred*)
        (princ "\\ifx\\includegraphics\\UNDEFINED" o)
@@ -3842,7 +3842,7 @@
 
 (defun dump-tex-postamble (o)
   (case *tex-format*
-    ((latex) (princ "\\end{document}" o) (terpri o))
+    ((:latex) (princ "\\end{document}" o) (terpri o))
     (t (princ "\\bye" o) (terpri o))))
 
 (defun skipping-img-file ()
@@ -4393,51 +4393,51 @@
 
 (defun do-htmlimgmagnification () t)
 
-(let ((latex-prog-name nil)
+(let ((tex-prog-name nil)
       (tex-output-format nil))
   (defun call-tex (f)
     ;run tex on f and return f.ps or f.pdf if successful
-    (unless latex-prog-name
+    (unless tex-prog-name
       (let ((d (find-def "\\TZPtexprogname")))
         (when d (setq *tex-prog-name* (tdef*-expansion d))))
-      (unless *tex-prog-name*
-        (setq *tex-prog-name* "pdftex"))
-      (setq latex-prog-name
-            (concatenate 'string (subseq *tex-prog-name*
-                                         (- (length *tex-prog-name*) 3))
-              "latex"))
+      (unless *tex-prog-name* (setq *tex-prog-name* "pdftex"))
+      (setq tex-prog-name *tex-prog-name*)
       (setq tex-output-format
             (if (or (eql (search "pdf" *tex-prog-name*) 0)
                     (eql (search "xe" *tex-prog-name*) 0)
                     (eql (search "lua" *tex-prog-name*) 0))
-                :pdf :dvi)))
-    (let* ((dvifile (concatenate 'string f
-                      (if (eq tex-output-format :pdf)
-                          ".pdf" ".dvi")))
-           (outfile dvifile))
-      (system (concatenate 'string
-                (if (eq *tex-format* :latex)
-                    latex-prog-name *tex-prog-name*)
-                " " f *bye-tex*))
-      (when (probe-file dvifile)
-        (let ((logfile (concatenate 'string f ".log")))
-          (when (probe-file logfile)
-            ;scan the log file for sign of problems
-            (let ((fine-p
-                   (with-open-file (i logfile :direction :input)
-                     (loop
-                       (let ((x (read-line i nil :eof-object)))
-                         (when (eq x :eof-object) (return t))
-                         (when (search "! I can't find file" x)
-                           ;the output can't be good
-                           (return nil)))))))
-              (when fine-p
-                (unless (eq tex-output-format :pdf)
-                  (let ((psfile (concatenate 'string f ".ps")))
-                    (system
-                     (concatenate 'string "dvips " dvifile " -o " psfile))
-                    (setq outfile psfile)))
-                outfile))))))))
+              :pdf :dvi))
+      (when (eq *tex-format* :latex)
+        (setq tex-prog-name
+              (concatenate 'string (subseq *tex-prog-name* 0
+                                           (- (length *tex-prog-name*) 3))
+                           "latex"))))
+      (let* ((dvifile (concatenate 'string f
+                                   (if (eq tex-output-format :pdf)
+                                     ".pdf" ".dvi")))
+             (outfile dvifile))
+        (system (concatenate 'string
+                             tex-prog-name
+                             " " f))
+        (when (probe-file dvifile)
+          (let ((logfile (concatenate 'string f ".log")))
+            (when (probe-file logfile)
+              ;scan the log file for sign of problems
+              (let ((fine-p
+                      (with-open-file (i logfile :direction :input)
+                        (loop
+                          (let ((x (read-line i nil :eof-object)))
+                            (when (eq x :eof-object) (return t))
+                            (when (search "! I can't find file" x)
+                              ;the output can't be good
+                              (return nil)))))))
+                (when fine-p
+                  (unless (eq tex-output-format :pdf)
+                    (let ((psfile (concatenate 'string f ".ps")))
+                      (system
+                        (concatenate 'string "dvips " dvifile " -o " psfile))
+                      (setq outfile psfile)))
+                  outfile))))))))
 
 (defun ps-to-img/gif/netpbm (psfile f)
   (system
@@ -4744,12 +4744,22 @@
              *tabular-stack* old-tabular-stack
              *ligatures-p* old-ligatures-p)))))
 
+#|
 (defun do-latex-frac ()
   (emit "(")
   (tex2page-string (get-token))
   (emit "/")
   (tex2page-string (get-token))
   (emit ")"))
+|#
+
+(defun do-latex-frac ()
+  (tex2page-string (ungroup (get-token)))
+  (emit
+    (cond ((or (not *in-display-math-p*) *math-script-mode-p*) "/")
+          (t (incf *math-height*)
+             "</td></tr><tr><td style=\"height=1pt; background-color: black\"></td></tr><tr><td align=center>")))
+  (tex2page-string (ungroup (get-token))))
 
 (defun do-tex-frac ()
   (ignorespaces)
@@ -6472,10 +6482,11 @@
   (emit-newline)
   (pop-tabular-stack :ruled-table))
 
-(defun do-tabular ()
+(defun do-tabular (&optional mathp)
   (do-end-para)
   (get-bracketed-text-if-any)
   (bgroup)
+  (unless mathp
   (add-postlude-to-top-frame
    (let ((old-math-mode-p *math-mode-p*)
          (old-in-display-math-p *in-display-math-p*))
@@ -6483,7 +6494,7 @@
      (setq *in-display-math-p* nil)
      (lambda ()
        (setq *math-mode-p* old-math-mode-p)
-       (setq *in-display-math-p* old-in-display-math-p))))
+       (setq *in-display-math-p* old-in-display-math-p)))))
   (let ((border-width (if (position #\| (get-group) :test #'char=) 1 0)))
     (push :tabular *tabular-stack*)
     (emit "<table border=")
@@ -7977,6 +7988,7 @@ Try the commands
 (tex-def-prim "\\appendix" #'do-appendix)
 
 (tex-def-prim "\\appendixname" (lambda () (emit "Appendix ")))
+(tex-def-prim "\\array" (lambda () (do-tabular t)))
 (tex-def-prim "\\author" #'do-author)
 
 (tex-def-prim "\\b" (lambda () (do-diacritic :barunder)))
@@ -7997,8 +8009,8 @@ Try the commands
 (tex-def-prim "\\c" (lambda () (do-diacritic :cedilla)))
 (tex-def-prim "\\caption" #'do-caption)
 (tex-def-prim "\\catcode" #'do-catcode)
-(tex-def-math-prim "\\cdots"
- (lambda () (emit "<tt>&middot;&middot;&middot;</tt>")))
+;(tex-def-math-prim "\\cdots" (lambda () (emit "<tt>&middot;&middot;&middot;</tt>")))
+(tex-def-prim "\\cdots" (lambda () (emit "&#x22ef;")))
 (tex-def-prim "\\center" (lambda () (do-block :center)))
 (tex-def-prim "\\centerline" (lambda () (do-function "\\centerline")))
 (tex-def-prim "\\chapter"
@@ -8037,6 +8049,7 @@ Try the commands
 (tex-def-prim "\\dag" (lambda () (emit "&dagger;")))
 (tex-def-prim "\\date" #'do-date)
 (tex-def-prim "\\ddag" (lambda () (emit "&Dagger;")))
+(tex-def-prim "\\ddots" (lambda () (emit "&#x22f1;")))
 (tex-def-prim "\\def" (lambda () (do-def (globally-p) nil)))
 (tex-def-prim "\\defcsactive" (lambda () (do-defcsactive (globally-p))))
 (tex-def-prim "\\definecolor" #'do-definecolor)
@@ -8072,7 +8085,8 @@ Try the commands
  (lambda () (tex-def-0arg "\\TZPmathimage" "0")))
 
 (tex-def-prim "\\dontuseimgforhtmlmathintext" (lambda () t))
-(tex-def-prim "\\dots" (lambda () (emit "<tt>...</tt>")))
+;(tex-def-prim "\\dots" (lambda () (emit "<tt>...</tt>")))
+(tex-def-prim "\\dots" (lambda () (emit "&#x2026;")))
 
 (tex-def-prim "\\edef" (lambda () (do-def (globally-p) t)))
 (tex-def-prim-0arg "\\egroup" "}")
@@ -8086,6 +8100,7 @@ Try the commands
 (tex-def-prim "\\end" #'do-end)
 (tex-def-prim "\\endalign" #'do-end-equation)
 (tex-def-prim "\\endalltt" #'do-end-alltt)
+(tex-def-prim "\\endarray" #'do-end-tabular)
 (tex-def-prim "\\endcenter" #'do-end-block)
 (tex-def-prim "\\enddescription"
  (lambda ()
@@ -8637,11 +8652,21 @@ Try the commands
 
 (tex-def-prim "\\v" (lambda () (do-diacritic :hacek)))
 
+#|
 (tex-def-prim "\\vdots"
  (lambda ()
      (emit "<tt><table><tr><td>.</td></tr>")
      (emit "<tr><td>.</td></tr>")
      (emit "<tr><td>.</td></tr></table></tt>")))
+
+(tex-def-prim "\\ddots"
+              (lambda ()
+     (emit "<tt><table><tr><td>.</td></tr>")
+     (emit "<tr><td></td><td>.</td></tr>")
+     (emit "<tr><td></td><td></td><td>.</td></tr></table></tt>")))
+|#
+
+(tex-def-prim "\\vdots" (lambda () (emit "&#x22ee;")))
 
 (tex-def-prim "\\verb" #'do-verb)
 

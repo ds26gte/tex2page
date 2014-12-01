@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20141130") ;last change
+(define *tex2page-version* "20141201") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -1601,6 +1601,7 @@
         (cond ((string=? s "(") (set! *math-delim-left* ':lparen))
               ((string=? s "[") (set! *math-delim-left* ':lbrack))
               ((string=? s "\\{") (set! *math-delim-left* ':lbrace))
+              ((string=? s "|") (set! *math-delim-left* ':lvert))
               (else (terror 'do-math-left)))))))
 
 (define do-math-right
@@ -1611,6 +1612,7 @@
         (cond ((string=? s ")") (set! *math-delim-right* ':rparen))
               ((string=? s "]") (set! *math-delim-right* ':rbrack))
               ((string=? s "\\}") (set! *math-delim-right* ':rbrace))
+              ((string=? s "|") (set! *math-delim-right* ':rvert))
               (else (terror 'do-math-right)))
         (egroup)))))
 
@@ -4807,8 +4809,8 @@
        (display (if *using-chapters?* "report" "article") o)
        (display "}" o) (newline o)
        (display *imgpreamble* o) (newline o)
-       (display "\\ifx\\bmatrix\\UNDEFINED" o)
-       (display "\\usepackage{amsmath}\\fi" o) (newline o)
+       ;(display "\\ifx\\bmatrix\\UNDEFINED" o)
+       ;(display "\\usepackage{amsmath}\\fi" o) (newline o)
        (when (memv ':includegraphics *imgpreamble-inferred*)
          (display "\\ifx\\includegraphics\\UNDEFINED" o)
          (display "\\usepackage{graphicx}\\fi" o)
@@ -5515,7 +5517,7 @@
     ))
 
 (define call-tex
-  (let ((latex-prog-name #f)
+  (let ((tex-prog-name #f)
         (tex-output-format #f))
   (lambda (f)
     ;run tex on f and return f.ps or f.pdf if successful
@@ -5523,25 +5525,25 @@
       (let ((d (find-def "\\TZPtexprogname")))
         (when d (set! *tex-prog-name* (tdef.expansion d))))
       (unless *tex-prog-name* (set! *tex-prog-name* "pdftex"))
-      (set! latex-prog-name
-        (string-append (substring *tex-prog-name*
-                                  0 (- (string-length *tex-prog-name*) 3))
-                       "latex"))
+      (set! tex-prog-name *tex-prog-name*)
       (set! tex-output-format
         (if (or (eqv? (substring? "pdf" *tex-prog-name*) 0)
                 (eqv? (substring? "xe" *tex-prog-name*) 0)
                 (eqv? (substring? "lua" *tex-prog-name*) 0))
-          ':pdf ':dvi)))
+          ':pdf ':dvi))
+      (when (eq? *tex-format* ':latex)
+        (set! tex-prog-name
+          (string-append (substring *tex-prog-name*
+                                    0 (- (string-length *tex-prog-name*) 3))
+                         "latex"))))
     (let* ((dvifile (string-append
                       f (if (eq? tex-output-format ':pdf)
                           ".pdf" ".dvi")))
            (outfile dvifile))
       ;[shd we check if dvifile already exists? no]
       (system (string-append
-                (if (or (eqv? *tex-format* ':latex) (eqv? *tex-format* 'latex))
-                  latex-prog-name
-                  *tex-prog-name*)
-               " " f *bye-tex*))
+                tex-prog-name
+               " " f))
       (and (file-exists? dvifile)
            (let ((logfile (string-append f ".log")))
              (and (file-exists? logfile)
@@ -5942,11 +5944,12 @@
 
 (define do-latex-frac
   (lambda ()
-    (emit "(")
-    (tex2page-string (get-token))
-    (emit "/")
-    (tex2page-string (get-token))
-    (emit ")")))
+    (tex2page-string (ungroup (get-token)))
+    (emit
+      (cond ((or (not *in-display-math?*) *math-script-mode?*) "/")
+            (else (set! *math-height* (+ *math-height* 1))
+               "</td></tr><tr><td style=\"height=1pt; background-color: black\"></td></tr><tr><td align=center>")))
+    (tex2page-string (ungroup (get-token)))))
 
 (define do-tex-frac
   (lambda ()
@@ -7991,18 +7994,19 @@
     (pop-tabular-stack ':ruled-table)))
 
 (define do-tabular
-  (lambda ()
+  (lambda (math?)
     (do-end-para)
     (get-bracketed-text-if-any)
     (bgroup)
-    (add-postlude-to-top-frame
-      (let ((old-math-mode? *math-mode?*)
-            (old-in-display-math? *in-display-math?*))
-        (set! *math-mode?* #f)
-        (set! *in-display-math?* #f)
-        (lambda ()
-          (set! *math-mode?* old-math-mode?)
-          (set! *in-display-math?* old-in-display-math?))))
+    (unless math?
+      (add-postlude-to-top-frame
+        (let ((old-math-mode? *math-mode?*)
+              (old-in-display-math? *in-display-math?*))
+          (set! *math-mode?* #f)
+          (set! *in-display-math?* #f)
+          (lambda ()
+            (set! *math-mode?* old-math-mode?)
+            (set! *in-display-math?* old-in-display-math?)))))
     (let ((border-width
             (if (string-index (get-group) #\|) 1 0)))
       (set! *tabular-stack* (cons ':tabular *tabular-stack*))
@@ -9522,7 +9526,7 @@ Try the commands
                         ((string=? x "\\approx") "&#x2249;")
                         ((string=? x "\\cong") "&#x2247;")
                         ((string=? x "\\asymp") "&#x226d;")
-                        (t (toss-back-string x) "/"))))
+                        (else (toss-back-string x) "/"))))
         (case c
           ((#\< #\> #\=) (get-actual-char)
            (emit (case c
@@ -9685,6 +9689,7 @@ Try the commands
 (tex-def-prim "\\alltt" do-alltt)
 (tex-def-prim "\\appendix" do-appendix)
 (tex-def-prim "\\appendixname" (lambda () (emit "Appendix ")))
+(tex-def-prim "\\array" (lambda () (do-tabular #t)))
 (tex-def-prim "\\author" do-author)
 
 (tex-def-prim "\\b" (lambda () (do-diacritic ':barunder)))
@@ -9706,8 +9711,7 @@ Try the commands
 (tex-def-prim "\\c" (lambda () (do-diacritic ':cedilla)))
 (tex-def-prim "\\caption" do-caption)
 (tex-def-prim "\\catcode" do-catcode)
-(tex-def-math-prim "\\cdots"
-  (lambda () (emit "<tt>&middot;&middot;&middot;</tt>")))
+(tex-def-prim "\\cdots" (lambda () (emit "&#x22ef;")))
 (tex-def-prim "\\center" (lambda () (do-block ':center)))
 (tex-def-prim "\\centerline" (lambda () (do-function "\\centerline")))
 (tex-def-prim "\\chapter"
@@ -9740,6 +9744,7 @@ Try the commands
 (tex-def-prim "\\dag" (lambda () (emit "&dagger;")))
 (tex-def-prim "\\date" do-date)
 (tex-def-prim "\\ddag" (lambda () (emit "&Dagger;")))
+(tex-def-prim "\\ddots" (lambda () (emit "&#x22f1;")))
 (tex-def-prim "\\def" (lambda () (do-def (global?) #f)))
 (tex-def-prim "\\defcsactive" (lambda () (do-defcsactive (global?))))
 (tex-def-prim "\\definecolor" do-definecolor)
@@ -9775,7 +9780,7 @@ Try the commands
   (lambda ()
    #t
    ))
-(tex-def-prim "\\dots" (lambda () (emit "<tt>...</tt>")))
+(tex-def-prim "\\dots" (lambda () (emit "&#x2026;")))
 
 (tex-def-prim "\\edef" (lambda () (do-def (global?) #t)))
 ;(tex-def-prim "\\egroup" egroup)
@@ -9788,6 +9793,7 @@ Try the commands
 (tex-def-prim "\\end" do-end)
 (tex-def-prim "\\endalign" do-end-equation)
 (tex-def-prim "\\endalltt" do-end-alltt)
+(tex-def-prim "\\endarray" do-end-tabular)
 (tex-def-prim "\\endcenter" do-end-block)
 (tex-def-prim "\\enddescription"
               (lambda ()
@@ -10114,7 +10120,7 @@ Try the commands
 (tex-def-prim "\\table" (lambda () (do-table/figure ':table)))
 (tex-def-prim "\\tableplain" do-table-plain)
 (tex-def-prim "\\tableofcontents" do-toc)
-(tex-def-prim "\\tabular" do-tabular)
+(tex-def-prim "\\tabular" (lambda () (do-tabular #f)))
 (tex-def-prim "\\tag" do-tag)
 (tex-def-prim "\\texonly" (lambda () (ignore-tex-specific-text "texonly")))
 (tex-def-prim "\\textasciicircum" (lambda () (emit "^")))
@@ -10195,11 +10201,8 @@ Try the commands
 (tex-def-prim "\\urlp" do-urlp)
 
 (tex-def-prim "\\v" (lambda () (do-diacritic ':hacek)))
-(tex-def-prim "\\vdots"
-  (lambda ()
-    (emit "<tt><table><tr><td>.</td></tr>")
-    (emit "<tr><td>.</td></tr>")
-    (emit "<tr><td>.</td></tr></table></tt>")))
+(tex-def-prim "\\vdots" (lambda () (emit "&#x22ee;")))
+
 (tex-def-prim "\\verb" do-verb)
 (tex-def-prim "\\verbatim" do-verbatim)
 (tex-def-prim "\\verbatiminput" do-verbatiminput)
@@ -10735,5 +10738,3 @@ Try the commands
     (tex2page
      (and (>= (length args) 1)
           (list-ref args 0)))))
-
-; vi:ft=scheme

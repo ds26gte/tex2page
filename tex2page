@@ -2010,8 +2010,7 @@
 
 (define do-title
   (lambda ()
-    ((if (or (eqv? *tex-format* ':latex)
-             (eqv? *tex-format* 'latex))
+    ((if (eqv? *tex-format* ':latex)
          do-latex-title
          do-subject))))
 
@@ -2214,7 +2213,7 @@
           ((string=? s "\\chapter")
            (!using-chapters)
            (write-aux `(!using-chapters))
-           (when (and (or (eqv? *tex-format* ':latex) (eqv? *tex-format* 'latex))
+           (when (and (eqv? *tex-format* ':latex)
                     (< (get-gcount "\\secnumdepth") -1))
                (set-gcount! "\\secnumdepth" 2))
            0)
@@ -2283,7 +2282,7 @@
       (emit ">")
       (let ((write-to-toc? ;kludge?
               (and *toc-page*
-                   (not (and (or (eqv? *tex-format* ':latex) (eqv? *tex-format* 'latex))
+                   (not (and (eqv? *tex-format* ':latex)
                              (string=? header "Contents"))))))
         (case seclvl
           ((-1)
@@ -2339,7 +2338,7 @@
         ;
         (let ((tocdepth (get-gcount "\\tocdepth")))
           (when (and write-to-toc?
-                     (not (and (or (eqv? *tex-format* ':latex) (eqv? *tex-format* 'latex)) starred?))
+                     (not (and (eqv? *tex-format* ':latex) starred?))
                      (or (< tocdepth -1)
                          (<= seclvl tocdepth)))
             (write-aux
@@ -2738,7 +2737,7 @@
     (fluid-let ((*subjobname* (string-append *jobname* *toc-file-suffix*))
                 (*img-file-count* 0)
                 (*imgdef-file-count* 0))
-      (when (or (eqv? *tex-format* ':latex) (eqv? *tex-format* 'latex))
+      (when (eqv? *tex-format* ':latex)
         (tex2page-string
          (if *using-chapters?*
              "\\chapter*{\\contentsname}" "\\section*{\\contentsname}")))
@@ -2834,7 +2833,7 @@
 
 (define do-footnote
   (lambda ()
-    ((if (or (eqv? *tex-format* ':latex) (eqv? *tex-format* 'latex))
+    ((if (eqv? *tex-format* ':latex)
         do-numbered-footnote
         do-plain-footnote))))
 
@@ -3980,7 +3979,7 @@
 (define do-thebibliography
   (lambda ()
     (get-group)
-    (when (or (eqv? *tex-format* ':latex) (eqv? *tex-format* 'latex))
+    (when (eqv? *tex-format* ':latex)
       (tex2page-string
         (if *using-chapters?*
             "\\chapter*{\\bibname}" "\\section*{\\refname}")))
@@ -4804,7 +4803,7 @@
 (define dump-tex-preamble
   (lambda (o)
     (case *tex-format*
-      ((:latex latex)
+      ((:latex)
        (display "\\documentclass{" o)
        (display (if *using-chapters?* "report" "article") o)
        (display "}" o) (newline o)
@@ -4841,7 +4840,7 @@
 (define dump-tex-postamble
   (lambda (o)
     (case *tex-format*
-      ((:latex latex)
+      ((:latex)
        (display "\\end{document}" o) (newline o))
       (else
         (display "\\bye" o) (newline o)))))
@@ -5974,7 +5973,7 @@
 
 (define do-frac
   (lambda ()
-    ((if (or (eqv? *tex-format* ':latex) (eqv? *tex-format* 'latex))
+    ((if (eqv? *tex-format* ':latex)
          do-latex-frac
        do-tex-frac))))
 
@@ -7372,7 +7371,7 @@
 
 (define do-verbatim
   (lambda ()
-    (if (or (eqv? *tex-format* ':latex) (eqv? *tex-format* 'latex))
+    (if (eqv? *tex-format* ':latex)
       (do-verbatim-latex "verbatim")
       (do-verbatim-eplain))))
 
@@ -7972,7 +7971,7 @@
            (emit-newline)))
         ((:header) (emit #\space))
         (else
-          (when (and (or (eqv? *tex-format* ':latex) (eqv? *tex-format* 'latex))
+          (when (and (eqv? *tex-format* ':latex)
                      (string=? z "\\\\"))
             (get-bracketed-text-if-any)
             (let ((c (snoop-actual-char)))
@@ -9640,7 +9639,7 @@ Try the commands
 (tex-def-math-prim "\\gimel" (lambda () (emit "&#x2137;")))
 (tex-def-math-prim "\\daleth" (lambda () (emit "&#x2138;")))
 
-;((string=? s "\\vdots" (lambda () (emit ":")))
+;
 
 (tex-def-math-prim "\\eqalign" (lambda () (do-eqalign ':eqalign)))
 (tex-def-math-prim "\\eqalignno" (lambda () (do-eqalign ':eqalignno)))

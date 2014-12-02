@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20141201") ;last change
+(define *tex2page-version* "20141202") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -9638,6 +9638,8 @@ Try the commands
 (tex-def-math-prim "\\beth" (lambda () (emit "&#x2136;")))
 (tex-def-math-prim "\\gimel" (lambda () (emit "&#x2137;")))
 (tex-def-math-prim "\\daleth" (lambda () (emit "&#x2138;")))
+(tex-def-math-prim "\\lozenge" (lambda () (emit "&#x2662;")))
+(tex-def-math-prim "\\Bbbk" (lambda () (emit "&#x1d55c;")))
 
 ;
 
@@ -10148,6 +10150,7 @@ Try the commands
 (tex-def-prim "\\textbackslash" (lambda () (emit "\\")))
 (tex-def-prim "\\textbf" (lambda () (do-function "\\textbf")))
 (tex-def-prim "\\textbullet" (lambda () (emit "&bull;")))
+(tex-def-prim "\\textcopyleft" (lambda () (emit "&#x254;&#x20dd;")))
 (tex-def-prim "\\textdegree" (lambda () (ignorespaces) (emit "&deg;")))
 (tex-def-prim "\\textemdash" (lambda () (emit "&mdash;")))
 (tex-def-prim "\\textendash" (lambda () (emit "&ndash;")))

@@ -37,7 +37,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20141201c") ;last change
+(defparameter *tex2page-version* "20141202c") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -7915,6 +7915,8 @@ Try the commands
 (tex-def-math-prim "\\beth" (lambda () (emit "&#x2136;")))
 (tex-def-math-prim "\\gimel" (lambda () (emit "&#x2137;")))
 (tex-def-math-prim "\\daleth" (lambda () (emit "&#x2138;")))
+(tex-def-math-prim "\\lozenge" (lambda () (emit "&#x2662;")))
+(tex-def-math-prim "\\Bbbk" (lambda () (emit "&#x1d55c;")))
 
 ;
 
@@ -8537,19 +8539,13 @@ Try the commands
 (tex-def-prim "\\texonly" (lambda () (ignore-tex-specific-text "texonly")))
 
 (tex-def-prim "\\textasciicircum" (lambda () (emit "^")))
-
 (tex-def-prim "\\textbar" (lambda () (emit "|")))
-
 (tex-def-prim "\\textbackslash" (lambda () (emit "\\")))
-
 (tex-def-prim "\\textbf" (lambda () (do-function "\\textbf")))
-
 (tex-def-prim "\\textbullet" (lambda () (emit "&bull;")))
-
+(tex-def-prim "\\textcopyleft" (lambda () (emit "&#x254;&#x20dd;")))
 (tex-def-prim "\\textemdash" (lambda () (emit "&mdash;")))
-
 (tex-def-prim "\\textendash" (lambda () (emit "&ndash;")))
-
 (tex-def-prim "\\textexclamdown" (lambda () (emit "&iexcl;")))
 (tex-def-prim "\\textgreater" (lambda () (emit "&gt;")))
 (tex-def-prim "\\textindent" #'do-textindent)
@@ -8561,92 +8557,50 @@ Try the commands
 (tex-def-prim "\\textquotedblright" (lambda () (emit "&rdquo;")))
 (tex-def-prim "\\textquoteleft" (lambda () (emit "&lsquo;")))
 (tex-def-prim "\\textquoteright" (lambda () (emit "&rsquo;")))
-
 (tex-def-prim "\\textregistered" (lambda () (emit "&reg;")))
-
 (tex-def-prim "\\textrm" (lambda () (do-function "\\textrm")))
-
 (tex-def-prim "\\textsc"
  (lambda ()
      (let ((*in-small-caps-p* t))
        (tex2page-string (get-group)))))
-
 (tex-def-prim "\\textsl" (lambda () (do-function "\\textsl")))
-
 (tex-def-prim "\\textasciitilde" (lambda () (emit "~")))
-
 (tex-def-prim "\\texttt" (lambda () (do-function "\\texttt")))
-
 (tex-def-prim "\\textvisiblespace" (lambda () (emit *verbatim-visible-space*)))
-
 (tex-def-prim "\\TH" (lambda () (emit "&THORN;")))
-
 (tex-def-prim "\\th" (lambda () (emit "&thorn;")))
-
 (tex-def-prim "\\the" #'do-the)
-
 (tex-def-prim "\\thebibliography" #'do-thebibliography)
-
 (tex-def-prim "\\theindex" #'do-theindex)
-
 (tex-def-prim "\\TIIPanchor" #'do-anchor-for-potential-label)
-
 (tex-def-prim "\\TIIPbackslash" (lambda () (emit "\\")))
-
 (tex-def-prim "\\TIIPbr" #'do-br)
-
 (tex-def-prim "\\TIIPcmyk" (lambda () (do-switch :cmyk)))
-
 (tex-def-prim "\\TIIPcsname" #'do-saved-csname)
-
 (tex-def-prim "\\TIIPcomment" #'eat-till-eol)
-
 (tex-def-prim "\\TIIPeatstar" #'eat-star)
-
 (tex-def-prim "\\TIIPendgraf" #'do-end-para)
-
 (tex-def-prim "\\TIIPpar" #'do-para-nopadding)
-
 (tex-def-prim "\\TIIPfolio" #'point-to-adjacent-pages)
-
 (tex-def-prim "\\TIIPgobblegroup" #'get-group)
-
 (tex-def-prim "\\TIIPgray" (lambda () (do-switch :gray)))
-
 (tex-def-prim "\\TIIPhlend" #'do-hlend)
-
 (tex-def-prim "\\TIIPlatexenvasimage" #'do-following-latex-env-as-image)
-
 (tex-def-prim "\\TIIPnbsp" (lambda () (emit-nbsp 1)))
-
 (tex-def-prim "\\TIIPnewline" #'do-newline)
-
 (tex-def-prim "\\TIIPnull" #'get-actual-char)
-
 (tex-def-prim "\\TIIPreuseimage" #'reuse-img)
-
 (tex-def-prim "\\TIIPrgb" (lambda () (do-switch :rgb)))
-
 (tex-def-prim "\\TIIPRGB" (lambda () (do-switch :rgb255)))
-
 (tex-def-prim "\\TIIPtheorem" #'do-theorem)
-
 (tex-def-prim "\\TIIPrelax" #'do-relax)
-
 (tex-def-prim "\\tiny" (lambda () (do-switch :tiny)))
-
 (tex-def-prim "\\title" #'do-title)
-
 (tex-def-prim "\\today" #'do-today)
-
 (tex-def-prim "\\TM" (lambda () (emit "&trade;")))
-
 (tex-def-prim "\\tracingall" #'do-tracingall)
-
 (tex-def-prim "\\tt" (lambda () (do-switch :tt)))
-
 (tex-def-prim "\\typein" #'do-typein)
-
 (tex-def-prim "\\TZPauxdir" (lambda () (emit *aux-dir/*)))
 (tex-def-prim "\\TZPlastpageno" (lambda () (emit *last-page-number*)))
 (tex-def-prim-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))

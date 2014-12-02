@@ -9627,6 +9627,9 @@ Try the commands
 
 ;amssymb
 
+(tex-def-prim "\\checkmark" (lambda () (emit "&#x2713;")))
+(tex-def-prim "\\maltese" (lambda () (emit "&#x2720;")))
+
 (tex-def-math-prim "\\because" (lambda () (emit "&#x2235;")))
 (tex-def-math-prim "\\geqslant" (lambda () (emit "&#x2a7e;")))
 (tex-def-math-prim "\\leqslant" (lambda () (emit "&#x2a7d;")))

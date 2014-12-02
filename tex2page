@@ -881,7 +881,7 @@
 
 (define outer-invisible-space?
   (lambda (c)
-    (eq c *outer-invisible-space*)))
+    (eq? c *outer-invisible-space*)))
 
 (define check-outerness
   (lambda (c)
@@ -1568,7 +1568,7 @@
            (when (or *math-delim-left* *math-delim-right*)
              (when (and (or (member *math-delim-left* '(:lbrace :rbrace))
                             (member *math-delim-right* '(:lbrace :rbrace)))
-                        (evenp *math-height*))
+                        (even? *math-height*))
                (set! *math-height* (+ *math-height* 1)))
              (set! res
                    (string-append
@@ -4200,7 +4200,7 @@
 (define do-textindent
   (lambda ()
     (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
-      (do-indent)
+      (do-noindent)
       (emit "<span style=\"margin-left: ")
       (emit parindent)
       (emit "pt\">&zwnj;</span>")
@@ -5524,7 +5524,7 @@
         (tex-output-format #f))
   (lambda (f)
     ;run tex on f and return f.ps or f.pdf if successful
-    (unless latex-prog-name
+    (unless tex-prog-name
       (let ((d (find-def "\\TZPtexprogname")))
         (when d (set! *tex-prog-name* (tdef.expansion d))))
       (unless *tex-prog-name* (set! *tex-prog-name* "pdftex"))

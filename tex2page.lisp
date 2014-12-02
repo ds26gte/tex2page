@@ -8030,7 +8030,6 @@ Try the commands
 (tex-def-prim "\\c" (lambda () (do-diacritic :cedilla)))
 (tex-def-prim "\\caption" #'do-caption)
 (tex-def-prim "\\catcode" #'do-catcode)
-;(tex-def-math-prim "\\cdots" (lambda () (emit "<tt>&middot;&middot;&middot;</tt>")))
 (tex-def-prim "\\cdots" (lambda () (emit "&#x22ef;")))
 (tex-def-prim "\\center" (lambda () (do-block :center)))
 (tex-def-prim "\\centerline" (lambda () (do-function "\\centerline")))
@@ -8106,7 +8105,6 @@ Try the commands
  (lambda () (tex-def-0arg "\\TZPmathimage" "0")))
 
 (tex-def-prim "\\dontuseimgforhtmlmathintext" (lambda () t))
-;(tex-def-prim "\\dots" (lambda () (emit "<tt>...</tt>")))
 (tex-def-prim "\\dots" (lambda () (emit "&#x2026;")))
 
 (tex-def-prim "\\edef" (lambda () (do-def (globally-p) t)))
@@ -8672,20 +8670,6 @@ Try the commands
 (tex-def-prim "\\urlp" #'do-urlp)
 
 (tex-def-prim "\\v" (lambda () (do-diacritic :hacek)))
-
-#|
-(tex-def-prim "\\vdots"
- (lambda ()
-     (emit "<tt><table><tr><td>.</td></tr>")
-     (emit "<tr><td>.</td></tr>")
-     (emit "<tr><td>.</td></tr></table></tt>")))
-
-(tex-def-prim "\\ddots"
-              (lambda ()
-     (emit "<tt><table><tr><td>.</td></tr>")
-     (emit "<tr><td></td><td>.</td></tr>")
-     (emit "<tr><td></td><td></td><td>.</td></tr></table></tt>")))
-|#
 
 (tex-def-prim "\\vdots" (lambda () (emit "&#x22ee;")))
 

@@ -39,7 +39,7 @@ main
 
 rename '(define-syntax' '(almost-define-syntax'
 
-uncall require trace 
+uncall require trace
 
 sed -e '/^#!/,/^END_OF_CURR_EXP/d' my-tex2page > .sedtmp
 mv .sedtmp my-tex2page
@@ -67,20 +67,12 @@ exec guile -e main -s \$0 \"\$@\"
 (define strftime-like strftime)
 (define string-reverse-index string-rindex)
 
-(define *scheme-version* 
+(define *scheme-version*
   (string-append "Guile " (version)))
 
 (define eval1
   (lambda (e)
     (eval e (interaction-environment))))
-
-(define-macro unless
-  (lambda (b . ee)
-    \`(if (not ,b) (begin ,@ee))))
-
-(define-macro when
-  (lambda (b . ee)
-    \`(if ,b (begin ,@ee))))
 
 (define-macro fluid-let
   (lambda (xvxv . ee)

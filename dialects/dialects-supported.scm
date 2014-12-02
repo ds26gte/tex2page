@@ -1,4 +1,4 @@
-;last change 2014-06-17
+; last change 2014-12-02
 abcl ;v 1.4.0; WORKS!
 allegro ;v 9.0; WORKS!
 bigloo
@@ -10,17 +10,17 @@ cmucl ;v 20d; WORKS!
 ecl ;v 13.5.1; WORKS!
 gambit ;v 4.4.2; WORKS!
 gauche ;v 0.9.1; WORKS!
-guile ;v 1.8.8; WORKS!
+guile ;v 2.0.11; WORKS!
 ;ikarus
 kawa ;not much success, but no recent tries: stack seems to blow fairly easily
-;larceny 
+;larceny
 mitscheme
 petite ;v 8.4; WORKS!
 plt ;lib version for PLT: not quite yet
 pscheme
-racket ;v 5.2.1; WORKS!
+racket ;v 6.1.1.5; WORKS!
 ;rscheme
-sbcl ;v 1.2.0; WORKS!
+sbcl ;v 1.2.3; WORKS!
 scheme48
 scm
 scsh

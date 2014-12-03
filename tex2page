@@ -8158,7 +8158,10 @@
   (lambda (c)
     (string-append "&#x"
                    (number->string
-                     (+ #x1d56c (- (char->integer c) (char->integer #\A))) 16)
+                     (if (char-upper-case? c)
+                       (+ #x1d56c (- (char->integer c) (char->integer #\A)))
+                       (+ #x1d586 (- (char->integer c) (char->integer #\a))))
+                     16)
                    ";")))
 
 (define emit-math-alpha-char
@@ -8168,7 +8171,7 @@
       ((:bf) (emit "<b>") (emit c) (emit "</b>"))
       ((:bb) (emit (if (char-upper-case? c) (tex-math-bb c) c)))
       ((:cal) (emit (if (char-upper-case? c) (tex-math-cal c) c)))
-      ((:frak) (emit (if (char-upper-case? c) (tex-math-frak c) c)))
+      ((:frak) (emit (if (char-alphabetic? c) (tex-math-frak c) c)))
       (else (emit "<em>") (emit c) (emit "</em>")))))
 
 (define do-tex-char

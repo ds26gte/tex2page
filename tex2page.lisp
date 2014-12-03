@@ -6626,16 +6626,26 @@
     ((#\Q) "&#x211a;")
     ((#\R) "&#x211d;")
     ((#\Z) "&#x2124;")
-    (t (format nil "&#x~x;"
-               (+ #x1d538 (- (char-int c) (char-int #\A)))))))
+    (t (concatenate 'string "&#x"
+                    (write-to-string
+                      (+ #x1d538 (- (char-int c) (char-int #\A))) :base 16)
+                    ";"))))
 
 (defun tex-math-cal (c)
-  (format nil "&#x~x;"
-          (+ #x1d4d0 (- (char-int c) (char-int #\A)))))
+  (concatenate 'string
+               "&#x"
+               (write-to-string
+                 (+ #x1d4d0 (- (char-int c) (char-int #\A))) :base 16)
+               ";"))
 
 (defun tex-math-frak (c)
-  (format nil "&#x~x;"
-          (+ #x1d56c (- (char-int c) (char-int #\A)))))
+  (concatenate 'string
+               "&#x"
+               (write-to-string
+                 (if (upper-case-p c)
+                   (+ #x1d56c (- (char-int c) (char-int #\A)))
+                   (+ #x1d586 (- (char-int c) (char-int #\a)))) :base 16)
+               ";"))
 
 (defun emit-math-alpha-char (c)
   (case *math-font*
@@ -6643,7 +6653,7 @@
     ((:bf) (emit "<b>") (emit c) (emit "</b>"))
     ((:bb) (emit (if (upper-case-p c) (tex-math-bb c) c)))
     ((:cal) (emit (if (upper-case-p c) (tex-math-cal c) c)))
-    ((:frak) (emit (if (upper-case-p c) (tex-math-frak c) c)))
+    ((:frak) (emit (if (alpha-char-p c) (tex-math-frak c) c)))
     (t (emit "<em>") (emit c) (emit "</em>"))))
 
 (defun do-tex-char (c)

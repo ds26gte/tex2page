@@ -165,6 +165,9 @@
     "text-transform: uppercase"
     "\">e</span>" "X"))
 
+(defparameter *calling-from-text-editor-p*
+  (retrieve-env "VIMRUNTIME"))
+
 ;above are true globals.  Following are
 ;per-document globals
 
@@ -501,13 +504,17 @@
     (mapc #'write-log args)
     (write-log :separation-newline)))
 
-(defun terror-outside-editor (where args)
+(defun terror (where &rest args)
   (write-log :separation-newline)
   (write-log "! ")
   (mapc #'write-log args)
   (write-log :separation-newline)
-  (write-log "l.")
+  (cond (*calling-from-text-editor-p*
+          (write-log *current-source-file*)
+          (write-log #\:))
+        (t (write-log "l.")))
   (write-log *input-line-no*)
+  (when *calling-from-text-editor-p* (write-log #\:))
   (write-log #\space)
   (write-log where)
   (write-log " failed.")
@@ -515,30 +522,14 @@
   (display-error-context-lines)
   (close-all-open-ports)
   (output-stats)
-  (format t "Type e to edit file at point of error; x to quit.~%")
-  (princ "? ")
-  (force-output)
-  (let ((c (read-char nil nil)))
-    (when (and c (char-equal c #\e))
-      (edit-offending-file)))
+  (unless *calling-from-text-editor-p*
+    (format t "Type e to edit file at point of error; x to quit.~%")
+    (princ "? ")
+    (force-output)
+    (let ((c (read-char nil nil)))
+      (when (and c (char-equal c #\e))
+        (edit-offending-file))))
   (error "TeX2page fatal error"))
-
-(defun terror-within-editor (where args)
-  (terpri)
-  (princ *current-source-file*)
-  (princ #\:)
-  (princ *input-line-no*)
-  (princ #\:)
-  (princ #\space)
-  (mapc #'princ args)
-  (terpri)
-  (quit))
-
-(defun terror (where &rest args)
-  (funcall (if (retrieve-env "VIMRUNTIME")
-             #'terror-within-editor
-             #'terror-outside-editor)
-           where args))
 
 (defun do-errmessage ()
   (write-log :separation-newline)

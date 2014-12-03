@@ -156,6 +156,8 @@
     "text-transform: uppercase"
     "\">e</span>" "X"))
 
+(define *calling-from-text-editor?* (getenv "VIMRUNTIME"))
+
 (define *filename-delims* '())
 
 (define *scm-token-delims*
@@ -710,14 +712,18 @@
               (write-log "/")
               )))))))
 
-(define terror-outside-editor
-  (lambda (where args)
+(define terror
+  (lambda (where . args)
     (write-log ':separation-newline)
     (write-log "! ")
     (for-each write-log args)
     (write-log ':separation-newline)
-    (write-log "l.")
+    (cond (*calling-from-text-editor?*
+            (write-log *current-source-file*)
+            (write-log #\:))
+          (else (write-log "l.")))
     (write-log *input-line-no*)
+    (when *calling-from-text-editor?* (write-log #\:))
     (write-log #\space)
     (write-log where)
     (write-log " failed.")
@@ -727,34 +733,16 @@
     (output-stats)
     ;(display "*** TeX2page fatal error! ***")
     ;(newline)
-    (display "Type e to edit file at point of error; x to quit.")
-    (newline)
-    (display "? ")
-    (flush-output)
-    (let ((c (read-char)))
-      (when (and (not (eof-object? c))
-                 (char-ci=? c #\e))
-        (edit-offending-file)))
+    (unless *calling-from-text-editor?*
+      (display "Type e to edit file at point of error; x to quit.")
+      (newline)
+      (display "? ")
+      (flush-output)
+      (let ((c (read-char)))
+        (when (and (not (eof-object? c))
+                   (char-ci=? c #\e))
+          (edit-offending-file))))
     (error "TeX2page fatal error")))
-
-(define terror-within-editor
-  (lambda (where args)
-    (newline)
-    (display *current-source-file*)
-    (display #\:)
-    (display *input-line-no*)
-    (display #\:)
-    (display #\space)
-    (for-each display args)
-    (newline)
-    (quit)))
-
-(define terror
-  (lambda (where . args)
-    ((if (getenv "VIMRUNTIME")
-       terror-within-editor
-       terror-within-editor)
-     where args)))
 
 (define edit-offending-file
   (lambda ()

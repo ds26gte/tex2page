@@ -2,8 +2,9 @@ Last change 2014-12-03
 
 2014 Dec 3
 
-If called from Vim (perhaps via make), populate the quickfix list
-upon error.
+Use standard file:line error format in addition to default TeX
+efm. This allows, e.g., use of quickfix when tex2page is called
+from vim.
 
 2014 Dec 1
 

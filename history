@@ -1,4 +1,9 @@
-Last change 2014-12-01
+Last change 2014-12-03
+
+2014 Dec 3
+
+If called from Vim (perhaps via make), populate the quickfix list
+upon error.
 
 2014 Dec 1
 

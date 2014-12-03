@@ -37,7 +37,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20141202c") ;last change
+(defparameter *tex2page-version* "20141203c") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -127,7 +127,7 @@
 (defparameter *verbatim-visible-space*
   ; for the likes of verb* and {verbatim*}
   ; "<span style=\"color: red\">&middot;</span>"
-  "<span style=\"vertical-align: -0.5ex\">&#x2334;</span>" )
+  "<span style=\"vertical-align: -0.5ex\">&#x2334;</span>")
 
 (defparameter *aux-file-suffix* "-Z-A")
 (defparameter *bib-aux-file-suffix* "-Z-B")
@@ -501,7 +501,7 @@
     (mapc #'write-log args)
     (write-log :separation-newline)))
 
-(defun terror (where &rest args)
+(defun terror-outside-editor (where args)
   (write-log :separation-newline)
   (write-log "! ")
   (mapc #'write-log args)
@@ -522,6 +522,23 @@
     (when (and c (char-equal c #\e))
       (edit-offending-file)))
   (error "TeX2page fatal error"))
+
+(defun terror-within-editor (where args)
+  (terpri)
+  (princ *current-source-file*)
+  (princ #\:)
+  (princ *input-line-no*)
+  (princ #\:)
+  (princ #\space)
+  (mapc #'princ args)
+  (terpri)
+  (quit))
+
+(defun terror (where &rest args)
+  (funcall (if (retrieve-env "VIMRUNTIME")
+             #'terror-within-editor
+             #'terror-outside-editor)
+           where args))
 
 (defun do-errmessage ()
   (write-log :separation-newline)

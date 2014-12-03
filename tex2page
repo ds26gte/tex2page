@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20141202") ;last change
+(define *tex2page-version* "20141203") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -112,7 +112,7 @@
 
 (define *verbatim-visible-space*
   ; "<span style=\"color: red\">&middot;</span>"
-  "<span style=\"vertical-align: -0.5ex\">&#x2334;</span>" )
+  "<span style=\"vertical-align: -0.5ex\">&#x2334;</span>")
 
 (define *aux-file-suffix* "-Z-A")
 (define *bib-aux-file-suffix* "-Z-B")
@@ -710,8 +710,8 @@
               (write-log "/")
               )))))))
 
-(define terror
-  (lambda (where . args)
+(define terror-outside-editor
+  (lambda (where args)
     (write-log ':separation-newline)
     (write-log "! ")
     (for-each write-log args)
@@ -736,6 +736,25 @@
                  (char-ci=? c #\e))
         (edit-offending-file)))
     (error "TeX2page fatal error")))
+
+(define terror-within-editor
+  (lambda (where args)
+    (newline)
+    (display *current-source-file*)
+    (display #\:)
+    (display *input-line-no*)
+    (display #\:)
+    (display #\space)
+    (for-each display args)
+    (newline)
+    (quit)))
+
+(define terror
+  (lambda (where . args)
+    ((if (getenv "VIMRUNTIME")
+       terror-within-editor
+       terror-within-editor)
+     where args)))
 
 (define edit-offending-file
   (lambda ()

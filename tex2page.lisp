@@ -165,9 +165,6 @@
     "text-transform: uppercase"
     "\">e</span>" "X"))
 
-(defparameter *calling-from-text-editor-p*
-  (retrieve-env "VIMRUNTIME"))
-
 ;above are true globals.  Following are
 ;per-document globals
 
@@ -465,34 +462,37 @@
             (write-log "/")))))))
 
 (defun edit-offending-file ()
-  (let (bad-texedit-p cmd)
-    (cond ((setq *it* (retrieve-env "TEXEDIT"))
-           (let ((s *it*))
-             (cond ((setq *it* (search "%d" s))
-                    (let ((i *it*))
-                      (setq s (concatenate (subseq s 0 i)
-                                         (write-to-string *input-line-no*)
-                                         (subseq s (+ i 2))))))
-                   (t (setq bad-texedit-p t)))
-             (cond ((and (not bad-texedit-p)
-                         (setq *it* (search "%s" s)))
-                    (let ((i *it*))
-                      (setq s (concatenate (subseq s 0 i)
-                                           *current-source-file*
-                                           (subseq s (+ i 2))))))
-                   (t (setq bad-texedit-p t)))
-             (cond (bad-texedit-p
-                     (format t "Bad TEXEDIT; using EDITOR~%"))
-                   (t (setq cmd s))))))
-    (cond ((and (not cmd)
-                (setq *it* (or (retrieve-env "EDITOR") "vi")))
-           (let ((s *it*))
-             (setq cmd
-                   (concatenate 'string
-                                s
-                                " +" (write-to-string *input-line-no*)
-                                " " *current-source-file*)))))
-    (when cmd (system cmd))))
+  (let ((calling-from-text-editor-p (retrieve-env "VIMRUNTIME")))
+    (unless calling-from-text-editor-p
+      (format t "Type e to edit file at point of error; x to quit.~%")
+      (princ "? ")
+      (force-output)
+      (let ((c (read-char nil nil)))
+        (when (and c (char-equal c #\e))
+          (let ((texedit-string (retrieve-env "TEXEDIT")))
+            (when texedit-string
+              (cond ((setq *it* (search "%d" texedit-string))
+                     (let ((i *it*))
+                       (setq texedit-string (concatenate 'string (subseq texedit-string 0 i)
+                                                         (write-to-string *input-line-no*)
+                                                         (subseq texedit-string (+ i 2))))))
+                    (t (setq texedit-string nil))))
+            (when texedit-string
+              (cond ((setq *it* (search "%s" texedit-string))
+                     (let ((i *it*))
+                       (setq texedit-string (concatenate 'string (subseq texedit-string 0 i)
+                                                         *current-source-file*
+                                                         (subseq texedit-string (+ i 2))))))
+                    (t (setq texedit-string nil))))
+            (unless texedit-string
+              (format t "Ill-formed TEXEDIT; using EDITOR.~%")
+              (cond ((setq *it* (or (retrieve-env "EDITOR") "vi"))
+                     (let ((e *it*))
+                       (setq texedit-string
+                             (concatenate 'string e
+                                          " +" (write-to-string *input-line-no*)
+                                          " " *current-source-file*))))))
+            (when texedit-string (system texedit-string))))))))
 
 (defun trace-if (write-p &rest args)
   (when write-p
@@ -509,12 +509,13 @@
   (write-log "! ")
   (mapc #'write-log args)
   (write-log :separation-newline)
-  (cond (*calling-from-text-editor-p*
-          (write-log *current-source-file*)
-          (write-log #\:))
-        (t (write-log "l.")))
+  (write-log *current-source-file*)
+  (write-log #\:)
   (write-log *input-line-no*)
-  (when *calling-from-text-editor-p* (write-log #\:))
+  (write-log ": error")
+  (write-log :separation-newline)
+  (write-log "l.")
+  (write-log *input-line-no*)
   (write-log #\space)
   (write-log where)
   (write-log " failed.")
@@ -522,13 +523,7 @@
   (display-error-context-lines)
   (close-all-open-ports)
   (output-stats)
-  (unless *calling-from-text-editor-p*
-    (format t "Type e to edit file at point of error; x to quit.~%")
-    (princ "? ")
-    (force-output)
-    (let ((c (read-char nil nil)))
-      (when (and c (char-equal c #\e))
-        (edit-offending-file))))
+  (edit-offending-file)
   (error "TeX2page fatal error"))
 
 (defun do-errmessage ()

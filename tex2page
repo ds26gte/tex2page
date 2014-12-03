@@ -718,12 +718,13 @@
     (write-log "! ")
     (for-each write-log args)
     (write-log ':separation-newline)
-    (cond (*calling-from-text-editor?*
-            (write-log *current-source-file*)
-            (write-log #\:))
-          (else (write-log "l.")))
+    (write-log *current-source-file*)
+    (write-log #\:)
     (write-log *input-line-no*)
-    (when *calling-from-text-editor?* (write-log #\:))
+    (write-log ": error")
+    (write-log ':separation-newline)
+    (write-log "l.")
+    (write-log *input-line-no*)
     (write-log #\space)
     (write-log where)
     (write-log " failed.")
@@ -731,53 +732,51 @@
     (display-error-context-lines)
     (close-all-open-ports)
     (output-stats)
+    (edit-offending-file)
     ;(display "*** TeX2page fatal error! ***")
     ;(newline)
-    (unless *calling-from-text-editor?*
-      (display "Type e to edit file at point of error; x to quit.")
-      (newline)
-      (display "? ")
-      (flush-output)
-      (let ((c (read-char)))
-        (when (and (not (eof-object? c))
-                   (char-ci=? c #\e))
-          (edit-offending-file))))
     (error "TeX2page fatal error")))
 
 (define edit-offending-file
   (lambda ()
-    (let ((bad-texedit? #f)
-          (cmd #f))
-      (cond ((getenv "TEXEDIT")
-             => (lambda (s)
-                  (cond ((substring? "%d" s)
-                         => (lambda (i)
-                              (set! s
-                                (string-append (substring s 0 i)
-                                               (number->string *input-line-no*)
-                                               (substring s (+ i 2)
-                                                          (string-length s))))))
-                        (else (set! bad-texedit? #t)))
-                  (cond ((and (not bad-texedit?)
-                              (substring? "%s" s))
-                         => (lambda (i)
-                              (set! s
-                                (string-append (substring s 0 i)
-                                               *current-source-file*
-                                               (substring s (+ i 2)
-                                                          (string-length s))))))
-                        (else (set! bad-texedit? #t)))
-                  (cond (bad-texedit?
-                          (display "Bad TEXEDIT; using EDITOR.") (newline))
-                        (else (set! cmd s))))))
-      (cond ((and (not cmd) (or (getenv "EDITOR") "vi"))
-             => (lambda (s)
-                  (set! cmd
-                    (string-append
-                      s " +" (number->string *input-line-no*)
-                      " " *current-source-file*)))))
-      (when cmd
-        (system cmd)))))
+    (let ((calling-from-text-editor? (getenv "VIMRUNTIME")))
+      (unless calling-from-text-editor?
+        (display "Type e to edit file at point of error; x to quit.")
+        (newline)
+        (display "? ")
+        (flush-output)
+        (let ((c (read-char)))
+          (when (and (not (eof-object? c))
+                     (char-ci=? c #\e))
+            (let ((texedit-string (getenv "TEXEDIT")))
+              (when texedit-string
+                (cond ((substring? "%d" texedit-string)
+                       => (lambda (i)
+                            (set! texedit-string
+                              (string-append (substring texedit-string 0 i)
+                                             (number->string *input-line-no*)
+                                             (substring texedit-string (+ i 2)
+                                                        (string-length texedit-string))))))
+                      (else (set! texedit-string #f))))
+              (when texedit-string
+                (cond ((substring? "%s" texedit-string)
+                       => (lambda (i)
+                            (set! texedit-string
+                              (string-append (substring texedit-string 0 i)
+                                             *current-source-file*
+                                             (substring texedit-string (+ i 2)
+                                                        (string-length texedit-string))))))
+                      (else (set! texedit-string #f))))
+              (unless texedit-string
+                (display "Ill-formed TEXEDIT; using EDITOR.") (newline)
+                (cond ((or (getenv "EDITOR") "vi")
+                       => (lambda (e)
+                            (set! texedit-string
+                              (string-append
+                                e " +" (number->string *input-line-no*)
+                                " " *current-source-file*))))))
+              (when texedit-string
+                (system texedit-string)))))))))
 
 (define trace-if
   (lambda (write? . args)

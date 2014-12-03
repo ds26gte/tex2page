@@ -1,0 +1,9 @@
+*.aux
+*.html
+*.mp
+*.mpx
+*.pdf
+*Z*
+*~
+[!s]*.*log
+my-tex2page*

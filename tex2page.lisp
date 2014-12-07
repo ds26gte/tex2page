@@ -7918,9 +7918,23 @@ Try the commands
 
 ;end appendix F
 
-;latex sec 3.3.2
+;latexsym (latex sec 3.3.2)
+
+(tex-defsym-math-prim "\\lhd" "&#x22b2;")
+(tex-defsym-math-prim "\\rhd" "&#x22b3;")
+(tex-defsym-math-prim "\\unlhd" "&#x22b4;")
+(tex-defsym-math-prim "\\unrhd" "&#x22b5;")
+
+(tex-defsym-math-prim "\\sqsubset" "&#x228f;")
+(tex-defsym-math-prim "\\sqsupset" "&#x2290;")
+
+(tex-defsym-math-prim "\\Join" "&#x2a1d;")
+
+(tex-defsym-math-prim "\\leadsto" "&#x2933;")
 
 (tex-defsym-math-prim "\\mho" "&#x2127;")
+(tex-defsym-math-prim "\\Box" "&#x25ab;")
+(tex-defsym-math-prim "\\Diamond" "&#x25c7;")
 
 ;amssymb
 

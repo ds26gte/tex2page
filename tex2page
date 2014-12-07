@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20141203") ;last change
+(define *tex2page-version* "20141207") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -3446,8 +3446,8 @@
     (emit
       (let ((c (snoop-actual-char)))
         (if (and (char? c) (char=? c #\-))
-            (begin (get-actual-char) "&mdash;")
-            "&ndash;")))))
+            (begin (get-actual-char) "&#x2014;")
+            "&#x2013;")))))
 
 (define do-lsquo
   (lambda ()
@@ -9400,8 +9400,8 @@ Try the commands
 
 (tex-defsym-math-prim "\\aleph" "&alefsym;")
 (tex-defsym-math-prim "\\hbar" "&#x210f;")
-(tex-defsym-math-prim "\\imath" "<i>&#x131;</i>") ; #x1d6a4 not supported yet
-(tex-defsym-math-prim "\\jmath" "<i>&#x237;</i>") ; #x1d6a5
+(tex-defsym-math-prim "\\imath" "&#x1d6a4;")
+(tex-defsym-math-prim "\\jmath" "&#x1d6a5")
 (tex-defsym-math-prim "\\ell" "&#x2113;")
 (tex-defsym-math-prim "\\wp" "&weierp;")
 (tex-defsym-math-prim "\\Re" "&real;")
@@ -9558,31 +9558,31 @@ Try the commands
 
 ;10. arrows
 
-(tex-defsym-math-prim "\\leftarrow" "&larr;")
-(tex-defsym-math-prim "\\Leftarrow" "&lArr;")
-(tex-defsym-math-prim "\\rightarrow" "&rarr;")
-(tex-defsym-math-prim "\\Rightarrow" "&rArr;")
-(tex-defsym-math-prim "\\leftrightarrow" "&harr;")
-(tex-defsym-math-prim "\\Leftrightarrow" "&hArr;")
+(tex-defsym-math-prim "\\leftarrow" "&#x2190;")
+(tex-defsym-math-prim "\\Leftarrow" "&#x21d0;")
+(tex-defsym-math-prim "\\rightarrow" "&#x2192;")
+(tex-defsym-math-prim "\\Rightarrow" "&#x21d2;")
+(tex-defsym-math-prim "\\leftrightarrow" "&#x2194;")
+(tex-defsym-math-prim "\\Leftrightarrow" "&#x21d4;")
 (tex-defsym-math-prim "\\mapsto" "&#x21a6;")
 (tex-defsym-math-prim "\\hookleftarrow" "&#x21a9;")
 (tex-defsym-math-prim "\\leftharpoonup" "&#x21bc;")
 (tex-defsym-math-prim "\\leftharpoondown" "&#x21bd;")
 (tex-defsym-math-prim "\\rightleftharpoons" "&#x21cb;")
-(tex-defsym-math-prim "\\longleftarrow" "&larr;---")
-(tex-defsym-math-prim "\\Longleftarrow" "&lArr;===")
-(tex-defsym-math-prim "\\longrightarrow" "---&rarr;")
-(tex-defsym-math-prim "\\Longrightarrow" "===&rArr;")
-(tex-defsym-math-prim "\\longleftrightarrow" "&larr;---&rarr;")
-(tex-defsym-math-prim "\\Longleftrightarrow" "&lArr;===&rArr;")
-(tex-defsym-math-prim "\\longmapsto" "---&#x21a6;")
+(tex-defsym-math-prim "\\longleftarrow" "&#x27f5;")
+(tex-defsym-math-prim "\\Longleftarrow" "&#x27f8;")
+(tex-defsym-math-prim "\\longrightarrow" "&#x27f6;")
+(tex-defsym-math-prim "\\Longrightarrow" "&#x27f9;")
+(tex-defsym-math-prim "\\longleftrightarrow" "&#x27f7;")
+(tex-defsym-math-prim "\\Longleftrightarrow" "&#x27fa;")
+(tex-defsym-math-prim "\\longmapsto" "&#x27fc;")
 (tex-defsym-math-prim "\\hookrightarrow" "&#x21aa;")
 (tex-defsym-math-prim "\\rightharpoonup" "&#x21c0;")
 (tex-defsym-math-prim "\\rightharpoondown" "&#x21c1;")
-(tex-defsym-math-prim "\\uparrow" "&uarr;")
-(tex-defsym-math-prim "\\Uparrow" "&uArr;")
-(tex-defsym-math-prim "\\downarrow" "&darr;")
-(tex-defsym-math-prim "\\Downarrow" "&dArr;")
+(tex-defsym-math-prim "\\uparrow" "&#x2191;")
+(tex-defsym-math-prim "\\Uparrow" "&#x21d1;")
+(tex-defsym-math-prim "\\downarrow" "&#x2193;")
+(tex-defsym-math-prim "\\Downarrow" "&#x21d3;")
 (tex-defsym-math-prim "\\nearrow" "&#x2197;")
 (tex-defsym-math-prim "\\searrow" "&#x2198;")
 (tex-defsym-math-prim "\\swarrow" "&#x2199;")
@@ -10169,8 +10169,8 @@ Try the commands
 (tex-defsym-prim "\\textbullet" "&bull;")
 (tex-defsym-prim "\\textcopyleft" "&#x254;&#x20dd;")
 (tex-def-prim "\\textdegree" (lambda () (ignorespaces) (emit "&deg;")))
-(tex-defsym-prim "\\textemdash" "&mdash;")
-(tex-defsym-prim "\\textendash" "&ndash;")
+(tex-defsym-prim "\\textemdash" "&#x2014;")
+(tex-defsym-prim "\\textendash" "&#x2013;")
 (tex-defsym-prim "\\textexclamdown" "&iexcl;")
 (tex-defsym-prim "\\textgreater" "&gt;")
 (tex-def-prim "\\textindent" do-textindent)

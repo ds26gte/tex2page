@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20141207") ;last change
+(define *tex2page-version* "20141213") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -283,6 +283,8 @@
 (define *outputting-to-non-html?* #f)
 
 (define *package* #f)
+
+(define *quote-level* 0)
 
 (define *reading-control-sequence?* #f)
 (define *recent-node-name* #f)
@@ -3472,6 +3474,23 @@
                 (if (and (char? c) (char=? c #\'))
                     (begin (get-actual-char) "&rdquo;")
                     "&rsquo;")))))))
+
+(define do-enquote
+  (lambda ()
+    (ignorespaces)
+    (when (char=? (snoop-actual-char) #\*)
+      (get-actual-char)
+      (ignorespaces)
+      (set! *quote-level* (+ *quote-level* 1)))
+    (unless (char=? (get-actual-char) #\{)
+      (terror 'do-enquote "Missing {"))
+    (bgroup)
+    (set! *quote-level* (+ *quote-level* 1))
+    (emit (if (odd? *quote-level*) "&#x201c;" "&#x2018;"))
+    (add-aftergroup-to-top-frame
+      (lambda ()
+        (emit (if (odd? *quote-level*) "&#x201d;" "&#x2019;"))
+        (set! *quote-level* (- *quote-level* 1))))))
 
 ;cross-references
 
@@ -9881,6 +9900,7 @@ Try the commands
 (tex-def-prim "\\endthebibliography"
               (lambda () (emit "</table>") (egroup) (do-para)))
 (tex-def-prim "\\endverbatim" do-endverbatim-eplain)
+(tex-def-prim "\\enquote" do-enquote)
 (tex-def-prim "\\enumerate"
               (lambda () (do-end-para)
                 (set! *tabular-stack* (cons ':enumerate *tabular-stack*))
@@ -10710,6 +10730,8 @@ Try the commands
                 (*outputting-to-non-html?* #f)
                 ;
                 (*package* *this-package*) ;place-holder for CL
+                ;
+                (*quote-level* 0)
                 ;
                 (*reading-control-sequence?* #f)
                 (*recent-node-name* #f)

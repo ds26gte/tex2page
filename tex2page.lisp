@@ -37,7 +37,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20141207c") ;last change
+(defparameter *tex2page-version* "20141213c") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -272,6 +272,8 @@
 (defvar *output-streams* nil)
 (defvar *outputting-external-title-p* nil)
 (defvar *outputting-to-non-html-p* nil)
+
+(defvar *quote-level* 0)
 
 (defvar *reading-control-sequence-p* nil)
 (defvar *recent-node-name* nil)
@@ -2690,6 +2692,24 @@
           (let ((c (snoop-actual-char)))
             (if (and (characterp c) (char= c #\'))
                 (progn (get-actual-char) "&rdquo;") "&rsquo;"))))))
+
+(defun do-enquote ()
+  (ignorespaces)
+  (when (char= (snoop-actual-char) #\*)
+    (get-actual-char)
+    (ignorespaces)
+    (incf *quote-level*))
+  (unless (char= (get-actual-char) #\{)
+    (terror 'do-enquote "Missing {"))
+  (bgroup)
+  (incf *quote-level*)
+  (emit (if (oddp *quote-level*) "&#x201c;" "&#x2018;"))
+  (add-aftergroup-to-top-frame
+    (lambda ()
+      (emit (if (oddp *quote-level*) "&#x201d;" "&#x2019;"))
+      (decf *quote-level*))))
+
+;cross-references
 
 (defstruct label*  (src nil) page name value)
 
@@ -8214,6 +8234,8 @@ Try the commands
 
 (tex-def-prim "\\endverbatim" #'do-endverbatim-eplain)
 
+(tex-def-prim "\\enquote" #'do-enquote)
+
 (tex-def-prim "\\enumerate"
   (lambda ()
     (do-end-para)
@@ -9264,6 +9286,7 @@ Try the commands
         (*outputting-external-title-p* nil)
         (*outputting-to-non-html-p* nil)
         (*package* *this-package*)
+        (*quote-level* 0)
         (*reading-control-sequence-p* nil)
         (*recent-node-name* nil)
         (*redirect-delay* nil)

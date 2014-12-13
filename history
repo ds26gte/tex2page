@@ -1,4 +1,9 @@
-Last change 2014-12-07
+Last change 2014-12-13
+
+2014 Dec 13
+
+Added basic support for \enquote (LaTeX's csquotes package).
+Suggested by Michael Matson.
 
 2014 Dec 7
 

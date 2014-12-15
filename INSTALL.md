@@ -101,7 +101,7 @@ source document, e.g.,
 
 ## Image generation
 
-(Skip this section if you’re ⋆not⋆ running Windows.)
+(Skip this section if you’re ⎈not⎈ running Windows.)
 
 The image generation subprocess in tex2page uses
 Ghostscript.  The tex2page code stores the name of the

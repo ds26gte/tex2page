@@ -7,7 +7,7 @@
 % tex2page is available at
 % http://www.ccs.neu.edu/~dorai/tex2page/index.html
 
-% last change: 2014-12-08
+% last change: 2015-01-12
 
 \input tex2page-doc-mac
 
@@ -912,7 +912,10 @@ Unlike \TeX, \TeX2page does not automatically split the document into
 pages at regular vertical lengths.
 \TeX2page will start a new HTML page only at \p{\chapter}
 commands and at explicit page break commands such as
-\p{\eject} or \LaTeX's \p{\clearpage}.
+\p{\eject} or \LaTeX's \p{\clearpage}. It is possible to disable
+pagebreaks entirely with the \p{\TZPsinglepage} flag
+(p.~\ref{singlepage}).
+
 (It is advisable to place a \p{\vfill} before
 \p{\eject} so the DVI document doesn't cause the
 pre-\p{\eject} text  to increase its
@@ -1784,6 +1787,19 @@ this, set \p{\TZPredirectseconds}, e.g.,
 
 \p{
 \def\TZPredirectseconds{10}
+}
+
+\beginsection Single output file
+
+\index{TZPsinglepage@\p{\TZPsinglepage}}
+\xrdef{singlepage}
+%
+Sometimes it is desirable to generate just a single output HTML
+file, i.e., to not generate a page break as described on
+p.~\ref{eject}. To do this, set the \p{\TZPsinglepage} flag:
+
+\p{
+\def\TZPsinglepage{1}
 }
 
 \beginsection Scheme or Common Lisp?

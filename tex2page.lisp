@@ -3430,18 +3430,19 @@
       (when next-page (emit-link-stop)))))
 
 (defun output-head-or-foot-line (head-or-foot)
-  (emit "<div align=right class=navigation>")
-  (cond ((or *tex-like-layout-p*
-             (and (eq head-or-foot :foot)
-                  (tex2page-flag-boolean "\\TZPtexlayout")))
-         (bgroup)
-         (tex-let "\\folio" "\\TIIPfolio" nil)
-         (tex2page-string
-          (if (eq head-or-foot :head) "\\the\\headline" "\\the\\footline"))
-         (egroup))
-        (t (output-navigation-bar head-or-foot)))
-  (emit "</div>")
-  (emit-newline))
+  (unless (tex2page-flag-boolean "\\TZPsinglepage")
+    (emit "<div align=right class=navigation>")
+    (cond ((or *tex-like-layout-p*
+               (and (eq head-or-foot :foot)
+                    (tex2page-flag-boolean "\\TZPtexlayout")))
+           (bgroup)
+           (tex-let "\\folio" "\\TIIPfolio" nil)
+           (tex2page-string
+             (if (eq head-or-foot :head) "\\the\\headline" "\\the\\footline"))
+           (egroup))
+          (t (output-navigation-bar head-or-foot)))
+    (emit "</div>")
+    (emit-newline)))
 
 (defun output-navigation-bar (head-or-foot)
   (let* ((first-page-p (= *html-page-count* 0))
@@ -3532,23 +3533,24 @@
       (emit "]"))))
 
 (defun do-eject ()
-  ;kludge: don't start a new page if \eject is the last thing in the
-  ;main file.  This is mostly to placate story.tex, which although
-  ;horrid as an example file, happens to be viewed as canonical by
-  ;everyone looking at TeX
-  (unless (and (eq (snoop-actual-char) :eof-object)
-               (eql *current-source-file* *main-tex-file*))
-    (unless (> *last-page-number* 0)
-      (flag-missing-piece :last-modification-time))
-    (do-end-page)
-    (incf *html-page-count*)
-    (setq *html-page*
-          (concatenate 'string *aux-dir/* *jobname* *html-page-suffix*
-            (write-to-string *html-page-count*)
-            *output-extension*))
-    (setq *html* (open *html-page* :direction :output
-                       :if-exists :supersede))
-    (do-start)))
+  (unless (tex2page-flag-boolean "\\TZPsinglepage")
+    (unless (and (eq (snoop-actual-char) :eof-object)
+                 (eql *current-source-file* *main-tex-file*))
+      ;kludge: don't start a new page if \eject is the last thing in the
+      ;main file.  This is mostly to placate story.tex, which although
+      ;horrid as an example file, happens to be viewed as canonical by
+      ;everyone looking at TeX
+      (unless (> *last-page-number* 0)
+        (flag-missing-piece :last-modification-time))
+      (do-end-page)
+      (incf *html-page-count*)
+      (setq *html-page*
+            (concatenate 'string *aux-dir/* *jobname* *html-page-suffix*
+                         (write-to-string *html-page-count*)
+                         *output-extension*))
+      (setq *html* (open *html-page* :direction :output
+                         :if-exists :supersede))
+      (do-start))))
 
 (defun output-html-preamble ()
   (when (stringp *doctype*)
@@ -3725,6 +3727,8 @@
         `(!html-redirect ,url ,seconds))))
   (when (tex2page-flag-boolean "\\TZPslides")
     (tex2page-file (actual-tex-filename "t2pslides")))
+  (when (tex2page-flag-boolean "\\TZPsinglepage")
+    (write-aux '(!single-page)))
   (when (tex2page-flag-boolean "\\TZPtexlayout")
     (write-aux '(!tex-like-layout))
     (terpri *css-port*)
@@ -7435,6 +7439,9 @@
 
 (defun !last-page-number (n) (setq *last-page-number* n))
 
+(defun !single-page ()
+  (tex-def-0arg "\\TZPsinglepage" "1"))
+
 (defun !using-chapters () (setq *using-chapters-p* t))
 
 (defun !definitely-latex ()
@@ -7538,6 +7545,7 @@
                  !last-modification-time
                  !last-page-number
                  !preferred-title
+                 !single-page
                  !stylesheet
                  !tex-like-layout
                  !tex-text

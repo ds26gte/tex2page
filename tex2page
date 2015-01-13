@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20141213") ;last change
+(define *tex2page-version* "20150112") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -4389,20 +4389,21 @@
 
 (define output-head-or-foot-line
   (lambda (head-or-foot)
-    (emit "<div align=right class=navigation>")
-    (cond ((or *tex-like-layout?*
-               (and (eq? head-or-foot ':foot)
-                    (tex2page-flag-boolean "\\TZPtexlayout")))
-           (bgroup)
-           (tex-let "\\folio" "\\TIIPfolio" #f)
-           (tex2page-string
-             (if (eq? head-or-foot ':head)
+    (unless (tex2page-flag-boolean "\\TZPsinglepage")
+      (emit "<div align=right class=navigation>")
+      (cond ((or *tex-like-layout?*
+                 (and (eq? head-or-foot ':foot)
+                      (tex2page-flag-boolean "\\TZPtexlayout")))
+             (bgroup)
+             (tex-let "\\folio" "\\TIIPfolio" #f)
+             (tex2page-string
+               (if (eq? head-or-foot ':head)
                  "\\the\\headline"
                  "\\the\\footline"))
-           (egroup))
-          (else (output-navigation-bar head-or-foot)))
-    (emit "</div>")
-    (emit-newline)))
+             (egroup))
+            (else (output-navigation-bar head-or-foot)))
+      (emit "</div>")
+      (emit-newline))))
 
 (define output-navigation-bar
   (lambda (head-or-foot)
@@ -4505,29 +4506,28 @@
 
 (define do-eject
   (lambda ()
-
-    ;kludge: don't start a new page if \eject is the
-    ;last thing in the main file.  This is mostly
-    ;to placate story.tex, which although horrid as an
-    ;example file, happens to be viewed as canonical by
-    ;everyone looking at TeX
-
-    (unless (and (eof-object? (snoop-actual-char))
-                 (eqv? *current-source-file* *main-tex-file*))
-      ;
-      (unless (> *last-page-number* 0) ;???
-        (flag-missing-piece ':last-modification-time))
-      (do-end-page)
-      ;
-      (set! *html-page-count* (+ *html-page-count* 1))
-      (set! *html-page*
-        (string-append *aux-dir/*
-          *jobname* *html-page-suffix*
-          (number->string *html-page-count*)
-                       *output-extension*))
-      (ensure-file-deleted *html-page*)
-      (set! *html* (open-output-file *html-page*))
-      (do-start))))
+    (unless (tex2page-flag-boolean "\\TZPsinglepage")
+      (unless (and (eof-object? (snoop-actual-char))
+                   (eqv? *current-source-file* *main-tex-file*))
+        ;kludge: don't start a new page if \eject is the
+        ;last thing in the main file.  This is mostly
+        ;to placate story.tex, which although horrid as an
+        ;example file, happens to be viewed as canonical by
+        ;everyone looking at TeX
+        ;
+        (unless (> *last-page-number* 0) ;???
+          (flag-missing-piece ':last-modification-time))
+        (do-end-page)
+        ;
+        (set! *html-page-count* (+ *html-page-count* 1))
+        (set! *html-page*
+          (string-append *aux-dir/*
+                         *jobname* *html-page-suffix*
+                         (number->string *html-page-count*)
+                         *output-extension*))
+        (ensure-file-deleted *html-page*)
+        (set! *html* (open-output-file *html-page*))
+        (do-start)))))
 
 (define output-html-preamble
   (lambda ()
@@ -4726,6 +4726,8 @@
                     `(!html-redirect ,url ,seconds))))))
     (when (tex2page-flag-boolean "\\TZPslides")
       (tex2page-file (actual-tex-filename "t2pslides" #f)))
+    (when (tex2page-flag-boolean "\\TZPsinglepage")
+      (write-aux '(!single-page)))
     (when (tex2page-flag-boolean "\\TZPtexlayout")
       (write-aux `(!tex-like-layout))
       (newline *css-port*)
@@ -9082,6 +9084,10 @@
   (lambda (n)
     (set! *last-page-number* n)))
 
+(define !single-page
+  (lambda ()
+    (tex-def-0arg "\\TZPsinglepage" "1")))
+
 (define !using-chapters
   (lambda ()
     (set! *using-chapters?* #t)))
@@ -9224,6 +9230,7 @@
                         ((!last-modification-time) !last-modification-time)
                         ((!last-page-number) !last-page-number)
                         ((!preferred-title) !preferred-title)
+                        ((!single-page) !single-page)
                         ((!stylesheet) !stylesheet)
                         ((!tex-like-layout) !tex-like-layout)
                         ((!tex-text) !tex-text)

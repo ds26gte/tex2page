@@ -1,4 +1,9 @@
-Last change 2014-12-13
+Last change 2015-01-12
+
+2015 Jan 12
+
+Setting flag \TZPsinglepage forces creation of a single output
+HTML file. Suggested by Michael Matson.
 
 2014 Dec 13
 

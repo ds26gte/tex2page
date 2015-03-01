@@ -1,4 +1,11 @@
-Last change 2015-01-12
+Last change 2015-03-01
+
+2015 Mar 1
+
+Be better at ignoring new-style \font commands.
+
+In no-ligature mode, ` and ' should print as themselves not as
+&lsquo; and &rsquo;.
 
 2015 Jan 12
 

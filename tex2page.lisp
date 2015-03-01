@@ -827,7 +827,9 @@
     (if (char= c #\")
         (progn (get-actual-char) (eat-till-char #\"))
       (loop (let ((c (snoop-actual-char)))
-              (unless (or (alpha-char-p c) (digit-char-p c)) (return))
+              (unless (or (alpha-char-p c)
+                          (digit-char-p c)
+                          (member c '(#\:) :test #'char=)) (return))
               (get-actual-char))))))
 
 (defun get-filename (bracedp)
@@ -2676,7 +2678,7 @@
 
 (defun do-lsquo ()
   (emit
-   (if (not *ligatures-p*) "&lsquo;"
+   (if (not *ligatures-p*) #\`
        (let ((c (snoop-actual-char)))
          (if (and (characterp c) (char= c #\`))
              (progn (get-actual-char) "&ldquo;") "&lsquo;")))))
@@ -2687,7 +2689,7 @@
           (let ((c (snoop-actual-char)))
             (if (and (characterp c) (char= c #\'))
                 (progn (get-actual-char) "&Prime;") "&prime;")))
-         ((not *ligatures-p*) "&rsquo;")
+         ((not *ligatures-p*) #\')
          (t
           (let ((c (snoop-actual-char)))
             (if (and (characterp c) (char= c #\'))

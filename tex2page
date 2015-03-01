@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20150112") ;last change
+(define *tex2page-version* "20150301") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -1167,12 +1167,18 @@
 (define eat-alphanumeric-string
   (lambda ()
     (ignorespaces)
-    (let loop ()
-      (let ((c (snoop-actual-char)))
-        (when (or (char-alphabetic? c)
-                  (char-numeric? c))
+    (let ((c (snoop-actual-char)))
+      (if (char=? c #\")
+        (begin
           (get-actual-char)
-          (loop))))))
+          (eat-till-char #\"))
+        (let loop ()
+          (let ((c (snoop-actual-char)))
+            (when (or (char-alphabetic? c)
+                      (char-numeric? c)
+                      (memv c '(#\:)))
+              (get-actual-char)
+              (loop))))))))
 
 (define get-filename
   (lambda (braced?)
@@ -3454,7 +3460,7 @@
 (define do-lsquo
   (lambda ()
     (emit
-      (if (not *ligatures?*) "&lsquo;"
+      (if (not *ligatures?*) #\`
           (let ((c (snoop-actual-char)))
             (if (and (char? c) (char=? c #\`))
                 (begin (get-actual-char) "&ldquo;")
@@ -3468,7 +3474,7 @@
                 (if (and (char? c) (char=? c #\'))
                     (begin (get-actual-char) "&Prime;")
                     "&prime;")))
-            ((not *ligatures?*) "&rsquo;")
+            ((not *ligatures?*) #\')
             (else
               (let ((c (snoop-actual-char)))
                 (if (and (char? c) (char=? c #\'))
@@ -6082,6 +6088,12 @@
     (let loop ()
       (let ((c (get-actual-char)))
         (unless (or (eof-object? c) (char=? c #\newline)) (loop))))))
+
+(define eat-till-char
+  (lambda (d)
+    (let loop ()
+      (let ((c (get-actual-char)))
+        (unless (or (eof-object? c) (char=? c d)) (loop))))))
 
 (define do-comment
   (lambda ()

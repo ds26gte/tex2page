@@ -7,7 +7,7 @@
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
-\message{version 20130203} % last change
+\message{version 20150526} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -838,6 +838,14 @@
       \def\epsfbox##1{\convertMPtoPDF{##1}{1}{1}}%
     \fi
   \fi
+  \let\epsfboxSAVE\epsfbox
+  \def\epsfbox##1{%
+    \openin0 ##1
+    \ifeof0 \closein0
+      \message{##1 missing.}%
+    \else\closein0
+      \epsfboxSAVE{##1}%
+    \fi}%
 }
 
 % fluff

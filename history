@@ -1,4 +1,9 @@
-Last change 2015-03-01
+Last change 2015-05-26
+
+2015 May 26
+
+tex2page.tex: \inputepsf makes an \epsfbox that doesn't error if
+the eps file doesn't exist.
 
 2015 Mar 1
 

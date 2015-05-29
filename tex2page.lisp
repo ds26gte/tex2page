@@ -1,12 +1,3 @@
-":"; if test -z "$LISP"; then
-":";   if test "$USER" = evalwhen; then LISP=ecl
-":";   elif test $(hostname | grep TUSMA.*RLKVT); then LISP=clisp
-":";   else LISP=sbcl
-":";   fi
-":"; fi
-":"; if test "$USER" = ds26 -a "$HOSTNAME" = fun; then
-":";   export LANG=en_US.UTF-8
-":"; fi
 ":"; if test "$LISP" != sbcl; then export T2PARG=$1; fi
 ":"; if test "$LISP" = abcl; then exec abcl --load $0 --eval '(ext::quit)'
 ":"; elif test "$LISP" = allegro; then exec alisp -L $0 -kill

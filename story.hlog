@@ -1,5 +1,5 @@
-This is TeX2page, Version 20141202c (SBCL 1.2.3.debian Linux)
-(story.tex)
+This is TeX2page, Version 20150601 (Racket 6.2.0.3, :unix)
+(/home/ds26gte/.tex2page.t2p) (story.tex)
 ! Missing \end inserted.
 [0]
 Output written on story.html (1 page).

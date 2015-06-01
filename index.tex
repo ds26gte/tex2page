@@ -5,9 +5,9 @@
 % tex2page index
 
 % tex2page is available at
-% http://www.ccs.neu.edu/~dorai/tex2page/index.html
+% http://ds26gte.github.io/tex2page/index.html
 
-% last change: 2015-01-12
+% last change: 2015-06-01
 
 \input tex2page-doc-mac
 
@@ -18,7 +18,7 @@
 
 \smallskip
 
-\c{\urlh{../index.html}{Dorai Sitaram}}
+\c{\urlh{http://ds26gte.github.io}{Dorai Sitaram}}
 %
 \ifx\inpltdist\Undefined
 \ifx\shipout\UnDeFiNeD
@@ -3440,7 +3440,7 @@ can manually call Scmxlate, which isn't really all that
 tedious.
 
 First ensure that
-\urlp{Scmxlate}{http://www.ccs.neu.edu/~dorai/scmxlate/index.html}
+\urlp{Scmxlate}{https::/github.com/ds26gte/scmxlate}
 is installed on your system.  Note down the pathname of
 the file \p{scmxlate.scm} in the unpacked \p{scmxlate}
 directory.
@@ -3509,7 +3509,7 @@ procedure \q{tex2page} on your source document.  E.g.,
 
 \q{
 (load "tex2page")
-(tex2page "tex2page-doc.tex")
+(tex2page "filename.tex")
 }
 Once loaded, the procedure \q{tex2page} can be called several times from
 the same Scheme session, on the same file (to resolve cross-references)

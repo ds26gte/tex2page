@@ -9,11 +9,11 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20150301") ;last change
+(define *tex2page-version* "20150601") ;last change
 
 (define *tex2page-website*
   ;for details, please see
-  "http://www.ccs.neu.edu/~dorai/tex2page/index.html")
+  "http://ds26gte.github.io/tex2page/index.html")
 
 ;some parameters that may hinge on user preference or
 ;need.  I've tried to make it all automatic, with
@@ -4353,7 +4353,7 @@
           (emit " ")
           (when colophon-links-to-tex2page-website?
             (emit-link-start
-              "http://www.ccs.neu.edu/~dorai/tex2page/index.html"))
+              "http://ds26gte.github.io/tex2page/index.html"))
           (emit *tex-logo*) (emit "2page ")
           (emit *tex2page-version*)
           (when colophon-links-to-tex2page-website?

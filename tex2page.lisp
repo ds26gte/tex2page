@@ -12,7 +12,7 @@
 ;tex2page
 ;Dorai Sitaram
 ;For details, see
-;http://www.ccs.neu.edu/~dorai/tex2page/index.html
+;http://ds26gte.github.io/tex2page/index.html
 
 #+sbcl
 (declaim (sb-ext:muffle-conditions style-warning))
@@ -28,11 +28,11 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20141213c") ;last change
+(defparameter *tex2page-version* (concatenate 'string "20150601" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
-  "http://www.ccs.neu.edu/~dorai/tex2page/index.html")
+  "http://ds26gte.github.io/tex2page/index.html")
 
 (defparameter *tex2page-copyright-notice*
   (format nil "Copyright (C) 1997-~a Dorai Sitaram"
@@ -3390,7 +3390,7 @@
         (emit " ")
         (when colophon-links-to-tex2page-website-p
           (emit-link-start
-           "http://www.ccs.neu.edu/~dorai/tex2page/index.html"))
+           "http://ds26gte.github.io/tex2page/index.html"))
         (emit *tex-logo*) (emit "2page ")
         (emit *tex2page-version*)
         (when colophon-links-to-tex2page-website-p (emit-link-stop))

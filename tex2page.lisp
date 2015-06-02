@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20150601" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20150602" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -3762,7 +3762,7 @@
     (princ ".navigation { color: black; font-style: normal; }" *css-port*)
     (terpri *css-port*))
   (unless (tex2page-flag-boolean "\\TZPtextext")
-    (write-aux `(!tex-text 0)))
+    (write-aux `(!tex-text 1)))
   )
 
 (defun insert-missing-end ()

@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20150601") ;last change
+(define *tex2page-version* "20150602") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -4774,7 +4774,7 @@
       (newline *css-port*)
       )
     (unless (tex2page-flag-boolean "\\TZPtextext")
-      (write-aux `(!tex-text 0)))
+      (write-aux `(!tex-text 1)))
     ))
 
 (define insert-missing-end

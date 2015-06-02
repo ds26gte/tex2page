@@ -5246,7 +5246,7 @@
   (tex-gdef-0arg "\\TZPmathimage" "1")
   (tex-gdef-0arg "\\TZPimageformat" "PNG")
   (tex-gdef-0arg "\\TZPimageconverter" "NetPBM")
-  (tex-gdef-0arg "\\TZPredirectseconds" "5")
+  (tex-gdef-0arg "\\TZPredirectseconds" "0")
   (tex-gdef-0arg "\\TZPslatexcomments" "0")
   (tex-gdef-0arg "\\TZPtexlayout" "0")
   (tex-gdef-0arg "\\TZPtextext" "1")

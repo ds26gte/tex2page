@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20150602" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20150623" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -934,6 +934,7 @@
          (gethash (read-from-string (ungroup (get-token)))
                   *section-counters*
                   0))
+        ((string= x "\\magstep") (get-number-or-false))
         ((find-count x)) ((find-dimen x))
         (t (string-to-number (or (resolve-defs x) x)))))
 
@@ -2600,6 +2601,12 @@
   (cond ((eat-word "at") (eat-dimen))
         ((eat-word "scaled") (get-number))))
 
+(defun do-fontdimen ()
+  (get-number)
+  (get-ctl-seq)
+  (get-equal-sign)
+  (eat-dimen))
+
 ;(defun do-hskip ()
 ;  ;assume 1 space is 5 pxl wide
 ;  (emit-nbsp (/ (get-pixels) 5)))
@@ -3226,6 +3233,15 @@
     (get-group) ;ignore
     (emit "<em>see also</em> ")
     (tex2page-string other-entry)))
+
+(defun do-setbox ()
+  (get-raw-token/is)
+  (get-equal-sign)
+  (let ((cs (get-raw-token/is)))
+    (when (member cs '("\\hbox" "\\vbox") :test #'string=)
+      (get-to)
+      (eat-dimen)
+      (get-token-or-peeled-group))))
 
 (defun do-indexitem (indent)
   (setq *index-page-mention-alist* (make-hash-table))
@@ -6637,6 +6653,14 @@
              (emit (write-to-string n :base 16))
              (emit ";")))))
 
+(defun do-chardef ()
+  (let ((lhs (get-raw-token/is)))
+    (get-equal-sign)
+    (let ((n (get-number-or-false)))
+      (if n
+          (tex-let lhs (string (code-char n)) nil)
+          (terror 'do-chardef "non-number found while scanning definition of " lhs)))))
+
 (defun tex-math-bb (c)
   (case c
     ((#\C) "&#x2102;")
@@ -8102,6 +8126,8 @@ Try the commands
 
 (tex-def-prim "\\char" #'do-char)
 
+(tex-def-prim "\\chardef" #'do-chardef)
+
 (tex-def-prim "\\cite" #'do-cite)
 
 (tex-def-prim "\\closegraphsfile" #'do-mfpic-closegraphsfile)
@@ -8284,6 +8310,8 @@ Try the commands
 (tex-def-prim "\\folio" (lambda () (emit *html-page-count*)))
 
 (tex-def-prim "\\font" #'do-font)
+
+(tex-def-prim "\\fontdimen" #'do-fontdimen)
 
 (tex-def-prim "\\footnote" #'do-footnote)
 
@@ -8566,6 +8594,7 @@ Try the commands
 (tex-def-prim "\\scriptsize" (lambda () (do-switch :scriptsize)))
 (tex-def-prim "\\section" (lambda () (do-heading 1)))
 (tex-def-prim "\\seealso" #'do-see-also)
+(tex-def-prim "\\setbox" #'do-setbox)
 (tex-def-prim "\\setcounter" (lambda () (set-latex-counter nil)))
 (tex-def-prim "\\sevenrm" (lambda () (do-switch :sevenrm)))
 (tex-def-prim "\\sf" (lambda () (do-switch :sf)))
@@ -9358,6 +9387,7 @@ Try the commands
           (t (tex2page-help tex-file)))
     (output-stats)))
 
+;(trace get-number-or-false get-number-corresp-to-ctl-seq)
 ;(trace do-math do-display-math do-intext-math do-math-fragment do-math-left do-math-right
 ;       bgroup-math-hook bgroup egroup )
 

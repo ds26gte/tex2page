@@ -1,4 +1,10 @@
-Last change 2015-05-26
+Last change 2015-06-23
+
+2015 Jun 23
+
+Process webmac.tex without error. Reported by @razvanm. For this:
+Read \magstep<number> as a number. Ignore \fontdimen and \setbox
+cleanly. Recognize \chardef.
 
 2015 May 26
 

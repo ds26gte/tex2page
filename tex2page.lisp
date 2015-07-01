@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20150623" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20150701" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -885,20 +885,20 @@
   (let ((minusp nil) (c (snoop-actual-char)))
     (when (char= c #\-) (setq minusp t))
     (when (or minusp (char= c #\+)) (get-actual-char))
-    (let ((n (read-from-string
-              (concatenate 'string
-                           (nreverse
-                            (let ((s '()))
-                              (loop
-                                (let ((c (snoop-actual-char)))
-                                  (cond ((eq c :eof-object) (return s))
-                                        ((or (digit-char-p c)
-                                             (char= c #\.))
-                                         (get-actual-char)
-                                         (push c s))
-                                        (t (ignorespaces)
-                                           (return s)))))))))))
-      (if minusp (- n) n))))
+    (let ((s '()))
+      (loop
+        (let ((c (snoop-actual-char)))
+          (cond ((eq c :eof-object) (return))
+                ((or (digit-char-p c)
+                     (char= c #\.))
+                 (get-actual-char)
+                 (push c s))
+                (t (ignorespaces)
+                   (return)))))
+      (if s
+          (let ((n (read-from-string (concatenate 'string (nreverse s)))))
+            (if minusp (- n) n))
+          nil))))
 
 (defun get-equal-sign ()
   (ignorespaces)
@@ -936,7 +936,9 @@
                   0))
         ((string= x "\\magstep") (get-number-or-false))
         ((find-count x)) ((find-dimen x))
-        (t (string-to-number (or (resolve-defs x) x)))))
+        (t (let ((it (resolve-defs x)))
+             (if it (char-code (char it 0))
+                 (string-to-number x))))))
 
 (defun get-number-or-false ()
   (ignorespaces)
@@ -1122,6 +1124,8 @@
   (toks (make-hash-table :test #'equal))
   (dimens (make-hash-table :test #'equal))
   (postludes '())
+  (uccodes (make-hash-table :test #'eql))
+  (lccodes (make-hash-table :test #'eql))
   (aftergroups '()))
 
 (defvar *primitive-texframe* (make-texframe*))
@@ -1322,7 +1326,10 @@
              (setf (tdef*-defer lft-def) rt)))))
 
 (defun tex-let-prim (lft rt)
-  (tex-let lft rt *primitive-texframe*))
+  (tex-let lft rt *primitive-texframe*)
+  )
+
+;(trace tex-let tex-let-prim)
 
 (defun tex-def-thunk (name thunk frame)
   (unless (inside-false-world-p)
@@ -6592,8 +6599,31 @@
     (when n
       (emit (number-to-roman n upcase-p)))))
 
-(defun do-uppercase ()
-  (emit (string-upcase (tex-string-to-html-string (get-token)))))
+(defun do-tex-case-code (kase)
+  (unless (inside-false-world-p)
+    (let* ((c1 (get-tex-char-spec))
+           (c2 (progn (get-equal-sign) (get-tex-char-spec)))
+           (fr (top-texframe)))
+      (setf (gethash c1 (funcall (case kase
+                                   (:uccode #'texframe*-uccodes)
+                                   (:lccode #'texframe*-lccodes))
+                                 fr))
+            c2))))
+
+(defun tex-char-downcase (c)
+  (or (some (lambda (fr) (gethash c (texframe*-lccodes fr))) *tex-env*)
+      (char-downcase c)))
+
+(defun tex-char-upcase (c)
+  (or (some (lambda (fr) (gethash c (texframe*-uccodes fr))) *tex-env*)
+      (char-upcase c)))
+
+(defun do-flipcase (kase)
+  (emit
+    (map 'string (case kase
+                   (:uccode #'tex-char-upcase)
+                   (:lccode #'tex-char-downcase))
+         (get-token))))
 
 (defun set-latex-counter (addp)
   (let* ((counter-name (get-peeled-group))
@@ -8474,6 +8504,7 @@ Try the commands
 (tex-def-prim "\\LARGE" (lambda () (do-switch :large-up)))
 (tex-def-prim "\\latexonly"
  (lambda () (ignore-tex-specific-text "latexonly")))
+(tex-def-prim "\\lccode" (lambda () (do-tex-case-code :lccode)))
 (tex-def-prim "\\leftdisplays"
  (lambda () (setq *display-justification* "left")))
 (tex-def-prim "\\leftline" (lambda () (do-function "\\leftline")))
@@ -8482,6 +8513,7 @@ Try the commands
  (lambda () (get-bracketed-text-if-any) (emit "<br>")))
 (tex-def-prim "\\listing" #'do-verbatiminput)
 (tex-def-prim "\\lstlisting" (lambda () (do-verbatim-latex "lstlisting")))
+(tex-def-prim "\\lowercase" (lambda () (do-flipcase :lccode)))
 
 (tex-def-prim "\\magnification" #'do-magnification)
 (tex-def-prim "\\magstep" #'do-magstep)
@@ -8692,26 +8724,18 @@ Try the commands
 (tex-def-prim "\\TZPlastpageno" (lambda () (emit *last-page-number*)))
 (tex-def-prim-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))
 
+(tex-def-prim "\\uccode" (lambda () (do-tex-case-code :uccode)))
 (tex-def-prim "\\undefcsactive" #'do-undefcsactive)
-
 (tex-def-prim "\\undefschememathescape" (lambda () (scm-set-mathescape nil)))
-
 (tex-def-prim "\\underline" (lambda () (do-function "\\underline")))
-
 (tex-def-prim "\\unscmspecialsymbol" #'do-scm-unset-specialsymbol)
-
-(tex-def-prim "\\uppercase" #'do-uppercase)
-
+(tex-def-prim "\\uppercase" (lambda () (do-flipcase :uccode)))
 (tex-def-prim "\\url" #'do-url)
-
 (tex-def-prim "\\urlh" #'do-urlh)
-
 (tex-def-prim "\\urlhd" #'do-urlhd)
-
 (tex-def-prim "\\urlp" #'do-urlp)
 
 (tex-def-prim "\\v" (lambda () (do-diacritic :hacek)))
-
 (tex-defsym-prim "\\vdots" "&#x22ee;")
 
 (tex-def-prim "\\verb" #'do-verb)
@@ -8880,6 +8904,18 @@ Try the commands
   (tex-def-prim "\\TeX" (lambda () (emit TeX)))
   (tex-def-prim "\\XeLaTeX" (lambda () (emit Xe) (emit thinspace) (emit LaTeX)))
   (tex-def-prim "\\XeTeX" (lambda () (emit Xe) (emit TeX))))
+
+;plain quicknums
+
+(tex-let-prim "\\@ne" (string (code-char 1)))
+(tex-let-prim "\\tw@" (string (code-char 2)))
+(tex-let-prim "\\thr@@" (string (code-char 3)))
+(tex-let-prim "\\sixt@@n" (string (code-char 16)))
+(tex-let-prim "\\@cclv" (string (code-char 255)))
+(tex-let-prim "\\@cclvi" (string (code-char 256)))
+(tex-let-prim "\\@m" (string (code-char 1000)))
+(tex-let-prim "\\@M" (string (code-char 10000)))
+(tex-let-prim "\\@MM" (string (code-char 20000)))
 
 ;ignoring these
 
@@ -9386,9 +9422,5 @@ Try the commands
            (do-bye))
           (t (tex2page-help tex-file)))
     (output-stats)))
-
-;(trace get-number-or-false get-number-corresp-to-ctl-seq)
-;(trace do-math do-display-math do-intext-math do-math-fragment do-math-left do-math-right
-;       bgroup-math-hook bgroup egroup )
 
 (tex2page *tex2page-file-arg*)

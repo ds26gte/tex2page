@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20150623") ;last change
+(define *tex2page-version* "20150701") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -1247,20 +1247,18 @@
     (let ((minus? #f)
           (c (snoop-actual-char)))
       (when (char=? c #\-) (set! minus? #t))
-      (when (or minus? (char=? c #\+))
-        (get-actual-char))
-      (let ((n (string->number
-                (list->string
-                 (nreverse
-                  (let loop ((s '()))
-                    (let ((c (snoop-actual-char)))
-                      (cond ((eof-object? c) s)
-                            ((or (char-numeric? c) (char=? c #\.))
-                             (get-actual-char)
-                             (loop (cons c s)))
-                            (else (ignorespaces)
-                                  s)))))))))
-        (if minus? (- n) n)))))
+      (when (or minus? (char=? c #\+)) (get-actual-char))
+      (let ((s (let loop ((s '()))
+                 (let ((c (snoop-actual-char)))
+                   (cond ((eof-object? c) s)
+                         ((or (char-numeric? c) (char=? c #\.))
+                          (get-actual-char)
+                          (loop (cons c s)))
+                         (else (ignorespaces)
+                               s))))))
+        (and (pair? s)
+            (let ((n (string->number (list->string (nreverse s)))))
+              (if minus? (- n) n)))))))
 
 (define get-equal-sign
   (lambda ()
@@ -1304,15 +1302,13 @@
           ((string=? x "\\sectiondnumber")
            (table-get *section-counters*
                       (string->number
-                       (ungroup (get-token))) 0))
+                        (ungroup (get-token))) 0))
           ((string=? x "\\magstep") (get-number-or-false))
           ((find-count x))
           ((find-dimen x))
-          (else
-           (or (string->number (or (resolve-defs x) x))
-              ; (terror 'get-number-corresp-to-ctl-seq "Missing number")
-               )
-           ))))
+          (else (let ((it (resolve-defs x)))
+                  (if it (char->integer (string-ref it 0))
+                      (string->number x)))))))
 
 (define get-number-or-false
   (lambda ()
@@ -1551,6 +1547,8 @@
   (toks (make-table 'equ string=?))
   (dimens (make-table 'equ string=?))
   (postludes '())
+  (uccodes (make-table 'equ char=?))
+  (lccodes (make-table 'equ char=?))
   (aftergroups '()))
 
 (define *primitive-texframe* (make-texframe))
@@ -8129,11 +8127,38 @@
                 (emit
                   (number->roman n upcase?)))))))
 
-(define do-uppercase
-  (lambda ()
+(define do-tex-case-code
+  (lambda (kase)
+    (unless (inside-false-world?)
+      (let* ((c1 (get-tex-char-spec))
+             (c2 (begin (get-equal-sign) (get-tex-char-spec)))
+             (fr (top-texframe)))
+        (table-put!
+          ((case kase
+             ((:lccode) texframe.uccodes)
+             ((:uccode) texframe.lccodes)) fr)
+          c1 c2)))))
+
+(define tex-char-downcase
+  (lambda (c)
+    (or (ormap (lambda (f)
+                 (table-get (texframe.lccodes f) c)) *tex-env*)
+        (char-downcase c))))
+
+(define tex-char-upcase
+  (lambda (c)
+    (or (ormap (lambda (f)
+                 (table-get (texframe.uccodes f) c)) *tex-env*)
+        (char-upcase c))))
+
+(define do-flipcase
+  (lambda (kase)
     (emit
-      (string-upcase
-        (tex-string->html-string (get-token))))))
+      (list->string
+        (map (case kase
+               ((:uccode) tex-char-upcase)
+               ((:lccode) tex-char-downcase))
+             (string->list (get-token)))))))
 
 (define set-latex-counter
   (lambda (add?)
@@ -10090,6 +10115,7 @@ Try the commands
 (tex-def-prim "\\LARGE" (lambda () (do-switch ':large-up)))
 (tex-def-prim "\\latexonly"
   (lambda () (ignore-tex-specific-text "latexonly")))
+(tex-def-prim "\\lccode" (lambda () (do-tex-case-code ':lccode)))
 (tex-def-prim "\\leftdisplays"
   (lambda () (set! *display-justification* "left")))
 (tex-def-prim "\\leftline" (lambda () (do-function "\\leftline")))
@@ -10098,6 +10124,7 @@ Try the commands
   (lambda () (get-bracketed-text-if-any) (emit "<br>")))
 (tex-def-prim "\\listing" do-verbatiminput)
 (tex-def-prim "\\lstlisting" (lambda () (do-verbatim-latex "lstlisting")))
+(tex-def-prim "\\lowercase" (lambda () (do-flipcase ':lccode)))
 
 (tex-def-prim "\\magnification" do-magnification)
 (tex-def-prim "\\magstep" do-magstep)
@@ -10313,11 +10340,12 @@ Try the commands
 (tex-def-prim "\\TZPlastpageno" (lambda () (emit *last-page-number*)))
 (tex-def-prim-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))
 
+(tex-def-prim "\\uccode" (lambda () (do-tex-case-code ':uccode)))
 (tex-def-prim "\\undefcsactive" do-undefcsactive)
 (tex-def-prim "\\undefschememathescape" (lambda () (scm-set-mathescape #f)))
 (tex-def-prim "\\underline" (lambda () (do-function "\\underline")))
 (tex-def-prim "\\unscmspecialsymbol" do-scm-unset-specialsymbol)
-(tex-def-prim "\\uppercase" do-uppercase)
+(tex-def-prim "\\uppercase" (lambda () (do-flipcase ':uccode)))
 (tex-def-prim "\\url" do-url)
 (tex-def-prim "\\urlh" do-urlh)
 (tex-def-prim "\\urlhd" do-urlhd)
@@ -10451,6 +10479,19 @@ Try the commands
   (tex-def-prim "\\TeX" (lambda () (emit TeX)))
   (tex-def-prim "\\XeLaTeX" (lambda () (emit Xe) (emit thinspace) (emit LaTeX)))
   (tex-def-prim "\\XeTeX" (lambda () (emit Xe) (emit TeX))))
+
+;plain quicknums
+
+(tex-let-prim "\\@ne" (string (integer->char 1)))
+(tex-let-prim "\\tw@" (string (integer->char 2)))
+(tex-let-prim "\\thr@@" (string (integer->char 3)))
+(tex-let-prim "\\sixt@@n" (string (integer->char 16)))
+(tex-let-prim "\\@cclv" (string (integer->char 255)))
+(tex-let-prim "\\@cclvi" (string (integer->char 256)))
+(tex-let-prim "\\@m" (string (integer->char 1000)))
+(tex-let-prim "\\@M" (string (integer->char 10000)))
+(tex-let-prim "\\@MM" (string (integer->char 20000)))
+
 ;ignoring these
 
 (tex-let-prim "\\htmladvancedentities" "\\TIIPrelax")

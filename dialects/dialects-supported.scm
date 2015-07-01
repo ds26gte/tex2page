@@ -1,11 +1,11 @@
-; last change 2014-12-02
+; last change 2015-07-01
 abcl ;v 1.4.0; WORKS!
 allegro ;v 9.0; WORKS!
 bigloo
 chez ;works for petite, so...
 chicken ;v 4.8.2; WORKS!
 clisp ;v 2.49; WORKS!
-clozure ;v 1.9; WORKS!
+clozure ;v 1.10; WORKS!
 cmucl ;v 20d; WORKS!
 ecl ;v 13.5.1; WORKS!
 gambit ;v 4.4.2; WORKS!
@@ -18,11 +18,11 @@ mitscheme
 petite ;v 8.4; WORKS!
 plt ;lib version for PLT: not quite yet
 pscheme
-racket ;v 6.1.1.5; WORKS!
+racket ;v 6.2.0.5; WORKS!
 ;rscheme
-sbcl ;v 1.2.3; WORKS!
+sbcl ;v 1.2.13; WORKS!
 scheme48
-scm
+scm ;v 5e5; WORKS!
 scsh
 stk ;RIP?
 stklos ;not sure

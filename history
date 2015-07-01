@@ -1,4 +1,13 @@
-Last change 2015-06-23
+Last change 2015-07-01
+
+2015 Jul 1
+
+Process amstex.tex without error. Reported by Wolfgang Tintemann.
+
+Added \lowercase (cf. \uppercase), \lccode, \uccode. Recognize
+quicknums \@ne \tw@ \thr@@ \sixt@@n \@cclv \@cclvi \@m \@M \@MM.
+Corrected get-real to skip empty strings (useful in
+get-scaled-points)
 
 2015 Jun 23
 

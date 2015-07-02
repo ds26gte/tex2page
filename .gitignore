@@ -1,0 +1,8 @@
+*.aux
+*.html
+*.mp
+*Z-*
+*~
+?.*
+lambda*
+my-tex2page*

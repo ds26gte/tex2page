@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20150701" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20150930" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -3387,7 +3387,7 @@
             m
             (if (<= 0 h 11) "a" "p")
             (format nil "UTC~a~a"
-                    (if (> tz 0) "&minus;" "+")
+                    (if (> tz 0) "−" "+")
                     (abs tz))
             (if dst "+1" ""))))
 
@@ -5185,7 +5185,8 @@
 
 (defun set-start-time ()
   (multiple-value-bind (s m h d mo y)
-      (decode-universal-time (get-universal-time) 5) ;don't care about TZ
+      (decode-universal-time (get-universal-time))
+      ;TeX uses local time zone so we don't worry about reporting what it is
     (declare (ignore s))
     (tex-def-count "\\time" (+ (* 60 h) m) t)
     (tex-def-count "\\day" d t)
@@ -9403,6 +9404,8 @@ Try the commands
     (write-log #\()
     (write-log *common-lisp-version*)
     (write-log #\))
+    (write-log #\space)
+    (write-log (seconds-to-human-time (get-universal-time)))
     (write-log :separation-newline)
     (cond (*main-tex-file*
            (setq *subjobname* *jobname*

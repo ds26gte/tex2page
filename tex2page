@@ -9,7 +9,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20150701") ;last change
+(define *tex2page-version* "20150930") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -10878,6 +10878,8 @@ Try the commands
       (write-log #\,) (write-log #\space)
       (write-log *operating-system*)
       (write-log #\))
+      (write-log #\space)
+      (write-log (seconds->human-time (current-seconds)))
       (write-log ':separation-newline)
       (cond (*main-tex-file*
              (set! *subjobname* *jobname*)

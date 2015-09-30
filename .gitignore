@@ -4,5 +4,7 @@
 *Z-*
 *~
 ?.*
+[^s]*log
 lambda*
 my-tex2page*
+tmp/*

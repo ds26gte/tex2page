@@ -5,11 +5,10 @@
 ;Dorai Sitaram
 
 (require mzlib/process)
-(require mzlib/date)
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20150930") ;last change
+(define *tex2page-version* "20151001") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -338,12 +337,36 @@
 
 ;timely stuff
 
+(define *short-month-names*
+  (vector "Jan" "Feb" "March" "April" "May" "June"
+          "July" "Aug" "Sept" "Oct" "Nov" "Dec"))
+
+(define *week-day-names*
+  (vector "Mon" "Tues" "Wed" "Thurs" "Fri" "Sat" "Sun"))
+
 (define strftime-like
   (lambda (ignore-format d)
-    (string-append
-      (date->string d #t)
-      (let ((tz (getenv "TZ")))
-        (if tz (string-append " " tz) "")))))
+    (let ((m (date-minute d))
+          (h (date-hour d))
+          (dy (date-day d))
+          (mo (date-month d))
+          (y (date-year d))
+          (dow (date-week-day d))
+          (dst (date-dst? d))
+          (tz (/ (date-time-zone-offset d) 3600)))
+      (format "~a, ~a ~a, ~a, ~a:~a~a ~am ~a"
+              (vector-ref *week-day-names* dow)
+              (vector-ref *short-month-names* (- mo 1))
+              dy
+              y
+              (let ((h (modulo h 12)))
+                (if (= h 0) 12 h))
+              (if (< m 10) "0" "")
+              m
+              (if (<= 0 h 11) "a" "p")
+              (format "UTC~a~a"
+                      (if (> tz 0) "+" "-")
+                      (abs tz))))))
 
 (define seconds->human-time
   (lambda (s)

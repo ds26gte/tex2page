@@ -1,4 +1,14 @@
-Last change 2015-07-01
+Last change 2015-11-19
+
+2015 Nov 19
+
+tex2page.tex: Flag \TZPurlhdebugmode. Use it to cause \urlh to
+print its URL (for debugging). Feature request by Michael Matson.
+
+Use hex codes rather than names for the curvy quotes. Suggested
+by Michael Matson.
+
+Nested \enquote* shouldn't act as toggle. Reported by Michael Matson.
 
 2015 Jul 1
 

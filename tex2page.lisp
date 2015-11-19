@@ -117,7 +117,7 @@
 
 (defparameter *verbatim-visible-space*
   ; for the likes of verb* and {verbatim*}
-  ; "<span style=\"color: red\">&middot;</span>"
+  ; "<span style=\"color: red\">&#xb7;</span>"
   "<span style=\"vertical-align: -0.5ex\">&#x2334;</span>")
 
 (defparameter *aux-file-suffix* "-Z-A")
@@ -1107,10 +1107,10 @@
     (cond ((char= c #\Newline) (emit-newline))
           (*outputting-to-non-html-p* (emit c))
           (t (emit (case c
-                     ((#\<) "&lt;")
-                     ((#\>) "&gt;")
-                     ((#\") "&quot;")
-                     ((#\&) "&amp;")
+                     ((#\<) "&#x3c;")
+                     ((#\>) "&#x3e;")
+                     ((#\") "&#x22;")
+                     ((#\&) "&#x26;")
                      (t c)))))))
 
 (defun emit-html-string (s)
@@ -2058,9 +2058,9 @@
 
 (defun do-integral ()
   (if (or (not *in-display-math-p*) *math-script-mode-p*)
-      (emit "&int;")
+      (emit "&#x222b;")
     (let ((affixes-already-read '()))
-      (emit "<span style=\"font-size: 200%; position: relative; top: .25ex;\">&int;</span>")
+      (emit "<span style=\"font-size: 200%; position: relative; top: .25ex;\">&#x222b;</span>")
       (dotimes (i 2)
         (ignorespaces)
         (let ((c (snoop-actual-char)))
@@ -2165,9 +2165,9 @@
   (defun number-to-footnote-symbol (n)
     (unless symlist
       (setq symlist
-            '("*" "&dagger;" "&Dagger;" "&sect;" "&para;"
+            '("*" "&#x2020;" "&#x2021;" "&#xa7;" "&#xb6;"
               "&#x2225;" ; ||
-              "*" "&dagger;&dagger;" "&Dagger;&Dagger;")
+              "*" "&#x2020;&#x2020;" "&#x2021;&#x2021;")
             symlist-len (length symlist)))
     (elt symlist (mod (1- n) symlist-len))))
 
@@ -2499,9 +2499,9 @@
           ((string= fn "\\emph") (emit "<em>"))
           ((string= fn "\\leftline") (do-end-para) (emit "<div align=left>"))
           ((string= fn "\\centerline") (do-end-para)
-           (emit "<div align=center>&nbsp;"))
+           (emit "<div align=center>&#xa0;"))
           ((string= fn "\\rightline") (do-end-para)
-           (emit "<div align=right>&nbsp;"))
+           (emit "<div align=right>&#xa0;"))
           ((string= fn "\\underline") (emit "<u>"))
           ((string= fn "\\textbf") (setq *math-mode-p* nil) (emit "<b>"))
           ((or (string= fn "\\textit") (string= fn "\\textsl"))
@@ -2516,7 +2516,7 @@
           ((string= fn "\\emph") (emit "</em>"))
           ((string= fn "\\rightline") (emit "</div>") (emit-newline))
           ((or (string= fn "\\leftline") (string= fn "\\centerline"))
-           (do-end-para) (emit "&nbsp;</div>") (emit-newline))
+           (do-end-para) (emit "&#xa0;</div>") (emit-newline))
           ((string= fn "\\underline") (emit "</u>"))
           ((string= fn "\\textbf") (emit "</b>"))
           ((or (string= fn "\\textsl") (string= fn "\\textit"))
@@ -2546,7 +2546,7 @@
 
 (defun emit-nbsp (n)
   (dotimes (i n)
-    (emit "&nbsp;")))
+    (emit "&#xa0;")))
 
 (defun scaled-point-equivalent-of (unit)
   (case unit
@@ -2656,7 +2656,7 @@
 
 (defun do-hyphen ()
   (cond (*math-mode-p*
-         (emit (if (eq *math-font* :rm) "-" "&minus;")))
+         (emit (if (eq *math-font* :rm) "-" "&#x2212;")))
         ((not *ligatures-p*) (emit #\-))
         (t
          (let ((c (snoop-actual-char)))
@@ -2667,13 +2667,13 @@
   (if (or *math-mode-p* (not *ligatures-p*)) (emit #\!)
       (let ((c (snoop-actual-char)))
         (if (and (characterp c) (char= c #\`))
-            (progn (get-actual-char) (emit "&iexcl;")) (emit #\!)))))
+            (progn (get-actual-char) (emit "&#xa1;")) (emit #\!)))))
 
 (defun do-quest ()
   (if (or *math-mode-p* (not *ligatures-p*)) (emit #\?)
       (let ((c (snoop-actual-char)))
         (if (and (characterp c) (char= c #\`))
-            (progn (get-actual-char) (emit "&iquest;")) (emit #\?)))))
+            (progn (get-actual-char) (emit "&#xbf;")) (emit #\?)))))
 
 (defun do-ndash ()
   (emit
@@ -2693,7 +2693,7 @@
    (cond (*math-mode-p*
           (let ((c (snoop-actual-char)))
             (if (and (characterp c) (char= c #\'))
-                (progn (get-actual-char) "&Prime;") "&prime;")))
+                (progn (get-actual-char) "&#x2033;") "&#x2032;")))
          ((not *ligatures-p*) #\')
          (t
           (let ((c (snoop-actual-char)))
@@ -3304,8 +3304,8 @@
     (do-noindent)
     (emit "<span style=\"margin-left: ")
     (emit parindent)
-    (emit "pt\">&zwnj;</span>")
-    (emit "<span style=\"position: relative\">&zwnj;")
+    (emit "pt\">&#x200c;</span>")
+    (emit "<span style=\"position: relative\">&#x200c;")
     (emit "<span style=\"position: absolute; left: -")
     (emit parindent)
     (emit "pt\">")
@@ -3438,11 +3438,11 @@
                    *output-extension*)))))
     (unless (= *last-page-number* 0)
       (when prev-page (emit-link-start prev-page))
-      (emit "&lt;&middot;&middot;&middot;Prev ")
+      (emit "&#x3c;&#xb7;&#xb7;&#xb7;Prev ")
       (when prev-page (emit-link-stop))
       (emit "||")
       (when next-page (emit-link-start next-page))
-      (emit " Next&middot;&middot;&middot;&gt;")
+      (emit " Next&#xb7;&#xb7;&#xb7;&#x3e;")
       (when next-page (emit-link-stop)))))
 
 (defun output-head-or-foot-line (head-or-foot)
@@ -5922,7 +5922,7 @@
               ((char= c #\space)
                (emit (if *verb-visible-space-p* *verbatim-visible-space* #\space)))
               ((char= c #\Newline)
-               (cond (*verb-display-p* (emit "&nbsp;") (emit-newline))
+               (cond (*verb-display-p* (emit "&#xa0;") (emit-newline))
                      (*verb-visible-space-p* (emit *verbatim-visible-space*))
                      (t (emit-newline))))
               ((and (char= c #\-) (not *verb-display-p*))
@@ -5940,7 +5940,7 @@
              (emit
              (if *verb-visible-space-p* *verbatim-visible-space* #\space)))
             ((char= c #\Newline)
-             (cond (*verb-display-p* (emit "&nbsp;") (emit-newline))
+             (cond (*verb-display-p* (emit "&#xa0;") (emit-newline))
                    (*verb-visible-space-p* (emit *verbatim-visible-space*))
                    (t (emit-newline))))
             ((and (char= c #\-) (not *verb-display-p*))
@@ -6097,7 +6097,7 @@
                           (get-ctl-seq))))
                  (cond ((string= x "\\ ") (emit " "))
                        (t (do-tex-ctl-seq-completely x)))))
-              ((char= c #\space) (emit "&nbsp;"))
+              ((char= c #\space) (emit "&#xa0;"))
               ((char= c #\Newline) (emit "<br>") (emit-newline))
               (t (emit-html-char c)))))))
 
@@ -6748,7 +6748,7 @@
                 ;(do-end-para) ;??? ;must check why this is needed
                 (case (car *tabular-stack*)
                   ((:pmatrix :eqalign :displaylines :mathbox)
-                   (emit "&nbsp;</td><td align=center>&nbsp;"))
+                   (emit "&#xa0;</td><td align=center>&#xa0;"))
                   (:eqalignno
                    (setq *equation-position* (+ *equation-position* 1))
                    (emit "</td><td")
@@ -7679,7 +7679,7 @@ Try the commands
 (defun non-fatal-error (&rest ss)
   (emit-link-start (concatenate 'string *jobname* ".hlog"))
   ;x2692 won't print on lynx
-  (emit "<span style=\"color: red\">&#x2388;&nbsp;")
+  (emit "<span style=\"color: red\">&#x2388;&#xa0;")
   (mapc #'emit-html-string ss)
   (emit-link-stop)
   (emit "</span>"))
@@ -7709,92 +7709,92 @@ Try the commands
 
 ;1. lowercase Greek
 
-(tex-defsym-math-prim "\\alpha" "&alpha;")
-(tex-defsym-math-prim "\\beta" "&beta;")
-(tex-defsym-math-prim "\\gamma" "&gamma;")
-(tex-defsym-math-prim "\\delta" "&delta;")
-(tex-defsym-math-prim "\\epsilon" "&epsilon;")
-(tex-defsym-math-prim "\\varepsilon" "&epsilon;")
-(tex-defsym-math-prim "\\zeta" "&zeta;")
-(tex-defsym-math-prim "\\eta" "&eta;")
-(tex-defsym-math-prim "\\theta" "&theta;")
-(tex-defsym-math-prim "\\vartheta" "&thetasym;")
-(tex-defsym-math-prim "\\iota" "&iota;")
-(tex-defsym-math-prim "\\kappa" "&kappa;")
-(tex-defsym-math-prim "\\lambda" "&lambda;")
-(tex-defsym-math-prim "\\mu" "&mu;")
-(tex-defsym-math-prim "\\nu" "&nu;")
-(tex-defsym-math-prim "\\xi" "&xi;")
-(tex-defsym-math-prim "\\omicron" "&omicron;")
-(tex-defsym-math-prim "\\pi" "&pi;")
-(tex-defsym-math-prim "\\varpi" "&piv;")
-(tex-defsym-math-prim "\\rho" "&rho;")
-(tex-defsym-math-prim "\\varrho" "&rho;")
-(tex-defsym-math-prim "\\sigma" "&sigma;")
-(tex-defsym-math-prim "\\varsigma" "&sigmaf;")
-(tex-defsym-math-prim "\\tau" "&tau;")
-(tex-defsym-math-prim "\\upsilon" "&upsilon;")
-(tex-defsym-math-prim "\\phi" "&phi;")
+(tex-defsym-math-prim "\\alpha" "&#x3b1;")
+(tex-defsym-math-prim "\\beta" "&#x3b2;")
+(tex-defsym-math-prim "\\gamma" "&#x3b3;")
+(tex-defsym-math-prim "\\delta" "&#x3b4;")
+(tex-defsym-math-prim "\\epsilon" "&#x3b5;")
+(tex-defsym-math-prim "\\varepsilon" "&#x3b5;")
+(tex-defsym-math-prim "\\zeta" "&#x3b6;")
+(tex-defsym-math-prim "\\eta" "&#x3b7;")
+(tex-defsym-math-prim "\\theta" "&#x3b8;")
+(tex-defsym-math-prim "\\vartheta" "&#x3d1;")
+(tex-defsym-math-prim "\\iota" "&#x3b9;")
+(tex-defsym-math-prim "\\kappa" "&#x3ba;")
+(tex-defsym-math-prim "\\lambda" "#x3bb;")
+(tex-defsym-math-prim "\\mu" "&#x3bc;")
+(tex-defsym-math-prim "\\nu" "&#x3bd;")
+(tex-defsym-math-prim "\\xi" "&#x3be;")
+(tex-defsym-math-prim "\\omicron" "&#x3bf;")
+(tex-defsym-math-prim "\\pi" "&#x3c0;")
+(tex-defsym-math-prim "\\varpi" "&#x3d6;")
+(tex-defsym-math-prim "\\rho" "&#x3c1;")
+(tex-defsym-math-prim "\\varrho" "&#x3f1;")
+(tex-defsym-math-prim "\\sigma" "&#x3c3;")
+(tex-defsym-math-prim "\\varsigma" "&#x3c2;")
+(tex-defsym-math-prim "\\tau" "&#x3c4;")
+(tex-defsym-math-prim "\\upsilon" "&#x3c5;")
+(tex-defsym-math-prim "\\phi" "&#x3c6;")
 (tex-defsym-math-prim "\\varphi" "&#x3d5;")
-(tex-defsym-math-prim "\\chi" "&chi;")
-(tex-defsym-math-prim "\\psi" "&psi;")
-(tex-defsym-math-prim "\\omega" "&omega;")
+(tex-defsym-math-prim "\\chi" "&#x3c7;")
+(tex-defsym-math-prim "\\psi" "&#x3c8;")
+(tex-defsym-math-prim "\\omega" "&#x3c9;")
 
 ;2. uppercase Greek
 
-(tex-defsym-math-prim "\\Gamma" "&Gamma;")
-(tex-defsym-math-prim "\\Delta" "&Delta;")
-(tex-defsym-math-prim "\\Theta" "&Theta;")
-(tex-defsym-math-prim "\\Lambda" "&Lambda;")
-(tex-defsym-math-prim "\\Xi" "&Xi;")
-(tex-defsym-math-prim "\\Pi" "&Pi;")
-(tex-defsym-math-prim "\\Sigma" "&Sigma;")
-(tex-defsym-math-prim "\\Upsilon" "&Upsilon;")
-(tex-defsym-math-prim "\\Phi" "&Phi;")
-(tex-defsym-math-prim "\\Psi" "&Psi;")
-(tex-defsym-math-prim "\\Omega" "&Omega;")
+(tex-defsym-math-prim "\\Gamma" "&#x393;")
+(tex-defsym-math-prim "\\Delta" "&#x394;")
+(tex-defsym-math-prim "\\Theta" "&#x398;")
+(tex-defsym-math-prim "\\Lambda" "&#x39b;")
+(tex-defsym-math-prim "\\Xi" "&#x39e;")
+(tex-defsym-math-prim "\\Pi" "&#x3a0;")
+(tex-defsym-math-prim "\\Sigma" "&#x3a3;")
+(tex-defsym-math-prim "\\Upsilon" "&#x3a5;")
+(tex-defsym-math-prim "\\Phi" "&#x3a6;")
+(tex-defsym-math-prim "\\Psi" "&#x3a8;")
+(tex-defsym-math-prim "\\Omega" "&#x3a9;")
 
 ;4. misc symbols of type Ord
 
-(tex-defsym-math-prim "\\aleph" "&alefsym;")
+(tex-defsym-math-prim "\\aleph" "&#x2135;")
 (tex-defsym-math-prim "\\hbar" "&#x210f;")
 ;(tex-defsym-math-prim "\\imath" "<i>&#x131;</i>")
 ;(tex-defsym-math-prim "\\jmath" "<i>&#x237;</i>")
 (tex-defsym-math-prim "\\imath" "&#x1d6a4;")
 (tex-defsym-math-prim "\\jmath" "&#x1d6a5")
 (tex-defsym-math-prim "\\ell" "&#x2113;")
-(tex-defsym-math-prim "\\wp" "&weierp;")
-(tex-defsym-math-prim "\\Re" "&real;")
-(tex-defsym-math-prim "\\Im" "&image;")
-(tex-defsym-math-prim "\\partial" "&part;")
-(tex-defsym-math-prim "\\infty" "&infin;")
-(tex-defsym-math-prim "\\prime" "&frasl;")
-(tex-defsym-math-prim "\\emptyset" "&empty;")
-(tex-defsym-math-prim "\\nabla" "&nabla;")
-(tex-defsym-math-prim "\\surd" "&radic;")
+(tex-defsym-math-prim "\\wp" "&#x2118;")
+(tex-defsym-math-prim "\\Re" "&#x211c;")
+(tex-defsym-math-prim "\\Im" "&#x2111;")
+(tex-defsym-math-prim "\\partial" "&#x2202;")
+(tex-defsym-math-prim "\\infty" "&#x221e;")
+(tex-defsym-math-prim "\\prime" "&#x2044;")
+(tex-defsym-math-prim "\\emptyset" "&#x2205;")
+(tex-defsym-math-prim "\\nabla" "&#x2207;")
+(tex-defsym-math-prim "\\surd" "&#x221a;")
 (tex-defsym-math-prim "\\top" "&#x22a4;")
 (tex-defsym-math-prim "\\bot" "&#x22a5;")
 (tex-defsym-math-prim "\\|" "&#x2225;")
-(tex-defsym-math-prim "\\angle" "&ang;")
-(tex-defsym-math-prim "\\triangle" "&Delta;")
+(tex-defsym-math-prim "\\angle" "&#x2220;")
+(tex-defsym-math-prim "\\triangle" "&#x394;")
 (tex-defsym-math-prim "\\backslash" "\\")
-(tex-defsym-math-prim "\\forall" "&forall;")
-(tex-defsym-math-prim "\\exists" "&exist;")
-(tex-defsym-math-prim "\\neg" "&not;")
+(tex-defsym-math-prim "\\forall" "&#x2200;")
+(tex-defsym-math-prim "\\exists" "&#x2203;")
+(tex-defsym-math-prim "\\neg" "&#xac;")
 (tex-defsym-math-prim "\\flat" "&#x266d;")
 (tex-defsym-math-prim "\\natural" "&#x266e;")
 (tex-defsym-math-prim "\\sharp" "&#x266f;")
-(tex-defsym-math-prim "\\clubsuit" "&clubs;")
+(tex-defsym-math-prim "\\clubsuit" "&#x2663;")
 (tex-defsym-math-prim "\\diamondsuit" "&#x2662;")
 (tex-defsym-math-prim "\\heartsuit" "&#x2661;")
-(tex-defsym-math-prim "\\spadesuit" "&spades;")
+(tex-defsym-math-prim "\\spadesuit" "&#x2660;")
 
 ;6. large operators
 
-(tex-defsym-math-prim "\\sum" "&sum;")
-(tex-defsym-math-prim "\\prod" "&prod;")
+(tex-defsym-math-prim "\\sum" "&#x2211;")
+(tex-defsym-math-prim "\\prod" "&#x220f;")
 (tex-defsym-math-prim "\\coprod" "&#x2210;")
-(tex-def-math-prim "\\int" #'do-integral) ;(lambda () (emit "&int;")))
+(tex-def-math-prim "\\int" #'do-integral) ;(lambda () (emit "&#x222b;")))
 (tex-defsym-math-prim "\\oint" "&#x222e;")
 (tex-defsym-math-prim "\\bigcap" "&#x2229;")
 (tex-defsym-math-prim "\\bigcup" "&#x222a;")
@@ -7808,71 +7808,71 @@ Try the commands
 
 ;7. binary operations
 
-(tex-defsym-math-prim "\\pm" "&plusmn;")
+(tex-defsym-math-prim "\\pm" "&#xb1;")
 (tex-defsym-math-prim "\\mp" "&#x2213;")
 (tex-defsym-math-prim "\\setminus" "&#x2216;")
-(tex-defsym-math-prim "\\cdot" " &middot; ")
-(tex-defsym-math-prim "\\times" "&times;")
-(tex-defsym-math-prim "\\ast" "&lowast;")
-(tex-defsym-math-prim "\\star" "&2605;")
+(tex-defsym-math-prim "\\cdot" " &#xb7; ")
+(tex-defsym-math-prim "\\times" "&#xd7;")
+(tex-defsym-math-prim "\\ast" "&#x2217;")
+(tex-defsym-math-prim "\\star" "&#x2605;")
 (tex-defsym-math-prim "\\diamond" "&#x25c7;")
 (tex-defsym-math-prim "\\circ" "&#x25cb;")
-(tex-defsym-math-prim "\\bullet" "&bull;")
-(tex-defsym-math-prim "\\div" "&divide;")
-(tex-defsym-math-prim "\\cap" "&cap;")
-(tex-defsym-math-prim "\\cup" "&cup;")
+(tex-defsym-math-prim "\\bullet" "&#x2022;")
+(tex-defsym-math-prim "\\div" "&#xf7;")
+(tex-defsym-math-prim "\\cap" "&#x2229;")
+(tex-defsym-math-prim "\\cup" "&#x222a;")
 (tex-defsym-math-prim "\\uplus" "&#x2283;")
 (tex-defsym-math-prim "\\sqcap" "&#x2293;")
 (tex-defsym-math-prim "\\sqcup" "&#x2294;")
 (tex-defsym-math-prim "\\triangleleft" "&#x2282;")
 (tex-defsym-math-prim "\\triangleright" "&#x2283;")
 (tex-defsym-math-prim "\\wr" "&#x2240;")
-(tex-defsym-math-prim "\\vee" "&or;")
-(tex-defsym-math-prim "\\wedge" "&and;")
-(tex-defsym-math-prim "\\oplus" "&oplus;")
-(tex-defsym-math-prim "\\otimes" "&otimes;")
+(tex-defsym-math-prim "\\vee" "&#x2228;")
+(tex-defsym-math-prim "\\wedge" "&#x2227;")
+(tex-defsym-math-prim "\\oplus" "&#x2295;")
+(tex-defsym-math-prim "\\otimes" "&#x2297;")
 (tex-defsym-math-prim "\\oslash" "&#x2298;")
 (tex-defsym-math-prim "\\odot" "&#x2299;")
-(tex-defsym-math-prim "\\dagger" "&dagger;")
-(tex-defsym-math-prim "\\ddagger" "&Dagger;")
+(tex-defsym-math-prim "\\dagger" "&#x2020;")
+(tex-defsym-math-prim "\\ddagger" "&#x2021;")
 (tex-defsym-math-prim "\\amalg" "&#x2210;")
 
 ;8. relations
 
-(tex-defsym-math-prim "\\leq" "&le;")
+(tex-defsym-math-prim "\\leq" "&#x2264;")
 (tex-defsym-math-prim "\\prec" "&#x227a;")
 (tex-defsym-math-prim "\\preceq" "&#x227c;")
 (tex-defsym-math-prim "\\ll" "&#x226a;")
-(tex-defsym-math-prim "\\subset" "&sub;")
-(tex-defsym-math-prim "\\subseteq" "&sube;")
+(tex-defsym-math-prim "\\subset" "&#x2282;")
+(tex-defsym-math-prim "\\subseteq" "&#x2286;")
 (tex-defsym-math-prim "\\sqsubseteq" "&#x2291;")
-(tex-defsym-math-prim "\\in" "&isin;")
+(tex-defsym-math-prim "\\in" "&#x2208;")
 (tex-defsym-math-prim "\\vdash" "&#x22a2;")
 (tex-defsym-math-prim "\\smile" "&#x2323;")
 (tex-defsym-math-prim "\\frown" "&#x2322;")
-(tex-defsym-math-prim "\\geq" "&ge;")
+(tex-defsym-math-prim "\\geq" "&#x2265;")
 (tex-defsym-math-prim "\\succ" "&#x227b;")
 (tex-defsym-math-prim "\\succeq" "&#x227d;")
 (tex-defsym-math-prim "\\gg" "&#x226b;")
-(tex-defsym-math-prim "\\supset" "&sup;")
-(tex-defsym-math-prim "\\supseteq" "&supe;")
+(tex-defsym-math-prim "\\supset" "&#x2283;")
+(tex-defsym-math-prim "\\supseteq" "&#x2287;")
 (tex-defsym-math-prim "\\sqsupseteq" "&#x2292;")
-(tex-defsym-math-prim "\\ni" "&ni;")
+(tex-defsym-math-prim "\\ni" "&#x220b;")
 (tex-defsym-math-prim "\\dashv" "&#x22a3;")
 (tex-defsym-math-prim "\\mid" "&#x2223;")
 (tex-defsym-math-prim "\\parallel" "&#x2225;")
-(tex-defsym-math-prim "\\equiv" "&equiv;")
-(tex-defsym-math-prim "\\sim" "&sim;")
+(tex-defsym-math-prim "\\equiv" "&#x2261;")
+(tex-defsym-math-prim "\\sim" "&#x223c;")
 (tex-defsym-math-prim "\\simeq" "&#x2243;")
 (tex-defsym-math-prim "\\asymp" "&#x224d;")
-(tex-defsym-math-prim "\\approx" "&asymp;")
-(tex-defsym-math-prim "\\cong" "&cong;")
+(tex-defsym-math-prim "\\approx" "&#x2248;")
+(tex-defsym-math-prim "\\cong" "&#x2245;")
 (tex-defsym-math-prim "\\bowtie" "&#x22c8;")
 (tex-defsym-math-prim "\\propto" "&#x221d;")
 (tex-defsym-math-prim "\\models" "&#x22a8;")
 (tex-defsym-math-prim "\\doteq" "&#x2250;")
-(tex-defsym-math-prim "\\propto" "&prop;")
-(tex-defsym-math-prim "\\perp" "&perp;")
+(tex-defsym-math-prim "\\propto" "&#x221d;")
+(tex-defsym-math-prim "\\perp" "&#x22a5;")
 
 ;9. negated relations
 
@@ -7911,7 +7911,7 @@ Try the commands
         (t (emit "/"))))))
 
 (tex-def-math-prim "\\not" #'do-not)
-(tex-defsym-math-prim "\\notin" "&notin;")
+(tex-defsym-math-prim "\\notin" "&#x2209;")
 
 ;10. arrows
 
@@ -7949,17 +7949,17 @@ Try the commands
 
 (tex-defsym-math-prim "\\lbrack" "[")
 (tex-defsym-math-prim "\\lbrace" "{")
-(tex-defsym-math-prim "\\lfloor" "&lfloor;")
-(tex-defsym-math-prim "\\langle" "&lang;")
-(tex-defsym-math-prim "\\lceil" "&lceil;")
+(tex-defsym-math-prim "\\lfloor" "&#x230a;")
+(tex-defsym-math-prim "\\langle" "&#x27e8;")
+(tex-defsym-math-prim "\\lceil" "&#x2308;")
 
 ;12. closings
 
 (tex-defsym-math-prim "\\rbrack" "]")
 (tex-defsym-math-prim "\\rbrace" "}")
-(tex-defsym-math-prim "\\rfloor" "&rfloor;")
-(tex-defsym-math-prim "\\rangle" "&rang;")
-(tex-defsym-math-prim "\\rceil" "&rceil;")
+(tex-defsym-math-prim "\\rfloor" "&#x230b;")
+(tex-defsym-math-prim "\\rangle" "&#x27e9;")
+(tex-defsym-math-prim "\\rceil" "&#x2309;")
 
 ;13. punctuation
 
@@ -7969,7 +7969,7 @@ Try the commands
 
 ;14. alternate names
 
-(tex-defsym-math-prim "\\ne" "&ne;")
+(tex-defsym-math-prim "\\ne" "&#x2260;")
 (tex-let-prim "\\neq" "\\ne")
 (tex-let-prim "\\le" "\\leq")
 (tex-let-prim "\\ge" "\\geq")
@@ -7987,10 +7987,10 @@ Try the commands
 
 ;15. non-math symbols
 
-(tex-defsym-prim "\\S" "&sect;")
-(tex-defsym-prim "\\P" "&para;")
-(tex-defsym-prim "\\dag" "&dagger;")
-(tex-defsym-prim "\\ddag" "&Dagger;")
+(tex-defsym-prim "\\S" "&#xa7;")
+(tex-defsym-prim "\\P" "&#xb6;")
+(tex-defsym-prim "\\dag" "&#x2020;")
+(tex-defsym-prim "\\ddag" "&#x2021;")
 
 ;end appendix F
 
@@ -8065,7 +8065,7 @@ Try the commands
 (tex-def-math-prim "\\over" #'do-over); (lambda () (emit "/")))
 
 (tex-def-math-prim "\\sqrt"
- (lambda () (emit "&radic;(") (tex2page-string (get-token)) (emit ")")))
+ (lambda () (emit "&#x221a;(") (tex2page-string (get-token)) (emit ")")))
 
 (tex-def-math-prim "\\left" #'do-math-left)
 
@@ -8091,8 +8091,8 @@ Try the commands
 
 ;
 
-(tex-defsym-prim "\\AA" "&Aring;")
-(tex-defsym-prim "\\aa" "&aring;")
+(tex-defsym-prim "\\AA" "&#xc5;")
+(tex-defsym-prim "\\aa" "&#xe5;")
 
 (tex-def-prim "\\abstract"
  (lambda ()
@@ -8107,9 +8107,9 @@ Try the commands
 
 (tex-def-prim "\\advancetally" (lambda () (do-advancetally (globally-p))))
 
-(tex-defsym-prim "\\AE" "&AElig;")
+(tex-defsym-prim "\\AE" "&#xc6;")
 
-(tex-defsym-prim "\\ae" "&aelig;")
+(tex-defsym-prim "\\ae" "&#xe6;")
 
 (tex-def-prim "\\afterassignment" #'do-afterassignment)
 
@@ -8171,7 +8171,7 @@ Try the commands
 
 (tex-def-prim "\\convertMPtoPDF" #'do-convertmptopdf)
 
-(tex-defsym-prim "\\copyright" "&copy;")
+(tex-defsym-prim "\\copyright" "&#xa9")
 
 (tex-def-prim "\\countdef" (lambda () (do-newcount t) (eat-integer)))
 (tex-def-prim "\\CR" (lambda () (do-cr "\\CR")))
@@ -8181,9 +8181,9 @@ Try the commands
 
 (tex-def-prim "\\d" (lambda () (do-diacritic :dotunder)))
 (tex-def-prim "\\." (lambda () (do-diacritic :dot)))
-(tex-defsym-prim "\\dag" "&dagger;")
+(tex-defsym-prim "\\dag" "&#x2020;")
 (tex-def-prim "\\date" #'do-date)
-(tex-defsym-prim "\\ddag" "&Dagger;")
+(tex-defsym-prim "\\ddag" "&#x2021;")
 (tex-defsym-prim "\\ddots" "&#x22f1;")
 (tex-def-prim "\\def" (lambda () (do-def (globally-p) nil)))
 (tex-def-prim "\\defcsactive" (lambda () (do-defcsactive (globally-p))))
@@ -8192,15 +8192,15 @@ Try the commands
 (tex-def-prim "\\definexref" #'do-definexref)
 (tex-def-prim "\\definitelylatex" #'definitely-latex)
 (tex-def-prim "\\defschememathescape" (lambda () (scm-set-mathescape t)))
-(tex-defsym-prim "\\degree" "&deg;")
+(tex-defsym-prim "\\degree" "&#xb0;")
 (tex-def-prim "\\description"
   (lambda ()
     (do-end-para)
     (push :description *tabular-stack*)
     (emit "<dl><dt></dt><dd>")))
-(tex-defsym-prim "\\DH" "&ETH;")
+(tex-defsym-prim "\\DH" "&#xd0;")
 
-(tex-defsym-prim "\\dh" "&eth;")
+(tex-defsym-prim "\\dh" "&#xf0;")
 
 (tex-def-prim "\\discretionary" #'do-discretionary)
 
@@ -8561,13 +8561,13 @@ Try the commands
 (tex-def-prim "\\numberedfootnote" #'do-numbered-footnote)
 
 (tex-def-prim "\\@ldc@l@r" #'do-color)
-(tex-defsym-prim "\\O" "&Oslash;")
-(tex-defsym-prim "\\o" "&oslash;")
+(tex-defsym-prim "\\O" "&#xd8;")
+(tex-defsym-prim "\\o" "&#xf8;")
 (tex-def-prim "\\obeylines" #'do-obeylines)
 (tex-def-prim "\\obeyspaces" #'do-obeyspaces)
 (tex-def-prim "\\obeywhitespace" #'do-obeywhitespace)
-(tex-defsym-prim "\\OE" "&OElig;")
-(tex-defsym-prim "\\oe" "&oelig;")
+(tex-defsym-prim "\\OE" "&#x152;")
+(tex-defsym-prim "\\oe" "&#x153;")
 (tex-def-prim "\\opengraphsfile" #'do-mfpic-opengraphsfile)
 (tex-def-prim "\\openin" (lambda () (do-open-stream :in)))
 (tex-def-prim "\\openout" (lambda () (do-open-stream :out)))
@@ -8581,7 +8581,7 @@ Try the commands
 (tex-def-prim "\\picture"
  (lambda () (do-latex-env-as-image "picture" nil)))
 (tex-def-prim "\\plainfootnote" #'do-plain-footnote)
-(tex-defsym-prim "\\pounds" "&pound;")
+(tex-defsym-prim "\\pounds" "&#xa3;")
 (tex-def-prim "\\printindex" (lambda () (do-inputindex t)))
 (tex-def-prim "\\providecommand" (lambda () (do-newcommand nil)))
 
@@ -8639,7 +8639,7 @@ Try the commands
 (tex-def-prim "\\small" (lambda () (do-switch :small)))
 (tex-def-prim "\\smallbreak" (lambda () (do-bigskip :smallskip)))
 (tex-def-prim "\\smallskip" (lambda () (do-bigskip :smallskip)))
-(tex-defsym-prim "\\ss" "&szlig;")
+(tex-defsym-prim "\\ss" "&#xdf;")
 (tex-def-prim "\\strike" (lambda () (do-switch :strike)))
 (tex-def-prim "\\string" #'do-string)
 (tex-def-prim "\\subject" #'do-subject)
@@ -8662,22 +8662,22 @@ Try the commands
 (tex-defsym-prim "\\textbar" "|")
 (tex-defsym-prim "\\textbackslash" "\\")
 (tex-def-prim "\\textbf" (lambda () (do-function "\\textbf")))
-(tex-defsym-prim "\\textbullet" "&bull;")
+(tex-defsym-prim "\\textbullet" "&#x2022;")
 (tex-defsym-prim "\\textcopyleft" "&#x254;&#x20dd;")
 (tex-defsym-prim "\\textemdash" "&#x2014;")
 (tex-defsym-prim "\\textendash" "&#x2013;")
-(tex-defsym-prim "\\textexclamdown" "&iexcl;")
-(tex-defsym-prim "\\textgreater" "&gt;")
+(tex-defsym-prim "\\textexclamdown" "&#xa1;")
+(tex-defsym-prim "\\textgreater" "&#x3e;")
 (tex-def-prim "\\textindent" #'do-textindent)
 (tex-def-prim "\\textit" (lambda () (do-function "\\textit")))
-(tex-defsym-prim "\\textless" "&lt;")
-(tex-defsym-prim "\\textperiodcentered" "&middot;")
-(tex-defsym-prim "\\textquestiondown" "&iquest;")
+(tex-defsym-prim "\\textless" "&#x3c;")
+(tex-defsym-prim "\\textperiodcentered" "&#xb7;")
+(tex-defsym-prim "\\textquestiondown" "&#xbf;")
 (tex-defsym-prim "\\textquotedblleft" "&#x201c;")
 (tex-defsym-prim "\\textquotedblright" "&#x201d;")
 (tex-defsym-prim "\\textquoteleft" "&#x2018;")
 (tex-defsym-prim "\\textquoteright" "&#x2019;")
-(tex-defsym-prim "\\textregistered" "&reg;")
+(tex-defsym-prim "\\textregistered" "&#xae;")
 (tex-def-prim "\\textrm" (lambda () (do-function "\\textrm")))
 (tex-def-prim "\\textsc"
  (lambda ()
@@ -8687,8 +8687,8 @@ Try the commands
 (tex-defsym-prim "\\textasciitilde" "~")
 (tex-def-prim "\\texttt" (lambda () (do-function "\\texttt")))
 (tex-def-prim "\\textvisiblespace" (lambda () (emit *verbatim-visible-space*)))
-(tex-defsym-prim "\\TH" "&THORN;")
-(tex-defsym-prim "\\th" "&thorn;")
+(tex-defsym-prim "\\TH" "&#xde;")
+(tex-defsym-prim "\\th" "&#xfe;")
 (tex-def-prim "\\the" #'do-the)
 (tex-def-prim "\\thebibliography" #'do-thebibliography)
 (tex-def-prim "\\theindex" #'do-theindex)
@@ -8717,7 +8717,7 @@ Try the commands
 (tex-def-prim "\\tiny" (lambda () (do-switch :tiny)))
 (tex-def-prim "\\title" #'do-title)
 (tex-def-prim "\\today" #'do-today)
-(tex-defsym-prim "\\TM" "&trade;")
+(tex-defsym-prim "\\TM" "&#x2122;")
 (tex-def-prim "\\tracingall" #'do-tracingall)
 (tex-def-prim "\\tt" (lambda () (do-switch :tt)))
 (tex-def-prim "\\typein" #'do-typein)
@@ -8775,7 +8775,7 @@ Try the commands
 
 (tex-def-prim "\\xspace" #'do-xspace)
 
-(tex-defsym-prim "\\yen" "&yen;")
+(tex-defsym-prim "\\yen" "&#xa5;")
 
 (tex-defsym-prim "\\contentsname" "Contents")
 
@@ -8841,7 +8841,7 @@ Try the commands
 
 (tex-defsym-prim "\\%" "%")
 
-(tex-defsym-prim "\\&" "&amp;")
+(tex-defsym-prim "\\&" "&#x26;")
 
 (tex-defsym-prim "\\@" "@")
 
@@ -8891,14 +8891,14 @@ Try the commands
               "<span style=\""
               "position: relative; "
               "top: .5ex"
-              "\">&epsilon;</span>"))
+              "\">&#x3b5;</span>"))
        (MF (concatenate 'string "<span style=\""
              "font-family: sans-serif"
              "\">METAFONT</span>")))
   (tex-def-prim "\\AmSTeX" (lambda () (emit AmS) (emit #\-) (emit TeX)))
   (tex-def-prim "\\BibTeX" (lambda () (emit Bib) (emit TeX)))
   (tex-def-prim "\\ConTeXt" (lambda () (emit ConTeXt)))
-  (tex-def-prim "\\eTeX" (lambda () (emit "&epsilon;-") (emit TeX)))
+  (tex-def-prim "\\eTeX" (lambda () (emit "&#x3b5;-") (emit TeX)))
   (tex-def-prim "\\LaTeX" (lambda () (emit LaTeX)))
   (tex-def-prim "\\LaTeXe" (lambda () (emit LaTeX) (emit _2e)))
   (tex-def-prim "\\MF" (lambda () (emit MF)))

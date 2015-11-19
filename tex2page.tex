@@ -7,7 +7,7 @@
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
-\message{version 20150526} % last change
+\message{version 20151119} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -264,9 +264,25 @@
 % the latter is replaced by a fixed-width representation
 % of URL.
 
-\def\urlh{\bgroup\urlsetup
+\def\urlh{\ifx\TZPurlhdebugmode\UnDeFiNeD\let\urlhQdispatch\urlhQproduction
+  \else\ifx\TZPurlhdebugmode0\let\urlhQdispatch\urlhQproduction
+  \else\let\urlhQdispatch\urlhQdebugmode\fi\fi
+  \urlhQdispatch}
+
+\def\urlhQproduction{\bgroup\urlsetup
   \afterassignment\urlhQii
   \gdef\urlhQurlarg}
+
+\def\urlhQdebugmode{\bgroup\urlsetup
+  \afterassignment\urlhQiii
+  \gdef\urlhQurlarg}
+
+\def\urlhQiii{\egroup
+  ({\urlsetup\urlhQurlarg})\space
+  \bgroup
+    \let\\\relax
+    \def\1{{\urlsetup\urlhQurlarg}}%
+    \let\dummy=}
 
 \def\urlhQii{\egroup
   \bgroup

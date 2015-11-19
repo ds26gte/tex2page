@@ -1,8 +1,7 @@
 TeX2page is a Scheme or Common Lisp program for making Web pages
-from TeX documents.  
+from (La)TeX documents.
 
 Please see http://ds26gte.github.io/tex2page/index.html for what
 it can do.
 
-Installation instructions are at
-http://github.com/ds26gte/tex2page/blob/master/INSTALL.
+Installation instructions are at link:INSTALL.adoc[].

@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20151001") ;last change
+(define *tex2page-version* "20151119") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -3492,8 +3492,8 @@
       (if (not *ligatures?*) #\`
           (let ((c (snoop-actual-char)))
             (if (and (char? c) (char=? c #\`))
-                (begin (get-actual-char) "&ldquo;")
-                "&lsquo;"))))))
+                (begin (get-actual-char) "&#x201c;")
+                "&#x2018;"))))))
 
 (define do-rsquo
   (lambda ()
@@ -3507,8 +3507,8 @@
             (else
               (let ((c (snoop-actual-char)))
                 (if (and (char? c) (char=? c #\'))
-                    (begin (get-actual-char) "&rdquo;")
-                    "&rsquo;")))))))
+                    (begin (get-actual-char) "&#x201d;")
+                    "&#x2019;")))))))
 
 (define do-enquote
   (lambda ()
@@ -3516,7 +3516,8 @@
     (when (char=? (snoop-actual-char) #\*)
       (get-actual-char)
       (ignorespaces)
-      (set! *quote-level* (+ *quote-level* 1)))
+      (when (= *quote-level* 0)
+        (set! *quote-level* (+ *quote-level* 1))))
     (unless (char=? (get-actual-char) #\{)
       (terror 'do-enquote "Missing {"))
     (bgroup)
@@ -10311,10 +10312,10 @@ Try the commands
 (tex-defsym-prim "\\textless" "&lt;")
 (tex-defsym-prim "\\textperiodcentered" "&middot;")
 (tex-defsym-prim "\\textquestiondown" "&iquest;")
-(tex-defsym-prim "\\textquotedblleft" "&ldquo;")
-(tex-defsym-prim "\\textquotedblright" "&rdquo;")
-(tex-defsym-prim "\\textquoteleft" "&lsquo;")
-(tex-defsym-prim "\\textquoteright" "&rsquo;")
+(tex-defsym-prim "\\textquotedblleft" "&#x201c;")
+(tex-defsym-prim "\\textquotedblright" "&#x201d;")
+(tex-defsym-prim "\\textquoteleft" "&#x2018;")
+(tex-defsym-prim "\\textquoteright" "&#x2019;")
 (tex-defsym-prim "\\textregistered" "&reg;")
 (tex-def-prim "\\textrm" (lambda () (do-function "\\textrm")))
 (tex-def-prim "\\textsc"

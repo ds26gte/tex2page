@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20150930" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20151119" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -2686,7 +2686,7 @@
    (if (not *ligatures-p*) #\`
        (let ((c (snoop-actual-char)))
          (if (and (characterp c) (char= c #\`))
-             (progn (get-actual-char) "&ldquo;") "&lsquo;")))))
+             (progn (get-actual-char) "&#x201c;") "&#x2018;")))))
 
 (defun do-rsquo ()
   (emit
@@ -2698,14 +2698,14 @@
          (t
           (let ((c (snoop-actual-char)))
             (if (and (characterp c) (char= c #\'))
-                (progn (get-actual-char) "&rdquo;") "&rsquo;"))))))
+                (progn (get-actual-char) "&#x201d;") "&#x2019;"))))))
 
 (defun do-enquote ()
   (ignorespaces)
-  (when (char= (snoop-actual-char) #\*)
+  (when (and (char= (snoop-actual-char) #\*))
     (get-actual-char)
     (ignorespaces)
-    (incf *quote-level*))
+    (when (= *quote-level* 0) (incf *quote-level*)))
   (unless (char= (get-actual-char) #\{)
     (terror 'do-enquote "Missing {"))
   (bgroup)
@@ -8673,10 +8673,10 @@ Try the commands
 (tex-defsym-prim "\\textless" "&lt;")
 (tex-defsym-prim "\\textperiodcentered" "&middot;")
 (tex-defsym-prim "\\textquestiondown" "&iquest;")
-(tex-defsym-prim "\\textquotedblleft" "&ldquo;")
-(tex-defsym-prim "\\textquotedblright" "&rdquo;")
-(tex-defsym-prim "\\textquoteleft" "&lsquo;")
-(tex-defsym-prim "\\textquoteright" "&rsquo;")
+(tex-defsym-prim "\\textquotedblleft" "&#x201c;")
+(tex-defsym-prim "\\textquotedblright" "&#x201d;")
+(tex-defsym-prim "\\textquoteleft" "&#x2018;")
+(tex-defsym-prim "\\textquoteright" "&#x2019;")
 (tex-defsym-prim "\\textregistered" "&reg;")
 (tex-def-prim "\\textrm" (lambda () (do-function "\\textrm")))
 (tex-def-prim "\\textsc"

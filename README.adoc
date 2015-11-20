@@ -1,3 +1,5 @@
+= TeX2page
+
 TeX2page is a Scheme or Common Lisp program for making Web pages
 from (La)TeX documents.
 

@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20151119") ;last change
+(define *tex2page-version* "20151201") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -2639,6 +2639,12 @@
       (emit "</td></tr>")
       (emit-newline)
       (emit "<tr><td>"))))
+
+(define do-marginnote
+  (lambda ()
+    (emit "<span class=marginnote>")
+    (tex2page-string (get-group))
+    (emit "</span>")))
 
 (define do-marginpar
   (lambda ()
@@ -6655,6 +6661,13 @@
                   (tex2page-string x)))
             (else (trace-if #f "do-the failed"))))))
 
+(define do-arabic
+  (lambda ()
+    (let* ((counter-name (ungroup (get-group)))
+           (counter (table-get *dotted-counters* counter-name)))
+      (cond ((counter.value counter) => emit)
+            (else (trace-if #f "do-arabic failed"))))))
+
 (define find-corresp-prim
   ;is this really necessary? -- why not make resolve-defs
   ;take over this too?
@@ -6766,6 +6779,12 @@
       (unless ok-to-def?
         (trace-if (> (find-count "\\tracingcommands") 0)
                   lhs " already defined")))))
+
+(define do-newcounter
+  (lambda ()
+    (let* ((counter-name (ungroup (get-group)))
+           (within (get-bracketed-text-if-any)))
+      (tex-def-dotted-count counter-name within))))
 
 (define do-advancetally
   (lambda (g?)
@@ -8184,34 +8203,57 @@
                ((:lccode) tex-char-downcase))
              (string->list (get-token)))))))
 
+(define do-addtocounter
+  (lambda ()
+    (let* ((counter-name (get-peeled-group))
+           (new-value (string->number (get-token-or-peeled-group))))
+      (set-latex-counter-aux counter-name #t new-value))))
+
+(define do-setcounter
+  (lambda ()
+    (let* ((counter-name (get-peeled-group))
+           (new-value (string->number (get-token-or-peeled-group))))
+      (set-latex-counter-aux counter-name #f new-value))))
+
+(define do-stepcounter
+  (lambda ()
+    (let ((counter-name (get-peeled-group)))
+      (set-latex-counter-aux counter-name #t 1))))
+
+#|
 (define set-latex-counter
   (lambda (add?)
     (let* ((counter-name (get-peeled-group))
            (new-value (string->number (get-token-or-peeled-group))))
-      (cond ((table-get *dotted-counters* counter-name)
-             => (lambda (counter)
-               (set!counter.value counter
+      (set-latex-counter-aux add? new-value))))
+|#
+
+(define set-latex-counter-aux
+  (lambda (counter-name add? new-value)
+    (cond ((table-get *dotted-counters* counter-name)
+           => (lambda (counter)
+                (set!counter.value counter
+                                   (if add?
+                                       (+ new-value (counter.value counter))
+                                       new-value))))
+          (else
+            (let ((count-seq (string-append "\\" counter-name)))
+              (cond
+                ((section-ctl-seq? count-seq)
+                 => (lambda (n)
+                      (table-put! *section-counters* n
                                   (if add?
-                                      (+ new-value (counter.value counter))
+                                      (+ new-value
+                                         (table-get *section-counters* n 0))
                                       new-value))))
-            (else
-              (let ((count-seq (string-append "\\" counter-name)))
-                (cond
-                  ((section-ctl-seq? count-seq)
-                   => (lambda (n)
-                        (table-put! *section-counters* n
-                                    (if add?
-                                        (+ new-value
-                                           (table-get *section-counters* n 0))
-                                        new-value))))
-                  ((find-count count-seq)
-                   ;typically \secnumdepth, \tocdepth
-                   (set-gcount! count-seq
-                                (if add?
-                                    (+ new-value (get-gcount count-seq))
-                                    new-value)))
-                  (else ;(terror 'set-latex-counter)
-                    #f))))))))
+                ((find-count count-seq)
+                 ;typically \secnumdepth, \tocdepth
+                 (set-gcount! count-seq
+                              (if add?
+                                  (+ new-value (get-gcount count-seq))
+                                  new-value)))
+                (else ;(terror 'set-latex-counter-aux)
+                  #f)))))))
 
 (define do-tex-prim
   (lambda (z)
@@ -9845,7 +9887,7 @@ Try the commands
                 (tex2page-string "\\quote")
                 (tex2page-string "\\centerline{\\bf\\abstractname}\\par")))
 (tex-def-prim "\\addcontentsline" do-addcontentsline)
-(tex-def-prim "\\addtocounter" (lambda () (set-latex-counter #t)))
+(tex-def-prim "\\addtocounter" do-addtocounter)
 (tex-def-prim "\\advance" (lambda () (do-advance (global?))))
 (tex-def-prim "\\advancetally" (lambda () (do-advancetally (global?))))
 (tex-defsym-prim "\\AE" "&#xc6;")
@@ -9856,6 +9898,7 @@ Try the commands
 (tex-def-prim "\\alltt" do-alltt)
 (tex-def-prim "\\appendix" do-appendix)
 (tex-defsym-prim "\\appendixname" "Appendix ")
+(tex-def-prim "\\arabic" do-arabic)
 (tex-def-prim "\\array" (lambda () (do-tabular #t)))
 (tex-def-prim "\\author" do-author)
 
@@ -10158,6 +10201,7 @@ Try the commands
 (tex-def-prim "\\makeatother" (lambda () (set-catcode #\@ 12)))
 (tex-def-prim "\\makehtmlimage" do-makehtmlimage)
 (tex-def-prim "\\maketitle" do-maketitle)
+(tex-def-prim "\\marginnote" do-marginnote)
 (tex-def-prim "\\marginpar" do-marginpar)
 (tex-def-prim "\\mathg" do-mathg)
 (tex-def-prim "\\mathdg" do-mathdg)
@@ -10172,6 +10216,7 @@ Try the commands
 (tex-def-prim "\\narrower" (lambda () (do-switch ':narrower)))
 (tex-def-prim "\\newcommand" (lambda () (do-newcommand #f)))
 (tex-def-prim "\\newcount" (lambda () (do-newcount (global?))))
+(tex-def-prim "\\newcounter" do-newcounter)
 (tex-def-prim "\\newdimen" (lambda () (do-newdimen (global?))))
 (tex-def-prim "\\newenvironment" (lambda () (do-newenvironment #f)))
 (tex-def-prim "\\newif" do-newif)
@@ -10268,7 +10313,7 @@ Try the commands
 (tex-def-prim "\\section" (lambda () (do-heading 1)))
 (tex-def-prim "\\seealso" do-see-also)
 (tex-def-prim "\\setbox" do-setbox)
-(tex-def-prim "\\setcounter" (lambda () (set-latex-counter #f)))
+(tex-def-prim "\\setcounter" do-setcounter)
 (tex-def-prim "\\sevenrm" (lambda () (do-switch ':sevenrm)))
 (tex-def-prim "\\sf" (lambda () (do-switch ':sf)))
 (tex-def-prim "\\sidx" do-index)
@@ -10280,6 +10325,7 @@ Try the commands
 (tex-def-prim "\\smallbreak" (lambda () (do-bigskip ':smallskip)))
 (tex-def-prim "\\smallskip" (lambda () (do-bigskip ':smallskip)))
 (tex-defsym-prim "\\ss" "&#xdf;")
+(tex-def-prim "\\stepcounter" do-stepcounter)
 (tex-def-prim "\\strike" (lambda () (do-switch ':strike)))
 (tex-def-prim "\\string" do-string)
 (tex-def-prim "\\subject" do-subject)
@@ -10547,7 +10593,6 @@ Try the commands
 (tex-def-prim "\\externalref" get-group)
 (tex-def-prim "\\GOBBLEARG" get-group)
 (tex-def-prim "\\hyphenation" get-group)
-(tex-def-prim "\\newcounter" get-group)
 (tex-def-prim "\\newlength" get-group)
 (tex-def-prim "\\hphantom" get-group)
 (tex-def-prim "\\vphantom" get-group)

@@ -1,4 +1,9 @@
-Last change 2015-11-19
+Last change 2015-12-01
+
+2015 Dec 1
+
+Added \newcounter, \stepcounter, \arabic, and a placeholder for
+\marginnote. Report by Stefan Husmann.
 
 2015 Nov 19
 

@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20151119" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20151201" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1975,6 +1975,11 @@
     (emit "</td></tr>")
     (emit-newline)
     (emit "<tr><td>")))
+
+(defun do-marginnote ()
+  (emit "<span class=marginnote>")
+  (tex2page-string (get-group))
+  (emit "</span>"))
 
 (defun do-marginpar ()
   (get-bracketed-text-if-any)
@@ -5372,6 +5377,13 @@
            (tex2page-string *it*))
           (t (trace-if nil "do-the failed")))))
 
+(defun do-arabic ()
+  (let* ((counter-name (ungroup (get-group)))
+         (counter (gethash counter-name *dotted-counters*))
+         it)
+    (cond ((setq it (counter*-value counter)) (emit it))
+          (t (trace-if nil "do-arabic failed")))))
+
 (defun find-corresp-prim (ctlseq)
   ;is this really necessary?  Why not make resolve-defs take over this
   ;too?
@@ -5446,6 +5458,11 @@
     (unless ok-to-def-p
       (trace-if (> (find-count "\\tracingcommands") 0)
                 lhs " already defined"))))
+
+(defun do-newcounter ()
+  (let* ((counter-name (ungroup (get-group)))
+         (within (get-bracketed-text-if-any)))
+    (tex-def-dotted-count counter-name within)))
 
 (defun do-advancetally (globalp)
   (let* ((ctlseq (get-ctl-seq))
@@ -6626,29 +6643,41 @@
                    (:lccode #'tex-char-downcase))
          (get-token))))
 
-(defun set-latex-counter (addp)
+(defun do-addtocounter ()
   (let* ((counter-name (get-peeled-group))
-         (new-value (read-from-string (get-token-or-peeled-group))))
-    (cond ((setq *it* (gethash counter-name *dotted-counters*))
-           (let ((counter *it*))
-             (if addp
+         (new-value (string-to-number (get-token-or-peeled-group))))
+    (set-latex-counter-aux counter-name t new-value)))
+
+(defun do-setcounter ()
+  (let* ((counter-name (get-peeled-group))
+         (new-value (string-to-number (get-token-or-peeled-group))))
+    (set-latex-counter-aux counter-name nil new-value)))
+
+(defun do-stepcounter ()
+  (let* ((counter-name (get-peeled-group)))
+    (set-latex-counter-aux counter-name t 1)))
+
+(defun set-latex-counter-aux (counter-name addp new-value)
+  (cond ((setq *it* (gethash counter-name *dotted-counters*))
+         (let ((counter *it*))
+           (if addp
                (incf (counter*-value counter) new-value)
                (setf (counter*-value counter) new-value))))
-          (t
-            (let ((count-seq (concatenate 'string "\\" counter-name)))
-              (cond ((setq *it* (section-ctl-seq-p count-seq))
-                     (let ((n *it*))
-                       (if addp
+        (t
+          (let ((count-seq (concatenate 'string "\\" counter-name)))
+            (cond ((setq *it* (section-ctl-seq-p count-seq))
+                   (let ((n *it*))
+                     (if addp
                          (incf (gethash n *section-counters* 0) new-value)
                          (setf (gethash n *section-counters*) new-value))))
-                    ((find-count count-seq)
-                     ;typically \secnumdepth, \tocdepth
-                     (tex-gdef-count count-seq
-                                    (if addp
-                                      (+ new-value (get-gcount count-seq))
-                                      new-value)))
-                    (t ;error?
-                      nil)))))))
+                  ((find-count count-seq)
+                   ;typically \secnumdepth, \tocdepth
+                   (tex-gdef-count count-seq
+                                   (if addp
+                                       (+ new-value (get-gcount count-seq))
+                                       new-value)))
+                  (t ;error?
+                    nil))))))
 
 (defun do-tex-prim (z)
   (cond ((setq *it* (find-def z))
@@ -8100,8 +8129,7 @@ Try the commands
      (tex2page-string "\\centerline{\\bf\\abstractname}\\par")))
 
 (tex-def-prim "\\addcontentsline" #'do-addcontentsline)
-
-(tex-def-prim "\\addtocounter" (lambda () (set-latex-counter t)))
+(tex-def-prim "\\addtocounter" #'do-addtocounter)
 
 (tex-def-prim "\\advance" (lambda () (do-advance (globally-p))))
 
@@ -8122,6 +8150,7 @@ Try the commands
 (tex-def-prim "\\appendix" #'do-appendix)
 
 (tex-defsym-prim "\\appendixname" "Appendix ")
+(tex-def-prim "\\arabic" #'do-arabic)
 (tex-def-prim "\\array" (lambda () (do-tabular t)))
 (tex-def-prim "\\author" #'do-author)
 
@@ -8524,6 +8553,7 @@ Try the commands
 (tex-def-prim "\\makeatother" (lambda () (set-catcode #\@ 12)))
 (tex-def-prim "\\makehtmlimage" #'do-makehtmlimage)
 (tex-def-prim "\\maketitle" #'do-maketitle)
+(tex-def-prim "\\marginnote" #'do-marginnote)
 (tex-def-prim "\\marginpar" #'do-marginpar)
 (tex-def-prim "\\mathg" #'do-mathg)
 (tex-def-prim "\\mathdg" #'do-mathdg)
@@ -8540,6 +8570,7 @@ Try the commands
 (tex-def-prim "\\narrower" (lambda () (do-switch :narrower)))
 (tex-def-prim "\\newcommand" (lambda () (do-newcommand nil)))
 (tex-def-prim "\\newcount" (lambda () (do-newcount (globally-p))))
+(tex-def-prim "\\newcounter" #'do-newcounter)
 (tex-def-prim "\\newdimen" (lambda () (do-newdimen (globally-p))))
 (tex-def-prim "\\newenvironment" (lambda () (do-newenvironment nil)))
 (tex-def-prim "\\newif" #'do-newif)
@@ -8628,7 +8659,7 @@ Try the commands
 (tex-def-prim "\\section" (lambda () (do-heading 1)))
 (tex-def-prim "\\seealso" #'do-see-also)
 (tex-def-prim "\\setbox" #'do-setbox)
-(tex-def-prim "\\setcounter" (lambda () (set-latex-counter nil)))
+(tex-def-prim "\\setcounter" #'do-setcounter)
 (tex-def-prim "\\sevenrm" (lambda () (do-switch :sevenrm)))
 (tex-def-prim "\\sf" (lambda () (do-switch :sf)))
 (tex-def-prim "\\sidx" #'do-index)
@@ -8640,6 +8671,7 @@ Try the commands
 (tex-def-prim "\\smallbreak" (lambda () (do-bigskip :smallskip)))
 (tex-def-prim "\\smallskip" (lambda () (do-bigskip :smallskip)))
 (tex-defsym-prim "\\ss" "&#xdf;")
+(tex-def-prim "\\stepcounter" #'do-stepcounter)
 (tex-def-prim "\\strike" (lambda () (do-switch :strike)))
 (tex-def-prim "\\string" #'do-string)
 (tex-def-prim "\\subject" #'do-subject)
@@ -8959,8 +8991,6 @@ Try the commands
 (tex-def-prim "\\GOBBLEARG" #'get-group)
 
 (tex-def-prim "\\hyphenation" #'get-group)
-
-(tex-def-prim "\\newcounter" #'get-group)
 
 (tex-def-prim "\\newlength" #'get-group)
 

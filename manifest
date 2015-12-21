@@ -1,8 +1,8 @@
 ;read these first
 
 COPYING
-README
-INSTALL
+README.adoc
+INSTALL.adoc
 
 ;the program
 
@@ -23,12 +23,12 @@ tex2page-doc-mac.tex
 tex2page.bib
 like-plt-logo.tex
 ursa-major.tex
-tex2page.1
 t2p.png
 story.log
 story.hlog
 faq.tex
 celeb.tex
+man/man1/tex2page.1
 
 tex2pagedeprecated.tex
 plainsection.tex
@@ -80,4 +80,4 @@ tex2page.bat
 t2p-example/*.t2p
 t2p-example/scshdoc.tex
 
-;last change: 2013-03-10
+;last change: 2015-12-13

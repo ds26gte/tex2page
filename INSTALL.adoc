@@ -14,6 +14,9 @@ among other things, the files
 Put copies of (or link to) the files `tex2page.tex` and
 `tex2page.sty` in a directory that is in your `TEXINPUTS` path.
 
+Optional: Copy the file `man/man1/tex2page.1` to the `man1` subdirectory of a
+directory in your `MANPATH`.
+
 == Configuring TeX2page for your machine
 
 If your dialect is Racket, you may directly use the `tex2page`

@@ -155,6 +155,8 @@ the NetPBM library.
 
 Email to ds26gte at yahoo dot com.
 
+https://github.com/ds26gte/tex2page/issues
+
 == SEE ALSO
 
 tex(1), latex(1), racket(1), bibtex(1), makeindex(1L),

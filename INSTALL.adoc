@@ -1,6 +1,6 @@
 = Installing TeX2page
 
-Get the tex2page distribution from GitHub:
+Get the TeX2page distribution from GitHub:
 
   git clone https://github.com/ds26gte/tex2page
 
@@ -28,7 +28,7 @@ If you use Common Lisp, you may copy the script `tex2page.lisp`
 as `tex2page` into your `PATH`.
 
 For other Scheme dialects and also for Common Lisp (if you wish
-to have a machine-translation of the Scheme tex2page), the
+to have a machine-translation of the Scheme TeX2page), the
 following method usually has a good chance of working on
 Unix-like systems.  If you are not connected to the Internet and
 don’t have Git, it will help to ensure that you have Scmxlate
@@ -86,15 +86,15 @@ your source document, e.g.,
 
 (Skip this section if you’re _not_ running Windows.)
 
-The image generation subprocess in tex2page uses Ghostscript.
-The tex2page code stores the name of the Ghostscript executable
+The image generation subprocess in TeX2page uses Ghostscript.
+The TeX2page code stores the name of the Ghostscript executable
 name in the variable `+*ghostscript*+`.  For Unix, this value is
 `”gs”`, which is pretty standard.  If you’re using Windows, check
 that the value assigned to `+*ghostscript*+` is correct for you.
 
 == Generating the documentation
 
-The tex2page documentation is provided in the TeX file `index.tex`.
+The TeX2page documentation is provided in the TeX file `index.tex`.
 To get a PDF version of the document run, first ensure that the
 file `story.log` exists.  If it does not, run
 
@@ -127,8 +127,8 @@ To get an HTML version of the document, run
 a few times. (This also serves as a check that TeX2page is indeed
 correctly installed on your machine.)
 
-As with TeX, multiple runs of tex2page are needed to resolve
-cross-references, but each run of tex2page will explicitly tell
+As with TeX, multiple runs of `tex2page` are needed to resolve
+cross-references, but each run of `tex2page` will explicitly tell
 you if another run is necessary.
 
 The WWW copy of the HTML documentation is at

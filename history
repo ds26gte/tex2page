@@ -1,4 +1,10 @@
-Last change 2015-12-01
+Last change 2016-02-16
+
+2016 Feb 16
+
+All doc-internal hrefs get class=hrefinternal.
+
+All internal anchor ids start with ‘TAG:__tex2page_’.
 
 2015 Dec 1
 

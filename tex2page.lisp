@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20151201" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20160216" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -124,7 +124,8 @@
 (defparameter *bib-aux-file-suffix* "-Z-B")
 (defparameter *css-file-suffix* "-Z-S.css")
 (defparameter *eval-file-suffix* "-Z-E-")
-(defparameter *html-node-prefix* "node_")
+;(defparameter *html-node-prefix* "node_")
+(defparameter *html-node-prefix* "TAG:__tex2page_")
 (defparameter *html-page-suffix* "-Z-H-")
 (defparameter *img-file-suffix* "-Z-G-")
 (defparameter *imgdef-file-suffix* "D-")
@@ -2103,7 +2104,7 @@
       (tex2page-string
        (if *using-chapters-p* "\\chapter*{\\contentsname}"
          "\\section*{\\contentsname}")))
-    (emit-anchor (concatenate 'string *html-node-prefix* "toc_start"))
+    (emit-anchor (concatenate 'string *html-node-prefix* "toc"))
     (!toc-page *html-page-count*)
     (write-aux `(!toc-page ,*html-page-count*))
     (cond ((null *toc-list*) (flag-missing-piece :toc)
@@ -2746,7 +2747,10 @@
 (defun emit-link-start (link) (emit "<a href=\"") (emit link) (emit "\">"))
 
 (defun emit-ext-page-node-link-start (extfile pageno node)
-  (emit "<a href=\"")
+  (emit "<a ")
+  (unless extfile
+    (emit "class=hrefinternal "))
+  (emit "href=\"")
   (unless (and (not extfile) (or (not pageno) (= *html-page-count* pageno)))
     (emit (or extfile *jobname*))
     (unless (= pageno 0) (emit *html-page-suffix*) (emit pageno))
@@ -2756,6 +2760,9 @@
 
 (defun emit-page-node-link-start (pageno node)
   (emit-ext-page-node-link-start nil pageno node))
+
+(defun emit-page-link-start (pageno)
+  (emit-ext-page-node-link-start nil pageno nil))
 
 (defun emit-link-stop () (emit "</a>"))
 
@@ -2978,6 +2985,17 @@
       (emit *log-file*))
     (emit "\"")))
 
+(defun doc-internal-url (url)
+  (let ((n (length url)))
+    (cond ((and (> n 0) (char= (char url 0) #\#))
+           (let* ((label (subseq url 1 n))
+                  (label-ref (label-bound-p label)))
+             (if label-ref
+                 (if (label*-src label-ref) nil
+                     (list (label*-page label-ref) (label*-name label-ref)))
+                 nil)))
+          (t nil))))
+
 (defun fully-qualify-url (url)
   (let ((n (length url)))
     (cond ((and (> n 0) (char= (char url 0) #\#))
@@ -2993,6 +3011,10 @@
 
 (defun do-url ()
   (let ((url (get-url)))
+    (let ((durl (doc-internal-url url)))
+      (if durl
+          (emit-page-node-link-start (car durl) (cadr durl))
+          (emit-link-start (fully-qualify url))))
     (emit-link-start (fully-qualify-url url))
     (emit url)
     (emit-link-stop)))
@@ -3004,10 +3026,14 @@
     (emit-link-stop)))
 
 (defun do-urlh ()
-  (emit-link-start (fully-qualify-url (get-url)))
+  (let* ((url (get-url))
+         (durl (doc-internal-url url)))
+    (if durl
+        (emit-page-node-link-start (car durl) (cadr durl))
+        (emit-link-start (fully-qualify-url url))))
   (bgroup)
   (tex2page-string
-   (concatenate 'string "\\def\\\\{\\egroup\\endinput}" (get-token)))
+    (concatenate 'string "\\def\\\\{\\egroup\\endinput}" (get-token)))
   (egroup)
   (emit-link-stop))
 
@@ -3018,7 +3044,11 @@
 
 (defun do-urlp ()
   (let ((link-text (get-token)))
-    (emit-link-start (fully-qualify-url (get-url)))
+    (let* ((url (get-url))
+           (durl (doc-internal-url url)))
+      (if durl
+          (emit-page-node-link-start (car durl) (cadr durl))
+          (emit-link-start (fully-qualify-url url))))
     (tex2page-string link-text)
     (emit-link-stop)))
 
@@ -3179,7 +3209,7 @@
       ;
       (!index *index-count* *html-page-count*)
       (write-aux `(!index ,*index-count* ,*html-page-count*))
-      (let ((tag (format nil "~aidx_~a" *html-node-prefix* *index-count*)))
+      (let ((tag (format nil "~aindex_~a" *html-node-prefix* *index-count*)))
         (emit-anchor tag)
         (unless *index-port*
           (let ((idx-file (concatenate 'string *aux-dir/* *jobname*
@@ -3231,7 +3261,7 @@
          (n (read-from-string s))
          (pageno (gethash n *index-table*)))
     (emit-page-node-link-start
-      pageno (concatenate 'string *html-node-prefix* "idx_" s))
+      pageno (concatenate 'string *html-node-prefix* "index_" s))
     (emit pageno)
     (cond ((setq *it* (gethash pageno *index-page-mention-alist*))
            (let ((n (1+ *it*)))
@@ -3427,26 +3457,14 @@
       (emit-newline))))
 
 (defun point-to-adjacent-pages ()
-  (let* ((prev-page
-          (cond ((= *html-page-count* 0) nil)
-                ((= *html-page-count* 1)
-                 (concatenate 'string *jobname* *output-extension*))
-                (t
-                 (concatenate 'string *jobname* *html-page-suffix*
-                   (write-to-string (1- *html-page-count*))
-                   *output-extension*))))
-         (next-page
-          (cond ((= *html-page-count* *last-page-number*) nil)
-                (t
-                 (concatenate 'string *jobname* *html-page-suffix*
-                   (write-to-string (1+ *html-page-count*))
-                   *output-extension*)))))
+  (let* ((prev-page (if (= *html-page-count* 0) nil (- *html-page-count* 1)))
+         (next-page (if (= *html-page-count* *last-page-number*) nil (+ *html-page-count* 1))))
     (unless (= *last-page-number* 0)
-      (when prev-page (emit-link-start prev-page))
+      (when prev-page (emit-page-link-start prev-page))
       (emit "&#x3c;&#xb7;&#xb7;&#xb7;Prev ")
       (when prev-page (emit-link-stop))
       (emit "||")
-      (when next-page (emit-link-start next-page))
+      (when next-page (emit-page-link-start next-page))
       (emit " Next&#xb7;&#xb7;&#xb7;&#x3e;")
       (when next-page (emit-link-stop)))))
 
@@ -3472,20 +3490,8 @@
          (toc-page-p (and *toc-page* (= *html-page-count* *toc-page*)))
          (index-page-p
           (and *index-page* (= *html-page-count* *index-page*)))
-         (first-page
-          (concatenate 'string *jobname* *output-extension*))
-         (prev-page
-          (cond (first-page-p nil)
-                ((= *html-page-count* 1) first-page)
-                (t (concatenate 'string *jobname* *html-page-suffix*
-                     (write-to-string
-                      (1- *html-page-count*))
-                     *output-extension*))))
-         (next-page
-          (cond (last-page-p nil)
-                (t (concatenate 'string *jobname* *html-page-suffix*
-                     (write-to-string (1+ *html-page-count*))
-                     *output-extension*)))))
+         (prev-page (if first-page-p nil (- *html-page-count* 1)))
+         (next-page (if last-page-p nil (+ *html-page-count* 1))))
     (unless (and first-page-p
                  (or last-page-p
                      (and (eq head-or-foot :head)
@@ -3495,11 +3501,11 @@
       (emit "<span")
       (when first-page-p (emit " class=disable"))
       (emit ">")
-      (unless first-page-p (emit-link-start first-page))
+      (unless first-page-p (emit-page-link-start 0))
       (emit *navigation-first-name*)
       (unless first-page-p (emit-link-stop))
       (emit ", ")
-      (unless first-page-p (emit-link-start prev-page))
+      (unless first-page-p (emit-page-link-start prev-page))
       (emit *navigation-previous-name*)
       (unless first-page-p (emit-link-stop))
       (emit "</span>")
@@ -3509,7 +3515,7 @@
       (when first-page-p (emit "<span class=disable>"))
       (emit ", ")
       (when first-page-p (emit "</span>"))
-      (unless last-page-p (emit-link-start next-page))
+      (unless last-page-p (emit-page-link-start next-page))
       (emit *navigation-next-name*)
       (unless last-page-p (emit-link-stop))
       (emit "</span>")
@@ -3529,7 +3535,7 @@
           (unless toc-page-p
             (emit-page-node-link-start *toc-page*
                                        (concatenate 'string *html-node-prefix*
-                                         "toc_start")))
+                                         "toc")))
           (emit *navigation-contents-name*)
           (unless toc-page-p (emit-link-stop))
           (emit "</span>"))
@@ -7541,7 +7547,7 @@
   (case x
     (:last-page (tex-def-0arg "\\TZPcolophonlastpage" "1"))
     (:no-timestamp (tex-def-0arg "\\TZPcolophontimestamp" "0"))
-    ((:dont-credit-tex2page :ingrate) (tex-def-0arg "\\TZPcolophoncredit" "0"))
+    (:dont-credit-tex2page (tex-def-0arg "\\TZPcolophoncredit" "0"))
     (:dont-link-to-tex2page-website
      (tex-def-0arg "\\TZPcolophonweblink" "0"))))
 

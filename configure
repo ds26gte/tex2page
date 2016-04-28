@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Last modified: 2014-12-01
+# Last modified: 2016-04-26
 
 # Set scmxlate to the pathname of scmxlate/scmxlate.scm
 # on your system, if you know it.  Otherwise let
@@ -76,6 +76,9 @@ makeit() {
 
     bigloo)
     echo bigloo|bigloo -eval '(load "'$scmxlate'")';;
+
+    chez)
+    echo chez|scheme $scmxlate;;
 
     chicken)
     echo chicken|csi $scmxlate;;

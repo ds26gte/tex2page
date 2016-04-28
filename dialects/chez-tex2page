@@ -1,4 +1,4 @@
-; last change: 2012-04-21
+; last change: 2016-04-28
 
 (scmxlate-eval
  (define *chez-name*
@@ -8,18 +8,15 @@
        )))
 
 (scmxlate-cond
+
  ((eqv? *operating-system* 'unix)
   (scmxlate-insert
-    "\":\";echo '"
-    "(define arg-one \"'$1'\")"
-    "(load \"'$0'\")"
-    "(main arg-one)"
-    "(exit)"
-    "'|exec "
+    "\":\";"
     *chez-name*
-    ";exit
-
-"))
+    " --script "
+    "$0 $1;exit
+"
+    ))
 
  ((eqv? *operating-system* 'windows)
   (scmxlate-insert
@@ -94,8 +91,8 @@
 ;  (lambda (secs)
 ;    ""))
 
-(define current-seconds
-  (lambda () #f))
+(define (current-seconds)
+  (time-second (current-time)))
 
 (define set-start-time
   (lambda ()
@@ -119,3 +116,10 @@
  ((eqv? *operating-system* 'windows)
   (define *ghostscript* "d:\\aladdin\\gs6.0\\bin\\gswin32c")
   ))
+
+(scmxlate-ignore main)
+
+(scmxlate-postamble)
+
+(let ((pa (command-line-arguments)))
+  (tex2page (car pa)))

@@ -120,6 +120,8 @@
   ; "<span style=\"color: red\">&#xb7;</span>"
   "<span style=\"vertical-align: -0.5ex\">&#x2334;</span>")
 
+(defparameter *opmac-active-tt-char* nil)
+
 (defparameter *aux-file-suffix* "-Z-A")
 (defparameter *bib-aux-file-suffix* "-Z-B")
 (defparameter *css-file-suffix* "-Z-S.css")
@@ -1435,6 +1437,23 @@
     (0 (setq *esc-char* 0))
     (11 (push c  *tex-extra-letters*))
     (13 (activate-cdef c))))
+
+(defun do-activettchar ()
+  (ignorespaces)
+  (let ((c (get-actual-char)))
+    (setq *opmac-active-tt-char* c)
+    (activate-cdef c)
+    (tex-def-char c '() "\\TIIPopmacverb" nil)))
+
+(defun do-opmac-intext-verb ()
+  (bgroup)
+  (let ((*ligatures-p* nil))
+    (cond (*outputting-external-title-p* nil)
+          (t (emit "<code class=verbatim>")))
+    (do-verb-delimed *opmac-active-tt-char*)
+    (cond (*outputting-external-title-p* nil)
+          (t (emit "</code>"))))
+  (egroup))
 
 (defun do-global ()
   (ignorespaces)
@@ -6139,6 +6158,24 @@
 (defun do-endverbatim-eplain ()
   (setq *inside-eplain-verbatim-p* nil))
 
+(defun do-begtt ()
+  (do-end-para)
+  (bgroup)
+  (emit "<pre class=verbatim>")
+  (munched-a-newline-p)
+  (let ((*ligatures-p* nil))
+    (loop
+      (let ((c (snoop-actual-char)))
+        (when (eq c :eof-object) (terror 'do-verbatim-latex "Eof inside verbatim"))
+        (cond ((char= c #\\)
+               (let ((cs (get-ctl-seq)))
+                 (when (string= cs "\\endtt") (return))
+                 (emit-html-string cs)))
+              (t (emit-html-char (get-actual-char)))))))
+  (emit "</pre>")
+  (egroup)
+  (do-para))
+
 (defun do-alltt ()
   (do-end-para)
   (bgroup)
@@ -6926,9 +6963,9 @@
   (when (probe-file f) (tex2page-file f)))
 
 (defun ignorable-tex-file-p (f)
-  (let ((e (file-extension f)))
-    (cond ((and e (string-equal e ".sty")) t)
-          (t (when (and e (string-equal e ".tex"))
+  (let ((e (or (file-extension f) "")))
+    (cond ((string-equal e ".sty") t)
+          (t (when (string-equal e ".tex")
                (setq f (subseq f 0 (- (length f) 4))))
              (member f *tex-files-to-ignore* :test #'string-equal)))))
 
@@ -7299,7 +7336,7 @@
                pre {
                overflow: auto;
                margin-left: 2em;
-               background-color: #f5f5f5;
+               /* background-color: #f5f5f5; */
                }
 
                blockquote {
@@ -7359,13 +7396,18 @@
 
                .verbatim em {
                font-family: serif;
-               }*/
+               }
+               */
 
                /*
                .verbatim {
                color: #4d0000;
                }
                */
+
+               .verbatim {
+               background-color: #f5f5f5;
+               }
 
                .scheme em {
                color: black;
@@ -8142,33 +8184,22 @@ Try the commands
 
 (tex-defsym-prim "\\AA" "&#xc5;")
 (tex-defsym-prim "\\aa" "&#xe5;")
-
 (tex-def-prim "\\abstract"
  (lambda ()
      (tex2page-string "\\quote")
      (tex2page-string "\\centerline{\\bf\\abstractname}\\par")))
-
+(tex-def-prim "\\activettchar" #'do-activettchar)
 (tex-def-prim "\\addcontentsline" #'do-addcontentsline)
 (tex-def-prim "\\addtocounter" #'do-addtocounter)
-
 (tex-def-prim "\\advance" (lambda () (do-advance (globally-p))))
-
 (tex-def-prim "\\advancetally" (lambda () (do-advancetally (globally-p))))
-
 (tex-defsym-prim "\\AE" "&#xc6;")
-
 (tex-defsym-prim "\\ae" "&#xe6;")
-
 (tex-def-prim "\\afterassignment" #'do-afterassignment)
-
 (tex-def-prim "\\aftergroup" #'do-aftergroup)
-
 (tex-def-prim "\\align" (lambda () (do-equation :align)))
-
 (tex-def-prim "\\alltt" #'do-alltt)
-
 (tex-def-prim "\\appendix" #'do-appendix)
-
 (tex-defsym-prim "\\appendixname" "Appendix ")
 (tex-def-prim "\\arabic" #'do-arabic)
 (tex-def-prim "\\array" (lambda () (do-tabular t)))
@@ -8176,8 +8207,9 @@ Try the commands
 
 (tex-def-prim "\\b" (lambda () (do-diacritic :barunder)))
 (tex-def-prim "\\begin" #'do-begin)
-(tex-def-prim "\\beginsection" #'do-beginsection)
 (tex-def-prim "\\beginchapter" #'do-beginchapter)
+(tex-def-prim "\\beginsection" #'do-beginsection)
+(tex-def-prim "\\begtt" #'do-begtt)
 (tex-def-prim "\\bf" (lambda () (do-switch :bf)))
 (tex-def-prim "\\bgcolor" (lambda () (do-switch :bgcolor)))
 (tex-def-prim-0arg "\\bgroup" "{")
@@ -8761,6 +8793,7 @@ Try the commands
 (tex-def-prim "\\TIIPnbsp" (lambda () (emit-nbsp 1)))
 (tex-def-prim "\\TIIPnewline" #'do-newline)
 (tex-def-prim "\\TIIPnull" #'get-actual-char)
+(tex-def-prim "\\TIIPopmacverb" #'do-opmac-intext-verb)
 (tex-def-prim "\\TIIPreuseimage" #'reuse-img)
 (tex-def-prim "\\TIIPrgb" (lambda () (do-switch :rgb)))
 (tex-def-prim "\\TIIPRGB" (lambda () (do-switch :rgb255)))

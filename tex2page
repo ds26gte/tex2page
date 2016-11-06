@@ -113,6 +113,8 @@
   ; "<span style=\"color: red\">&#xb7;</span>"
   "<span style=\"vertical-align: -0.5ex\">&#x2334;</span>")
 
+(define *opmac-active-tt-char* #f)
+
 (define *aux-file-suffix* "-Z-A")
 (define *bib-aux-file-suffix* "-Z-B")
 (define *css-file-suffix* "-Z-S.css")
@@ -1943,6 +1945,25 @@
       ((13) (activate-cdef c))
       )
     ))
+
+(define do-activettchar
+  (lambda ()
+    (ignorespaces)
+    (let ((c (get-actual-char)))
+      (set! *opmac-active-tt-char* c)
+      (activate-cdef c)
+      (tex-def-char c '() "\\TIIPopmacverb" #f))))
+
+(define do-opmac-intext-verb
+  (lambda ()
+    (bgroup)
+    (fluid-let ((*ligatures?* #f))
+      (cond (*outputting-external-title?* #f)
+            (else (emit "<code class=verbatim>")))
+      (do-verb-delimed *opmac-active-tt-char*)
+      (cond (*outputting-external-title?* #f)
+            (else (emit "</code>"))))
+    (egroup)))
 
 ;
 
@@ -3918,7 +3939,6 @@
       (emit url)
       (emit-link-stop))))
 
-
 (define do-mailto
   (lambda ()
     (let ((addr (get-url)))
@@ -3931,7 +3951,7 @@
     (let* ((link-text (get-bracketed-text-if-any))
            (url (get-url))
            (durl (doc-internal-url url)))
-      (if durl 
+      (if durl
           (emit-page-node-link-start (car durl) (cadr durl))
           (emit-link-start (fully-qualify-url url)))
       (bgroup)
@@ -6173,7 +6193,6 @@
     ;(emit-newline)
     ))
 
-
 (define path-to-list
   (lambda (p)
     ;convert an OS path into a Scheme list
@@ -7531,7 +7550,7 @@
                    (emit
                    (if *verb-visible-space?*
                        *verbatim-visible-space*
- #\space))
+                       #\space))
                    (loop))
                   (else (emit-html-char (get-actual-char))
                         (loop))))))
@@ -7563,6 +7582,29 @@
 (define do-endverbatim-eplain
   (lambda ()
     (set! *inside-eplain-verbatim?* #f)))
+
+(define do-begtt
+  (lambda ()
+    (do-end-para)
+    (bgroup)
+    (emit "<pre class=verbatim>")
+    (munched-a-newline?)
+    (fluid-let ((*ligatures?* #f))
+      (let loop ()
+        (let ((c (snoop-actual-char)))
+          (when (eof-object? c)
+            (terror 'do-begtt "Eof inside \\begtt"))
+          (cond
+            ((char=? c #\\)
+             (let ((cs (get-ctl-seq)))
+               (unless (string=? cs "\\endtt")
+                 (emit-html-string cs)
+                 (loop))))
+            (else (emit-html-char (get-actual-char))
+                  (loop))))))
+    (emit "</pre>")
+    (egroup)
+    (do-para)))
 
 ;
 
@@ -8530,12 +8572,11 @@
     (when (file-exists? f)
       (tex2page-file f))))
 
-
-(define ignorable-tex-file? 
+(define ignorable-tex-file?
   (lambda (f)
-    (let ((e (file-extension f)))
-      (cond ((and e (string-ci=? e ".sty")) #t)
-            (else (when (and e (string-ci=? e ".tex"))
+    (let ((e (or (file-extension f) "")))
+      (cond ((string-ci=? e ".sty") #t)
+            (else (when (string-ci=? e ".tex")
                     (set! f (substring f 0 (- (string-length f) 4))))
                   (member/string-ci=? f *tex-files-to-ignore*))))))
 
@@ -9013,6 +9054,7 @@
                list-style-type: upper-alpha;
                }
 
+               /*
                tt i {
                font-family: serif;
                }
@@ -9020,12 +9062,17 @@
                .verbatim em {
                font-family: serif;
                }
+               */
 
                /*
                .verbatim {
                color: #4d0000;
                }
                */
+
+               .verbatim {
+               background-color: #f5f5f5;
+               }
 
                .scheme em {
                color: black;
@@ -9905,6 +9952,7 @@ Try the commands
               (lambda ()
                 (tex2page-string "\\quote")
                 (tex2page-string "\\centerline{\\bf\\abstractname}\\par")))
+(tex-def-prim "\\activettchar" do-activettchar)
 (tex-def-prim "\\addcontentsline" do-addcontentsline)
 (tex-def-prim "\\addtocounter" do-addtocounter)
 (tex-def-prim "\\advance" (lambda () (do-advance (global?))))
@@ -9927,6 +9975,7 @@ Try the commands
 (tex-def-prim-0arg "\\bgroup" "{")
 (tex-def-prim "\\beginchapter" do-beginchapter)
 (tex-def-prim "\\beginsection" do-beginsection)
+(tex-def-prim "\\begtt" do-begtt)
 (tex-def-prim "\\bf" (lambda () (do-switch ':bf)))
 (tex-def-prim "\\bgcolor" (lambda () (do-switch ':bgcolor)))
 (tex-def-prim "\\bibitem" do-bibitem)
@@ -10413,6 +10462,7 @@ Try the commands
 (tex-def-prim "\\TIIPnbsp" (lambda () (emit-nbsp 1)))
 (tex-def-prim "\\TIIPnewline" do-newline)
 (tex-def-prim "\\TIIPnull" get-actual-char)
+(tex-def-prim "\\TIIPopmacverb" do-opmac-intext-verb)
 (tex-def-prim "\\TIIPreuseimage" reuse-img)
 (tex-def-prim "\\TIIPrgb" (lambda () (do-switch ':rgb)))
 (tex-def-prim "\\TIIPRGB" (lambda () (do-switch ':rgb255)))

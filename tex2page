@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20160216") ;last change
+(define *tex2page-version* "20161106") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -155,6 +155,9 @@
     "margin-right: -0.125em; "
     "text-transform: uppercase"
     "\">e</span>" "X"))
+
+(define *tex-files-to-ignore*
+  '("btxmac" "eplain" "epsf" "eval4tex" "opmac" "supp-pdf" "tex2page"))
 
 (define *calling-from-text-editor?* (getenv "VIMRUNTIME"))
 
@@ -3915,11 +3918,25 @@
       (emit url)
       (emit-link-stop))))
 
+
 (define do-mailto
   (lambda ()
     (let ((addr (get-url)))
       (emit-link-start (string-append "mailto:" addr))
       (emit addr)
+      (emit-link-stop))))
+
+(define do-ulink
+  (lambda ()
+    (let* ((link-text (get-bracketed-text-if-any))
+           (url (get-url))
+           (durl (doc-internal-url url)))
+      (if durl 
+          (emit-page-node-link-start (car durl) (cadr durl))
+          (emit-link-start (fully-qualify-url url)))
+      (bgroup)
+      (tex2page-string link-text)
+      (egroup)
       (emit-link-stop))))
 
 (define do-urlh
@@ -6156,10 +6173,6 @@
     ;(emit-newline)
     ))
 
-(define latex-style-file?
-  (lambda (f)
-    (let ((e (file-extension f)))
-      (and e (string-ci=? e ".sty")))))
 
 (define path-to-list
   (lambda (p)
@@ -8517,6 +8530,15 @@
     (when (file-exists? f)
       (tex2page-file f))))
 
+
+(define ignorable-tex-file? 
+  (lambda (f)
+    (let ((e (file-extension f)))
+      (cond ((and e (string-ci=? e ".sty")) #t)
+            (else (when (and e (string-ci=? e ".tex"))
+                    (set! f (substring f 0 (- (string-length f) 4))))
+                  (member/string-ci=? f *tex-files-to-ignore*))))))
+
 (define do-input
   (lambda ()
     (ignorespaces)
@@ -8528,15 +8550,7 @@
           (set! *inputting-boilerplate?* #f))
         (fluid-let ((*inputting-boilerplate?*
                      (and boilerplate-index (+ boilerplate-index 1))))
-          (cond ((or (latex-style-file? f)
-                     (member/string-ci=?
-                      f '("btxmac" "btxmac.tex"
-                                   "eplain" "eplain.tex"
-                                   "epsf" "epsf.tex"
-                                   "eval4tex" "eval4tex.tex"
-                                   "supp-pdf" "supp-pdf.tex"
-                                   "tex2page" "tex2page.tex"
-                                   )))
+          (cond ((ignorable-tex-file? f)
                  ;don't process .sty files,
                  ;and macro files like btxmac.tex
                  #f)
@@ -10416,6 +10430,7 @@ Try the commands
 (tex-def-prim-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))
 
 (tex-def-prim "\\uccode" (lambda () (do-tex-case-code ':uccode)))
+(tex-def-prim "\\ulink" do-ulink)
 (tex-def-prim "\\undefcsactive" do-undefcsactive)
 (tex-def-prim "\\undefschememathescape" (lambda () (scm-set-mathescape #f)))
 (tex-def-prim "\\underline" (lambda () (do-function "\\underline")))

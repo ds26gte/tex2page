@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20160216" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161106" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -156,6 +156,9 @@
     "margin-right: -0.125em; "
     "text-transform: uppercase"
     "\">e</span>" "X"))
+
+(defparameter *tex-files-to-ignore*
+  '("btxmac" "eplain" "epsf" "eval4tex" "opmac" "supp-pdf" "tex2page"))
 
 ;above are true globals.  Following are
 ;per-document globals
@@ -3025,6 +3028,18 @@
     (emit addr)
     (emit-link-stop)))
 
+(defun do-ulink ()
+  (let* ((link-text (get-bracketed-text-if-any))
+         (url (get-url))
+         (durl (doc-internal-url url)))
+    (if durl 
+        (emit-page-node-link-start (car durl) (cadr durl))
+        (emit-link-start (fully-qualify-url url)))
+    (bgroup)
+    (tex2page-string link-text)
+    (egroup)
+    (emit-link-stop)))
+
 (defun do-urlh ()
   (let* ((url (get-url))
          (durl (doc-internal-url url)))
@@ -4910,9 +4925,6 @@
   (when (munched-a-newline-p)
     (toss-back-char #\Newline) (toss-back-char #\Newline)))
 
-(defun latex-style-file-p (f)
-  (let ((e (file-extension f)))
-    (and e (string-equal e ".sty"))))
 
 (defun path-to-list (p)
   ;convert a Unix path into a Lisp list
@@ -6913,6 +6925,13 @@
 (defun tex2page-file-if-exists (f)
   (when (probe-file f) (tex2page-file f)))
 
+(defun ignorable-tex-file-p (f)
+  (let ((e (file-extension f)))
+    (cond ((and e (string-equal e ".sty")) t)
+          (t (when (and e (string-equal e ".tex"))
+               (setq f (subseq f 0 (- (length f) 4))))
+             (member f *tex-files-to-ignore* :test #'string-equal)))))
+
 (defun do-input ()
   (ignorespaces)
   (let* ((f (get-filename-possibly-braced))
@@ -6923,12 +6942,7 @@
       (setq *inputting-boilerplate-p* nil))
     (let ((*inputting-boilerplate-p*
            (and boilerplate-index (1+ boilerplate-index))))
-      (cond ((or (latex-style-file-p f)
-                 (member f
-                         '("btxmac" "btxmac.tex" "eplain" "eplain.tex" "epsf" "epsf.tex"
-                           "eval4tex" "eval4tex.tex" "supp-pdf" "supp-pdf.tex"
-                           "tex2page" "tex2page.tex"
-                           ) :test #'string-equal))
+      (cond ((ignorable-tex-file-p f)
              ;dont process .sty files and macro files like btxmac.tex
              nil)
             ((member f '("miniltx" "miniltx.tex") :test #'string-equal)
@@ -8764,6 +8778,7 @@ Try the commands
 (tex-def-prim-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))
 
 (tex-def-prim "\\uccode" (lambda () (do-tex-case-code :uccode)))
+(tex-def-prim "\\ulink" #'do-ulink)
 (tex-def-prim "\\undefcsactive" #'do-undefcsactive)
 (tex-def-prim "\\undefschememathescape" (lambda () (scm-set-mathescape nil)))
 (tex-def-prim "\\underline" (lambda () (do-function "\\underline")))

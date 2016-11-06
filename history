@@ -2,9 +2,9 @@ Last change 2016-11-06
 
 2016 Nov 6
 
-Ignore opmac[.tex].
+Accept OPmac's \ulink, \{beg,end}tt, \activettchar.
 
-Accept opmac's \ulink.
+Ignore \input opmac[.tex].
 
 2016 Feb 16
 

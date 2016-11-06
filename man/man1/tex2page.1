@@ -1,13 +1,13 @@
 '\" t
-.\"     Title: tex2page
+.\"     Title: t
 .\"    Author: [see the "AUTHORS" section]
 .\" Generator: Asciidoctor 1.5.4
-.\"      Date: 2015-12-13
+.\"      Date: 2016-08-04
 .\"    Manual: \ \&
 .\"    Source: \ \&
 .\"  Language: English
 .\"
-.TH "TEX2PAGE" "1" "2015-12-13" "\ \&" "\ \&"
+.TH "TEX2PAGE" "1" "2016-08-04" "\ \&" "\ \&"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -19,7 +19,7 @@
 .if \n[.g] .mso www.tmac
 .LINKSTYLE blue R < >
 .SH "NAME"
-tex2page \- makes Web pages from LaTeX and plain\-TeX documents
+t \- makes Web pages from LaTeX and plain\-TeX documents
 .SH "SYNOPSIS"
 .sp
 .if n \{\
@@ -47,25 +47,25 @@ tex2page <pathname>
 .RE
 .\}
 .sp
-converts the TeX source file \f[CR]<pathname>\fP to the HTML file
-\f[CR]<jobname>.html\fP, where \f[CR]<jobname>\fP is the basename of
-\f[CR]<pathname>\fP.
+converts the TeX source file <pathname> to the HTML file
+<jobname>.html, where <jobname> is the basename of
+<pathname>.
 Some auxiliary HTML files and some image files may also be
 created.
 .sp
-The argument \f[CR]<pathname>\fP can be a full or relative pathname.  If
+The argument <pathname> can be a full or relative pathname.  If
 the latter, it is reckoned relative to the current directory.
-The extension may be omitted if it is \f[CR].tex\fP.
+The extension may be omitted if it is .tex.
 .sp
 In order to resolve cross\-references, it may be necessary to
 invoke tex2page a couple of times.  The log displayed on the
 console will inform you if such is the case.  This log is also
-saved in the file \f[CR]<jobname>.hlog\fP.
+saved in the file <jobname>.hlog.
 .sp
-If tex2page is called with the option \f[CR]\-\-help\fP, it prints a help
+If tex2page is called with the option \-\-help, it prints a help
 message and exits.
 .sp
-If tex2page is called with the option \f[CR]\-\-version\fP, it prints
+If tex2page is called with the option \-\-version, it prints
 version information and exits.
 .sp
 If tex2page is called without an argument, or if the argument is
@@ -89,18 +89,18 @@ http://ds26gte.github.io/tex2page/index.html
 .SH "SEARCH PATH FOR TEX FILES"
 .sp
 tex2page uses the same search path as TeX to search for
-\f[CR]\(rsinput\fP and \f[CR]\(rsopenin\fP files.  The default search path is
+\(rsinput and \(rsopenin files.  The default search path is
 implementation\-dependent but can be changed by setting the
-environment variable \f[CR]TEXINPUTS\fP to a list of colon\-separated
+environment variable TEXINPUTS to a list of colon\-separated
 directories.  (If you wish to merely prepend your list to the
 default list, end your list with a colon.)
 .sp
-Add two trailing forward slashes to any directory in \f[CR]TEXINPUTS\fP
+Add two trailing forward slashes to any directory in TEXINPUTS
 that you want to recursively search all subdirectories of.
 .sp
-If the environment variable \f[CR]TEX2PAGEINPUTS\fP is set, tex2page will
-use the \f[CR]TEX2PAGEINPUTS\fP value as its search path instead of
-\f[CR]TEXINPUTS\fP.  \f[CR]TEX2PAGEINPUTS\fP  does not support the double\-slash
+If the environment variable TEX2PAGEINPUTS is set, tex2page will
+use the TEX2PAGEINPUTS value as its search path instead of
+TEXINPUTS.  TEX2PAGEINPUTS  does not support the double\-slash
 mechanism of TEXINPUTS.
 .SH "EDITING ON ERROR"
 .sp
@@ -118,32 +118,32 @@ Type e to edit file at point of error; x to quit
 .RE
 .\}
 .sp
-If you type \f[CR]x\fP, tex2page immediately exits.
+If you type x, tex2page immediately exits.
 .sp
-If however you type \f[CR]e\fP, a text editor is fired up, showing the
+If however you type e, a text editor is fired up, showing the
 offending file — which may or may not be the main input file —
 at the line containing the error.  The particular editor chosen
 and the arguments with which it is called depends on the
-environment variables \f[CR]TEXEDIT\fP or \f[CR]EDITOR\fP.
+environment variables TEXEDIT or EDITOR.
 .sp
-If the environment variable \f[CR]TEXEDIT\fP is set, tex2page uses its
+If the environment variable TEXEDIT is set, tex2page uses its
 string value as the editor call to use.  A possible value for
-\f[CR]TEXEDIT\fP is \f[CR]"vim +%d %s"\fP.  This calls the editor vim with \f[CR]%s\fP
-replaced by the offending file’s name, and \f[CR]%d\fP replaced by the
+TEXEDIT is “vim +%d %s”.  This calls the editor vim with %s
+replaced by the offending file’s name, and %d replaced by the
 number of the offending line.
 .sp
-If \f[CR]TEXEDIT\fP is not set, the value of the environment variable
-\f[CR]EDITOR\fP is chosen as the editor.  Unlike \f[CR]TEXEDIT\fP
-which contains the editor call as a template, \f[CR]EDITOR\fP contains
-simply the editor’s name.  If \f[CR]EDITOR\fP is also not set, vi is
+If TEXEDIT is not set, the value of the environment variable
+EDITOR is chosen as the editor.  Unlike TEXEDIT
+which contains the editor call as a template, EDITOR contains
+simply the editor’s name.  If EDITOR is also not set, vi is
 chosen as the editor.
 .sp
-The editor specified in \f[CR]EDITOR\fP is called with the arguments
-“\f[CR] +<n> <f>\fP”, where \f[CR]<f>\fP is the offending file’s name and \f[CR]<n>\fP is the
+The editor specified in EDITOR is called with the arguments
+“ +<n> <f>”, where <f> is the offending file’s name and <n> is the
 offending line number.  It is not possible to alter the way the
 file and line arguments are supplied, but fortunately this style
 is accepted by vi, emacs, and all their clones.  If you use an
-editor that requires a different argument style, use \f[CR]TEXEDIT\fP.
+editor that requires a different argument style, use TEXEDIT.
 .SH "DIRECTORY FOR HTML PAGES"
 .sp
 By default, tex2page generates its output HTML files in the
@@ -162,17 +162,17 @@ naming it in one of the following files:
 .RE
 .\}
 .sp
-where \f[CR]<jobname>\fP is the basename of the input document.  The
+where <jobname> is the basename of the input document.  The
 first of these three files that exists overrides the rest.
 .sp
 The name in the .hdir file can be, or contain, the TeX
-control\-sequence \f[CR]\(rsjobname\fP, which expands to \f[CR]<jobname>\fP, the
+control\-sequence \(rsjobname, which expands to <jobname>, the
 basename of the input document.
 .SH "DOCUMENT\-SPECIFIC MACROS"
 .sp
 Before processing a TeX source file whose basename is
-\f[CR]<jobname>\fP, tex2page will automatically load the file
-\f[CR]<jobname>.t2p\fP, if it exists.  \f[CR]<jobname>.t2p\fP is a good place
+<jobname>, tex2page will automatically load the file
+<jobname>.t2p, if it exists.  <jobname>.t2p is a good place
 to put macros that are specific to the HTML version of the
 document.
 .SH "GENERAL MACROS"
@@ -182,8 +182,8 @@ the LaTeX or plain\-TeX formats — typically these are
 commands that add value to the HTML output.  In order to keep
 an input document that uses these extra commands processable
 by TeX, working TeX definitions are provided in the TeX macro
-file \f[CR]tex2page.tex\fP and the LaTeX macro package file
-\f[CR]tex2page.sty\fP.  Copy these macro files from the tex2page
+file tex2page.tex and the LaTeX macro package file
+tex2page.sty.  Copy these macro files from the tex2page
 distribution to a directory in your TEXINPUTS.
 .sp
 Plain\-TeX documents can use

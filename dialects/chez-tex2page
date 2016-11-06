@@ -11,10 +11,9 @@
 
  ((eqv? *operating-system* 'unix)
   (scmxlate-insert
-    "\":\";"
+    "#! /usr/local/bin/"
     *chez-name*
-    " --script "
-    "$0 $1;exit
+    " --script
 "
     ))
 

@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161106") ;last change
+(define *tex2page-version* "20161107") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -282,6 +282,9 @@
 
 (define *not-processing?* #f)
 
+(define *opmac-active-tt-char* #f)
+(define *opmac-nonum?* #f)
+(define *opmac-notoc?* #f)
 (define *outer?* #f)
 (define *output-streams* #f)
 (define *outputting-external-title?* #f)
@@ -2226,8 +2229,8 @@
 ;sections
 
 (define increment-section-counter
-  (lambda (seclvl unnumbered?)
-    (unless unnumbered?
+  (lambda (seclvl nonum?)
+    (unless nonum?
       ;increment the counter for seclvl.
       ;if counter not set, init it to 1
       (table-put! *section-counters* seclvl
@@ -2311,17 +2314,21 @@
                         (cond ((< secnumdepth -1) #f)
                               ((> seclvl secnumdepth) #t)
                               (else #f))))
-           (unnumbered? (or starred? too-deep?))
+           (nonum? (or starred? too-deep?))
            (header (fluid-let ((*tabular-stack* (list ':header)))
                      (tex-string->html-string (get-group)))))
-      (when (<= seclvl 0) (do-eject))
-      (increment-section-counter seclvl unnumbered?)
-      (let ((lbl-val (if unnumbered? #f
-                         (section-counter-value seclvl))))
-        (do-heading-aux seclvl starred? unnumbered? #f lbl-val header)))))
+      (do-heading-aux-1 seclvl starred? nonum? nil header))))
 
-(define do-heading-aux
-  (lambda (seclvl starred? unnumbered? chapname lbl-val header)
+(define do-heading-aux-1 
+  (lambda (seclvl starred? nonum? notoc? header)
+    (when (<= seclvl 0) (do-eject))
+    (increment-section-counter seclvl nonum?)
+    (let ((lbl-val (if nonum? #f
+                       (section-counter-value seclvl))))
+      (do-heading-aux-2 seclvl starred? nonum? #f lbl-val header))))
+
+(define do-heading-aux-2
+  (lambda (seclvl starred? nonum? notoc? lbl-val header)
     (unless lbl-val (set! lbl-val "IGNORE"))
     (let* ((htmlnum (max 1 (min 6 (if *using-chapters?*
                                       (+ seclvl 1) seclvl))))
@@ -2329,8 +2336,8 @@
                                (case seclvl
                                  ((-1) "part") ((0) "chap") (else "sec"))
                                "_"
-                               (if unnumbered? (gen-temp-string) lbl-val))))
-      (unless #f ;unnumbered?
+                               (if nonum? (gen-temp-string) lbl-val))))
+      (unless #f ;nonum?
         (tex-def-0arg "\\TIIPcurrentnodename" lbl)
         (tex-def-0arg "\\@currentlabel" lbl-val)
         )
@@ -2346,20 +2353,20 @@
         (else (emit " class=section")))
       (emit ">")
       (let ((write-to-toc? ;kludge?
-              (and *toc-page*
+              (and (not notoc?) *toc-page*
                    (not (and (eqv? *tex-format* ':latex)
                              (string=? header "Contents"))))))
         (case seclvl
           ((-1)
            (emit "<div class=partheading>")
-           (if unnumbered? (emit-nbsp 1)
+           (if nonum? (emit-nbsp 1)
                (begin
                  (when write-to-toc?
                    (emit-page-node-link-start *toc-page*
                                               (string-append
                                                 *html-node-prefix*
                                                 "toc_" lbl)))
-                 (tex2page-string (or chapname "\\partname"))
+                 (tex2page-string "\\partname")
                  (emit " ")
                  (emit lbl-val)
                  (when write-to-toc? (emit-link-stop))))
@@ -2368,16 +2375,15 @@
           ((0)
            (emit-newline)
            (emit "<div class=chapterheading>")
-           (if unnumbered? (emit-nbsp 1)
+           (if nonum? (emit-nbsp 1)
                (begin
                  (when write-to-toc?
                    (emit-page-node-link-start
                      *toc-page* (string-append *html-node-prefix*
                                                "toc_" lbl)))
                  (tex2page-string
-                   (or chapname
-                       (if *inside-appendix?*
-                           "\\appendixname" "\\chaptername")))
+                   (if *inside-appendix?*
+                       "\\appendixname" "\\chaptername"))
                  (emit " ")
                  (emit lbl-val)
                  (when write-to-toc? (emit-link-stop))))
@@ -2388,7 +2394,7 @@
             *toc-page* (string-append
                          *html-node-prefix*
                          "toc_" lbl)))
-        (unless (or (<= seclvl 0) unnumbered?)
+        (unless (or (<= seclvl 0) nonum?)
           (emit lbl-val)
           (emit-nbsp 2))
         ;(fluid-let ((*tabular-stack* (list ':header)))
@@ -2549,6 +2555,22 @@
       (egroup)
       (emit "</h1>")
       (do-noindent))))
+
+(define do-opmac-heading 
+  (lambda (seclvl)
+    (do-para)
+    (ignorespaces)
+    (let ((header (fluid-let ((*tabular-stack* (list ':header)))
+                    (tex-string->html-string (get-till-par)))))
+      (write-aux `(!default-title ,header))
+      (emit-newline)
+      (when (= seclvl 0)
+        (!using-chapters) (write-aux `(!using-chapers)))
+      (let ((nonum? *opmac-nonum?*)
+            (notoc? *opmac-notoc?*))
+        (set! *opmac-nonum?* #f)
+        (set! *opmac-notoc?* #f)
+        (do-heading-aux-1 seclvl #f nonum? notoc? header)))))
 
 (define do-appendix
   (lambda ()
@@ -9992,6 +10014,7 @@ Try the commands
 (tex-defsym-prim "\\cdots" "&#x22ef;")
 (tex-def-prim "\\center" (lambda () (do-block ':center)))
 (tex-def-prim "\\centerline" (lambda () (do-function "\\centerline")))
+(tex-def-prim "\\chap" (lambda () (do-opmac-heading 0)))
 (tex-def-prim "\\chapter"
               (lambda ()
                 (!using-chapters)
@@ -10269,6 +10292,7 @@ Try the commands
 (tex-def-prim "\\makeatother" (lambda () (set-catcode #\@ 12)))
 (tex-def-prim "\\makehtmlimage" do-makehtmlimage)
 (tex-def-prim "\\maketitle" do-maketitle)
+(tex-def-prim "\\maketoc" do-toc)
 (tex-def-prim "\\marginnote" do-marginnote)
 (tex-def-prim "\\marginpar" do-marginpar)
 (tex-def-prim "\\mathg" do-mathg)
@@ -10297,11 +10321,13 @@ Try the commands
 (tex-def-prim "\\nocite" do-nocite)
 (tex-def-prim "\\node" do-node)
 (tex-def-prim "\\noindent" do-noindent)
+(tex-def-prim "\\nonum" (lambda () (set! *opmac-nonum?* #t)))
 (tex-def-prim "\\nonumber" do-nonumber)
 (tex-def-prim "\\noslatexlikecomments"
               (lambda () (tex-def-0arg "\\TZPslatexcomments" "0")))
 (tex-def-prim "\\notimestamp"
               (lambda () (tex-def-0arg "\\TZPcolophontimestamp" "0")))
+(tex-def-prim "\\notoc" (lambda () (set! *opmac-notoc?* #t)))
 (tex-def-prim "\\nr" (lambda () (do-cr "\\nr")))
 (tex-def-prim "\\number" do-number)
 (tex-def-prim "\\numberedfootnote" do-numbered-footnote)
@@ -10378,6 +10404,8 @@ Try the commands
 (tex-def-prim "\\scmvariable" do-scm-set-variables)
 ;(tex-def-prim "\\scmwrite" do-scm-write)
 (tex-def-prim "\\scriptsize" (lambda () (do-switch ':scriptsize)))
+(tex-def-prim "\\sec" (lambda () (do-opmac-heading 1)))
+(tex-def-prim "\\secc" (lambda () (do-opmac-heading 2)))
 (tex-def-prim "\\section" (lambda () (do-heading 1)))
 (tex-def-prim "\\seealso" do-see-also)
 (tex-def-prim "\\setbox" do-setbox)
@@ -10953,6 +10981,9 @@ Try the commands
                 ;
                 (*not-processing?* #f)
                 ;
+                (*opmac-active-tt-char* #f)
+                (*opmac-nonum?* #f)
+                (*opmac-notoc?* #f)
                 (*outer?* #t)
                 (*output-streams* (make-table))
                 (*outputting-external-title?* #f)

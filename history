@@ -1,8 +1,12 @@
-Last change 2016-11-06
+Last change 2016-11-07
+
+2016 Nov 7
+
+Added OPmac's \chap, \sec, \secc, \maketoc, \nonum, \notoc.
 
 2016 Nov 6
 
-Accept OPmac's \ulink, \{beg,end}tt, \activettchar.
+Added OPmac's \ulink, \{beg,end}tt, \activettchar.
 
 Ignore \input opmac[.tex].
 

@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161106" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161107" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -120,7 +120,6 @@
   ; "<span style=\"color: red\">&#xb7;</span>"
   "<span style=\"vertical-align: -0.5ex\">&#x2334;</span>")
 
-(defparameter *opmac-active-tt-char* nil)
 
 (defparameter *aux-file-suffix* "-Z-A")
 (defparameter *bib-aux-file-suffix* "-Z-B")
@@ -265,6 +264,9 @@
 
 (defvar *not-processing-p* nil)
 
+(defvar *opmac-active-tt-char* nil)
+(defvar *opmac-nonum-p* nil)
+(defvar *opmac-notoc-p* nil)
 (defvar *outer-p* nil)
 (defvar *output-streams* nil)
 (defvar *outputting-external-title-p* nil)
@@ -1639,8 +1641,8 @@
        (emit-newline))
    *stylesheets*))
 
-(defun increment-section-counter (seclvl unnumbered-p)
-  (unless unnumbered-p
+(defun increment-section-counter (seclvl nonum-p)
+  (unless nonum-p
     ;increment the counter for seclvl.  If counter not set, init it to 1
     (incf (gethash seclvl *section-counters* 0)))
   ;zero the counters of all section levels below current level; except
@@ -1710,23 +1712,26 @@
           (let ((secnumdepth (get-gcount "\\secnumdepth")))
             (cond ((< secnumdepth -1) nil) ((> seclvl secnumdepth) t)
                   (t nil))))
-         (unnumbered-p (or starred-p too-deep-p))
+         (nonum-p (or starred-p too-deep-p))
          (header
           (let ((*tabular-stack* (list :header)))
             (tex-string-to-html-string (get-group)))))
-    (when (<= seclvl 0) (do-eject))
-    (increment-section-counter seclvl unnumbered-p)
-    (let ((lbl-val (if unnumbered-p nil (section-counter-value seclvl))))
-      (do-heading-aux seclvl starred-p unnumbered-p nil lbl-val
-                      header))))
+    (do-heading-aux-1 seclvl starred-p nonum-p nil header)))
 
-(defun do-heading-aux (seclvl starred-p unnumbered-p chapname lbl-val header)
+(defun do-heading-aux-1 (seclvl starred-p nonum-p notoc-p header)
+  (when (<= seclvl 0) (do-eject))
+  (increment-section-counter seclvl nonum-p)
+  (let ((lbl-val (if nonum-p nil (section-counter-value seclvl))))
+    (do-heading-aux-2 seclvl starred-p nonum-p notoc-p lbl-val
+                      header)))
+
+(defun do-heading-aux-2 (seclvl starred-p nonum-p notoc-p lbl-val header)
   (unless lbl-val (setq lbl-val "IGNORE"))
   (let* ((htmlnum (max 1 (min 6 (if *using-chapters-p* (+ seclvl 1) seclvl))))
          (lbl
           (concatenate 'string *html-node-prefix*
             (case seclvl ((-1) "part") ((0) "chap") (t "sec")) "_"
-            (if unnumbered-p (gen-temp-string) lbl-val))))
+            (if nonum-p (gen-temp-string) lbl-val))))
     (unless nil
       (tex-def-0arg "\\TIIPcurrentnodename" lbl)
       (tex-def-0arg "\\@currentlabel" lbl-val))
@@ -1742,19 +1747,19 @@
       (t (emit " class=section")))
     (emit ">")
     (let ((write-to-toc-p
-           (and *toc-page*
+           (and (not notoc-p) *toc-page*
                 (not
                  (and (eql *tex-format* :latex)
                       (string= header "Contents"))))))
       (case seclvl
         ((-1)
          (emit "<div class=partheading>")
-         (if unnumbered-p (emit-nbsp 1)
+         (if nonum-p (emit-nbsp 1)
            (progn
             (when write-to-toc-p
               (emit-page-node-link-start *toc-page*
                                          (concatenate 'string *html-node-prefix* "toc_" lbl)))
-            (tex2page-string (or chapname "\\partname"))
+            (tex2page-string "\\partname")
             (emit " ")
             (emit lbl-val)
             (when write-to-toc-p (emit-link-stop))))
@@ -1763,14 +1768,13 @@
         ((0)
          (emit-newline)
          (emit "<div class=chapterheading>")
-         (if unnumbered-p (emit-nbsp 1)
+         (if nonum-p (emit-nbsp 1)
            (progn
             (when write-to-toc-p
               (emit-page-node-link-start *toc-page*
                                          (concatenate 'string *html-node-prefix* "toc_" lbl)))
             (tex2page-string
-             (or chapname
-                 (if *inside-appendix-p* "\\appendixname" "\\chaptername")))
+              (if *inside-appendix-p* "\\appendixname" "\\chaptername"))
             (emit " ")
             (emit lbl-val)
             (when write-to-toc-p (emit-link-stop))))
@@ -1779,7 +1783,7 @@
       (when write-to-toc-p
         (emit-page-node-link-start *toc-page*
                                    (concatenate 'string *html-node-prefix* "toc_" lbl)))
-      (unless (or (<= seclvl 0) unnumbered-p) (emit lbl-val) (emit-nbsp 2))
+      (unless (or (<= seclvl 0) nonum-p) (emit lbl-val) (emit-nbsp 2))
       (emit header)
       (when write-to-toc-p (emit-link-stop))
       (emit "</h")
@@ -1908,6 +1912,20 @@
     (egroup)
     (emit "</h1>")
     (do-noindent)))
+
+(defun do-opmac-heading (seclvl)
+  (do-para)
+  (ignorespaces)
+  (let ((header (let ((*tabular-stack* (list :header)))
+                  (tex-string-to-html-string (get-till-par)))))
+    (write-aux `(!default-title ,header))
+    (emit-newline)
+    (when (= seclvl 0)
+      (!using-chapters) (write-aux `(!using-chapers)))
+    (let ((nonum-p *opmac-nonum-p*)
+          (notoc-p *opmac-notoc-p*))
+      (setq *opmac-nonum-p* nil *opmac-notoc-p* nil)
+      (do-heading-aux-1 seclvl nil nonum-p notoc-p header))))
 
 (defun do-appendix ()
   (unless *inside-appendix-p*
@@ -8182,6 +8200,8 @@ Try the commands
 
 ;
 
+(tex-def-prim "\\\"" (lambda () (do-diacritic :umlaut)))
+
 (tex-defsym-prim "\\AA" "&#xc5;")
 (tex-defsym-prim "\\aa" "&#xe5;")
 (tex-def-prim "\\abstract"
@@ -8227,6 +8247,7 @@ Try the commands
 (tex-defsym-prim "\\cdots" "&#x22ef;")
 (tex-def-prim "\\center" (lambda () (do-block :center)))
 (tex-def-prim "\\centerline" (lambda () (do-function "\\centerline")))
+(tex-def-prim "\\chap" (lambda () (do-opmac-heading 0)))
 (tex-def-prim "\\chapter"
  (lambda ()
      (!using-chapters)
@@ -8235,25 +8256,15 @@ Try the commands
        (tex-gdef-count "\\secnumdepth" 2))
      (do-heading 0)))
 (tex-defsym-prim "\\chaptername" "Chapter ")
-
 (tex-def-prim "\\char" #'do-char)
-
 (tex-def-prim "\\chardef" #'do-chardef)
-
 (tex-def-prim "\\cite" #'do-cite)
-
 (tex-def-prim "\\closegraphsfile" #'do-mfpic-closegraphsfile)
-
 (tex-def-prim "\\closein" (lambda () (do-close-stream :in)))
-
 (tex-def-prim "\\closeout" (lambda () (do-close-stream :out)))
-
 (tex-def-prim "\\color" #'do-color)
-
 (tex-def-prim "\\convertMPtoPDF" #'do-convertmptopdf)
-
 (tex-defsym-prim "\\copyright" "&#xa9")
-
 (tex-def-prim "\\countdef" (lambda () (do-newcount t) (eat-integer)))
 (tex-def-prim "\\CR" (lambda () (do-cr "\\CR")))
 (tex-def-prim "\\cr" (lambda () (do-cr "\\cr")))
@@ -8280,26 +8291,17 @@ Try the commands
     (push :description *tabular-stack*)
     (emit "<dl><dt></dt><dd>")))
 (tex-defsym-prim "\\DH" "&#xd0;")
-
 (tex-defsym-prim "\\dh" "&#xf0;")
-
 (tex-def-prim "\\discretionary" #'do-discretionary)
-
 (tex-def-prim "\\displaymath"
  (lambda () (do-latex-env-as-image "displaymath" :display)))
-
 (tex-def-prim "\\divide" (lambda () (do-divide (globally-p))))
-
 (tex-def-prim "\\document" #'probably-latex)
-
 (tex-def-prim "\\documentclass" #'do-documentclass)
-
 (tex-def-prim "\\dontuseimgforhtmlmath"
  (lambda () (tex-def-0arg "\\TZPmathimage" "0")))
-
 (tex-def-prim "\\dontuseimgforhtmlmathdisplay"
  (lambda () (tex-def-0arg "\\TZPmathimage" "0")))
-
 (tex-def-prim "\\dontuseimgforhtmlmathintext" (lambda () t))
 (tex-defsym-prim "\\dots" "&#x2026;")
 
@@ -8324,181 +8326,108 @@ Try the commands
      (emit "</dd></dl>")
      (do-noindent)))
 (tex-def-prim "\\endeqnarray" #'do-end-equation)
-
 (tex-def-prim "\\endequation" #'do-end-equation)
-
 (tex-def-prim "\\endenumerate"
  (lambda ()
      (pop-tabular-stack :enumerate)
      (do-end-para)
      (emit "</ol>")
      (do-noindent)))
-
 (tex-def-prim "\\endfigure" (lambda () (do-end-table/figure :figure)))
-
 (tex-def-prim "\\endflushleft" #'do-end-block)
-
 (tex-def-prim "\\endflushright" #'do-end-block)
-
 (tex-def-prim "\\endgraf" #'do-para)
-
 (tex-def-prim "\\endhtmlimg"
  (lambda () (terror 'tex-def-prim "Unmatched \\endhtmlimg")))
-
 (tex-def-prim "\\endhtmlonly"
  (lambda () (decf *html-only*)))
-
 (tex-def-prim "\\enditemize"
  (lambda ()
      (pop-tabular-stack :itemize)
      (do-end-para)
      (emit "</ul>")
      (do-noindent)))
-
 (tex-def-prim "\\endminipage" #'do-endminipage)
 (tex-def-prim "\\endquote"
  (lambda () (do-end-para) (egroup) (emit "</blockquote>")))
 (tex-def-prim "\\endruledtable" #'do-endruledtable)
-
 (tex-def-prim "\\endtabbing" #'do-end-tabbing)
-
 (tex-def-prim "\\endtable" (lambda () (do-end-table/figure :table)))
-
 (tex-def-prim "\\endtableplain" #'do-end-table-plain)
-
 (tex-def-prim "\\endtabular" #'do-end-tabular)
-
 (tex-def-prim "\\endthebibliography"
  (lambda () (emit "</table>") (egroup) (do-para)))
-
 (tex-def-prim "\\endverbatim" #'do-endverbatim-eplain)
-
 (tex-def-prim "\\enquote" #'do-enquote)
-
 (tex-def-prim "\\enumerate"
   (lambda ()
     (do-end-para)
     (push :enumerate *tabular-stack*)
     (emit "<ol>")))
-
 (tex-def-prim "\\epsfbox" #'do-epsfbox)
-
 (tex-def-prim "\\epsfig" #'do-epsfig)
-
 (tex-def-prim "\\eqnarray" (lambda () (do-equation :eqnarray)))
-
 (tex-def-prim "\\equation" (lambda () (do-equation :equation)))
-
 (tex-def-prim "\\errmessage" #'do-errmessage)
-
 (tex-def-prim "\\eval" (lambda () (do-eval :both)))
-
 ;(tex-def-prim "\\TIIPeval" (lambda () (do-eval :inner)))
-
 (tex-def-prim "\\evalh" (lambda () (do-eval :html)))
-
 (tex-def-prim "\\evalq" (lambda () (do-eval :quiet)))
-
 (tex-def-prim "\\expandafter" #'do-expandafter)
-
 (tex-def-prim "\\expandhtmlindex" #'expand-html-index)
-
 (tex-def-prim "\\externaltitle" #'do-externaltitle)
 
 (tex-def-prim "\\fi" (lambda () (do-fi)))
-
 (tex-def-prim "\\figure" (lambda () (do-table/figure :figure)))
-
 (tex-def-prim "\\fiverm" (lambda () (do-switch :fiverm)))
-
 (tex-def-prim "\\flushleft" (lambda () (do-block :flushleft)))
-
 (tex-def-prim "\\flushright" (lambda () (do-block :flushright)))
-
 (tex-defsym-prim "\\fmtname" "TeX2page")
-
 (tex-def-prim "\\fmtversion" (lambda () (emit *tex2page-version*)))
-
 (tex-def-prim "\\folio" (lambda () (emit *html-page-count*)))
-
 (tex-def-prim "\\font" #'do-font)
-
 (tex-def-prim "\\fontdimen" #'do-fontdimen)
-
 (tex-def-prim "\\footnote" #'do-footnote)
-
 (tex-def-prim "\\footnotesize" (lambda () (do-switch :footnotesize)))
 (tex-def-prim "\\frac" #'do-frac)
 (tex-def-prim "\\futurelet" #'do-futurelet)
-
 (tex-def-prim "\\futurenonspacelet" #'do-futurenonspacelet)
 
 (tex-def-prim "\\gdef" (lambda () (do-def t nil)))
-
 (tex-def-prim "\\global" #'do-global)
-
 (tex-def-prim "\\globaladvancetally" (lambda () (do-advancetally t)))
-
 (tex-def-prim "\\gobblegroup" #'get-group)
 
-(tex-def-prim "\\\"" (lambda () (do-diacritic :umlaut)))
 
 (tex-def-prim "\\H" (lambda () (do-diacritic :hungarianumlaut)))
 (tex-def-prim "\\halign" #'do-halign)
-
 (tex-def-prim "\\hbox" #'do-box)
-
 (tex-def-prim "\\hfill" (lambda () (emit-nbsp 5)))
-
 (tex-def-prim "\\hlstart" #'do-hlstart)
-
 (tex-def-prim "\\href" #'do-urlh)
-
 (tex-def-prim "\\hrule"
  (lambda () (do-end-para) (emit "<hr>") (emit-newline) (do-para)))
-
 (tex-def-prim "\\hskip" #'do-hskip)
-
 (tex-def-prim "\\hspace" #'do-hspace)
-
 (tex-def-prim "\\htmladdimg" #'do-htmladdimg)
-
 (tex-def-prim "\\htmlcolophon" #'do-htmlcolophon) ;obs
-
 (tex-def-prim "\\htmldoctype" #'do-htmldoctype)
-
 (tex-def-prim "\\htmlgif" (lambda () (do-htmlimg "htmlgif")))
-
 (tex-def-prim "\\htmlheadonly" #'do-htmlheadonly)
-
 (tex-def-prim "\\htmlimageconversionprogram" #'do-htmlimageconversionprogram)
-
 (tex-def-prim "\\htmlimageformat" #'do-htmlimageformat)
-
 (tex-def-prim "\\htmlimg" (lambda () (do-htmlimg "htmlimg")))
-
 (tex-def-prim "\\htmlimgmagnification" #'do-htmlimgmagnification)
-
 (tex-def-prim "\\htmlmathstyle" #'do-htmlmathstyle)
-
 (tex-def-prim "\\htmlonly" (lambda () (incf *html-only*)))
-
 (tex-def-prim "\\htmlpagelabel" #'do-htmlpagelabel)
-
 (tex-def-prim "\\htmlpageref" #'do-htmlpageref)
-
 (tex-def-prim "\\htmlref" #'do-htmlref)
-
 (tex-def-prim "\\htmlrefexternal" #'do-htmlrefexternal)
-
 (tex-def-prim "\\htmlspan" (lambda () (do-switch :span)))
-
 (tex-def-prim "\\htmldiv" (lambda () (do-switch :div)))
-
 (tex-def-prim "\\huge" (lambda () (do-switch :huge)))
-
 (tex-def-prim "\\Huge" (lambda () (do-switch :huge-cap)))
-
 (tex-def-prim "\\hyperref" #'do-hyperref)
 (tex-def-prim "\\hyperlink" #'do-hyperlink)
 (tex-def-prim "\\hypertarget" #'do-hypertarget)
@@ -8507,53 +8436,31 @@ Try the commands
 (tex-def-prim "\\if" #'do-if)
 (tex-def-prim "\\ifcase" #'do-ifcase)
 (tex-def-prim "\\ifdefined" #'do-ifdefined)
-
 (tex-def-prim "\\ifeof" #'do-ifeof)
-
 (tex-def-prim "\\ifdim" #'do-iffalse)
-
 (tex-def-prim "\\iffalse" #'do-iffalse)
-
 (tex-def-prim "\\IfFileExists" #'do-iffileexists)
-
 (tex-def-prim "\\ifhmode" #'do-iftrue)
-
 (tex-def-prim "\\ifmmode" #'do-ifmmode)
-
 (tex-def-prim "\\ifnum" #'do-ifnum)
-
 (tex-def-prim "\\iftrue" #'do-iftrue)
-
 (tex-def-prim "\\ifx" #'do-ifx)
-
 (tex-def-prim "\\ifodd" #'do-ifodd)
-
 (tex-def-prim "\\ignorenextinputtimestamp"
   (lambda ()
     (unless *inputting-boilerplate-p* (setq *inputting-boilerplate-p* 0))))
-
 (tex-def-prim "\\ignorespaces" #'ignorespaces)
-
 (tex-def-prim "\\imgdef" (lambda () (make-reusable-img (globally-p))))
-
 (tex-def-prim "\\imgpreamble" #'do-img-preamble)
-
 (tex-def-prim "\\IMGtabbing"
  (lambda () (do-latex-env-as-image "tabbing" :display)))
-
 (tex-def-prim "\\IMGtabular"
  (lambda () (do-latex-env-as-image "tabular" :display)))
-
 (tex-def-prim "\\include" #'do-include)
-
 (tex-def-prim "\\includeexternallabels" #'do-includeexternallabels)
-
 (tex-def-prim "\\includeonly" #'do-includeonly)
-
 (tex-def-prim "\\includegraphics" #'do-includegraphics)
-
 (tex-def-prim "\\index" #'do-index)
-
 (tex-def-prim "\\indexitem" (lambda () (do-indexitem 0)))
 (tex-def-prim "\\indexsubitem" (lambda () (do-indexitem 1)))
 (tex-def-prim "\\indexsubsubitem" (lambda () (do-indexitem 2)))
@@ -8605,15 +8512,14 @@ Try the commands
 (tex-def-prim "\\makeatother" (lambda () (set-catcode #\@ 12)))
 (tex-def-prim "\\makehtmlimage" #'do-makehtmlimage)
 (tex-def-prim "\\maketitle" #'do-maketitle)
+(tex-def-prim "\\maketoc" #'do-toc)
 (tex-def-prim "\\marginnote" #'do-marginnote)
 (tex-def-prim "\\marginpar" #'do-marginpar)
 (tex-def-prim "\\mathg" #'do-mathg)
 (tex-def-prim "\\mathdg" #'do-mathdg)
 (tex-def-prim "\\mathp" #'do-mathp)
 (tex-def-prim "\\medbreak" (lambda () (do-bigskip :medskip)))
-
 (tex-def-prim "\\medskip" (lambda () (do-bigskip :medskip)))
-
 (tex-def-prim "\\message" #'do-message)
 (tex-def-prim "\\mfpic" #'do-mfpic)
 (tex-def-prim "\\minipage" #'do-minipage)
@@ -8634,9 +8540,11 @@ Try the commands
 (tex-def-prim "\\nocite" #'do-nocite)
 (tex-def-prim "\\node" #'do-node)
 (tex-def-prim "\\noindent" #'do-noindent)
+(tex-def-prim "\\nonum" (lambda () (setq *opmac-nonum-p* t)))
 (tex-def-prim "\\nonumber" #'do-nonumber)
 (tex-def-prim "\\noslatexlikecomments"
  (lambda () (tex-def-0arg "\\TZPslatexcomments" "0")))
+(tex-def-prim "\\notoc" (lambda () (setq *opmac-notoc-p* t)))
 (tex-def-prim "\\notimestamp"
  (lambda () (tex-def-0arg "\\TZPcolophontimestamp" "0")))
 (tex-def-prim "\\nr" (lambda () (do-cr "\\nr")))
@@ -8708,6 +8616,8 @@ Try the commands
 (tex-def-prim "\\scmspecialsymbol" #'do-scm-set-specialsymbol)
 (tex-def-prim "\\scmvariable" #'do-scm-set-variables)
 (tex-def-prim "\\scriptsize" (lambda () (do-switch :scriptsize)))
+(tex-def-prim "\\sec" (lambda () (do-opmac-heading 1)))
+(tex-def-prim "\\secc" (lambda () (do-opmac-heading 2)))
 (tex-def-prim "\\section" (lambda () (do-heading 1)))
 (tex-def-prim "\\seealso" #'do-see-also)
 (tex-def-prim "\\setbox" #'do-setbox)
@@ -9360,17 +9270,21 @@ Try the commands
         (*aux-dir* nil)
         (*aux-dir/* "")
         (*aux-port* nil)
+        ;
         (*bib-aux-port* nil)
         (*bibitem-num* 0)
+        ;
         (*color-names* '())
         (*comment-char* #\%)
         (*css-port* nil)
         (*current-source-file* nil)
         (*current-tex2page-input* nil)
+        ;
         (*display-justification* "center")
         (*doctype* *doctype*)
         (*dotted-counters* nil)
         (*dumping-nontex-p* nil)
+        ;
         (*equation-number* nil)
         (*equation-numbered-p* t)
         (*equation-position* 0)
@@ -9380,16 +9294,20 @@ Try the commands
         (*eval-file-count* 0)
         (*eval-for-tex-only-p* nil)
         (*external-label-tables* (make-hash-table :test #'equal))
+        ;
         (*footnote-list* '())
         (*footnote-sym* 0)
+        ;
         (*global-texframe* nil)
         ;(*global-texframe* (make-texframe*))
         (*graphics-file-extensions* '(".eps"))
+        ;
         (*html* nil)
         (*html-head* '())
         (*html-only* 0)
         (*html-page* nil)
         (*html-page-count* 0)
+        ;
         (*img-file-count* 0)
         (*img-file-tally* 0)
         (*imgdef-file-count* 0)
@@ -9409,7 +9327,9 @@ Try the commands
         (*input-streams* (make-hash-table))
         (*inputting-boilerplate-p* nil)
         (*inside-appendix-p* nil)
+        ;
         (*jobname* "texput")
+        ;
         (*label-port* nil)
         (*label-source* nil)
         (*label-table* (make-hash-table :test #'equal))
@@ -9420,6 +9340,7 @@ Try the commands
         (*loading-external-labels-p* nil)
         (*log-file* nil)
         (*log-port* nil)
+        ;
         (*main-tex-file* nil)
         (*math-delim-left* nil)
         (*math-delim-right* nil)
@@ -9431,17 +9352,26 @@ Try the commands
         (*missing-eps-files* '())
         (*missing-pieces* '())
         (*mp-files* '())
+        ;
         (*not-processing-p* nil)
+        ;
+        (*opmac-active-tt-char* nil)
+        (*opmac-nonum-p* nil)
+        (*opmac-notoc-p* nil)
         (*outer-p* t)
         (*output-streams* (make-hash-table))
         (*outputting-external-title-p* nil)
         (*outputting-to-non-html-p* nil)
+        ;
         (*package* *this-package*)
+        ;
         (*quote-level* 0)
+        ;
         (*reading-control-sequence-p* nil)
         (*recent-node-name* nil)
         (*redirect-delay* nil)
         (*redirect-url* nil)
+        ;
         (*scm-builtins* nil)
         (*scm-dribbling-p* nil)
         (*scm-keywords* nil)
@@ -9453,6 +9383,7 @@ Try the commands
         (*source-changed-since-last-run-p* nil)
         (*stylesheets* '())
         (*subjobname* nil)
+        ;
         (*tabular-stack* '())
         (*temp-string-count* 0)
         (*temporarily-use-utf8-for-math-p* nil)
@@ -9466,14 +9397,17 @@ Try the commands
         (*title* nil)
         (*toc-list* '())
         (*toc-page* nil)
+        ;
         (*unresolved-xrefs* '())
         (*using-bibliography-p* nil)
         (*using-chapters-p* nil)
         (*using-index-p* nil)
+        ;
         (*verb-display-p* nil)
         (*verb-port* nil)
         (*verb-visible-space-p* nil)
         (*verb-written-files* '())
+        ;
         (*write-log-index* 0)
         (*write-log-possible-break-p* nil)
         )

@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161107" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161108" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1442,7 +1442,7 @@
     (11 (push c  *tex-extra-letters*))
     (13 (activate-cdef c))))
 
-(defun do-activettchar ()
+(defun do-opmac-activettchar ()
   (ignorespaces)
   (let ((c (get-actual-char)))
     (setq *opmac-active-tt-char* c)
@@ -3408,6 +3408,27 @@
     (:description (do-description-item))
     ((:itemize :enumerate) (do-regular-item))
     (t (do-plain-item 1))))
+
+(defun do-itemize ()
+  (do-end-para)
+  (push :itemize *tabular-stack*)
+  (emit "<ul>"))
+
+(defun do-enditemize ()
+  (do-end-para)
+  (pop-tabular-stack :itemize)
+  (emit "</ul>")
+  (do-noindent))
+
+(defun do-opmac-begitems ()
+  (do-itemize)
+  (bgroup)
+  (activate-cdef #\*)
+  (tex-def-char #\* '() "\\item" nil))
+
+(defun do-opmac-enditems ()
+  (egroup)
+  (do-enditemize))
 
 (defun do-bigskip (type)
   (do-end-para)
@@ -6284,7 +6305,7 @@
 (defun do-endverbatim-eplain ()
   (setq *inside-eplain-verbatim-p* nil))
 
-(defun do-begtt ()
+(defun do-opmac-begtt ()
   (do-end-para)
   (bgroup)
   (emit "<pre class=verbatim>")
@@ -8316,7 +8337,7 @@ Try the commands
  (lambda ()
      (tex2page-string "\\quote")
      (tex2page-string "\\centerline{\\bf\\abstractname}\\par")))
-(tex-def-prim "\\activettchar" #'do-activettchar)
+(tex-def-prim "\\activettchar" #'do-opmac-activettchar)
 (tex-def-prim "\\addcontentsline" #'do-addcontentsline)
 (tex-def-prim "\\addtocounter" #'do-addtocounter)
 (tex-def-prim "\\advance" (lambda () (do-advance (globally-p))))
@@ -8337,7 +8358,8 @@ Try the commands
 (tex-def-prim "\\begin" #'do-begin)
 (tex-def-prim "\\beginchapter" #'do-beginchapter)
 (tex-def-prim "\\beginsection" #'do-beginsection)
-(tex-def-prim "\\begtt" #'do-begtt)
+(tex-def-prim "\\begitems" #'do-opmac-begitems)
+(tex-def-prim "\\begtt" #'do-opmac-begtt)
 (tex-def-prim "\\bf" (lambda () (do-switch :bf)))
 (tex-def-prim "\\bgcolor" (lambda () (do-switch :bgcolor)))
 (tex-def-prim-0arg "\\bgroup" "{")
@@ -8449,12 +8471,8 @@ Try the commands
  (lambda () (terror 'tex-def-prim "Unmatched \\endhtmlimg")))
 (tex-def-prim "\\endhtmlonly"
  (lambda () (decf *html-only*)))
-(tex-def-prim "\\enditemize"
- (lambda ()
-     (pop-tabular-stack :itemize)
-     (do-end-para)
-     (emit "</ul>")
-     (do-noindent)))
+(tex-def-prim "\\enditemize" #'do-enditemize)
+(tex-def-prim "\\enditems" #'do-opmac-enditems)
 (tex-def-prim "\\endminipage" #'do-endminipage)
 (tex-def-prim "\\endquote"
  (lambda () (do-end-para) (egroup) (emit "</blockquote>")))
@@ -8580,11 +8598,7 @@ Try the commands
 (tex-def-prim "\\it" (lambda () (do-switch :it)))
 (tex-def-prim "\\item" #'do-item)
 (tex-def-prim "\\itemitem" (lambda () (do-plain-item 2)))
-(tex-def-prim "\\itemize"
-  (lambda ()
-    (do-end-para)
-    (push :itemize *tabular-stack*)
-    (emit "<ul>")))
+(tex-def-prim "\\itemize" #'do-itemize)
 (tex-def-prim "\\itshape" (lambda () (do-switch :it)))
 
 (tex-defsym-prim "\\j" "&#x237;")

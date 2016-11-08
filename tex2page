@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161107") ;last change
+(define *tex2page-version* "20161108") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -1948,7 +1948,7 @@
       )
     ))
 
-(define do-activettchar
+(define do-opmac-activettchar
   (lambda ()
     (ignorespaces)
     (let ((c (get-actual-char)))
@@ -4388,6 +4388,48 @@
         ((:description) (do-description-item))
         ((:itemize :enumerate) (do-regular-item))
         (else (do-plain-item 1))))))
+
+(define do-itemize 
+  (lambda ()
+    (do-end-para)
+    (set! *tabular-stack* (cons ':itemize *tabular-stack*))
+    (emit "<ul>")))
+
+(define do-enditemize 
+  (lambda ()
+    (do-end-para)
+    (pop-tabular-stack ':itemize)
+    (emit "</ul>")
+    (do-noindent)))
+
+(define do-opmac-begitems 
+  (lambda ()
+    (do-itemize)
+    (bgroup)
+    (activate-cdef #\*)
+    (tex-def-char #\* '() "\\item" #f)))
+
+(define do-opmac-enditems
+  (lambda ()
+    (egroup)
+    (do-enditemize)))
+
+(define do-opmac-begitems
+  (lambda ()
+    (do-end-para)
+    (bgroup)
+    (activate-cdef #\*)
+    (tex-def-char #\* '() "\\item" #f)
+    (set! *tabular-stack* (cons ':itemize *tabular-stack*))
+    (emit "<ul>")))
+
+(define do-opmac-enditems
+  (lambda ()
+    (pop-tabular-stack ':itemize)
+    (do-end-para)
+    (emit "</ul>")
+    (egroup)
+    (do-noindent)))
 
 ;vert space
 
@@ -7720,7 +7762,7 @@
   (lambda ()
     (set! *inside-eplain-verbatim-p* #f)))
 
-(define do-begtt
+(define do-opmac-begtt
   (lambda ()
     (do-end-para)
     (bgroup)
@@ -7730,7 +7772,7 @@
       (let loop ()
         (let ((c (snoop-actual-char)))
           (when (eof-object? c)
-            (terror 'do-begtt "Eof inside \\begtt"))
+            (terror 'do-opmac-begtt "Eof inside \\begtt"))
           (cond
             ((char=? c #\\)
              (let ((cs (get-ctl-seq)))
@@ -10089,7 +10131,7 @@ Try the commands
               (lambda ()
                 (tex2page-string "\\quote")
                 (tex2page-string "\\centerline{\\bf\\abstractname}\\par")))
-(tex-def-prim "\\activettchar" do-activettchar)
+(tex-def-prim "\\activettchar" do-opmac-activettchar)
 (tex-def-prim "\\addcontentsline" do-addcontentsline)
 (tex-def-prim "\\addtocounter" do-addtocounter)
 (tex-def-prim "\\advance" (lambda () (do-advance (global?))))
@@ -10112,7 +10154,8 @@ Try the commands
 (tex-def-prim-0arg "\\bgroup" "{")
 (tex-def-prim "\\beginchapter" do-beginchapter)
 (tex-def-prim "\\beginsection" do-beginsection)
-(tex-def-prim "\\begtt" do-begtt)
+(tex-def-prim "\\begtt" do-opmac-begtt)
+(tex-def-prim "\\begitems" do-opmac-begitems)
 (tex-def-prim "\\bf" (lambda () (do-switch ':bf)))
 (tex-def-prim "\\bgcolor" (lambda () (do-switch ':bgcolor)))
 (tex-def-prim "\\bibitem" do-bibitem)
@@ -10232,10 +10275,8 @@ Try the commands
   (lambda () (terror 'tex-def-prim "Unmatched \\endhtmlimg")))
 (tex-def-prim "\\endhtmlonly"
   (lambda () (set! *html-only* (- *html-only* 1))))
-(tex-def-prim "\\enditemize"
-              (lambda ()
-                (pop-tabular-stack ':itemize)
-                (do-end-para) (emit "</ul>") (do-para)))
+(tex-def-prim "\\enditemize" do-enditemize)
+(tex-def-prim "\\enditems" do-opmac-enditems)
 (tex-def-prim "\\endminipage" do-endminipage)
 (tex-def-prim "\\endruledtable" do-endruledtable)
 (tex-def-prim "\\endtabbing" do-end-tabbing)
@@ -10368,10 +10409,7 @@ Try the commands
 (tex-def-prim "\\it" (lambda () (do-switch ':it)))
 (tex-def-prim "\\item" do-item)
 (tex-def-prim "\\itemitem" (lambda () (do-plain-item 2)))
-(tex-def-prim "\\itemize"
-              (lambda () (do-end-para)
-                (set! *tabular-stack* (cons ':itemize *tabular-stack*))
-                (emit "<ul>")))
+(tex-def-prim "\\itemize" do-itemize)
 (tex-def-prim "\\itshape" (lambda () (do-switch ':itshape)))
 
 (tex-defsym-prim "\\j" "&#x237;")

@@ -159,7 +159,7 @@
     "\">e</span>" "X"))
 
 (defparameter *tex-files-to-ignore*
-  '("btxmac" "eplain" "epsf" "eval4tex" "opmac" "supp-pdf" "tex2page"))
+  '("btxmac" "eplain" "epsf" "eval4tex" "lmfonts" "opmac" "supp-pdf" "tex2page"))
 
 ;above are true globals.  Following are
 ;per-document globals
@@ -267,6 +267,7 @@
 (defvar *opmac-active-tt-char* nil)
 (defvar *opmac-nonum-p* nil)
 (defvar *opmac-notoc-p* nil)
+(defvar *opmac-verbinput-table* nil)
 (defvar *outer-p* nil)
 (defvar *output-streams* nil)
 (defvar *outputting-external-title-p* nil)
@@ -962,7 +963,8 @@
           ((char= c #\-) (get-actual-char)
            (let ((n (get-number-or-false)))
              (and n (- n))))
-          ((digit-char-p c) (get-integer 10)) (t nil))))
+          ((digit-char-p c) (get-integer 10))
+          (t nil))))
 
 (defun get-number ()
   (or (get-number-or-false) (terror 'get-number "Missing number.")))
@@ -6059,6 +6061,112 @@
            (emit "</pre>") (egroup) (do-para))
           (t (non-fatal-error "File " f " not found")))))
 
+(defun get-char-definitely (c0)
+  (ignorespaces)
+  (let ((c (get-actual-char)))
+    (when (eq c :eof-object) (terror 'get-char-defnitely "Runaway argument"))
+    (unless (char= c c0) (terror 'get-char-defnitely "Missing" c0))))
+
+(defun get-char-optionally (cc)
+  (ignorespaces)
+  (let ((c (snoop-actual-char)))
+    (cond ((eq c :eof-object) nil)
+          ((member c cc :test #'char=) (get-actual-char) c)
+          (t nil))))
+
+(defun get-unsigned-number-optionally ()
+  (ignorespaces)
+  (let ((c (snoop-actual-char)))
+    (cond ((eq c :eof-object) nil)
+          ((digit-char-p c) (get-integer 10))
+          (t nil))))
+
+(defun opmac-verbinput-skip-lines (i n)
+  (dotimes (_ n)
+    (let ((x (read-line i nil :eof-object)))
+      (when (eq x :eof-object)
+        (terror 'do-opmac-verbinput "\\verbinput file ended too soon")))))
+
+(defun opmac-verbinput-print-lines (i n)
+  (if (eq n t)
+      (loop
+        (let ((x (read-line i nil :eof-object)))
+          (when (eq x :eof-object) (return))
+          (emit-html-string x)
+          (emit-newline)))
+      (dotimes (_ n)
+        (let ((x (read-line i nil :eof-object)))
+          (when (eq x :eof-object)
+            (terror 'do-opmac-verbinput "\\verbinput file ended too soon"))
+          (emit-html-string x)
+          (emit-newline)))))
+
+(defun do-opmac-verbinput ()
+  (let* ((s1 (progn (get-char-definitely #\() (get-char-optionally '(#\+ #\-))))
+         (n1 (get-unsigned-number-optionally))
+         (s2 (get-char-optionally '(#\+ #\-)))
+         (n2 (get-unsigned-number-optionally))
+         (f (progn (get-char-definitely #\)) (get-filename nil)))
+         (n (let ((n (gethash f *opmac-verbinput-table*)))
+              (or n
+                  (progn (setf (gethash f *opmac-verbinput-table*) 0)
+                         0)))))
+    (do-end-para)
+    (bgroup)
+    (emit "<pre class=verbatim>")
+    (with-open-file (i f :direction :input)
+      (cond ((and s1 n1 s2 n2 (char= s1 #\-) (char= s2 #\+))
+             ;skip n1 after current point, print n2
+             (opmac-verbinput-skip-lines i (+ n n1))
+             (opmac-verbinput-print-lines i n2)
+             (incf n (+ n1 n2)))
+            ;
+            ((and (not s1) n1 s2 n2 (char= s2 #\-))
+             ;print lines n1 thru n2
+             (opmac-verbinput-skip-lines i (- n1 1))
+             (opmac-verbinput-print-lines i (+ (- n2 n1) 1))
+             (setq n n2))
+            ;
+            ((and (not s1) n1 s2 n2 (char= s2 #\+))
+             ;print n2 lines starting at line n1
+             (opmac-verbinput-skip-lines i (- n1 1))
+             (opmac-verbinput-print-lines i n2)
+             (setq n (+ (- n1 1) n2)))
+            ;
+            ((and s1 n1 (not s2) (not n2) (char= s1 #\-))
+             ;print lines 1 thru n1
+             (opmac-verbinput-print-lines i n1)
+             (setq n n1))
+            ;
+            ((and s1 n1 (not s2) (not n2) (char= s1 #\+))
+             ;print n1 lines following current point
+             (opmac-verbinput-skip-lines i n)
+             (opmac-verbinput-print-lines i n1)
+             (incf n1))
+            ;
+            ((and (not s1) n1 s2 (not n2) (char= s2 #\-)) 
+             ;print from line n1 to eof
+             (opmac-verbinput-skip-lines i (- n1 1))
+             (opmac-verbinput-print-lines i t)
+             (setq n 0))
+            ;
+            ((and s1 (not n1) (not s2) (not n2) (char= s1 #\+)) 
+             ;print from current point to eof
+             (opmac-verbinput-skip-lines i n)
+             (opmac-verbinput-print-lines i t)
+             (setq n 0))
+            ;
+            ((and s1 (not n1) (not s2) (not n2) (char= s1 #\-)) 
+             ;print entire file
+             (opmac-verbinput-print-lines i t)
+             (setq n 0))
+            ;
+            (t (terror 'do-opmac-verbinput "Malformed \\verbinput" s1 n1 s2 n2 f))))
+    (setf (gethash f *opmac-verbinput-table*) n)
+    (emit "</pre>")
+    (egroup)
+    (do-para)))
+
 (defun do-verbwritefile ()
   (let* ((f (get-filename-possibly-braced))
          (e (file-extension f)))
@@ -8734,41 +8842,26 @@ Try the commands
 
 (tex-def-prim "\\v" (lambda () (do-diacritic :hacek)))
 (tex-defsym-prim "\\vdots" "&#x22ee;")
-
 (tex-def-prim "\\verb" #'do-verb)
-
 (tex-def-prim "\\verbatim" #'do-verbatim)
-
 (tex-def-prim "\\verbatiminput" #'do-verbatiminput)
-
 (tex-def-prim "\\verbc" #'do-verbc)
-
 (tex-def-prim "\\verbatimescapechar" #'do-verbatimescapechar)
-
+(tex-def-prim "\\verbinput" #'do-opmac-verbinput)
 (tex-def-prim "\\verbwrite" #'do-verbwrite)
-
 (tex-def-prim "\\verbwritefile" #'do-verbwritefile)
-
 (tex-def-prim "\\vfootnote" #'do-vfootnote)
-
 (tex-def-prim "\\vskip" #'do-vskip)
-
 (tex-def-prim "\\vspace" #'do-vspace)
 
 (tex-def-prim "\\write" #'do-write)
-
 (tex-def-prim "\\writenumberedcontentsline" #'do-writenumberedcontentsline)
-
 (tex-def-prim "\\writenumberedtocline" #'do-writenumberedtocline)
 
 (tex-def-prim "\\xdef" (lambda () (do-def t t)))
-
 (tex-def-prim "\\xrdef" #'do-xrdef)
-
 (tex-def-prim "\\xrefn" #'do-ref)
-
 (tex-def-prim "\\xrtag" #'do-tag)
-
 (tex-def-prim "\\xspace" #'do-xspace)
 
 (tex-defsym-prim "\\yen" "&#xa5;")
@@ -9223,7 +9316,7 @@ Try the commands
 
 (tex-let-prim "\\scmverb" "\\scm")
 
-(tex-let-prim "\\verbinput" "\\verbatiminput")
+;(tex-let-prim "\\verbinput" "\\verbatiminput")
 
 (tex-let-prim "\\verbatimfile" "\\verbatiminput")
 
@@ -9358,6 +9451,7 @@ Try the commands
         (*opmac-active-tt-char* nil)
         (*opmac-nonum-p* nil)
         (*opmac-notoc-p* nil)
+        (*opmac-verbinput-table* (make-hash-table :test #'equal))
         (*outer-p* t)
         (*output-streams* (make-hash-table))
         (*outputting-external-title-p* nil)

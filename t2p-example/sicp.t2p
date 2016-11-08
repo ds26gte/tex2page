@@ -108,7 +108,7 @@
 % is book-like, ie, will be using chapters.  Saves
 % a re-run, perhaps
 
-\evalh{(set! *using-chapters?* #t)}
+\evalh{(set! *using-chapters-p* #t)}
 
 % Might as well tell it it's LaTeX
 
@@ -171,7 +171,7 @@
 % tag "epigraph" so we can change its look via style-sheet
 
 \def\epigraph{\par\begingroup
-\evalh{(set! *use-img-for-in-text-math?* #t)}
+\evalh{(set! *use-img-for-in-text-math-p* #t)}
 \rawhtml
 <div align=right> 
 <table width=60%><tr><td>
@@ -183,7 +183,7 @@
 </td></tr></table>
 </div>
 \endrawhtml
-\evalh{(set! *use-img-for-in-text-math?* #f)}
+\evalh{(set! *use-img-for-in-text-math-p* #f)}
 \endgroup\par}
 
 %

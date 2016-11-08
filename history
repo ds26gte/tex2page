@@ -4,6 +4,9 @@ Last change 2016-11-07
 
 Added OPmac's \chap, \sec, \secc, \maketoc, \nonum, \notoc, \verbinput.
 
+Use *bool-var-p* (instead of *bool-var?*) in Scheme version so it matches 
+CL version. (Prevents maintenance hassle.)
+
 2016 Nov 6
 
 Added OPmac's \ulink, \{beg,end}tt, \activettchar.

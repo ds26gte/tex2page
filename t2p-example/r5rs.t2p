@@ -2,7 +2,7 @@
 % tex2page macro file for r5rs.tex
 % Dorai Sitaram
 % 20 Feb 2001
-% last change 2005-05-01
+% last change 2016-11-07
 
 \evalh{(!definitely-latex)}
 
@@ -232,7 +232,7 @@ keywords, and procedures}%
 \ifnum\sectiondnumber{0}=2
 \def\copy0{\verb+[ ] { } |+}
 \else\ifnum\sectiondnumber{0}=6
-\evalh{(set! *use-image-for-displayed-math?* #t)}%
+\evalh{(set! *use-image-for-displayed-math-p* #t)}%
 \def\copy0{\cf\meta{variable} \goesto{} $\langle$}%
 \fi\fi
 \chapterORIG}

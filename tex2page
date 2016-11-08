@@ -27,7 +27,7 @@
             ':cygwin ':windows))
       ':unix))
 
-(define *enable-write-18?*
+(define *enable-write-18-p*
   ;true if you want \write18{command} to execute command
   ;as an OS command; false if you think that is a
   ;security risk for your situation
@@ -54,7 +54,7 @@
                    "gswin32.exe"))
     (else "gs")))
 
-(define *use-closing-p-tag?*
+(define *use-closing-p-tag-p*
   ;false if you don't want closing </p>
   #t)
 
@@ -161,8 +161,6 @@
 (define *tex-files-to-ignore*
   '("btxmac" "eplain" "epsf" "eval4tex" "lmfonts" "opmac" "supp-pdf" "tex2page"))
 
-(define *calling-from-text-editor?* (getenv "VIMRUNTIME"))
-
 (define *filename-delims* '())
 
 (define *scm-token-delims*
@@ -201,17 +199,17 @@
 
 (define *display-justification* #f)
 (define *dotted-counters* #f)
-(define *dumping-nontex?* #f)
+(define *dumping-nontex-p* #f)
 
 (define *equation-number* #f)
-(define *equation-numbered?* #t)
+(define *equation-numbered-p* #t)
 (define *equation-position* 0)
 (define *esc-char* #\\ )
 (define *esc-char-std* #\\ )
 (define *esc-char-verb* #\|)
 (define *eval-file-count* 0)
-(define *eval-for-tex-only?* #f)
-(define *expand-escape?* #f)
+(define *eval-for-tex-only-p* #f)
+(define *expand-escape-p* #f)
 (define *external-label-tables* #f)
 
 (define *footnote-list* '())
@@ -226,18 +224,18 @@
 (define *html-page* #f)
 (define *html-page-count* #f)
 
-(define *ignore-timestamp?* #f)
-(define *ignore-active-space?* #f)
+(define *ignore-timestamp-p* #f)
+(define *ignore-active-space-p* #f)
 ;(define *img-magnification* 1)
 (define *img-file-count* 0)
 (define *img-file-tally* 0)
 (define *imgdef-file-count* 0)
 (define *imgpreamble* #f)
 (define *imgpreamble-inferred* #f)
-(define *in-alltt?* #f)
-(define *in-display-math?* #f)
-(define *in-para?* #f)
-(define *in-small-caps?* #f)
+(define *in-alltt-p* #f)
+(define *in-display-math-p* #f)
+(define *in-para-p* #f)
+(define *in-small-caps-p* #f)
 (define *includeonly-list* #f)
 (define *index-page-mention-alist* #f)
 (define *index-table* #f)
@@ -247,9 +245,9 @@
 (define *infructuous-calls-to-tex2page* #f)
 (define *input-line-no* 0)
 (define *input-streams* #f)
-(define *inputting-boilerplate?* #f)
-(define *inside-appendix?* #f)
-(define *inside-eplain-verbatim?* #f)
+(define *inputting-boilerplate-p* #f)
+(define *inside-appendix-p* #f)
+(define *inside-eplain-verbatim-p* #f)
 
 (define *jobname* "texput")
 
@@ -260,8 +258,8 @@
 (define *last-modification-time* #f)
 (define *last-page-number* #f)
 (define *latex-probability* #f)
-(define *ligatures?* #f)
-(define *loading-external-labels?* #f)
+(define *ligatures-p* #f)
+(define *loading-external-labels-p* #f)
 (define *log-file* #f)
 (define *log-port* #f)
 
@@ -269,10 +267,10 @@
 (define *math-delim-left* #f)
 (define *math-delim-right* #f)
 (define *math-height* #f)
-(define *math-mode?* #f)
-(define *math-needs-image?* #f)
+(define *math-mode-p* #f)
+(define *math-needs-image-p* #f)
 (define *math-font* #f)
-(define *math-script-mode?* #f)
+(define *math-script-mode-p* #f)
 (define *mfpic-file-num* #f)
 (define *mfpic-file-stem* #f)
 (define *mfpic-port* #f)
@@ -280,29 +278,29 @@
 (define *missing-pieces* #f)
 (define *mp-files* #f)
 
-(define *not-processing?* #f)
+(define *not-processing-p* #f)
 
 (define *opmac-active-tt-char* #f)
-(define *opmac-nonum?* #f)
-(define *opmac-notoc?* #f)
+(define *opmac-nonum-p* #f)
+(define *opmac-notoc-p* #f)
 (define *opmac-verbinput-table* #f)
-(define *outer?* #f)
+(define *outer-p* #f)
 (define *output-streams* #f)
-(define *outputting-external-title?* #f)
-(define *outputting-to-non-html?* #f)
+(define *outputting-external-title-p* #f)
+(define *outputting-to-non-html-p* #f)
 
 (define *package* #f)
 
 (define *quote-level* 0)
 
-(define *reading-control-sequence?* #f)
+(define *reading-control-sequence-p* #f)
 (define *recent-node-name* #f)
 (define *remember-index-number* #f)
 (define *redirect-delay* #f)
 (define *redirect-url* #f)
 
 (define *scm-builtins* #f)
-(define *scm-dribbling?* #f)
+(define *scm-dribbling-p* #f)
 
 (define *scm-special-symbols* #f)
 (define *scm-keywords* #f)
@@ -310,40 +308,40 @@
 (define *scm-variables* #f)
 (define *section-counters* #f)
 (define *section-counter-dependencies* #f)
-;(define *slatex-like-comments?* #f)
+;(define *slatex-like-comments-p* #f)
 (define *slatex-math-escape* #f)
-(define *source-changed-since-last-run?* #f)
+(define *source-changed-since-last-run-p* #f)
 (define *stylesheets* #f)
 (define *subjobname* *jobname*)
 
 (define *tabular-stack* '())
 (define *temp* #f)
 (define *temp-string-count* #f)
-(define *temporarily-use-utf8-for-math?* #f)
+(define *temporarily-use-utf8-for-math-p* #f)
 (define *tex2page-inputs* '())
-;(define *tex2page-flag-set?* #f)
+;(define *tex2page-flag-set-p* #f)
 (define *tex-env* '())
 (define *tex-format* #f)
 (define *tex-if-stack* '())
-(define *tex-like-layout?* #f)
+(define *tex-like-layout-p* #f)
 (define *this-package* #f)
 (define *title* #f)
 (define *toc-list* #f)
 (define *toc-page* #f)
 
 (define *unresolved-xrefs* #f)
-(define *using-bibliography?* #f)
-(define *using-chapters?* #f)
-(define *using-index?* #f)
+(define *using-bibliography-p* #f)
+(define *using-chapters-p* #f)
+(define *using-index-p* #f)
 
-(define *verb-display?* #f)
+(define *verb-display-p* #f)
 (define *verb-port* #f)
-(define *verb-visible-space?* #f)
+(define *verb-visible-space-p* #f)
 (define *verb-written-files* '())
 
 (define *write-log-max* 55)
 (define *write-log-index* 0)
-(define *write-log-possible-break?* #f)
+(define *write-log-possible-break-p* #f)
 
 ;timely stuff
 
@@ -659,36 +657,36 @@
       (set! *log-file* (string-append *aux-dir/* *jobname* ".hlog"))
       (ensure-file-deleted *log-file*)
       (set! *log-port* (open-output-file *log-file*)))
-    (when (and *write-log-possible-break?* (char? x)
+    (when (and *write-log-possible-break-p* (char? x)
                (ormap (lambda (c) (char=? x c))
                       ; #\( #\[ #\{
                       '(#\) #\] #\} #\,)))
       ;disallow breaks before rt-paren-like chars
-      (set! *write-log-possible-break?* #f))
-    (when (and *write-log-possible-break?*
+      (set! *write-log-possible-break-p* #f))
+    (when (and *write-log-possible-break-p*
                (> *write-log-index* *write-log-max*))
       ;if current line is too long, start a new one,
       (newline *log-port*)
       (newline)
-      (set! *write-log-possible-break?* #f)
+      (set! *write-log-possible-break-p* #f)
       (set! *write-log-index* 0))
     (unless (and (= *write-log-index* 0)
                  (or (eqv? x ':separation-newline)
                      (eqv? x ':separation-space)))
       (case x
         ((#\newline :separation-newline)
-         (when *write-log-possible-break?*
-           (set! *write-log-possible-break?* #f))
+         (when *write-log-possible-break-p*
+           (set! *write-log-possible-break-p* #f))
          (newline *log-port*) (newline)
          (set! *write-log-index* 0))
         ((:separation-space)
-         (set! *write-log-possible-break?* #t))
+         (set! *write-log-possible-break-p* #t))
         (else
-         (when *write-log-possible-break?*
+         (when *write-log-possible-break-p*
            (write-char #\space *log-port*)
            (write-char #\space)
            (set! *write-log-index* (+ *write-log-index* 1))
-           (set! *write-log-possible-break?* #f))
+           (set! *write-log-possible-break-p* #f))
          (display x *log-port*)
          (display x)
          (flush-output)
@@ -774,8 +772,8 @@
 
 (define edit-offending-file
   (lambda ()
-    (let ((calling-from-text-editor? (getenv "VIMRUNTIME")))
-      (unless calling-from-text-editor?
+    (let ((calling-from-text-editor-p (getenv "VIMRUNTIME")))
+      (unless calling-from-text-editor-p
         (display "Type e to edit file at point of error; x to quit.")
         (newline)
         (display "? ")
@@ -910,7 +908,7 @@
 
 (define emit-newline
   (lambda ()
-    ;(when *verb-display?* (emit "&#xa0;"))
+    ;(when *verb-display-p* (emit "&#xa0;"))
     (newline *html*)))
 
 ;
@@ -927,7 +925,7 @@
 (define check-outerness
   (lambda (c)
     (when (eq? c *outer-invisible-space*)
-      (set! *outer?* #t))))
+      (set! *outer-p* #t))))
 
 (define snoop-actual-char
   (lambda ()
@@ -980,7 +978,7 @@
   ;goes past at most one newline
   (lambda ()
     (unless (and (find-chardef #\space)
-                 (not *ignore-active-space?*))
+                 (not *ignore-active-space-p*))
       (let ((newline-active? (find-chardef #\newline))
             (newline-already-read? #f))
         (let loop ()
@@ -989,7 +987,7 @@
             (cond ((eof-object? c) #t)
                   ((invisible-space? c)
                    (get-char)
-                   (unless *reading-control-sequence?*
+                   (unless *reading-control-sequence-p*
                      (loop)))
                   ((char=? c #\newline)
                    (cond (newline-active? #t)
@@ -1063,12 +1061,12 @@
                          ((char-tex-alphabetic? c) (get-char)
                           (loop (cons c s)))
                          (else
-                          (unless (or ;*in-verb?*
-                                      *math-mode?*
-                                      *not-processing?*
+                          (unless (or ;*in-verb-p*
+                                      *math-mode-p*
+                                      *not-processing-p*
                                       (eq? *tex-format* ':texinfo)
                                       )
-                            (fluid-let ((*reading-control-sequence?* #t))
+                            (fluid-let ((*reading-control-sequence-p* #t))
                               (ignorespaces))
                             )
                           s)))))))
@@ -1105,10 +1103,10 @@
            (cond (escape?
                   (loop (cons c s) nesting #f))
                  ((char=? c *esc-char*)
-                  (if *expand-escape?*
+                  (if *expand-escape-p*
                       (let ((s1
                               (begin (toss-back-char c)
-                                     (let ((x (fluid-let ((*not-processing?* #t))
+                                     (let ((x (fluid-let ((*not-processing-p* #t))
                                                 (get-ctl-seq))))
                                        (cond ((ormap (lambda (z) (string=? x z))
                                                      '("\\ " "\\{" "\\}"))
@@ -1231,7 +1229,7 @@
                       (or (char-whitespace? c)
                           (and *comment-char* (char=? c *comment-char*))
                           (ormap (lambda (d) (char=? c d)) *filename-delims*)))
-                 (unless *not-processing?* (ignorespaces))
+                 (unless *not-processing-p* (ignorespaces))
                  s)
                 ((and braced? (char=? c #\}))
                  (get-actual-char) s)
@@ -1442,7 +1440,7 @@
     (let ((c (snoop-actual-char)))
       (cond ((eof-object? c) c)
             ((char=? c *esc-char*)
-             (fluid-let ((*not-processing?* #t))
+             (fluid-let ((*not-processing-p* #t))
                (get-ctl-seq)))
             ;((and *comment-char* (char=? c *comment-char*))
             ; (eat-till-eol) (get-raw-token))
@@ -1495,7 +1493,7 @@
             ((ormap eat-word '("plus" "minus")) #t)
             (else (set! go-ahead? #f)))
       (when go-ahead?
-        (fluid-let ((*not-processing?* #t))
+        (fluid-let ((*not-processing-p* #t))
           (let loop ((first? full?))
             (ignorespaces)
             (let ((c (snoop-actual-char)))
@@ -1521,7 +1519,7 @@
 
 (define eat-integer
   (lambda ()
-    (fluid-let ((*not-processing?* #t))
+    (fluid-let ((*not-processing-p* #t))
       (ignorespaces)
       (get-equal-sign)
       (get-number))))
@@ -1548,7 +1546,7 @@
     ;display the html equiv of char c
     (unless (eof-object? c)
       (cond ((char=? c #\newline) (emit-newline))
-            (*outputting-to-non-html?* (emit c))
+            (*outputting-to-non-html-p* (emit c))
             (else
              (case c
                ((#\<) (emit "&#x3c;"))
@@ -1590,7 +1588,7 @@
 (define bgroup
   (lambda ()
     (set! *tex-env* (cons (make-texframe) *tex-env*))
-    (when (and *in-display-math?* (not *math-script-mode?*))
+    (when (and *in-display-math-p* (not *math-script-mode-p*))
       (bgroup-math-hook))))
 
 (define bgroup-math-hook
@@ -1630,18 +1628,18 @@
            (set! *math-delim-right* old-math-delim-right)
            (set! *math-height* (+ old-math-height *math-height*))
            (pop-tabular-stack ':mathbox)
-           (unless *math-script-mode?*
+           (unless *math-script-mode-p*
              (emit "</td><td>"))
            ;(when (> *math-height* 0) (emit "<small>")) ;not quite
            (emit res)
            ;(when (> *math-height* 0) (emit "</small>"))
-           (unless *math-script-mode?*
+           (unless *math-script-mode-p*
              (emit "</td><td>"))))))))
 
 (define do-math-left
   (lambda ()
     (ignorespaces)
-    (when (and *in-display-math?* (not *math-script-mode?*))
+    (when (and *in-display-math-p* (not *math-script-mode-p*))
       (let ((s (get-token)))
         (bgroup)
         (cond ((string=? s "(") (set! *math-delim-left* ':lparen))
@@ -1653,7 +1651,7 @@
 (define do-math-right
   (lambda ()
     (ignorespaces)
-    (when (and *in-display-math?* (not *math-script-mode?*))
+    (when (and *in-display-math-p* (not *math-script-mode-p*))
       (let ((s (get-token)))
         (cond ((string=? s ")") (set! *math-delim-right* ':rparen))
               ((string=? s "]") (set! *math-delim-right* ':rbrack))
@@ -1961,11 +1959,11 @@
 (define do-opmac-intext-verb
   (lambda ()
     (bgroup)
-    (fluid-let ((*ligatures?* #f))
-      (cond (*outputting-external-title?* #f)
+    (fluid-let ((*ligatures-p* #f))
+      (cond (*outputting-external-title-p* #f)
             (else (emit "<code class=verbatim>")))
       (do-verb-delimed *opmac-active-tt-char*)
-      (cond (*outputting-external-title?* #f)
+      (cond (*outputting-external-title-p* #f)
             (else (emit "</code>"))))
     (egroup)))
 
@@ -2024,7 +2022,7 @@
 
 (define make-external-title
   (lambda (title)
-    (fluid-let ((*outputting-external-title?* #t))
+    (fluid-let ((*outputting-external-title-p* #t))
       (bgroup)
       (let ((s (tex-string->html-string
 		 (string-append
@@ -2039,7 +2037,7 @@
 
 (define output-external-title
   (lambda ()
-    (fluid-let ((*outputting-external-title?* #t))
+    (fluid-let ((*outputting-external-title-p* #t))
       (emit "<title>") (emit-newline)
       (emit (or *title* *jobname*))
       (emit-newline)
@@ -2111,27 +2109,27 @@
 
 (define do-end-para
   (lambda ()
-    (when *in-para?*
-      (when *use-closing-p-tag?* (emit "</p>"))
+    (when *in-para-p*
+      (when *use-closing-p-tag-p* (emit "</p>"))
       (unless (null? *afterpar*)
         (for-each (lambda (ap) (ap))
                   (nreverse *afterpar*))
         (set! *afterpar* '()))
       (emit-newline)
-      (set! *in-para?* #f))))
+      (set! *in-para-p* #f))))
 
 (define do-para
   (lambda ()
     (do-end-para)
     (let ((in-table? (and (not (null? *tabular-stack*))
                           (memv (car *tabular-stack*) '(:block)))))
-      ;(when *in-para?* (when *use-closing-p-tag?* (emit "</p>")))
+      ;(when *in-para-p* (when *use-closing-p-tag-p* (emit "</p>")))
       ;(emit-newline)
       (when in-table?
         (emit "</td></tr><tr><td>")
         (emit-newline))
       (emit "<p>")
-      (set! *in-para?* #t)
+      (set! *in-para-p* #t)
       ;too many bogus <p>s generated right now for this
       ;to work.  Plus, is it too expensive?
       ;(tex2page-string (get-toks "\\everypar"))
@@ -2142,14 +2140,14 @@
     (do-end-para)
     (emit-newline)
     (emit "<p class=noindent>")
-    (set! *in-para?* #t)))
+    (set! *in-para-p* #t)))
 
 (define do-para-nopadding
   (lambda ()
     (do-end-para)
     (emit-newline)
     (emit "<p class=nopadding>")
-    (set! *in-para?* #t)))
+    (set! *in-para-p* #t)))
 
 (define do-maketitle
   (lambda ()
@@ -2212,7 +2210,7 @@
 
 (define do-cssblock
   (lambda ()
-    (fluid-let ((*dumping-nontex?* #t))
+    (fluid-let ((*dumping-nontex-p* #t))
       (dump-till-end-env "cssblock" *css-port*))))
 
 (define link-stylesheets
@@ -2259,10 +2257,10 @@
   (lambda (seclvl)
     (if (= seclvl -1)
         (number->roman (table-get *section-counters* -1) #t)
-        (let ((i (if *using-chapters?* 0 1)))
+        (let ((i (if *using-chapters-p* 0 1)))
           (let ((outermost-secnum
                   (let ((n (table-get *section-counters* i 0)))
-                    (if *inside-appendix?*
+                    (if *inside-appendix-p*
                         (string (integer->char (+ (char->integer #\A) -1
                                                   n)))
                         (number->string n)))))
@@ -2331,7 +2329,7 @@
 (define do-heading-aux-2
   (lambda (seclvl starred? nonum? notoc? lbl-val header)
     (unless lbl-val (set! lbl-val "IGNORE"))
-    (let* ((htmlnum (max 1 (min 6 (if *using-chapters?*
+    (let* ((htmlnum (max 1 (min 6 (if *using-chapters-p*
                                       (+ seclvl 1) seclvl))))
            (lbl (string-append *html-node-prefix*
                                (case seclvl
@@ -2383,7 +2381,7 @@
                      *toc-page* (string-append *html-node-prefix*
                                                "toc_" lbl)))
                  (tex2page-string
-                   (if *inside-appendix?*
+                   (if *inside-appendix-p*
                        "\\appendixname" "\\chaptername"))
                  (emit " ")
                  (emit lbl-val)
@@ -2416,7 +2414,7 @@
             (write-aux
               `(!toc-entry
                  ,(if (= seclvl -1) -1
-                      (if *using-chapters?* seclvl (- seclvl 1)))
+                      (if *using-chapters-p* seclvl (- seclvl 1)))
                  ,lbl-val
                  ,*html-page-count* ,lbl ,header))))
         )
@@ -2478,7 +2476,7 @@
         (write-aux
           `(!toc-entry
              ,(if (= seclvl -1) -1
-                  (if *using-chapters?* seclvl (- seclvl 1)))
+                  (if *using-chapters-p* seclvl (- seclvl 1)))
              ,(ctl-seq-no-arg-expand-once "\\@currentlabel") ;?
              ,*html-page-count*
              ,(ctl-seq-no-arg-expand-once "\\TIIPcurrentnodename")
@@ -2567,18 +2565,18 @@
       (emit-newline)
       (when (= seclvl 0)
         (!using-chapters) (write-aux `(!using-chapers)))
-      (let ((nonum? *opmac-nonum?*)
-            (notoc? *opmac-notoc?*))
-        (set! *opmac-nonum?* #f)
-        (set! *opmac-notoc?* #f)
+      (let ((nonum? *opmac-nonum-p*)
+            (notoc? *opmac-notoc-p*))
+        (set! *opmac-nonum-p* #f)
+        (set! *opmac-notoc-p* #f)
         (do-heading-aux-1 seclvl #f nonum? notoc? header)))))
 
 (define do-appendix
   (lambda ()
-    (unless *inside-appendix?*
-      (set! *inside-appendix?* #t)
+    (unless *inside-appendix-p*
+      (set! *inside-appendix-p* #t)
       (table-put! *section-counters*
-        (if *using-chapters?* 0 1) 0))))
+        (if *using-chapters-p* 0 1) 0))))
 
 ;HTML's approximation of the TeX box
 
@@ -2734,7 +2732,7 @@
 (define do-equation
   (lambda (type)
     (cond ((and (tex2page-flag-boolean "\\TZPmathimage")
-                (not *temporarily-use-utf8-for-math?*))
+                (not *temporarily-use-utf8-for-math-p*))
            (do-latex-env-as-image
              (case type
                ((:equation) "equation")
@@ -2748,8 +2746,8 @@
            (when (and (eqv? type ':eqnarray) (eat-star))
              (set! type ':eqnarray*))
            (set! *tabular-stack* (cons type *tabular-stack*))
-           (set! *math-mode?* #t)
-           (set! *in-display-math?* #t)
+           (set! *math-mode-p* #t)
+           (set! *in-display-math-p* #t)
            (let ((eqn-tag (string-append *html-node-prefix* "eqn_"
                                          (gen-temp-string))))
              (tex-def-0arg "\\TIIPcurrentnodename" eqn-tag)
@@ -2770,7 +2768,7 @@
     (emit "</td>")
     (unless (or (and (not (null? *tabular-stack*))
                      (eqv? (car *tabular-stack*) ':eqnarray*))
-                (not *equation-numbered?*))
+                (not *equation-numbered-p*))
       (emit "<td>(")
       (emit *equation-number*)
       (emit ")</td>"))
@@ -2778,16 +2776,16 @@
     (emit-newline)
     (emit "</table></div>")
     (pop-tabular-stack ':equation)
-    (set! *math-mode?* #f)
-    (set! *in-display-math?* #f)
+    (set! *math-mode-p* #f)
+    (set! *in-display-math-p* #f)
     (egroup)
-    (set! *equation-numbered?* #t)
+    (set! *equation-numbered-p* #t)
     (set! *equation-position* 0)
     (do-para)))
 
 (define do-integral
   (lambda ()
-    (if (or (not *in-display-math?*) *math-script-mode?*)
+    (if (or (not *in-display-math-p*) *math-script-mode-p*)
         (emit "&#x222b;")
       (let ((affixes-already-read '()))
         (emit "<span style=\"font-size: 200%; position: relative; top: .25ex;\">&#x222b;</span>")
@@ -2801,7 +2799,7 @@
                 (get-actual-char)
                 (when (= i 0)
                   (emit (kern ".16667em")))
-                (fluid-let ((*math-script-mode?* #t))
+                (fluid-let ((*math-script-mode-p* #t))
                 (let ( (s  (get-token)))
                   (emit "<span style=\"font-size: 85%; position: relative; ")
                   (emit (case c
@@ -2814,7 +2812,7 @@
 
 (define do-nonumber
   (lambda ()
-    (set! *equation-numbered?* #f)))
+    (set! *equation-numbered-p* #f)))
 
 (define indent-n-levels
   (lambda (n)
@@ -2833,7 +2831,7 @@
                 (*imgdef-file-count* 0))
       (when (eqv? *tex-format* ':latex)
         (tex2page-string
-         (if *using-chapters?*
+         (if *using-chapters-p*
              "\\chapter*{\\contentsname}" "\\section*{\\contentsname}")))
       (emit-anchor (string-append *html-node-prefix* "toc"))
       (!toc-page *html-page-count*)
@@ -2853,12 +2851,12 @@
                           (or (= lvl -1) ;always bold parts
                               (and (= lvl 0)
                                    (or (< tocdepth -1)
-                                       (and *using-chapters?*
+                                       (and *using-chapters-p*
                                             (> tocdepth 0))
-                                       (and (not *using-chapters?*)
+                                       (and (not *using-chapters-p*)
                                             (> tocdepth 1)))))))
                     (when subentries?
-		     (if *tex-like-layout?*
+		     (if *tex-like-layout-p*
 			 (do-bigskip ':medskip)
 			 (do-para))
                       (do-noindent)
@@ -2911,7 +2909,7 @@
     (lambda (n)
       (unless symlist
         (set! symlist
-          (fluid-let ((*temporarily-use-utf8-for-math?* #t ))
+          (fluid-let ((*temporarily-use-utf8-for-math-p* #t ))
             (map tex-string->html-string
                  '("*" "\\dag" "\\ddag" "\\S" "\\P"
                    "$\\Vert$" "**" "\\dag\\dag" "\\ddag\\ddag")))))
@@ -2921,7 +2919,7 @@
 (define do-plain-footnote
   (lambda ()
     (do-footnote-aux
-      (fluid-let ((*temporarily-use-utf8-for-math?* #t))
+      (fluid-let ((*temporarily-use-utf8-for-math-p* #t))
         (tex-string->html-string
           (get-token))))))
 
@@ -2956,7 +2954,7 @@
 (define do-vfootnote
   (lambda ()
     (do-vfootnote-aux
-      (fluid-let ((*temporarily-use-utf8-for-math?* #t))
+      (fluid-let ((*temporarily-use-utf8-for-math-p* #t))
         (tex-string->html-string (get-token)))
       #f ;no footnote call tag
       #f ;no footnote tag
@@ -3092,11 +3090,11 @@
 (define do-switch
   (lambda (sw)
     ;(ignorespaces)
-    (unless *outputting-external-title?*
+    (unless *outputting-external-title-p*
       (add-postlude-to-top-frame
        (case sw
          ((:rm)
-          (when *math-mode?*
+          (when *math-mode-p*
             (let ((old-math-font *math-font*))
               (set! *math-font* ':rm)
               (lambda ()
@@ -3117,16 +3115,16 @@
           (emit "<span style=\"font-family: sans-serif\">")
           (lambda () (emit "</span>")))
          ((:tt)
-          (let ((old-ligatures? *ligatures?*))
-            (set! *ligatures?* #f)
+          (let ((old-ligatures-p *ligatures-p*))
+            (set! *ligatures-p* #f)
             (emit "<tt>")
             (lambda () (emit "</tt>")
-              (set! *ligatures?* old-ligatures?))))
+              (set! *ligatures-p* old-ligatures-p))))
          ((:sc :scshape)
-          (let ((old-in-small-caps? *in-small-caps?*))
-            (set! *in-small-caps?* #t)
+          (let ((old-in-small-caps-p *in-small-caps-p*))
+            (set! *in-small-caps-p* #t)
             (lambda ()
-              (set! *in-small-caps?* old-in-small-caps?))))
+              (set! *in-small-caps-p* old-in-small-caps-p))))
          ;((ormap (lambda (z) (string=? sw z))
          ;        '("\\sevenrm" "\\small" "\\scriptsize"))
          ; (emit "<small>")
@@ -3301,30 +3299,30 @@
 
 (define do-function
   (lambda (fn)
-    (fluid-let ((*math-mode?* *math-mode?*))
-      (cond (*outputting-external-title?* #f)
+    (fluid-let ((*math-mode-p* *math-mode-p*))
+      (cond (*outputting-external-title-p* #f)
             ((string=? fn "\\emph") (emit "<em>"))
             ((string=? fn "\\leftline") (do-end-para) (emit "<div align=left>"))
             ((string=? fn "\\centerline") (do-end-para) (emit "<div align=center>&#xa0;"))
             ((string=? fn "\\rightline") (do-end-para) (emit "<div align=right>&#xa0;"))
             ((string=? fn "\\underline") (emit "<u>"))
             ((string=? fn "\\textbf")
-             (set! *math-mode?* #f)
+             (set! *math-mode-p* #f)
              (emit "<b>"))
             ((ormap (lambda (z) (string=? fn z))
                     '("\\textit" "\\textsl"))
-             (set! *math-mode?* #f)
+             (set! *math-mode-p* #f)
              (emit "<i>"))
             ((string=? fn "\\textrm")
-             (set! *math-mode?* #f))
+             (set! *math-mode-p* #f))
             ((string=? fn "\\texttt")
-             (set! *math-mode?* #f)
+             (set! *math-mode-p* #f)
              (emit "<tt>"))
             (else (terror 'do-function "Unknown function " fn)))
       (bgroup)
       (tex2page-string (get-token))
       (egroup)
-      (cond (*outputting-external-title?* #f)
+      (cond (*outputting-external-title-p* #f)
             ((string=? fn "\\emph") (emit "</em>"))
             ((string=? fn "\\rightline")
              (emit "</div>") (emit-newline)
@@ -3472,7 +3470,7 @@
       (emit "pt\"></div>")
       (emit-newline)
       (emit "<p style=\"margin-top: 0pt; margin-bottom: 0pt\">")
-      (set! *in-para?* #t)
+      (set! *in-para-p* #t)
       )))
 
 (define do-newline
@@ -3493,22 +3491,22 @@
 (define do-sup
   (lambda ()
     (emit "<sup>")
-    (fluid-let ((*math-script-mode?* #t))
+    (fluid-let ((*math-script-mode-p* #t))
       (tex2page-string (get-token)))
     (emit "</sup>")))
 
 (define do-sub
   (lambda ()
     (emit "<sub>")
-    (fluid-let ((*math-script-mode?* #t))
+    (fluid-let ((*math-script-mode-p* #t))
       (tex2page-string (get-token)))
     (emit "</sub>")))
 
 (define do-hyphen
   (lambda ()
-    (cond (*math-mode?*
+    (cond (*math-mode-p*
             (emit (if (eq? *math-font* ':rm) "-" "&#x2212;")))
-          ((not *ligatures?*) (emit #\-))
+          ((not *ligatures-p*) (emit #\-))
           (else (let ((c (snoop-actual-char)))
                   (if (and (char? c) (char=? c #\-))
                       (begin (get-actual-char) (do-ndash))
@@ -3516,7 +3514,7 @@
 
 (define do-excl
   (lambda ()
-    (if (or *math-mode?* (not *ligatures?*))
+    (if (or *math-mode-p* (not *ligatures-p*))
         (emit #\!)
         (let ((c (snoop-actual-char)))
           (if (and (char? c) (char=? c #\`))
@@ -3525,7 +3523,7 @@
 
 (define do-quest
   (lambda ()
-    (if (or *math-mode?* (not *ligatures?*))
+    (if (or *math-mode-p* (not *ligatures-p*))
         (emit #\?)
         (let ((c (snoop-actual-char)))
           (if (and (char? c) (char=? c #\`))
@@ -3543,7 +3541,7 @@
 (define do-lsquo
   (lambda ()
     (emit
-      (if (not *ligatures?*) #\`
+      (if (not *ligatures-p*) #\`
           (let ((c (snoop-actual-char)))
             (if (and (char? c) (char=? c #\`))
                 (begin (get-actual-char) "&#x201c;")
@@ -3552,12 +3550,12 @@
 (define do-rsquo
   (lambda ()
     (emit
-      (cond (*math-mode?*
+      (cond (*math-mode-p*
               (let ((c (snoop-actual-char)))
                 (if (and (char? c) (char=? c #\'))
                     (begin (get-actual-char) "&#x2033;")
                     "&#x2032;")))
-            ((not *ligatures?*) #\')
+            ((not *ligatures-p*) #\')
             (else
               (let ((c (snoop-actual-char)))
                 (if (and (char? c) (char=? c #\'))
@@ -4121,7 +4119,7 @@
 
 (define do-bibliography
   (lambda ()
-    (set! *using-bibliography?* #t)
+    (set! *using-bibliography-p* #t)
     (let ((bibdata (ungroup (get-token)))
           (bbl-file (string-append *aux-dir/* *jobname*
                                    *bib-aux-file-suffix* ".bbl")))
@@ -4143,7 +4141,7 @@
     (get-group)
     (when (eqv? *tex-format* ':latex)
       (tex2page-string
-        (if *using-chapters?*
+        (if *using-chapters-p*
             "\\chapter*{\\bibname}" "\\section*{\\refname}")))
     (bgroup)
     (set! *bibitem-num* 0)
@@ -4241,10 +4239,10 @@
 
 (define do-inputindex
   (lambda (insert-heading?)
-    (set! *using-index?* #t)
+    (set! *using-index-p* #t)
     (when insert-heading?
       (tex2page-string
-       (if *using-chapters?*
+       (if *using-chapters-p*
            "\\chapter*{\\indexname}" "\\section*{\\indexname}"))
       (emit-newline))
     (emit-anchor (string-append *html-node-prefix* "index_start"))
@@ -4404,7 +4402,7 @@
     (emit "></div>")
     (emit-newline)
     (emit "<p style=\"margin-top: 0pt; margin-bottom: 0pt\">")
-    (set! *in-para?* #t)
+    (set! *in-para-p* #t)
     (emit-newline)))
 
 (define do-hspace
@@ -4521,7 +4519,7 @@
   (lambda (head-or-foot)
     (unless (tex2page-flag-boolean "\\TZPsinglepage")
       (emit "<div align=right class=navigation>")
-      (cond ((or *tex-like-layout?*
+      (cond ((or *tex-like-layout-p*
                  (and (eq? head-or-foot ':foot)
                       (tex2page-flag-boolean "\\TZPtexlayout")))
              (bgroup)
@@ -4932,8 +4930,8 @@
 
 (define do-mathdg
   (lambda ()
-    (fluid-let ((*math-mode?* #t) (*in-display-math?* #t)
-                (*tabular-stack* '()) (*ligatures?* #f))
+    (fluid-let ((*math-mode-p* #t) (*in-display-math-p* #t)
+                (*tabular-stack* '()) (*ligatures-p* #f))
       (do-end-para)
       (emit "<div align=")
       (emit *display-justification*)
@@ -4944,8 +4942,8 @@
 
 (define do-mathg
   (lambda ()
-    (fluid-let ((*math-mode?* #t) (*in-display-math?* #f)
-                (*tabular-stack* '()) (*ligatures?* #f))
+    (fluid-let ((*math-mode-p* #t) (*in-display-math-p* #f)
+                (*tabular-stack* '()) (*ligatures-p* #f))
       (tex2page-string (get-group)))))
 
 (define dump-tex-preamble
@@ -4953,7 +4951,7 @@
     (case *tex-format*
       ((:latex)
        (display "\\documentclass{" o)
-       (display (if *using-chapters?* "report" "article") o)
+       (display (if *using-chapters-p* "report" "article") o)
        (display "}" o) (newline o)
        (display *imgpreamble* o) (newline o)
        ;(display "\\ifx\\bmatrix\\UNDEFINED" o)
@@ -5024,19 +5022,19 @@
       (emit *display-justification*)
       (emit ">")
       (emit "<table><tr><td>"))
-    (let ((old-math-mode-p *math-mode?*)
-          (old-in-display-math-p *in-display-math?*)
+    (let ((old-math-mode-p *math-mode-p*)
+          (old-in-display-math-p *in-display-math-p*)
           (old-tabular-stack *tabular-stack*))
-      (set! *math-mode?* #t)
-      (set! *in-display-math?* display-p)
+      (set! *math-mode-p* #t)
+      (set! *in-display-math-p* display-p)
       (set! *tabular-stack* '())
       (bgroup)
       (toss-back-char #\})
       (toss-back-string s)
       (add-aftergroup-to-top-frame
        (lambda ()
-         (set! *math-mode?* old-math-mode-p)
-         (set! *in-display-math?* old-in-display-math-p)
+         (set! *math-mode-p* old-math-mode-p)
+         (set! *in-display-math-p* old-in-display-math-p)
          (set! *tabular-stack* old-tabular-stack)
          (when display-p
            (emit "</td></tr></table>")
@@ -5047,7 +5045,7 @@
   (lambda (tex-string)
     (do-end-para)
     (if (and (tex2page-flag-boolean "\\TZPmathimage")
-             (not *temporarily-use-utf8-for-math?*))
+             (not *temporarily-use-utf8-for-math-p*))
         (begin
          (emit "<div class=mathdisplay align=")
          (emit *display-justification*)
@@ -5136,11 +5134,11 @@
 
 (define do-intext-math
   (lambda (tex-string)
-    (fluid-let ((*math-needs-image?* #f))
+    (fluid-let ((*math-needs-image-p* #f))
       (let ((html-string (tex-math-string-to-html-string tex-string)))
         (if (and (tex2page-flag-boolean "\\TZPmathimage")
-                 *math-needs-image?*
-                 (not *temporarily-use-utf8-for-math?*))
+                 *math-needs-image-p*
+                 (not *temporarily-use-utf8-for-math-p*))
             (call-with-html-image-port
              (lambda (o) (display #\$ o) (display tex-string o) (display #\$ o))
              tex-string)
@@ -5200,7 +5198,7 @@
 
 (define dump-till-ctl-seq
   (lambda (cs o)
-    (fluid-let ((*not-processing?* #t))
+    (fluid-let ((*not-processing-p* #t))
       (let loop ((nesting 0))
         (let ((c (snoop-actual-char)))
           (cond ((eof-object? c) (terror 'dump-till-ctl-seq))
@@ -5219,7 +5217,7 @@
     (let* ((endenv (string-append "\\end" env))
            (endenv-prim (find-corresp-prim endenv))
            (endenv-prim-th (find-corresp-prim-thunk endenv)))
-      (fluid-let ((*not-processing?* #t))
+      (fluid-let ((*not-processing-p* #t))
         (let loop ((brace-nesting 0) (env-nesting 0))
           (let ((c (snoop-actual-char)))
             (cond ((eof-object? c) (terror 'dump-till-end-env env))
@@ -5236,7 +5234,7 @@
                            ((string=? x "\\end")
                             (let ((g (get-grouped-environment-name-if-any)))
                               (unless
-                                (and g (or *dumping-nontex?* (= env-nesting 0))
+                                (and g (or *dumping-nontex-p* (= env-nesting 0))
                                      (let ((endg (string-append "\\end" g)))
                                        (or (string=? (find-corresp-prim endg)
                                                      endenv-prim)
@@ -5253,7 +5251,7 @@
                            (else (display x o)
                              (loop brace-nesting env-nesting)))))
                   ((and (char=? c *comment-char*)
-                        (not *dumping-nontex?*))
+                        (not *dumping-nontex-p*))
                    (do-comment)
                    (write-char #\% o) (newline o)
                    (loop brace-nesting env-nesting))
@@ -5281,7 +5279,7 @@
     ;(if *imgpreamble*
     ;    (terror 'do-img-preamble "Calling \\imgpreamble more than once"))
     (set! *imgpreamble*
-      (fluid-let ((*not-processing?* #t))
+      (fluid-let ((*not-processing-p* #t))
         (let loop ((r *imgpreamble*))
           (let ((c (snoop-actual-char)))
             (cond ((eof-object? c)
@@ -5353,7 +5351,7 @@
 (define tex-write-output-string
   (lambda (s)
     (let ((o (open-output-string)))
-      (fluid-let ((*outputting-to-non-html?* #t)
+      (fluid-let ((*outputting-to-non-html-p* #t)
                   (*html* o))
         (call-with-input-string/buffered
          s (lambda ()
@@ -5369,7 +5367,7 @@
 (define do-write-aux
   (lambda (o)
     (let ((output (tex-write-output-string (get-peeled-group))))
-      (cond ((and (= o 18) *enable-write-18?*)
+      (cond ((and (= o 18) *enable-write-18-p*)
              (system output))
             ((or (= o 16) (= o 18))
              (write-log output)
@@ -5530,7 +5528,7 @@
 (define do-ifmmode
   (lambda ()
     (set! *tex-if-stack*
-      (cons *math-mode?* *tex-if-stack*))))
+      (cons *math-mode-p* *tex-if-stack*))))
 
 (define do-ifnum
   (lambda ()
@@ -5547,7 +5545,7 @@
 
 (define read-ifcase-clauses
   (lambda ()
-    (fluid-let ((*not-processing?* #t))
+    (fluid-let ((*not-processing-p* #t))
       (let* ((else-clause #f)
              (or-clauses
               (let loop ((or-clauses '()) (else? #f))
@@ -5854,7 +5852,7 @@
   (lambda ()
     (let* ((b (get-bracketed-text-if-any))
            (f (get-filename-possibly-braced)))
-      (unless *eval-for-tex-only?*
+      (unless *eval-for-tex-only-p*
         (let ((epsf-x-size (get-dimen "\\epsfxsize"))
               (epsf-y-size (get-dimen "\\epsfysize")))
           (cond ((and (= epsf-x-size 0) (= epsf-y-size 0))
@@ -6061,7 +6059,7 @@
 
 (define do-box
   (lambda ()
-    (fluid-let ((*ignore-active-space?* #t))
+    (fluid-let ((*ignore-active-space-p* #t))
       (ignorespaces)
       (get-to))
     (eat-dimen)
@@ -6075,25 +6073,25 @@
     (get-actual-char)
     (bgroup)
     (add-postlude-to-top-frame
-      (let ((old-math-mode? *math-mode?*)
-            (old-in-display-math? *in-display-math?*)
+      (let ((old-math-mode-p *math-mode-p*)
+            (old-in-display-math-p *in-display-math-p*)
             (old-tabular-stack *tabular-stack*)
-            (old-ligatures? *ligatures?*))
-        (set! *math-mode?* #f)
-        (set! *in-display-math?* #f)
+            (old-ligatures-p *ligatures-p*))
+        (set! *math-mode-p* #f)
+        (set! *in-display-math-p* #f)
         (set! *tabular-stack* '())
-        (set! *ligatures?* #t)
+        (set! *ligatures-p* #t)
         (lambda ()
-          (set! *math-mode?* old-math-mode?)
-          (set! *in-display-math?* old-in-display-math?)
+          (set! *math-mode-p* old-math-mode-p)
+          (set! *in-display-math-p* old-in-display-math-p)
           (set! *tabular-stack* old-tabular-stack)
-          (set! *ligatures?* old-ligatures?))))))
+          (set! *ligatures-p* old-ligatures-p))))))
 
 (define do-latex-frac
   (lambda ()
     (tex2page-string (ungroup (get-token)))
     (emit
-      (cond ((or (not *in-display-math?*) *math-script-mode?*) "/")
+      (cond ((or (not *in-display-math-p*) *math-script-mode-p*) "/")
             (else (set! *math-height* (+ *math-height* 1))
                "</td></tr><tr><td style=\"height=1pt; background-color: black\"></td></tr><tr><td align=center>")))
     (tex2page-string (ungroup (get-token)))))
@@ -6101,7 +6099,7 @@
 (define do-tex-frac
   (lambda ()
     (ignorespaces)
-    (let ((inner-level? (or (not *in-display-math?*)
+    (let ((inner-level? (or (not *in-display-math-p*)
                             (not (null? *tabular-stack*)))))
       (fluid-let ((*tabular-stack* (cons 'frac *tabular-stack*)))
         (cond (inner-level?
@@ -6127,7 +6125,7 @@
 
 (define do-eqno
   (lambda ()
-    (unless *in-display-math?*
+    (unless *in-display-math-p*
       (terror 'do-eqno "You can't use \\eqno in math mode"))
     (emit "</td><td width=10% align=right>")))
 
@@ -6144,10 +6142,10 @@
        (lambda ()
          (emit "</td></tr>") (emit-newline)
          (emit "</table>") (emit-newline)
-         (when *in-display-math?* (emit "</td><td>"))
+         (when *in-display-math-p* (emit "</td><td>"))
          (pop-tabular-stack type)
          (set! *equation-position* 0)))
-      (when *in-display-math?* (emit "</td><td>"))
+      (when *in-display-math-p* (emit "</td><td>"))
       (emit-newline)
       (emit "<table><tr><td>"))))
 
@@ -6179,17 +6177,17 @@
       (add-postlude-to-top-frame
        (lambda ()
          (emit "</td></tr></table>")
-         (when *in-display-math?* (emit "</td><td>"))
+         (when *in-display-math-p* (emit "</td><td>"))
          (emit-newline)
          (pop-tabular-stack ':pmatrix)))
-      (when *in-display-math?* (emit "</td><td>"))
+      (when *in-display-math-p* (emit "</td><td>"))
       (emit "<table border=1><tr><td>")
       (emit-newline))))
 
 (define do-over
   (lambda ()
     (emit
-     (cond ((or (not *in-display-math?*) *math-script-mode?*) "/")
+     (cond ((or (not *in-display-math-p*) *math-script-mode-p*) "/")
            (else (set! *math-height* (+ *math-height* 1))
                  "</td></tr><tr><td style=\"height=1pt; background-color: black\"></td></tr><tr><td align=center>")))))
 
@@ -6422,8 +6420,8 @@
                                     ;(> (length (tdef.argpat y)) 0)
                                     ) #f)
                               (else
-                                (when *outer?*
-                                  (set! *outer?* #f)
+                                (when *outer-p*
+                                  (set! *outer-p* #f)
                                   (toss-back-char *outer-invisible-space*))
                                 (expand-tex-macro
                                   (tdef.optarg y)
@@ -7216,7 +7214,7 @@
 
 (define expand-edef-macro
   (lambda (rhs)
-    (fluid-let ((*not-processing?* #t))
+    (fluid-let ((*not-processing-p* #t))
       (let ((tmp-port (open-output-string)))
         (call-with-input-string/buffered
           rhs
@@ -7264,7 +7262,7 @@
 
 (define expand-tex-macro
   (lambda (optarg argpat rhs)
-    ;(unless (or *in-verb?* *math-mode?*)
+    ;(unless (or *in-verb-p* *math-mode-p*)
     ;     (ignorespaces))
     (let* (;(arg-pat-n (length argpat))
            (k 0)
@@ -7338,7 +7336,7 @@
                  (terror 'do-verb-braced "Eof inside verbatim"))
                 ((char=? c *esc-char*)
                  (toss-back-char c)
-                 (let ((x (fluid-let ((*not-processing?* #t))
+                 (let ((x (fluid-let ((*not-processing-p* #t))
                             (get-ctl-seq))))
                    (cond ((ormap (lambda (z) (string=? x z))
                                  '("\\ " "\\{" "\\}"))
@@ -7356,18 +7354,18 @@
                    (loop (- nesting 1))))
                 ((char=? c #\space)
                  (emit
-                  (if *verb-visible-space?*
+                  (if *verb-visible-space-p*
                       *verbatim-visible-space*
                     #\space))
                  (loop nesting))
                 ((char=? c #\newline)
-                 (cond (*verb-display?* (emit "&#xa0;")
+                 (cond (*verb-display-p* (emit "&#xa0;")
                                         (emit-newline))
-                       (*verb-visible-space?*
+                       (*verb-visible-space-p*
                         (emit *verbatim-visible-space*))
                        (else (emit-newline)))
                  (loop nesting))
-                ((and (char=? c #\-) (not *verb-display?*))
+                ((and (char=? c #\-) (not *verb-display-p*))
                  (emit "&#x2011;") (loop nesting))
                 (else (emit-html-char c)
                       (loop nesting))))))))
@@ -7381,18 +7379,18 @@
               ((char=? c d) 'done)
               ((char=? c #\space)
                (emit
-               (if *verb-visible-space?*
+               (if *verb-visible-space-p*
                    *verbatim-visible-space*
  #\space))
                (loop))
               ((char=? c #\newline)
-               (cond (*verb-display?* (emit "&#xa0;")
+               (cond (*verb-display-p* (emit "&#xa0;")
                                       (emit-newline))
-                     (*verb-visible-space?*
+                     (*verb-visible-space-p*
                       (emit *verbatim-visible-space*))
                      (else (emit-newline)))
                (loop))
-              ((and (char=? c #\-) (not *verb-display?*))
+              ((and (char=? c #\-) (not *verb-display-p*))
                (emit "&#x2011;") (loop))
               (else (emit-html-char c)
                     (loop)))))))
@@ -7401,18 +7399,18 @@
   (lambda ()
     (ignorespaces)
     (bgroup)
-    (fluid-let ((*verb-visible-space?* (eat-star))
-                (*ligatures?* #f))
+    (fluid-let ((*verb-visible-space-p* (eat-star))
+                (*ligatures-p* #f))
       (let ((d (get-actual-char)))
-        (fluid-let ((*verb-display?* (munched-a-newline?)))
-          (cond (*outputting-external-title?* #f)
-                (*verb-display?* (do-end-para) (emit "<pre class=verbatim>"))
+        (fluid-let ((*verb-display-p* (munched-a-newline?)))
+          (cond (*outputting-external-title-p* #f)
+                (*verb-display-p* (do-end-para) (emit "<pre class=verbatim>"))
                 (else (emit "<code class=verbatim>")))
           ((if (char=? d #\{)
                do-verb-braced
                do-verb-delimed) d)
-          (cond (*outputting-external-title?* #f)
-                (*verb-display?* (emit "</pre>") ;(do-para)
+          (cond (*outputting-external-title-p* #f)
+                (*verb-display-p* (emit "</pre>") ;(do-para)
                                  (do-noindent))
                 (else (emit "</code>"))))))
     (egroup)))
@@ -7421,7 +7419,7 @@
   (lambda ()
     (ignorespaces)
     (bgroup)
-    (fluid-let ((*ligatures?* #f))
+    (fluid-let ((*ligatures-p* #f))
       (emit "<code class=verbatim>")
       (emit-html-char (get-actual-char))
       (emit "</code>"))
@@ -7657,12 +7655,12 @@
   (lambda (env)
     (do-end-para)
     (bgroup)
-    (fluid-let ((*verb-visible-space?* (eat-star)))
-               (when *verb-visible-space?*
+    (fluid-let ((*verb-visible-space-p* (eat-star)))
+               (when *verb-visible-space-p*
                  (set! env (string-append env "*")))
       (emit "<pre class=verbatim>")
       (munched-a-newline?)
-      (fluid-let ((*ligatures?* #f))
+      (fluid-let ((*ligatures-p* #f))
         (let loop ()
           (let ((c (snoop-actual-char)))
             (cond ((eof-object? c)
@@ -7687,7 +7685,7 @@
                   ((char=? c #\space)
                    (get-actual-char)
                    (emit
-                   (if *verb-visible-space?*
+                   (if *verb-visible-space-p*
                        *verbatim-visible-space*
                        #\space))
                    (loop))
@@ -7699,15 +7697,15 @@
 
 (define do-verbatim-eplain
   (lambda ()
-    (fluid-let ((*inside-eplain-verbatim?* #t)
+    (fluid-let ((*inside-eplain-verbatim-p* #t)
                 (*esc-char* *esc-char-verb*))
       (let loop ()
-        (when *inside-eplain-verbatim?*
+        (when *inside-eplain-verbatim-p*
           (let ((c (get-actual-char)))
             (cond ((eof-object? c) (terror 'do-verbatim-eplain "Eof inside verbatim"))
                   ((char=? c *esc-char*)
                    (toss-back-char c)
-                   (let ((x (fluid-let ((*not-processing?* #t))
+                   (let ((x (fluid-let ((*not-processing-p* #t))
                               (get-ctl-seq))))
                      (cond ((string=? x "\\ ") (emit " "))
                            (else (do-tex-ctl-seq-completely x))))
@@ -7720,7 +7718,7 @@
 
 (define do-endverbatim-eplain
   (lambda ()
-    (set! *inside-eplain-verbatim?* #f)))
+    (set! *inside-eplain-verbatim-p* #f)))
 
 (define do-begtt
   (lambda ()
@@ -7728,7 +7726,7 @@
     (bgroup)
     (emit "<pre class=verbatim>")
     (munched-a-newline?)
-    (fluid-let ((*ligatures?* #f))
+    (fluid-let ((*ligatures-p* #f))
       (let loop ()
         (let ((c (snoop-actual-char)))
           (when (eof-object? c)
@@ -7753,7 +7751,7 @@
     (bgroup)
     (emit "<pre class=verbatim>")
     (munched-a-newline?)
-    (fluid-let ((*in-alltt?* #t))
+    (fluid-let ((*in-alltt-p* #t))
       (let loop ()
         (let ((c (snoop-actual-char)))
           (if (eof-object? c)
@@ -7764,14 +7762,14 @@
                  ((#\{) (get-actual-char) (bgroup))
                  ((#\}) (get-actual-char) (egroup))
                  (else (emit-html-char (get-actual-char))))
-               (when *in-alltt?* (loop)))))))))
+               (when *in-alltt-p* (loop)))))))))
 
 (define do-end-alltt
   (lambda ()
     (emit "</pre>")
     (egroup)
     (do-para)
-    (set! *in-alltt?* #f)))
+    (set! *in-alltt-p* #f)))
 
 ;Scheme tokens
 
@@ -7843,8 +7841,8 @@
 (define scm-emit-html-char
   (lambda (c)
     (unless (eof-object? c)
-      (when *scm-dribbling?* (write-char c *verb-port*))
-      (if (and (char=? c #\-) (not *verb-display?*))
+      (when *scm-dribbling-p* (write-char c *verb-port*))
+      (if (and (char=? c #\-) (not *verb-display-p*))
           (emit "&#x2011;")
         (emit-html-char c)))))
 
@@ -7903,7 +7901,7 @@
   (lambda ()
     (let ((s (get-line)))
       (emit "<span class=comment>")
-      (when *scm-dribbling?*
+      (when *scm-dribbling-p*
         (display s *verb-port*)
         (newline *verb-port*))
       (fluid-let ((*esc-char* *esc-char-std*))
@@ -8035,13 +8033,13 @@
             (else (do-end-para) (emit "<pre class=scheme>")))
       (bgroup)
       (fluid-let ((*esc-char* *esc-char-verb*)
-                  (*verb-display?* display?))
+                  (*verb-display-p* display?))
         (let loop ((nesting 0))
           (let ((c (snoop-actual-char)))
             (cond ((eof-object? c)
                    (terror 'do-scm-braced "Eof inside verbatim"))
                   ((char=? c *esc-char*)
-                   (let ((x (fluid-let ((*not-processing?* #t))
+                   (let ((x (fluid-let ((*not-processing-p* #t))
                               (get-ctl-seq))))
                      (cond ((ormap (lambda (z) (string=? x z))
                                    '("\\ " "\\{" "\\}"))
@@ -8076,7 +8074,7 @@
                          (when result? (emit "response"))
                          (emit ">"))
                (else (do-end-para) (emit "<pre class=scheme>")))
-        (fluid-let ((*verb-display?* display?)
+        (fluid-let ((*verb-display-p* display?)
                     (*scm-token-delims* (cons d *scm-token-delims*)))
           (let loop ()
             (let ((c (snoop-actual-char)))
@@ -8090,11 +8088,11 @@
 
 (define do-scm
   (lambda (result?)
-    (cond (*outputting-external-title?* (do-verb))
+    (cond (*outputting-external-title-p* (do-verb))
           (else
             (ignorespaces)
             (bgroup)
-            (fluid-let ((*ligatures?* #f))
+            (fluid-let ((*ligatures-p* #f))
               ((if (char=? (snoop-actual-char) #\{)
                    do-scm-braced
                    do-scm-delimed) result?))
@@ -8125,7 +8123,7 @@
 (define do-scmdribble
   (lambda ()
     (verb-ensure-output-port)
-    (fluid-let ((*scm-dribbling?* #t))
+    (fluid-let ((*scm-dribbling-p* #t))
       (do-scm #f))
     (newline *verb-port*)))
 
@@ -8143,9 +8141,9 @@
       (emit "<div align=left><pre class=scheme")
       (when result? (emit "response"))
       (emit ">")
-      (fluid-let ((*ligatures?* #f)
-                  (*verb-display?* #t)
-                  (*not-processing?* #t))
+      (fluid-let ((*ligatures-p* #f)
+                  (*verb-display-p* #t)
+                  (*not-processing-p* #t))
         (let loop ()
           (let ((c (snoop-actual-char)))
             (cond ((eof-object? c)
@@ -8248,12 +8246,12 @@
          (emit "<tr><td align=right>"))
         ((:eqnarray)
          (emit "</td>")
-         (cond (*equation-numbered?*
+         (cond (*equation-numbered-p*
                 (emit "<td>(")
                 (emit *equation-number*)
                 (bump-dotted-counter "equation")
                 (emit ")</td>"))
-               (else (set! *equation-numbered?* #t)))
+               (else (set! *equation-numbered-p* #t)))
          (emit "</tr>") (emit-newline)
          (set! *equation-position* 0)
          (emit "<tr><td align=right>"))
@@ -8300,13 +8298,13 @@
     (bgroup)
     (unless math?
       (add-postlude-to-top-frame
-        (let ((old-math-mode? *math-mode?*)
-              (old-in-display-math? *in-display-math?*))
-          (set! *math-mode?* #f)
-          (set! *in-display-math?* #f)
+        (let ((old-math-mode-p *math-mode-p*)
+              (old-in-display-math-p *in-display-math-p*))
+          (set! *math-mode-p* #f)
+          (set! *in-display-math-p* #f)
           (lambda ()
-            (set! *math-mode?* old-math-mode?)
-            (set! *in-display-math?* old-in-display-math?)))))
+            (set! *math-mode-p* old-math-mode-p)
+            (set! *in-display-math-p* old-in-display-math-p)))))
     (let ((border-width
             (if (string-index (get-group) #\|) 1 0)))
       (set! *tabular-stack* (cons ':tabular *tabular-stack*))
@@ -8465,7 +8463,7 @@
                           (tdef.argpat y)
                           (tdef.expansion y))))))
           ((section-ctl-seq? z) => (lambda (n) (do-heading n)))
-          (*math-mode?* (do-math-ctl-seq z))
+          (*math-mode-p* (do-math-ctl-seq z))
           (else
             (trace-if (> (find-count "\\tracingcommands") 0)
                       "Ignoring " z)))))
@@ -8576,18 +8574,18 @@
           ((char=? c #\space) (do-space))
           ((char=? c *tab*) (do-tab))
           (else
-            (cond (*math-mode?*
+            (cond (*math-mode-p*
                     (case c
                       ((#\^) (do-sup))
                       ((#\_) (do-sub))
                       ((#\+ #\=)
-                       (unless *math-script-mode?* (emit #\space))
+                       (unless *math-script-mode-p* (emit #\space))
                        (emit c)
-                       (unless *math-script-mode?* (emit #\space)))
+                       (unless *math-script-mode-p* (emit #\space)))
                       (else (if (char-alphabetic? c)
                               (emit-math-alpha-char c)
                               (emit c)))))
-                 ((and *in-small-caps?* (char-lower-case? c))
+                 ((and *in-small-caps-p* (char-lower-case? c))
                   (emit "<small>")
                   (emit (char-upcase c))
                   (emit "</small>")
@@ -8637,7 +8635,7 @@
 
 (define generate-html
   (lambda ()
-    (fluid-let ((*outer?* #t))
+    (fluid-let ((*outer-p* #t))
       (let loop ()
         (let ((c (snoop-actual-char)))
           (cond ((eof-object? c)
@@ -8674,8 +8672,8 @@
                          e '(".t2p" ".bbl" ".ind"))))
           ;don't use timestamp of .t2p .ind .bbl files
            #f)
-          (*inputting-boilerplate?* #f)
-          (*ignore-timestamp?* #f)
+          (*inputting-boilerplate-p* #f)
+          (*ignore-timestamp-p* #f)
           ((> *html-only* 0) #f)
           ((and (>= (string-length f) 3)
                 (char=? (string-ref f 0) #\.)
@@ -8723,12 +8721,12 @@
   (lambda ()
     (ignorespaces)
     (let ((f (get-filename-possibly-braced)))
-      (let ((boilerplate-index *inputting-boilerplate?*))
+      (let ((boilerplate-index *inputting-boilerplate-p*))
         ;this is ugly code that nobody really needs, so
         ;why am I so invested in keeping it?
-        (when (eqv? *inputting-boilerplate?* 0)
-          (set! *inputting-boilerplate?* #f))
-        (fluid-let ((*inputting-boilerplate?*
+        (when (eqv? *inputting-boilerplate-p* 0)
+          (set! *inputting-boilerplate-p* #f))
+        (fluid-let ((*inputting-boilerplate-p*
                      (and boilerplate-index (+ boilerplate-index 1))))
           (cond ((ignorable-tex-file? f)
                  ;don't process .sty files,
@@ -8806,12 +8804,12 @@
 
 (define do-eval
   (lambda (fmts)
-    (let ((s (if *outer?*
+    (let ((s (if *outer-p*
                ;Careful: This could break existing docs that rely on
                ;this!
                (ungroup
                (fluid-let ((*esc-char* *esc-char-verb*)
-                           (*expand-escape?* #t))
+                           (*expand-escape-p* #t))
                  (get-group)))
               (tex-write-output-string
                 (ungroup (get-group))))))
@@ -8841,14 +8839,14 @@
                  ;that creeps after
                  ;\input file
                  (display "\\relax")))
-             (fluid-let ((*ignore-timestamp?* #t))
+             (fluid-let ((*ignore-timestamp-p* #t))
                (tex2page-file eval4tex-file))
              ;(ensure-file-deleted eval4tex-file)
              )))))))
 
 (define eval-for-tex-only
   (lambda ()
-    (set! *eval-for-tex-only?* #t)
+    (set! *eval-for-tex-only-p* #t)
     (do-end-page)
     (ensure-file-deleted *html-page*)
     (set! *main-tex-file* #f)
@@ -8877,23 +8875,23 @@
 (define call-external-programs-if-necessary
   (lambda ()
     (let ((run-bibtex?
-           (cond ((not *using-bibliography?*) #f)
+           (cond ((not *using-bibliography-p*) #f)
                  ((not (file-exists?
                         (string-append *aux-dir/* *jobname*
                                        *bib-aux-file-suffix* ".aux")))
                   #f)
                  ((memv 'bibliography *missing-pieces*) #t)
-                 (*source-changed-since-last-run?*
+                 (*source-changed-since-last-run-p*
                   (flag-missing-piece ':fresh-bibliography) #t)
                  (else #f)))
           (run-makeindex?
-           (cond ((not *using-index?*) #f)
+           (cond ((not *using-index-p*) #f)
                  ((not (file-exists?
                         (string-append *aux-dir/* *jobname*
                                        *index-file-suffix* ".idx")))
                   #f)
                  ((memv ':index *missing-pieces*) #t)
-                 (*source-changed-since-last-run?*
+                 (*source-changed-since-last-run-p*
                   (flag-missing-piece ':fresh-index) #t)
                  (else #f))))
 
@@ -9334,7 +9332,7 @@
     (let ((s (file-or-directory-modify-seconds f)))
       (when (and s (or (not *last-modification-time*)
                        (> s *last-modification-time*)))
-        (set! *source-changed-since-last-run?* #t)
+        (set! *source-changed-since-last-run-p* #t)
         (set! *last-modification-time* s)
         ;(write-aux `(!last-modification-time ,s))
         (when (and (tex2page-flag-boolean "\\TZPcolophontimestamp")
@@ -9363,7 +9361,7 @@
 
 (define !tex-like-layout
   (lambda ()
-    (set! *tex-like-layout?* #t)))
+    (set! *tex-like-layout-p* #t)))
 
 (define !head-line
   (lambda (e)
@@ -9425,7 +9423,7 @@
 
 (define !using-chapters
   (lambda ()
-    (set! *using-chapters?* #t)))
+    (set! *using-chapters-p* #t)))
 
 (define !definitely-latex
   (lambda ()
@@ -9462,7 +9460,7 @@
 (define !tex-text
   (lambda (n)
     (when (= n 0)
-      (set! *ligatures?* #f))))
+      (set! *ligatures-p* #f))))
 
 ;;
 
@@ -9685,7 +9683,7 @@ Try the commands
     (cond ((find-math-def s)
            => (lambda (x) ((tdef.thunk x))))
           (else
-            (unless *math-needs-image?* (set! *math-needs-image?* #t))
+            (unless *math-needs-image-p* (set! *math-needs-image-p* #t))
             (emit (substring s 1 (string-length s)))
             ;(emit " ")
             ))))
@@ -10345,8 +10343,8 @@ Try the commands
 (tex-def-prim "\\ifodd" do-ifodd)
 (tex-def-prim "\\ignorenextinputtimestamp"
   (lambda ()
-    (unless *inputting-boilerplate?*
-      (set! *inputting-boilerplate?* 0))))
+    (unless *inputting-boilerplate-p*
+      (set! *inputting-boilerplate-p* 0))))
 (tex-def-prim "\\ignorespaces" ignorespaces)
 (tex-def-prim "\\imgdef" (lambda () (make-reusable-img (global?))))
 (tex-def-prim "\\imgpreamble" do-img-preamble)
@@ -10438,13 +10436,13 @@ Try the commands
 (tex-def-prim "\\nocite" do-nocite)
 (tex-def-prim "\\node" do-node)
 (tex-def-prim "\\noindent" do-noindent)
-(tex-def-prim "\\nonum" (lambda () (set! *opmac-nonum?* #t)))
+(tex-def-prim "\\nonum" (lambda () (set! *opmac-nonum-p* #t)))
 (tex-def-prim "\\nonumber" do-nonumber)
 (tex-def-prim "\\noslatexlikecomments"
               (lambda () (tex-def-0arg "\\TZPslatexcomments" "0")))
 (tex-def-prim "\\notimestamp"
               (lambda () (tex-def-0arg "\\TZPcolophontimestamp" "0")))
-(tex-def-prim "\\notoc" (lambda () (set! *opmac-notoc?* #t)))
+(tex-def-prim "\\notoc" (lambda () (set! *opmac-notoc-p* #t)))
 (tex-def-prim "\\nr" (lambda () (do-cr "\\nr")))
 (tex-def-prim "\\number" do-number)
 (tex-def-prim "\\numberedfootnote" do-numbered-footnote)
@@ -10493,7 +10491,7 @@ Try the commands
 (tex-def-prim "\\resizebox" do-resizebox)
 (tex-def-prim "\\rightline" (lambda () (do-function "\\rightline")))
 (tex-def-prim "\\rm" (lambda ()
-                       (when *math-mode?*
+                       (when *math-mode-p*
                            (do-switch ':rm))))
 (tex-def-prim "\\romannumeral" (lambda () (do-romannumeral #f)))
 (tex-def-prim "\\Romannumeral" (lambda () (do-romannumeral #t)))
@@ -10579,7 +10577,7 @@ Try the commands
 (tex-def-prim "\\textrm" (lambda () (do-function "\\textrm")))
 (tex-def-prim "\\textsc"
   (lambda ()
-    (fluid-let ((*in-small-caps?* #t))
+    (fluid-let ((*in-small-caps-p* #t))
       (tex2page-string (get-group)))))
 (tex-def-prim "\\textsl" (lambda () (do-function "\\textsl")))
 (tex-defsym-prim "\\textasciitilde" "~")
@@ -11028,16 +11026,16 @@ Try the commands
                 (*display-justification* "center")
                 (*doctype* *doctype*)
                 (*dotted-counters* #f)
-                (*dumping-nontex?* #f)
+                (*dumping-nontex-p* #f)
                 ;
                 (*equation-number* #f)
-                (*equation-numbered?* #t)
+                (*equation-numbered-p* #t)
                 (*equation-position* 0)
                 (*esc-char* #\\ )
                 (*esc-char-std* #\\ )
                 (*esc-char-verb* #\|)
                 (*eval-file-count* 0)
-                (*eval-for-tex-only?* #f)
+                (*eval-for-tex-only-p* #f)
                 (*external-label-tables* (make-table 'equ string=?))
                 ;
                 (*footnote-list* '())
@@ -11057,10 +11055,10 @@ Try the commands
                 (*imgdef-file-count* 0)
                 (*imgpreamble* "")
                 (*imgpreamble-inferred* '())
-                (*in-alltt?* #f)
-                (*in-display-math?* #f)
-                (*in-para?* #f)
-                (*in-small-caps?* #f)
+                (*in-alltt-p* #f)
+                (*in-display-math-p* #f)
+                (*in-para-p* #f)
+                (*in-small-caps-p* #f)
                 (*includeonly-list* #t)
                 (*index-table* (make-table))
                 (*index-count* 0)
@@ -11069,8 +11067,8 @@ Try the commands
                 (*infructuous-calls-to-tex2page* 0)
                 (*input-line-no* 0) ;will be set by tex2page-file
                 (*input-streams* (make-table))
-                (*inputting-boilerplate?* #f)
-                (*inside-appendix?* #f)
+                (*inputting-boilerplate-p* #f)
+                (*inside-appendix-p* #f)
                 ;
                 (*jobname* "texput")
                 ;
@@ -11080,8 +11078,8 @@ Try the commands
                 (*last-modification-time* #f)
                 (*last-page-number* -1)
                 (*latex-probability* 0)
-                (*ligatures?* #t)
-                (*loading-external-labels?* #f)
+                (*ligatures-p* #t)
+                (*loading-external-labels-p* #f)
                 (*log-file* #f)
                 (*log-port* #f)
                 ;
@@ -11089,7 +11087,7 @@ Try the commands
                 (*math-delim-left* #f)
                 (*math-delim-right* #f)
                 (*math-height* 0)
-                (*math-mode?* #f)
+                (*math-mode-p* #f)
                 (*mfpic-file-num* #f)
                 (*mfpic-file-stem* #f)
                 (*mfpic-port* #f)
@@ -11097,65 +11095,65 @@ Try the commands
                 (*missing-pieces* '())
                 (*mp-files* '())
                 ;
-                (*not-processing?* #f)
+                (*not-processing-p* #f)
                 ;
                 (*opmac-active-tt-char* #f)
-                (*opmac-nonum?* #f)
-                (*opmac-notoc?* #f)
+                (*opmac-nonum-p* #f)
+                (*opmac-notoc-p* #f)
                 (*opmac-verbinput-table* (make-table 'equ string=?))
-                (*outer?* #t)
+                (*outer-p* #t)
                 (*output-streams* (make-table))
-                (*outputting-external-title?* #f)
-                (*outputting-to-non-html?* #f)
+                (*outputting-external-title-p* #f)
+                (*outputting-to-non-html-p* #f)
                 ;
                 (*package* *this-package*) ;place-holder for CL
                 ;
                 (*quote-level* 0)
                 ;
-                (*reading-control-sequence?* #f)
+                (*reading-control-sequence-p* #f)
                 (*recent-node-name* #f)
                 (*redirect-delay* #f)
                 (*redirect-url* #f)
                 ;
-                (*scm-dribbling?* #f)
+                (*scm-builtins* #f)
+                (*scm-dribbling-p* #f)
                 (*scm-keywords* #f)
                 (*scm-special-symbols* #f)
-                (*scm-builtins* #f)
                 (*scm-variables* #f)
                 (*section-counter-dependencies* #f)
                 (*section-counters* (make-table))
-                ;(*slatex-like-comments?* #f)
+                ;(*slatex-like-comments-p* #f)
                 (*slatex-math-escape* #f)
-                (*source-changed-since-last-run?* #f)
+                (*source-changed-since-last-run-p* #f)
                 (*stylesheets* '())
                 (*subjobname* #f)
                 ;
                 (*tabular-stack* '())
                 (*temp-string-count* 0)
-                (*temporarily-use-utf8-for-math?* #f)
+                (*temporarily-use-utf8-for-math-p* #f)
                 (*tex2page-inputs* (path-to-list (or (getenv "TEX2PAGEINPUTS")
                                                      (getenv "TIIPINPUTS"))))
                 (*tex-env* '())
                 (*tex-format* ':plain)
                 (*tex-if-stack* '())
-                (*tex-like-layout?* *tex-like-layout?*)
+                (*tex-like-layout-p* *tex-like-layout-p*)
                 (*tex-prog-name* *tex-prog-name*)
                 (*title* #f)
                 (*toc-list* '())
                 (*toc-page* #f)
                 ;
                 (*unresolved-xrefs* '())
-                (*using-bibliography?* #f)
-                (*using-chapters?* #f)
-                (*using-index?* #f)
+                (*using-bibliography-p* #f)
+                (*using-chapters-p* #f)
+                (*using-index-p* #f)
                 ;
-                (*verb-display?* #f)
+                (*verb-display-p* #f)
                 (*verb-port* #f)
-                (*verb-visible-space?* #f)
+                (*verb-visible-space-p* #f)
                 (*verb-written-files* '())
                 ;
                 (*write-log-index* 0)
-                (*write-log-possible-break?* #f))
+                (*write-log-possible-break-p* #f))
       ;
       (initialize-globals)
       (set! *main-tex-file* (actual-tex-filename

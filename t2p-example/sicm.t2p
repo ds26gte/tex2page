@@ -50,9 +50,9 @@
 \let\ORIGtableofcontents\tableofcontents
 
 \def\utableofcontents{%
-\evalh{(set! *use-img-for-math?* #f)}%
+\evalh{(set! *use-img-for-math-p* #f)}%
 \ORIGtableofcontents
-\evalh{(set! *use-img-for-math?* #t)}%
+\evalh{(set! *use-img-for-math-p* #t)}%
 }
 
 % SICP sets its displayed material flushleft

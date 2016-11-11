@@ -1,4 +1,5 @@
 *.aux
+*.eps
 *.html
 *.mp
 *.pdf
@@ -6,6 +7,7 @@
 *~
 ?.*
 [^s]*log
+index.[^t]*
 lambda*
 my-tex2page*
 tmp/*

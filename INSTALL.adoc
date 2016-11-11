@@ -98,7 +98,7 @@ The TeX2page documentation is provided in the TeX file `index.tex`.
 To get a PDF version of the document run, first ensure that the
 file `story.log` exists.  If it does not, run
 
-  pdftex story
+  xetex story
 
 and supply
 
@@ -106,11 +106,12 @@ and supply
 
 at TeX’s interactive prompt.  Then do
 
-  pdftex index
+  xetex index
   makeindex index
+  bibtex index
   mpost lambda
-  pdftex index
-  pdftex index
+  xetex index
+  xetex index
 
 The first TeX run may fail due to missing files.  Simply type `s`
 at the TeX prompt to force TeX to continue.

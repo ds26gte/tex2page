@@ -7,7 +7,7 @@
 % tex2page is available at
 % http://ds26gte.github.io/tex2page/index.html
 
-% last change: 2016-11-10
+% last change: 2016-11-11
 
 \input tex2page-doc-mac
 
@@ -2098,7 +2098,6 @@ the file \p{notes-to-myself.txt}.  \p{\verbwritefile}
 deletes any pre-existing contents of its argument file.
 
 \index{write@\p{\write}}
-\index{write@\p{\write}!to stream 18}
 %
 \TeX2page also recognizes the \TeX\ command
 \p{\write}, which takes two arguments: an {\em output
@@ -2106,7 +2105,12 @@ stream number} and a \TeX\ expression to be output.
 Recall that \TeX\ allows only the numbers 0–15 for
 output streams that can be associated with files;
 numbers outside this range are deemed to represent
-standard output.  However: \TeX2page follows modern
+standard output.  
+
+\xrdef{write18}
+\index{write@\p{\write}!to stream 18}
+%
+However: \TeX2page follows modern
 \TeX\ implementation practice in treating the output
 stream 18 specially.  \p{\write18{|meta[oscommand]}},
 instead of writing \p{|meta[oscommand]} to standard
@@ -2476,54 +2480,6 @@ files with \p{\let\color\@ldc@l@r}.}
 \resetatcatcode
 }
 
-Here is
-an example of an EPS insert: The MetaPost file
-\urlh{mpexample.html}{\p{lambda.mp}} is processed by
-MetaPost generating the PS file \p{lambda.1},
-which we load with
-
-\p{
-\centerline{\epsfbox{lambda.1}}
-}
-
-\n to produce\f{%
-\index{scrollmode@\p{\scrollmode}}
-\index{notstopmode@\p{\nonstopmode}}
-\index{batchmode@\p{\batchmode}}
-\index{errorstopmode@\p{\errorstopmode}}
-%
-The file
-\p{lambda.mp} was actually written out from this document’s
-source using \p{\verbwrite} (p.~\ref{verbwritefile}),
-so the file \p{lambda.1} isn’t immediately available.
-Nevertheless, \TeX2page will take care to call MetaPost
-on the generated \p{lambda.mp} file, ensuring that the EPS
-file is available for conversion into an HTML image.
-In contrast, when getting the DVI version of the
-document via \TeX, it is the user’s responsibility to
-call MetaPost on generated files, and call \TeX\
-again.  Unfortunately, commands like \p{\epsfbox}
-and \p{\includegraphics}, when they do not find their argument
-file, will signal error and cause \TeX\ to go into a
-debug loop, even
-though the MetaPost file needed for their creation can
-only be created if \TeX\ successfully finishes processing the source
-document!
-To force \TeX\ to finish processing the source file regardless
-of missing EPS files, you need to run it in
-\p{\scrollmode}, or its even more reckless cousins
-\p{\nonstopmode} and \p{\batchmode}.  One way to get into
-these modes is to type \p{s}, \p{r}, or \p{q},
-respectively, at the \TeX\ debug prompt.  By default, \TeX\
-runs in \p{\errorstopmode}, which is why it stops on
-the missing-file error.}
-
-\index{centerline@\p{\centerline}}
-
-%\quote
-\centerline{\epsfbox{lambda.1}}
-%\endquote
-
 \index{epsfxsize@\p{\epsfxsize}}
 \index{epsfysize@\p{\epsfysize}}
 
@@ -2564,15 +2520,9 @@ which is included in most modern distributions of \TeX.
 Caveat: \p{\convertMPtoPDF} doesn’t work for EPS files
 that weren’t made using MetaPost!
 
-If you use \XeTeX, source \p{tex2page.tex} to get a usable definition of
-\p{\epsfbox}.
-%continue to use \p{epsf.tex} or \p{epsfig.sty} as
-%described above, even though the output is PDF.
-%(This is failing. The image is placed off-kilter.)
-
 \index{pdfximage@\p{\pdfximage}}
 
-PDF versions of \TeX\ can import common graphics formats
+pdf\TeX\ can import common graphics formats
 such PNG and JPEG: Either use \p{\includegraphics}, or a primitive call
 such as
 
@@ -2584,6 +2534,73 @@ such as
 and \p{\includegraphics},  with one browser pixel
 equated to one point.  Unlike EPS files, PNG and JPEG images are directly
 supported by HTML, so \TeX2page does not need to convert them.
+
+\index{XeTeXpdffile@\p{\XeTeXpdffile}}
+\index{XeTeXpicfile@\p{\XeTeXpicfile}}
+\index{epstopdf@\p{epstopdf}}
+
+\XeTeX\ has its own duo of graphics-insertion commands:
+\p{\XeTeXpdffile} for PDF images, and \p{\XeTeXpicfile} for PNG,
+JPEG and GIF images.  To load a graphic specified in MetaPost,
+you can either (a) convert MetaPost spec into EPS and
+thence to PDF using a utility like \p{epstopdf}; or (b) 
+convert the spec to PNG. Let’s start with a MetaPost file
+\urlh{mpexample.html}{\p{lambda.mp}}. 
+
+(a) At the OS shell, type
+
+\p{
+mpost lambda.mp
+epstopdf lambda-1.eps
+}
+
+
+This creates a PDF file \p{lambda-1.pdf}, which is inserted in
+the source document via
+
+\p{
+\centerline{\XeTeXpdffile lambda-1.pdf }
+}
+to obtain\f{%
+\index{scrollmode@\p{\scrollmode}}
+\index{notstopmode@\p{\nonstopmode}}
+\index{batchmode@\p{\batchmode}}
+\index{errorstopmode@\p{\errorstopmode}}
+%
+The file
+\p{lambda.mp} was actually written out from this document’s
+source using \p{\verbwrite} (p.~\ref{verbwritefile}),
+so the files \p{lambda-1.eps} and \p{lambda-1.pdf} aren’t immediately available
+on the first run. \TeX\ will signal a file-not-found error and go
+into a debug loop, even though the MetaPost file needed to create
+the missing file can only be created if \TeX\ successfully
+finishes processing the source document! To force \TeX\ to finish
+processing the source file regardless of missing files, you need
+to run it in
+\p{\scrollmode}, or its even more reckless cousins
+\p{\nonstopmode} and \p{\batchmode}.  One way to get into
+these modes is to type \p{s}, \p{r}, or \p{q},
+respectively, at the \TeX\ debug prompt.  By default, \TeX\
+runs in \p{\errorstopmode}, which is why it stops on
+the missing-file error. A different approach is to use “shell
+escape” to call \p{mpost} and \p{epstopdf} from within your
+source file. See p.~\ref{write18}.}
+
+\index{centerline@\p{\centerline}}
+
+\centerline{\XeTeXpdffile lambda-1.pdf }
+
+(b) To generate PNG, in the MetaPost set
+
+\p{
+outputformat := "png";
+}
+Metapost will directly produce the file \p{lambda-1.png}, which
+can be inserted with
+
+\p{
+\XeTeXpicfile lambda-1.png
+}
 
 \beginsection Other image inserts
 

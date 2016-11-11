@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161108") ;last change
+(define *tex2page-version* "20161110") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -159,7 +159,7 @@
     "\">e</span>" "X"))
 
 (define *tex-files-to-ignore*
-  '("btxmac" "eplain" "epsf" "eval4tex" "lmfonts" "opmac" "supp-pdf" "tex2page"))
+  '("btxmac" "eplain" "epsf" "lmfonts" "opmac" "supp-pdf"))
 
 (define *filename-delims* '())
 

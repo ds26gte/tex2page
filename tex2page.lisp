@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161108" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161110" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -159,7 +159,7 @@
     "\">e</span>" "X"))
 
 (defparameter *tex-files-to-ignore*
-  '("btxmac" "eplain" "epsf" "eval4tex" "lmfonts" "opmac" "supp-pdf" "tex2page"))
+  '("btxmac" "eplain" "epsf" "lmfonts" "opmac" "supp-pdf"))
 
 ;above are true globals.  Following are
 ;per-document globals
@@ -1338,8 +1338,6 @@
 (defun tex-let-prim (lft rt)
   (tex-let lft rt *primitive-texframe*)
   )
-
-;(trace tex-let tex-let-prim)
 
 (defun tex-def-thunk (name thunk frame)
   (unless (inside-false-world-p)

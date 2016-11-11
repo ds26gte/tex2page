@@ -120,7 +120,6 @@
   ; "<span style=\"color: red\">&#xb7;</span>"
   "<span style=\"vertical-align: -0.5ex\">&#x2334;</span>")
 
-
 (defparameter *aux-file-suffix* "-Z-A")
 (defparameter *bib-aux-file-suffix* "-Z-B")
 (defparameter *css-file-suffix* "-Z-S.css")
@@ -3067,7 +3066,7 @@
   (let* ((link-text (get-bracketed-text-if-any))
          (url (get-url))
          (durl (doc-internal-url url)))
-    (if durl 
+    (if durl
         (emit-page-node-link-start (car durl) (cadr durl))
         (emit-link-start (fully-qualify-url url)))
     (bgroup)
@@ -4754,10 +4753,11 @@
 
 (defun do-xetexpdffile ()
   (let* ((pdf-file (get-filename))
-         height width
+         height rotated width
          (img-file-stem (next-html-image-file-stem))
          (img-file (concatenate 'string *aux-dir/* img-file-stem (find-img-file-extn))))
     (loop (cond ((eat-word "height") (setq height (get-pixels)))
+                ((eat-word "rotated") (setq rotated (get-number)))
                 ((eat-word "width") (setq width (get-pixels)))
                 (t (return))))
     (unless (probe-file img-file)
@@ -4778,6 +4778,10 @@
     (emit img-file)
     (emit "\"")
     (when height (emit " height=") (emit height))
+    (when rotated
+      (setq rotated (- rotated))
+      (emit " style=\"transform: rotate(")
+      (emit rotated) (emit "deg)\""))
     (when width (emit " width=") (emit width))
     (emit ">")
     (write-log #\))
@@ -4785,14 +4789,19 @@
 
 (defun do-xetexpicfile ()
   (let ((img-file (get-filename))
-        height width)
+        height rotated width)
     (loop (cond ((eat-word "height") (setq height (get-pixels)))
+                ((eat-word "rotated") (setq rotated (get-number)))
                 ((eat-word "width") (setq width (get-pixels)))
                 (t (return))))
     (emit "<img src=\"")
     (emit img-file)
     (emit "\"")
     (when height (emit " height=") (emit height))
+    (when rotated
+      (setq rotated (- rotated))
+      (emit " style=\"transform: rotate(")
+      (emit rotated) (emit "deg)\""))
     (when width (emit " width=") (emit width))
     (emit ">")))
 
@@ -5022,7 +5031,6 @@
   (eat-till-eol)
   (when (munched-a-newline-p)
     (toss-back-char #\Newline) (toss-back-char #\Newline)))
-
 
 (defun path-to-list (p)
   ;convert a Unix path into a Lisp list
@@ -6203,19 +6211,19 @@
              (opmac-verbinput-print-lines i n1)
              (incf n1))
             ;
-            ((and (not s1) n1 s2 (not n2) (char= s2 #\-)) 
+            ((and (not s1) n1 s2 (not n2) (char= s2 #\-))
              ;print from line n1 to eof
              (opmac-verbinput-skip-lines i (- n1 1))
              (opmac-verbinput-print-lines i t)
              (setq n 0))
             ;
-            ((and s1 (not n1) (not s2) (not n2) (char= s1 #\+)) 
+            ((and s1 (not n1) (not s2) (not n2) (char= s1 #\+))
              ;print from current point to eof
              (opmac-verbinput-skip-lines i n)
              (opmac-verbinput-print-lines i t)
              (setq n 0))
             ;
-            ((and s1 (not n1) (not s2) (not n2) (char= s1 #\-)) 
+            ((and s1 (not n1) (not s2) (not n2) (char= s1 #\-))
              ;print entire file
              (opmac-verbinput-print-lines i t)
              (setq n 0))
@@ -8561,7 +8569,6 @@ Try the commands
 (tex-def-prim "\\global" #'do-global)
 (tex-def-prim "\\globaladvancetally" (lambda () (do-advancetally t)))
 (tex-def-prim "\\gobblegroup" #'get-group)
-
 
 (tex-def-prim "\\H" (lambda () (do-diacritic :hungarianumlaut)))
 (tex-def-prim "\\halign" #'do-halign)

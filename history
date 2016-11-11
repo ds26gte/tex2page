@@ -1,4 +1,12 @@
-Last change 2016-11-08
+Last change 2016-11-10
+
+2016 Nov 10
+
+Added tgtermes.tex (sets up TeX Gyre Termes as text font). Use XeTeX
+for document index.tex, which now has nice Unicode quotes & dashes.
+
+tex2page.tex: add a definition for \epsfbox for XeTeX, as relying on epsf.tex
+produces off-kilter images.
 
 2016 Nov 8
 
@@ -8,7 +16,7 @@ Added OPmac's \{beg,end}items, *.
 
 Added OPmac's \chap, \sec, \secc, \maketoc, \nonum, \notoc, \verbinput.
 
-Use *bool-var-p* (instead of *bool-var?*) in Scheme version so it matches 
+Use *bool-var-p* (instead of *bool-var?*) in Scheme version so it matches
 CL version. (Prevents maintenance hassle.)
 
 2016 Nov 6

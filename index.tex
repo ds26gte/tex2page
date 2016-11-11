@@ -1,4 +1,4 @@
-% This is a plain TeX file, and can be TeX'd as usual,
+% This is a plain TeX file, and can be TeX’d as usual,
 % but it can also be converted into an HTML document.  To do
 % this latter, run
 %
@@ -7,7 +7,7 @@
 % tex2page is available at
 % http://ds26gte.github.io/tex2page/index.html
 
-% last change: 2015-06-01
+% last change: 2016-11-10
 
 \input tex2page-doc-mac
 
@@ -43,13 +43,13 @@
 \ifx\shipout\UnDeFiNeD\small\fi
 {\it Making books is a skilled trade,
 like making clocks.}
---- Jean de la Bruy\`ere (\dag 1696)
+— Jean de la Bruyère (†1696)
 }
 
 %French original:
-%``C'est un m\'etier que de faire un livre,
-%comme de faire une pendule.''
-%JdlB's lifespan: 1645--1696.
+%“C’est un métier que de faire un livre,
+%comme de faire une pendule.”
+%JdlB’s lifespan: 1645–1696.
 
 \medskip
 
@@ -95,8 +95,8 @@ exercise a fine control over its structure and
 presentation.  A converter such as \TeX2page that can
 convert \TeX\ macro definitions in addition to basic \TeX\
 markup enables the format converted to to also benefit
-from \TeX's extensibility.  For the cases where
-\TeX2page's implementation of the \TeX\ macro system is
+from \TeX’s extensibility.  For the cases where
+\TeX2page’s implementation of the \TeX\ macro system is
 not manipulable enough, the document writer can use the
 \TeX2page {\em extension language}, which is full Scheme or Common Lisp
 augmented with all the \TeX2page procedure definitions.
@@ -116,7 +116,7 @@ The rest of this manual is organized as follows:
 \TeX2page is invoked in much the same way as plain \TeX\
 or \LaTeX.\f{Hereafter, we will use {\em \TeX} to mean
 any format of \TeX, and {\em plain \TeX} when we
-specifically mean the ``plain'' format.}
+specifically mean the “plain” format.}
 For instance, given a plain-\TeX\ document file
 with the relative or full pathname
 \p{|meta[wherever-it-is/jobname].|meta[ext]}, where
@@ -183,7 +183,7 @@ to see)\fi.
 
 The {\em log file} \p{story.hlog}
 contains a copy of the above log, and is useful
-if you didn't or couldn't keep track of the console
+if you didn’t or couldn’t keep track of the console
 (perhaps because the log was too long).
 The log says that \p{story.tex} lacked a
 document-ending command such as \p{\end} (or \p{\bye})
@@ -237,7 +237,7 @@ respectively.  While the man page is always a single page, the Info and
 Vim-help output is composed of multiple files if the HTML document contains
 pagebreaks.}\fi
 
-%can be used to create such ``low-tech'' but
+%can be used to create such “low-tech” but
 %easy-access hypertext that is readable on any
 %tags-capable text editor.
 
@@ -277,7 +277,7 @@ typically permitted for \p{TEXINPUTS}.
 %looking for files in \p{TEXINPUTS}.\f{The \p{TEXINPUTS}
 %value can use a quite complicated syntax, which is why
 %\TeX2page uses its own environment variable instead of
-%simply reusing TeX's \p{TEXINPUTS}.  However, to make a
+%simply reusing TeX’s \p{TEXINPUTS}.  However, to make a
 %virtue out of a necessity, it is quite unnecessary for
 %\TeX2page to attempt parsing most of the TeX files that
 %are accessible via \p{TEXINPUTS}.  Furthermore, you can
@@ -297,7 +297,7 @@ p.~\ref{recovery}.
 Like most recent versions of \TeX, \TeX2page also
 supports the standard self-identification
 arguments \p{--help} and \p{--version}.  These
-arguments elicit help only if there isn't an input file
+arguments elicit help only if there isn’t an input file
 (e.g., \p{--help.tex}) that could match them.
 
 \TeX2page called without an argument displays a help
@@ -372,7 +372,7 @@ directory.
 The files used for specifying the target directory are:
 \p{|meta[jobname].hdir} in the working directory,
 \p{.tex2page.hdir} in the working directory, and
-\p{.tex2page.hdir} in the user's \p{HOME} directory.
+\p{.tex2page.hdir} in the user’s \p{HOME} directory.
 The first line of the first of these files that exists
 is taken to be the name of the target directory.
 If none of the files exists, the current working
@@ -390,7 +390,7 @@ The filename may contain the \TeX\ control sequence
 the \TeX\ document.  To always use an auxiliary
 subdirectory with the same name as the basename of the
 \TeX\ document, have \p{~/.tex2page.hdir} contain the
-line ``\p{\jobname}'' (without quotes).
+line “\p{\jobname}” (without quotes).
 
 \iffalse
 beginsection Info files
@@ -415,24 +415,24 @@ The result is one or more Info files, the first of them named
 \fi
 
 \iffalse
-Split following into two chapters, "\TeX\ commands", about
-commands that \TeX2page doesn't recognize,
+Split following into two chapters, “\TeX\ commands”, about
+commands that \TeX2page doesn’t recognize,
 and
-"\TeX2page commands", about commands that \TeX\ doesn't
+“\TeX2page commands”, about commands that \TeX\ doesn’t
 recognize, without help, i.e.  (The latter may simply be
 because the command is from a different format.  \TeX2page
 recognizes both formats, but one format may not recognize
-the commands of the other.  Esp., plain \TeX\ won't understand
+the commands of the other.  Esp., plain \TeX\ won’t understand
 \LaTeX\ cmds.
 
-Perhaps "Paper and Screen" chapter can be rolled into these
+Perhaps “Paper and Screen” chapter can be rolled into these
 two chapters.  Can probably eliminate or at least
 drastically shorten the chapters about
 Sections, Verbatim, Cross-references, Color.
 
 Readers of this manual and users of this program will
-already know (La)TeX.  It is not this manual's job to
-introduce them to what's possible in (La)TeX.
+already know (La)TeX.  It is not this manual’s job to
+introduce them to what’s possible in (La)TeX.
 \fi
 
 \beginchapter 2  \TeX\ commands
@@ -501,7 +501,7 @@ and the vast arena of macro files and packages that
 \TeX2page does not know.  If in math mode (assuming
 math is translated as text and not image
 (p.~\ref{mathflag})), \TeX2page
-simply types the command's name without the leading
+simply types the command’s name without the leading
 escape character.  This is sometimes a good choice, as
 in the following text (where \p{\sin} and \p{\cos} are not
 explicitly recognized by \TeX2page):
@@ -519,7 +519,7 @@ $$\sin^2 x + \cos^2 x = 1$$
 \n which is clear enough.
 
 If in non-math mode, \TeX2page simply ignores commands
-it doesn't understand.  This is also usually a good
+it doesn’t understand.  This is also usually a good
 thing, as commands like \p{\leavevmode}, \p{\/}, and
 \p{\-} are best translated into HTML as nothing at all.
 
@@ -529,7 +529,7 @@ are loaded with \p{\usepackage} or \p{\input}.  If the
 commands offered by these packages are not already
 recognized by \TeX2page, they will be ignored too, and
 often this is not a problem.  E.g., you can use a
-package for generating double columns --- while this is
+package for generating double columns — while this is
 a great
 paper-saver for your printed copy, it is generally not
 important for the HTML version and so is no loss if
@@ -545,13 +545,13 @@ thereby permitting a vast cornucopia of characters
 to be entered verbatim (i.e.,
 without the aid of \TeX\ commands) in the source document.  \TeX2page
 follows modern practice in typesetting Unicode characters as themselves
-(provided of course they haven't been deliberately \p{\catcode}'d to
+(provided of course they haven’t been deliberately \p{\catcode}’d to
 mean something special).
 
 \index{char@\p{\char}}
 In particular, \TeX2page, like \TeX,
 recognizes the \p{\char} command, followed by a \TeX\ number $n$, as a
-directive to output the character $n$ in the current font --- but
+directive to output the character $n$ in the current font — but
 \TeX2page assumes a Unicode font is meant.
 You may need to use conditionals
 to ensure that the same glyphs are typeset in both the HTML and the
@@ -605,13 +605,13 @@ an environment called
 }
 
 \n Failing to use \p{\htmlonly} does not affect
-\TeX2page's operation, but may cause problems when \TeX\
+\TeX2page’s operation, but may cause problems when \TeX\
 is called on the same document.
 Incidentally, the fact that \p{\htmlonly} and \p{\endhtmlonly}
 have no definition in \TeX\ is quite all right, as \TeX\
 will only see the else branch of the \p{\ifx}.
 
-Now, let's say you want to have  your document load the macro file
+Now, let’s say you want to have  your document load the macro file
 \p{manmac.tex}, but in a way that \TeX2page will ignore
 it.  Use:
 
@@ -639,7 +639,7 @@ definition for \TeX2page:
 }
 
 \n Of course, we want this definition to be seen only
-by \TeX2page, as we don't want to override the
+by \TeX2page, as we don’t want to override the
 original, more sophisticated \p{\vrule}-based definition as seen by TeX.
 We therefore make our
 definition HTML-only
@@ -786,7 +786,7 @@ index, and bibliography.
 It is also possible that the
 document uses commands from external macro files
 without actually loading said files.  \TeX2page will be
-indulgent, but plain \TeX\ and \LaTeX\ won't.
+indulgent, but plain \TeX\ and \LaTeX\ won’t.
 In this case,
 simply loading the macro files should be
 enough.    Thus, a plain \TeX\ document using the \p{\cite}
@@ -912,12 +912,12 @@ Unlike \TeX, \TeX2page does not automatically split the document into
 pages at regular vertical lengths.
 \TeX2page will start a new HTML page only at \p{\chapter}
 commands and at explicit page break commands such as
-\p{\eject} or \LaTeX's \p{\clearpage}. It is possible to disable
+\p{\eject} or \LaTeX’s \p{\clearpage}. It is possible to disable
 pagebreaks entirely with the \p{\TZPsinglepage} flag
 (p.~\ref{singlepage}).
 
 (It is advisable to place a \p{\vfill} before
-\p{\eject} so the DVI document doesn't cause the
+\p{\eject} so the DVI document doesn’t cause the
 pre-\p{\eject} text  to increase its
 interparagraph space unsightlily in order to fill
 the physical page.)
@@ -943,8 +943,8 @@ navigation bar.  The nav bar is customizable if you set the
 \index{readtocfile@\p{\readtocfile}}
 \index{tocdepth@\p{\tocdepth}}
 %
-\TeX2page recognizes \LaTeX's \p{\tableofcontents} and
-Eplain's \p{\readtocfile}, both of which list the table
+\TeX2page recognizes \LaTeX’s \p{\tableofcontents} and
+Eplain’s \p{\readtocfile}, both of which list the table
 of contents (ToC). Each section name in the ToC links to the
 page on which the section occurs.  In \LaTeX, the ToC
 lists the numbered section names in the document, upto
@@ -957,11 +957,11 @@ In formats other than \LaTeX, the user would have to
 define section commands that explicitly wrote to the
 ToC.  A helper macro for this is
 \p{\writenumberedtocline}, whose three arguments are
-the section's depth, number, and heading, all of which
+the section’s depth, number, and heading, all of which
 can be empty (\p{{}}).  Your \TeX\ format may have its
 own macro for writing lines into the ToC
 (\p{\writenumberedtocline} is the Eplain name for this
-macro).  \TeX2page also understands \LaTeX's
+macro).  \TeX2page also understands \LaTeX’s
 \p{\addcontentsline}.  For other formats, if you intend
 to use their explicit ToC addition macro, you will need
 to furnish an HTML-only definition for it in terms of
@@ -973,10 +973,10 @@ to furnish an HTML-only definition for it in terms of
 \index{footnote@\p{\footnote}}
 \index{vfootnote@\p{\vfootnote}}
 \index{numberedfootnote@\p{\numberedfootnote}}
-Both unnumbered and numbered footnotes --- plain \TeX's
+Both unnumbered and numbered footnotes — plain \TeX’s
 \p{\footnote} and \p{\vfootnote},
-LaTeX's \p{\footnote}, Eplain's
-\p{\numberedfootnote} --- are recognized.
+LaTeX’s \p{\footnote}, Eplain’s
+\p{\numberedfootnote} — are recognized.
 They are translated as in DVI (modulo what constitutes
 a page), but additionally, the footnote mark in the text body
 is a link to the footnote mark in the footnote text,
@@ -1000,7 +1000,7 @@ follows:
 \TeX2page already recognizes \p{\numberedfootnote}.
 However, the \TeX\ programming in this definition is
 recognized by \TeX2page, so it does not matter if it
-overrides \TeX2page's internal definition.
+overrides \TeX2page’s internal definition.
 
 Indeed, one could define a
 more complicated macro such as the following
@@ -1045,8 +1045,8 @@ ones.
 \TeX2page
 can use the external program \BibTeX~\cite{latex,bibtex} to
 generate bibliographies from bibliographic database
-(\p{.bib}) files.  The bibliography commands ---
-\p{\cite} and the rest --- are included in \LaTeX, but
+(\p{.bib}) files.  The bibliography commands —
+\p{\cite} and the rest — are included in \LaTeX, but
 for Plain \TeX\ must be explicitly loaded via the macro
 file \p{btxmac.tex}.  In HTML, the citation created by
 \p{\cite} is a link to the corresponding entry in the
@@ -1067,14 +1067,14 @@ p~71]{latex}.
 %
 \TeX2page can use the external program
 MakeIndex~\cite{ind,makeindex} to generate indices.
-\TeX2page's index-generation feature follows the same
+\TeX2page’s index-generation feature follows the same
 conventions as traditionally used with \TeX\ and its
 derived packages~\cite[sec.~4.5 \& appendix~A]{latex}.
 
 \index{printindex@\p{\printindex}}
 \index{inputindex@\p{\inputindex}}
 The sorted index is inserted in the document with a
-command such \LaTeX's \p{\printindex} or the more
+command such \LaTeX’s \p{\printindex} or the more
 general \p{\inputindex}.  The latter does not include a
 section header, so you can print your index your own
 way, e.g., with a different section type and title, and
@@ -1107,7 +1107,7 @@ subsequent occurrences to distinguish them visually.
 \index{ref@\p{\ref}}
 \index{pageref@\p{\pageref}}
 \index{cross-references!internal}
-LaTeX's \p{\label} and \p{\ref} produce internal
+LaTeX’s \p{\label} and \p{\ref} produce internal
 cross-references in the HTML.  The \p{\label} {\em anchors}
 a location in the document, and a \p{\ref} anywhere
 else in the document links to it.  The link text used
@@ -1134,7 +1134,7 @@ an explicit link text as its second argument.
 identified by the \p{\xrtag}.\f{%
 %
 Eplain offers a version of \p{\xrtag} which it calls
-\p{\definexref}.  \TeX2page recognizes Eplain's \p{\refn} and
+\p{\definexref}.  \TeX2page recognizes Eplain’s \p{\refn} and
 \p{\xrefn} as synonyms for the \p{\ref} described
 above.  Eplain also has a \p{\ref} macro, but it
 behaves differently than a \LaTeX-like \p{\ref}.}
@@ -1203,9 +1203,9 @@ The command
 \n lets
 you link to arbitrary URLs, not just to labels within
 your document (although it can do that too).  In the
-HTML output, a hyperlink to `\p{|meta[URL]}' is created, with
-the link text being `\p{|meta[HTML text]}'.  In the DVI
-output, the part `\p{|meta[DVI text]}' is output.  Example:
+HTML output, a hyperlink to ‘\p{|meta[URL]}’ is created, with
+the link text being ‘\p{|meta[HTML text]}’.  In the DVI
+output, the part ‘\p{|meta[DVI text]}’ is output.  Example:
 
 \p{
 For more details, consult
@@ -1231,7 +1231,7 @@ Ithaka repository.
 \endquote
 
 \n where
-``{\em the Odyssey}'' is an HTML link to the site
+“{\em the Odyssey}” is an HTML link to the site
 \path|http://www.ithaka.org/odyssey.html|.
 
 \p{\urlhd} is named to be mnemonic for its
@@ -1242,7 +1242,7 @@ text.
 Note that you can use \p{\urlhd} for cross-referencing
 within the document also.  The URL in such cases will
 be a label as specified by a \p{\label} or a
-\p{\xrtag} command, but should add a `\p{#}' prefix.  E.g.,
+\p{\xrtag} command, but should add a ‘\p{#}’ prefix.  E.g.,
 
 \p{
 See \urlhd{#hairy}{below}{section~\ref{hairy}}
@@ -1252,20 +1252,20 @@ for further details.
 \n where the further details are described in a section
 annotated with \p{\label{hairy}}.  Assume this
 section is numbered 21.  Then, the reference typesets
-as ``See section 21 \dots'' in the DVI output and ``See
-{\em below} \dots'' in the HTML output (with {\em below}
+as “See section 21 \dots” in the DVI output and “See
+{\em below} \dots” in the HTML output (with {\em below}
 being a link).  In contrast, if we had written
 
 \p{
 See section~\ref{hairy} for further details.
 }
 
-\n we would have had ``See section 21 \dots'' in both
+\n we would have had “See section 21 \dots” in both
 DVI and HTML.   \p{\urlhd} is thus more flexible
 than \p{\ref}.
 
 Because of page breaks in the HTML output
-(p.~\ref{eject}), it is possible that a label's
+(p.~\ref{eject}), it is possible that a label’s
 definition and the references to it do not ultimately
 sit on the same {\em physical} HTML page.
 Nevertheless, your \TeX\ source can use \p{#tag}-style
@@ -1276,7 +1276,7 @@ correct fully qualified equivalent.
 \beginsection Common hyperlink abbreviations
 
 \index{href@\p{\href}}
-In some cases, \p{\urlhd}'s second and third arguments may be mere repetitions
+In some cases, \p{\urlhd}’s second and third arguments may be mere repetitions
 of a preceding argument.  For such cases, \TeX2page
 recognizes some convenient abbreviations, viz.,
 \p{\urlh}, \p{\urlp}, and \p{\url}.  (A version of
@@ -1303,11 +1303,11 @@ URL, and the second is the descriptive text that is used in
 
 \endquote
 
-\n In the HTML output, ``the TUG website'' is a hyperlink to
+\n In the HTML output, “the TUG website” is a hyperlink to
 \path|http://www.tug.org|.
 
 \index{\\@\p{\\}!in \p{\urlh}}
-An optional \p{\\} may be used inside \p{\urlh}'s second argument.  The
+An optional \p{\\} may be used inside \p{\urlh}’s second argument.  The
 text before the \p{\\} is used in both the HTML and the DVI
 outputs.  The text after the \p{\\} is used only in
 the DVI output.  This helps you to specify extra information
@@ -1328,7 +1328,7 @@ output lacks the information implicit in the hyperlink.  For example:
 \endquote
 
 \n The HTML output will not mention the parenthesized domain
-name, since the word ``TUG'' already hyperlinks to it.
+name, since the word “TUG” already hyperlinks to it.
 
 \p{\\} is useful for internal cross-references too.  For
 example (assuming the label \p{callcc} refers to section 2.3):
@@ -1349,10 +1349,10 @@ using \urlh{#callcc}{{\tt callcc}\\ (section~\ref{callcc})}.
 
 \n in the DVI output.  In the HTML output, the parenthesized
 section reference will be dropped as redundant, as
-the word ``{\tt callcc}'' hyperlinks to the relevant section.
+the word “{\tt callcc}” hyperlinks to the relevant section.
 
 An optional \p{\1} may be used after \p{\\} to refer to
-\p{\urlh}'s first argument, i.e.,
+\p{\urlh}’s first argument, i.e.,
 the URL.
 Example:
 
@@ -1370,7 +1370,7 @@ Example:
 \endquote
 
 \n in the DVI output.  In the HTML output, the parenthesized
-URL is dropped as redundant, as the word ``TUG''
+URL is dropped as redundant, as the word “TUG”
 hyperlinks to it.
 
 Finally, the combination of \p{\xrtag} and
@@ -1402,8 +1402,8 @@ the following text
 \endquote
 
 \n in both the DVI and the HTML.  However, in the
-HTML, the proclamations ``{\bf Exercise 1.}''\ and
-``{\bf Answer 1.}''\ are also helpful hyperlinks to each other.
+HTML, the proclamations “{\bf Exercise 1.}”\ and
+“{\bf Answer 1.}”\ are also helpful hyperlinks to each other.
 
 \index{url@\p{\url}}
 \p{\url} takes just one argument, the URL.  For the
@@ -1443,9 +1443,9 @@ flags should not affect the print output.
 \index{title@\p{\title}}
 \index{maketitle@\p{\maketitle}}
 %
-By default, the ``external'' title of the HTML document ---
+By default, the “external” title of the HTML document —
 i.e., the string that appears on the title bar of the
-browser window --- is either the same as the internal title,
+browser window — is either the same as the internal title,
 as specified with the \p{\title} command, or, if that is not
 available, the basename of the document source file.  If you
 wish the external title to be something else, you can set
@@ -1495,7 +1495,7 @@ colophon,
 }
 
 \n If the underlying
-Scheme is incapable of determining a file's write date, \TeX2page will
+Scheme is incapable of determining a file’s write date, \TeX2page will
 not mention the timestamp, regardless of the \p{\TZPcolophontimestamp} setting.
 
 \index{TZPcolophoncredit@\p{\TZPcolophoncredit}}
@@ -1512,7 +1512,7 @@ To avoid linking to the \TeX2page website in the colophon,
 \let\TZPcolophonweblink=0
 }
 
-\n If \p{\TZPcolophoncredit} is 0, the colophon won't link to the \TeX2page
+\n If \p{\TZPcolophoncredit} is 0, the colophon won’t link to the \TeX2page
 site, regardless of the \p{\TZPcolophonweblink} setting.
 
 \beginsection Math image flag
@@ -1522,7 +1522,7 @@ site, regardless of the \p{\TZPcolophonweblink} setting.
 The \p{\TZPmathimage} flag
 specifies whether mathematical fragments in the
 document should be rendered as image or text.  By default, \TeX2page will
-generate images for displayed math and for ``complicated''
+generate images for displayed math and for “complicated”
 in-text math (i.e., math embedded in running text).   If the
 in-text math is simple according its judgment, \TeX2page will
 economize by generating its text (UTF-8) equivalent.
@@ -1553,7 +1553,7 @@ not require complicated notation.
 \index{gif@\p{gif} (image format)}
 %
 These flags specify the conversion tactics used
-for generating HTML-suitable images from the user's graphics
+for generating HTML-suitable images from the user’s graphics
 requests.  \TeX2page invokes a combination of \TeX\ and
 Dvips~\cite{dvips} to create a PostScript version of the
 graphic, and then Ghostscript~\cite{gs} and either (a) the
@@ -1588,12 +1588,12 @@ contain the name of your preferred \TeX\ executable, e.g.,
 \def\TZPtexprogname{xetex}
 }
 
-You only need to set the executable name used for the ``plain'' format:
+You only need to set the executable name used for the “plain” format:
 \TeX2page will deduce the appropriate name for the \LaTeX\ executable,
 which will be used to generate images if the entire document is in the
 \LaTeX\ format.  (This is so that any image preambles
 (p.~\ref{imgpreamble}) you use match the
-document's format.)
+document’s format.)
 
 \beginsection Flag for Scheme code comments
 
@@ -1638,7 +1638,7 @@ restricts your Scheme comments to text that is valid \TeX.
 \xrdef{texlayout}
 %
 By default, \TeX2page produces block paragraphs with about a
-baseline's worth of vertical space separating paragraphs, and text width
+baseline’s worth of vertical space separating paragraphs, and text width
 expands to fill the browser width, allowing for some margins.
 
 To produce more \TeX-like layout, i.e., with no parskip and
@@ -1668,7 +1668,7 @@ and \p{\footline} as they are at the end of
 the document.
 
 The command \p{\folio} inside the tokens \p{\headline} and \p{\footline}
---- and only inside them ---
+— and only inside them —
 produces in HTML not the current page number but rather twin links to the
 adjacent pages. \p{\folio} thus lets you create navigation
 bars.
@@ -1771,7 +1771,7 @@ set the flag \p{\TZPredirect} to contain the target URL.
 \def\TZPredirect{http://newhome.com/path/samedoc.html}
 }
 This is useful when
-you've moved the location of a page but the old URL is still being used.
+you’ve moved the location of a page but the old URL is still being used.
 
 The content of the document is obviously irrelevant.  However, you may
 put in \p{\eject}s in your \TeX\ source to create the same number of pages as
@@ -1853,7 +1853,7 @@ are discussed in this manual alongside the commands
 that they govern (p.~\ref{verb-style}).
 %also \ref{syntax-hilite}
 
-You can have as many \p{\inputcss}'s in your
+You can have as many \p{\inputcss}’s in your
 document as you wish.  They will be combined in
 the sequence in which they appear.  It is perhaps
 necessary to add that style sheets are completely
@@ -1895,8 +1895,8 @@ Styles}~\cite{w3ccorestyles}.
 \index{verb@\p{\verb}}
 %
 \TeX2page recognizes a slightly enhanced version of
-\LaTeX's \p{\verb} command.
-Recall that \LaTeX's \p{\verb}'s argument is enclosed
+\LaTeX’s \p{\verb} command.
+Recall that \LaTeX’s \p{\verb}’s argument is enclosed
 within a pair of identical characters (not whitespace
 or \p{*}), and this argument is printed verbatim.  This
 is useful for typesetting things like fragments of computer code.
@@ -1908,8 +1908,8 @@ argument in
 
 The command \p{\verb} is used for text that should be
 set verbatim, such as fragments of computer code.
-\p{\verb}'s argument is enclosed within a
-pair of identical characters (that aren't whitespace,
+\p{\verb}’s argument is enclosed within a
+pair of identical characters (that aren’t whitespace,
 \p+{+, or \p{*}).  For example,
 
 \p$
@@ -1925,13 +1925,13 @@ $
 a \verb&cdr&.
 \endquote
 
-\n You could also use matching braces to enclose \verb{\verb}'s
+\n You could also use matching braces to enclose \verb{\verb}’s
 argument, provided the latter does not contain unmatched
 braces.  E.g.,
 
 \p{
 The command \verb{\section{Imagining a Conscious Robot}}
-typesets `\verb{Imagining a Conscious Robot}' as a section
+typesets ‘\verb{Imagining a Conscious Robot}’ as a section
 title.
 }
 
@@ -1941,12 +1941,12 @@ title.
 
 \n
 The command \verb{\section{Imagining a Conscious Robot}}
-typesets `\verb{Imagining a Conscious Robot}' as a section
+typesets ‘\verb{Imagining a Conscious Robot}’ as a section
 title.
 
 \endquote
 
-\n If \verb{\verb}'s argument commences with a newline, it is
+\n If \verb{\verb}’s argument commences with a newline, it is
 set as a display.  E.g.,
 
 \p{
@@ -1977,26 +1977,26 @@ indentation.
 \index{*@\p{*}!for visible verbatim space}
 
 As in \LaTeX, if a \p{*} immediately follows \p{\verb}, any spaces in
-\p{\verb}'s argument text are highlighted as something
+\p{\verb}’s argument text are highlighted as something
 that is visible.  This allows you to easily count
 spaces or tell if there is trailing space on a line.
 
 \p{
-``\verb*{three   spaces}''
+“\verb*{three   spaces}”
 }
 
 \n produces
 
 \quote
 
-\n ``\verb*{three   spaces}''
+\n “\verb*{three   spaces}”
 \endquote
 
 \index{path@\p{\path}}
 
-\TeX2page also understands \LaTeX's \p{{verbatim}}
+\TeX2page also understands \LaTeX’s \p{{verbatim}}
 environment, the \p{\path} macro from \p{path.sty}, and
-Eplain's \p{\verbatim}.
+Eplain’s \p{\verbatim}.
 
 \beginsection Commands within verbatim
 
@@ -2005,13 +2005,13 @@ Eplain's \p{\verbatim}.
 %
 Often you want to use \TeX\ commands in special spots within
 verbatim text, especially displayed verbatim material.  For
-this reason, the character `\p+|+' is allowed as an escape
+this reason, the character ‘\p+|+’ is allowed as an escape
 character {\em if the verbatim text is enclosed within
 braces}.
 
 \index{def@\p{\def}}
 
-As an example, let's say you've defined an \p{\evalsto}
+As an example, let’s say you’ve defined an \p{\evalsto}
 macro to use in cases where you want to say a program
 expression {\em evaluates to} a result.  A possible
 definition is:
@@ -2047,14 +2047,14 @@ verbatim are: \p+||+ to insert the escape character itself; and
 \index{verbatimescapechar@\p{\verbatimescapechar}}
 %
 You can use the Eplain and \TeX2page macro \p{\verbatimescapechar} to
-postulate a character other than `\p+|+' as the
+postulate a character other than ‘\p+|+’ as the
 verbatim escape.  E.g.,
 
 \p{
 \verbatimescapechar\@
 }
 
-\n makes `\p{@}' the verbatim escape.
+\n makes ‘\p{@}’ the verbatim escape.
 
 \beginsection Inserting files verbatim
 
@@ -2063,7 +2063,7 @@ verbatim escape.  E.g.,
 \index{listing@\p{\listing}}
 %
 You can insert files verbatim with the command
-\p{\verbatiminput} (from \LaTeX's \p{verbatim.sty}) or with Eplain's
+\p{\verbatiminput} (from \LaTeX’s \p{verbatim.sty}) or with Eplain’s
 \p{\listing}.  Usage:
 
 \p{
@@ -2103,7 +2103,7 @@ deletes any pre-existing contents of its argument file.
 \TeX2page also recognizes the \TeX\ command
 \p{\write}, which takes two arguments: an {\em output
 stream number} and a \TeX\ expression to be output.
-Recall that \TeX\ allows only the numbers 0--15 for
+Recall that \TeX\ allows only the numbers 0–15 for
 output streams that can be associated with files;
 numbers outside this range are deemed to represent
 standard output.  However: \TeX2page follows modern
@@ -2155,7 +2155,7 @@ code in the HTML file.  E.g.,
         (* n (fact (- n 1))))))
 }
 }
-\ifx\shipout\UnDeFiNeD % since the colors won't show on the DVI
+\ifx\shipout\UnDeFiNeD % since the colors won’t show on the DVI
 produces
 
 \q{
@@ -2213,8 +2213,8 @@ want builtins distinguished can use
 \scmbuiltin{cons car cdr}
 }
 
-Users who do not want to distinguish Common Lisp--style
-global (``special'') variables as a separate category from
+Users who do not want to distinguish Common Lisp–style
+global (“special”) variables as a separate category from
 other variables should give the style class \p{.global} the
 same properties as \p{.variable}, e.g.,
 
@@ -2229,7 +2229,7 @@ E.g.,
 \scmkeyword{define-class unwind-protect}
 }
 
-By default, tokens that don't fall in any of the
+By default, tokens that don’t fall in any of the
 other categories are set as variables.  However,
 \p{\scmvariable} can be used to explicitly identify as
 variables those tokens that are currently treated as
@@ -2252,7 +2252,7 @@ that these commands typeset code in the DVI output
 using fonts (rather than color) for highlighting.
 For the HTML, \TeX2page will use color.
 
-A minor point is that S\LaTeX's commands allow \TeX\
+A minor point is that S\LaTeX’s commands allow \TeX\
 commands inside Scheme comments.  This is useful
 if you want to highlight mentions of Scheme code inside
 Scheme comments.  To get the same effect with \TeX2page,
@@ -2382,7 +2382,7 @@ can avoid math-related images completely.  \TeX2page
 recognizes the \TeX\ command \p{\romannumeral}, which
 produces the roman equivalent of the following arabic
 number (\p{\romannumeral 1986} = \romannumeral 1986).
-\p{\romannumeral} produces lower-case letters ---
+\p{\romannumeral} produces lower-case letters —
 \p{tex2page.tex} includes \p{\Romannumeral}, whose
 result is all-upper-case  (\p{\Romannumeral 1986} =
 \Romannumeral 1986).
@@ -2410,7 +2410,7 @@ or algebraic
 ones like MetaPost~\cite{metapost}.
 \iffalse
 It is also
-possible to write a picture's specification in
+possible to write a picture’s specification in
 the document, while still relying on an external
 program to make sense of it.  An example is
 MFpic~\cite{mfpic}, whose \TeX\ macros transform
@@ -2493,14 +2493,14 @@ which we load with
 \index{errorstopmode@\p{\errorstopmode}}
 %
 The file
-\p{lambda.mp} was actually written out from this document's
+\p{lambda.mp} was actually written out from this document’s
 source using \p{\verbwrite} (p.~\ref{verbwritefile}),
-so the file \p{lambda.1} isn't immediately available.
+so the file \p{lambda.1} isn’t immediately available.
 Nevertheless, \TeX2page will take care to call MetaPost
 on the generated \p{lambda.mp} file, ensuring that the EPS
 file is available for conversion into an HTML image.
 In contrast, when getting the DVI version of the
-document via \TeX, it is the user's responsibility to
+document via \TeX, it is the user’s responsibility to
 call MetaPost on generated files, and call \TeX\
 again.  Unfortunately, commands like \p{\epsfbox}
 and \p{\includegraphics}, when they do not find their argument
@@ -2531,7 +2531,7 @@ the missing-file error.}
 width and height by assigning to the dimen
 registers \p{\epsfxsize} and \p{\epsfysize}
 (specifying only one of them will cause the other to
-change as well, maintaining the image's aspect ratio).
+change as well, maintaining the image’s aspect ratio).
 \TeX2page will respect such sizes, equating one browser
 pixel to one point (= 1/72.27 inch).  Thus,
 
@@ -2561,11 +2561,14 @@ MetaPost-created EPS files with the
 \n \p{\convertMPtoPDF} is defined in the macro file
 \p{supp-pdf.tex} of the \ConTeXt\ package,
 which is included in most modern distributions of \TeX.
-Caveat: \p{\convertMPtoPDF} doesn't work for EPS files
-that weren't made using MetaPost!
+Caveat: \p{\convertMPtoPDF} doesn’t work for EPS files
+that weren’t made using MetaPost!
 
-If you use \XeTeX, continue to use \p{epsf.tex} or \p{epsfig.sty} as
-described above, even though the output is PDF.
+If you use \XeTeX, source \p{tex2page.tex} to get a usable definition of
+\p{\epsfbox}.
+%continue to use \p{epsf.tex} or \p{epsfig.sty} as
+%described above, even though the output is PDF.
+%(This is failing. The image is placed off-kilter.)
 
 \index{pdfximage@\p{\pdfximage}}
 
@@ -2606,11 +2609,11 @@ supported by HTML, so \TeX2page does not need to convert them.
 %images.
 %
 You may explicitly request any part at all of your \TeX\
-document --- not just its math or EPS inserts ---
+document — not just its math or EPS inserts —
 to be converted into images for your HTML output.  The
 fragment of the document to be converted to image is
 given as an \p{\makehtmlimage} argument.
-Here's an example \TeX-based diagram from {\em
+Here’s an example \TeX-based diagram from {\em
 The \TeX book}~\cite[p~389]{tex}:
 
 \verbatiminput ursa-major.tex
@@ -2623,7 +2626,7 @@ The \TeX book}~\cite[p~389]{tex}:
 \smallskip
 %\endquote
 
-\n \p{\makehtmlimage}'s argument is a group containing
+\n \p{\makehtmlimage}’s argument is a group containing
 no unmatched braces.
 
 \beginsection Image preamble
@@ -2647,7 +2650,7 @@ defined elsewhere in the larger document.
 \TeX2page therefore provides the \p{\imgpreamble}
 \p{...} \p{\endimgpreamble} environment, into which
 are placed all definitions that are necessary for
-the HTML images.   For example, the ``image preamble''
+the HTML images.   For example, the “image preamble”
 
 \p{
 \ifx\shipout\UnDeFiNeD % HTML only
@@ -2669,7 +2672,7 @@ specified outside the \p{\imgpreamble} for use by \TeX\
 when it processes the entire document for DVI.
 
 Note that if you use encapsulated PostScript inserts,
-it is not necessary (though it doesn't hurt) to
+it is not necessary (though it doesn’t hurt) to
 specify an image preamble for loading the \p{epsf.tex}
 macro file or \p{graphicx.sty} package.  \TeX2page will
 automatically load them when processing the EPS files.
@@ -2864,17 +2867,17 @@ a very powerful {\em second extension language} for
 \TeX, and that its benefits are available to both the
 DVI and the HTML outputs.  As we have seen, \TeX2page
 implements a subset of the \TeX\ macro language, and for
-those cases where this macro language isn't enough,
+those cases where this macro language isn’t enough,
 Scheme can be used to fill the breach.  More generally,
 Scheme may be preferable to the \TeX\ macro language even
 for just DVI, where no HTML version of the document is
-contemplated.  We'll explore both of these
+contemplated.  We’ll explore both of these
 aspects of \p{\eval}.
 
-\p{\eval}'s argument is a balanced-brace
+\p{\eval}’s argument is a balanced-brace
 expression.  At the top-level, i.e., not within the body of a macro,
-\p{\eval}'s argument is sent verbatim to Scheme, except that the pipe character
-(`\p+|+') functions as the \TeX\ escape.  Use \p+||+ to represent a single
+\p{\eval}’s argument is sent verbatim to Scheme, except that the pipe character
+(‘\p+|+’) functions as the \TeX\ escape.  Use \p+||+ to represent a single
 pipe in the Scheme code.  If you need to include an unmatched brace, simply
 put a bogus matching brace inside a Scheme comment.
 
@@ -2887,7 +2890,7 @@ Let us first look at a simple example where
 \p{\eval} lets you define an HTML version of an already
 existing \TeX\ macro that is either impossible or at
 least prohibitively difficult  to process using
-\TeX2page's  mimicry of \TeX.  Consider a hypothetical
+\TeX2page’s  mimicry of \TeX.  Consider a hypothetical
 \p{\proto} macro, used to introduce the description of
 a Scheme operator by presenting a {\em prototypical}
 use of it.
@@ -2973,8 +2976,8 @@ is:
 }
 
 \n This piece of box-measuring contortion is
-too much for \TeX2page's mimicry of the \TeX\ macro
-system.  However, it's easy enough to  achieve the
+too much for \TeX2page’s mimicry of the \TeX\ macro
+system.  However, it’s easy enough to  achieve the
 same effect using the string-processing capabilities
 of Scheme:
 
@@ -3009,7 +3012,7 @@ of Scheme:
 +
 
 \n Note that we had to use \q{(integer->char 92)} to refer to the
-backslash character, as the \p{\eval} is inside a macro body and `\p{\}'
+backslash character, as the \p{\eval} is inside a macro body and ‘\p{\}’
 is not and cannot be made a letter.
 (Otherwise we could have simply written \q{(display "\\space")}.)
 
@@ -3063,7 +3066,7 @@ For complete details on using \p{\eval} with
 % documents that are not intended for HTML at all, and
 % that may fail to be processable by \TeX2page for reasons
 % unrelated to \p{\eval}.  Fortunately, this requirement
-% isn't necessary: Generic \TeX\ documents that cannot be
+% isn’t necessary: Generic \TeX\ documents that cannot be
 % converted by \TeX2page can still make use of the
 % \p{\eval} feature.  For the use of \p{\eval} in its
 % full generality, please see the companion manual,
@@ -3097,7 +3100,7 @@ The number of context lines so displayed is governed by
 the count register \p{\errorcontextlines}, which has a default
 value of 5.  Thus, setting \p{\errorcontextlines=7} will display
 seven lines.  Note that error contexts are often
-only approximate --- be prepared to look a little above
+only approximate — be prepared to look a little above
 or below the reported context.
 
 \index{TEXEDIT@\p{TEXEDIT} (environment variable)}
@@ -3119,10 +3122,10 @@ environment variables \p{TEXEDIT} (which is also used
 by \TeX) and \p{EDITOR}.
 
 If \p{TEXEDIT} is set, its string value (e.g.,
-``\p{vim +%d %s}'')
+“\p{vim +%d %s}”)
 is chosen as
 the entire editor call, with \p{%s} replaced by the offending
-file's name, and \p{%d} replaced by the number of the line
+file’s name, and \p{%d} replaced by the number of the line
 containing the error.
 If \p{TEXEDIT} is not set, or if
 it is mis-set, i.e., without \p{%s} or \p{%d}, then the
@@ -3147,7 +3150,7 @@ reach for an editor do tend to use \p{EDITOR}, and failing that,
 Sometimes, the diagnostic information in an error
 message may not be enough to track
 down the error.
-\TeX\ provides various commands for generating more diagnostics ---
+\TeX\ provides various commands for generating more diagnostics —
 \TeX2page recognizes the same commands to provide its own diagnostics.
 For instance,
 setting the count registers
@@ -3266,7 +3269,7 @@ p.~\ref{imageconv}) to convert them to the corresponding image files
 images.  If you had requested the PNG or JPEG format for images, the
 extensions of these aux files would be correspondingly different.)
 
-The above are ``single-use'' images.
+The above are “single-use” images.
 \p{story.tex} may reuse some image files within itself.
 Such image files have slightly different names and are
 numbered separately: \p{story-Z-G-D-1.gif}, etc.
@@ -3289,10 +3292,10 @@ the \p{\eval}s that occur in the HTML-only portions
 throwing the numbering off.  \p{\eval}s in
 HTML-only
 regions of the document are processed
-without any memorable aux files, because \TeX\ won't use
+without any memorable aux files, because \TeX\ won’t use
 them, and \TeX2page (which, unlike \TeX, can call Scheme
 immediately in the
-current run) doesn't need them.
+current run) doesn’t need them.
 
 \index{hdir file@\p{.hdir} file}
 
@@ -3308,7 +3311,7 @@ be \p{story.hdir}.
 
 \item{2.} \p{.tex2page.hdir} in the working directory.
 
-\item{3.} \p{.tex2page.hdir} in the user's \p{HOME} directory.
+\item{3.} \p{.tex2page.hdir} in the user’s \p{HOME} directory.
 
 \n The first line of the first of these files that exists
 is taken to be the name of the target directory.  If none of
@@ -3386,10 +3389,10 @@ Set \p{LISP} to
 and \p{sbcl} for SBCL~\cite{sbcl}.
 
 The top few lines in \p{tex2page.lisp} contain the lines
-that invoke Lisp ---  if they don't already address your
+that invoke Lisp —  if they don’t already address your
 particular Lisp
 implementation, you may need to add a line based on your
-Lisp's command line options.
+Lisp’s command line options.
 
 \beginsection When explicit configuration is needed
 
@@ -3397,7 +3400,7 @@ Lisp's command line options.
 In general, you need to {\em
 configure}
 \TeX2page so it runs on your system.  Even in cases where the supplied
-script runs ``out of the box'' for your setup, it may still be a good
+script runs “out of the box” for your setup, it may still be a good
 idea to do an explicit configuration.  In particular, for SBCL,
 configuration produces a compiled executable that is substantially
 faster than the script \p{tex2page.lisp}.
@@ -3407,7 +3410,7 @@ faster than the script \p{tex2page.lisp}.
 \beginsection Using {./configure}
 
 This method may not always work but is so easy that
-it's worth a try.  It should work for most
+it’s worth a try.  It should work for most
 dialects on Unix.
 
 \item{1.} Type \p{./configure --help} at your OS command line
@@ -3436,7 +3439,7 @@ The \p{./configure --dialect=|meta[D]} approach above
 essentially takes care to call Scmxlate (if needed) as described in
 this section, but unfortunately it may not work for
 some dialects or operating systems.  In such cases, you
-can manually call Scmxlate, which isn't really all that
+can manually call Scmxlate, which isn’t really all that
 tedious.
 
 First ensure that
@@ -3476,7 +3479,7 @@ or full pathname of \p{scmxlate.scm}.  For example,
 \n (assuming you unpacked Scmxlate in
 \p{/home/dorai/share}).  You will be asked a couple
 of questions about your setup.  A choice of answers
-will be provided, so you don't need to be too creative.
+will be provided, so you don’t need to be too creative.
 When Scmxlate finishes, you will be left with a
 version of \p{tex2page} called \p{my-tex2page},
 tailormade for your system.
@@ -3493,7 +3496,7 @@ is also created.  Move it to a directory in your
 \p{PATH}.  Edit the contents of \p{tex2page.bat} so
 that the pathnames it refers to are correct.
 
-\beginsection Can't create or don't want a {tex2page
+\beginsection Can’t create or don’t want a {tex2page
 script?}
 
 If the configuration process cannot create an

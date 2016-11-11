@@ -106,12 +106,12 @@ and supply
 
 at TeX’s interactive prompt.  Then do
 
-  xetex --shell-escape index
+  xetex index
   makeindex index
   bibtex index
-  mpost -s prologues=3 lambda
-  xetex --shell-escape index
-  xetex --shell-escape index
+  mpost lambda
+  xetex index
+  xetex index
 
 The first TeX run may fail due to missing files.  Simply type `s`
 at the TeX prompt to force TeX to continue.

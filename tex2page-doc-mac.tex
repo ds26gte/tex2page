@@ -1,14 +1,6 @@
-% last change: 2013-02-03
+% last change: 2016-11-10
 
-\ifx\pdfoutput\UnDeFiNeD
-\input txfonts
-%\input ncfonts
-\else
-% use times instead of cm
-\input txfonts
-% use new century schoolbook instead of cm
-%\input ncfonts
-\fi
+\input tgtermes
 
 %\magnification\magstephalf
 \input miniltx
@@ -30,6 +22,9 @@
 \inputepsf
 
 \input like-plt-logo
+
+\font\twelvebf "TeX Gyre Heros/B" at 12pt
+\def\chapterfont{\twelvebf \baselineskip=14.4pt }
 
 \def\beginmulticols#1{}
 \def\endmulticols{}

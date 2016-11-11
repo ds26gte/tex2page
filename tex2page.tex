@@ -7,7 +7,7 @@
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
-\message{version 20151119} % last change
+\message{version 20161110} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -755,11 +755,7 @@
   \def\par{\endgraf\endgroup\nobreak\noindent}%
   \bf}
 
-\ifx\twelvebf\UnDeFiNeD
-\def\fontstem#1{\expandafter\fontstemQii\fontname#1 \end}%
-\def\fontstemQii#1 #2\end{#1 }%
-\font\twelvebf \fontstem\tenbf at 12pt
-\fi
+\let\chapterfont\bf
 
 \def\beginchapter#1 #2 \par{%
   \edef\beginchapterQnr{#1}%
@@ -772,7 +768,7 @@
   \noindent
   \global\footnotenumber=0
   \writenumberedtocline{1}{\beginchapterQnr}{#2}%
-  \noindent\bgroup\twelvebf \baselineskip=14.4pt
+  \noindent\bgroup\chapterfont
   \ifx\beginchapterQnr\empty\else
   \beginchapterQnr\enspace\fi
   #2%
@@ -843,6 +839,21 @@
   \ifx\Gin@driver\UnDeFiNeD\def\Gin@driver{dvips.def}\fi
 \fi
 
+\ifx\XeTeXversion\UnDeFiNeD\else
+  \newdimen\epsfxsize \newdimen\epsfysize
+  \def\epsfbox#1{%
+    \message{doing xetex's version of epsfbox!}%
+    \ifnum\shellescape=1
+    \epsfboxQii #1\end
+    \epsfxsize=0pt \epsfysize=0pt
+    \else\message{XeTeX not called with --shell-escape}\fi}%
+  \def\epsfboxQii #1.#2\end{\immediate
+    \write18{cp #1.#2 #1-#2.eps;epstopdf #1-#2.eps}%
+    \lowercase{\XeTeXpdffile #1-#2.pdf
+      \ifdim\epsfxsize=0pt \else width\epsfxsize \fi
+      \ifdim\epsfysize=0pt \else height\epsfysize \fi}}%
+\fi
+
 \def\inputepsf{%
   \ifx\epsfbox\UnDeFiNeD
     \ifx\pdfoutput\UnDeFiNeD
@@ -863,6 +874,7 @@
       \epsfboxSAVE{##1}%
     \fi}%
 }
+
 
 % fluff
 

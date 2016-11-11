@@ -864,17 +864,16 @@
       \fi
       \def\epsfbox##1{\convertMPtoPDF{##1}{1}{1}}%
     \fi
-  \fi
-  \let\epsfboxSAVE\epsfbox
-  \def\epsfbox##1{%
-    \openin0 ##1
-    \ifeof0 \closein0
-      \message{##1 missing.}%
-    \else\closein0
-      \epsfboxSAVE{##1}%
-    \fi}%
-}
+  \fi}
 
+\let\epsfboxSAVE\epsfbox
+\def\epsfbox#1{%
+  \openin0 #1
+  \ifeof0 \closein0
+    \message{#1 missing.}%
+  \else\closein0
+    \epsfboxSAVE{#1}%
+  \fi}
 
 % fluff
 

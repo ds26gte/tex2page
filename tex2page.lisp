@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161110" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161111" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -832,7 +832,7 @@
                           (member c '(#\:) :test #'char=)) (return))
               (get-actual-char))))))
 
-(defun get-filename (bracedp)
+(defun get-filename (&optional bracedp)
   (ignorespaces)
   (when bracedp
     (let ((c (snoop-actual-char)))
@@ -865,8 +865,6 @@
                       (return s)))))
                 (t (get-actual-char)
                    (push c s)))))))))
-
-(defun get-plain-filename () (get-filename nil))
 
 (defun get-filename-possibly-braced ()
   (ignorespaces)
@@ -4239,7 +4237,7 @@
 
 (defun do-open-stream (type)
   (let* ((n (get-number))
-         (f (get-plain-filename))
+         (f (get-filename))
          (sl (if (eq type :out) *output-streams* *input-streams*))
          (c (gethash n sl)))
     (unless (eq c :free) (terror 'do-open-stream))
@@ -4542,14 +4540,14 @@
               (concatenate 'string (subseq *tex-prog-name* 0
                                            (- (length *tex-prog-name*) 3))
                            "latex"))))
-      (let* ((dvifile (concatenate 'string f
+      (let* ((dvi-file (concatenate 'string f
                                    (if (eq tex-output-format :pdf)
                                      ".pdf" ".dvi")))
-             (outfile dvifile))
+             (outfile dvi-file))
         (system (concatenate 'string
                              tex-prog-name
                              " " f))
-        (when (probe-file dvifile)
+        (when (probe-file dvi-file)
           (let ((logfile (concatenate 'string f ".log")))
             (when (probe-file logfile)
               ;scan the log file for sign of problems
@@ -4563,65 +4561,63 @@
                               (return nil)))))))
                 (when fine-p
                   (unless (eq tex-output-format :pdf)
-                    (let ((psfile (concatenate 'string f ".ps")))
+                    (let ((ps-file (concatenate 'string f ".ps")))
                       (system
-                        (concatenate 'string "dvips " dvifile " -o " psfile))
-                      (setq outfile psfile)))
+                        (concatenate 'string "dvips " dvi-file " -o " ps-file))
+                      (setq outfile ps-file)))
                   outfile))))))))
 
-(defun ps-to-img/gif/netpbm (psfile f)
+(defun ps-to-img/gif/netpbm (ps-file img-file)
   (system
-   (concatenate 'string *ghostscript* *ghostscript-options* " -sOutputFile=" f
-                ".ppm.1 " psfile " quit.ps"))
-  (system (concatenate 'string "pnmcrop " f ".ppm.1 > " f ".ppm.tmp"))
-  (system (concatenate 'string "ppmquant 256 < " f ".ppm.tmp > " f ".ppm"))
+   (concatenate 'string *ghostscript* *ghostscript-options* " -sOutputFile=" img-file
+                ".ppm.1 " ps-file " quit.ps"))
+  (system (concatenate 'string "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
+  (system (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
-   (concatenate 'string "ppmtogif -transparent rgb:ff/ff/ff < " f ".ppm > "
-                *aux-dir/* f ".gif"))
-  (mapc (lambda (e) (ensure-file-deleted (concatenate 'string f e)))
+   (concatenate 'string "ppmtogif -transparent rgb:ff/ff/ff < " img-file ".ppm > "
+                *aux-dir/* img-file))
+  (mapc (lambda (e) (ensure-file-deleted (concatenate 'string img-file e)))
         '(".ppm" ".ppm.tmp" ".ppm.1")))
 
-(defun ps-to-img/png/netpbm (psfile f)
+(defun ps-to-img/png/netpbm (ps-file img-file)
   (system
-   (concatenate 'string *ghostscript* *ghostscript-options* " -sOutputFile=" f
-                ".ppm.1 " psfile " quit.ps"))
-  (system (concatenate 'string "pnmcrop " f ".ppm.1 > " f ".ppm.tmp"))
+   (concatenate 'string *ghostscript* *ghostscript-options* " -sOutputFile=" img-file
+                ".ppm.1 " ps-file " quit.ps"))
+  (system (concatenate 'string "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
   '(system
-    (concatenate 'string "ppmquant 256 < " f ".ppm.tmp > " f ".ppm"))
+    (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
-   (concatenate 'string "pnmtopng -interlace -transparent \"#FFFFFF\" " " < " f
-                ".ppm.tmp > " *aux-dir/* f ".png"))
-  (mapc (lambda (e) (ensure-file-deleted (concatenate 'string f e)))
+   (concatenate 'string "pnmtopng -interlace -transparent \"#FFFFFF\" " " < " img-file
+                ".ppm.tmp > " *aux-dir/* img-file))
+  (mapc (lambda (e) (ensure-file-deleted (concatenate 'string img-file e)))
         '(".ppm.1" ".ppm.tmp" ".ppm")))
 
-(defun ps-to-img/jpeg/netpbm (psfile f)
+(defun ps-to-img/jpeg/netpbm (ps-file img-file)
   (system
-   (concatenate 'string *ghostscript* *ghostscript-options* " -sOutputFile=" f
-                ".ppm.1 " psfile  " quit.ps"))
-  (system (concatenate 'string "pnmcrop " f ".ppm.1 > " f ".ppm.tmp"))
-  (system (concatenate 'string "ppmquant 256 < " f ".ppm.tmp > " f ".ppm"))
+   (concatenate 'string *ghostscript* *ghostscript-options* " -sOutputFile=" img-file
+                ".ppm.1 " ps-file  " quit.ps"))
+  (system (concatenate 'string "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
+  (system (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
-   (concatenate 'string "ppmtojpeg --grayscale < " f ".ppm > " *aux-dir/* f
-                ".jpeg"))
-  (mapc (lambda (e) (ensure-file-deleted (concatenate 'string f e)))
+   (concatenate 'string "ppmtojpeg --grayscale < " img-file ".ppm > " *aux-dir/* img-file))
+  (mapc (lambda (e) (ensure-file-deleted (concatenate 'string img-file e)))
         '(".ppm.1" ".ppm.tmp" ".ppm")))
 
-(defun ps-to-img (psfile f)
+(defun ps-to-img (ps-file img-file)
   (case (tex2page-flag-value "\\TZPimageconverter")
     ((#\i #\I)
      (system
       (concatenate 'string "convert -transparent white -trim "
-                   psfile  " " f
-                   (find-img-file-extn))))
+                   ps-file  " " img-file)))
     (t (case (tex2page-flag-value "\\TZPimageformat")
-         ((#\p #\P) (ps-to-img/png/netpbm psfile f))
-         ((#\j #\J) (ps-to-img/jpeg/netpbm psfile f))
-         (t (ps-to-img/gif/netpbm psfile f))))))
+         ((#\p #\P) (ps-to-img/png/netpbm ps-file img-file))
+         ((#\j #\J) (ps-to-img/jpeg/netpbm ps-file img-file))
+         (t (ps-to-img/gif/netpbm ps-file img-file))))))
 
 (defun tex-to-img (f)
   (incf *img-file-tally*)
-  (let ((f.img (concatenate 'string *aux-dir/* f (find-img-file-extn))))
-    (unless (probe-file f.img)
+  (let ((img-file (concatenate 'string *aux-dir/* f (find-img-file-extn))))
+    (unless (probe-file img-file)
       (write-log :separation-space)
       (write-log #\{)
       (write-log (concatenate 'string f ".tex"))
@@ -4629,7 +4625,7 @@
       (write-log "->")
       (write-log :separation-space)
       (cond ((setq *it* (call-tex f))
-             (ps-to-img *it* f) (write-log f.img)
+             (ps-to-img *it* img-file) (write-log img-file)
              '(mapc
                (lambda (e)
                  (ensure-file-deleted (concatenate 'string f e)))
@@ -4727,18 +4723,18 @@
          (b1 (get-bracketed-text-if-any))
          (b2 (and b1 (get-bracketed-text-if-any)))
          (f (get-filename-possibly-braced))
-         (img-file-stem (next-html-image-file-stem))
          (ffull (if (probe-file f) f
-                  (some (lambda (e)
-                          (let ((f2 (concatenate 'string f e)))
-                            (and (probe-file f2) f2)))
-                        *graphics-file-extensions*)))
+                    (some (lambda (e)
+                            (let ((f2 (concatenate 'string f e)))
+                              (and (probe-file f2) f2)))
+                          *graphics-file-extensions*)))
          (ffull-ext (and ffull (file-extension ffull))))
     (cond ((and ffull-ext
                 (member ffull-ext '(".jpg" ".jpeg" ".png") :test #'string=))
            (do-includegraphics-web b1 ffull))
           (t (let ((*imgpreamble-inferred*
-                    (cons :includegraphics *imgpreamble-inferred*)))
+                     (cons :includegraphics *imgpreamble-inferred*))
+                   (img-file-stem (next-html-image-file-stem)))
                (call-with-lazy-image-port (or ffull f) img-file-stem
                  (lambda (o)
                    (princ "\\includegraphics" o)
@@ -4753,8 +4749,52 @@
                      (princ #\] o))
                    (princ #\{ o)
                    (princ f o)
-                   (princ #\} o))))
-             (source-img-file img-file-stem)))))
+                   (princ #\} o)))
+               (source-img-file img-file-stem))))))
+
+(defun do-xetexpdffile ()
+  (let* ((pdf-file (get-filename))
+         height width
+         (img-file-stem (next-html-image-file-stem))
+         (img-file (concatenate 'string *aux-dir/* img-file-stem (find-img-file-extn))))
+    (loop (cond ((eat-word "height") (setq height (get-pixels)))
+                ((eat-word "width") (setq width (get-pixels)))
+                (t (return))))
+    (unless (probe-file img-file)
+      (write-log :separation-space)
+      (write-log #\{)
+      (write-log pdf-file)
+      (write-log :separation-space)
+      (write-log "->")
+      (write-log :separation-space)
+      (write-log img-file)
+      (write-log #\})
+      (write-log :separation-space)
+      (ps-to-img pdf-file img-file))
+    (write-log #\()
+    (write-log img-file)
+    (write-log :separation-space)
+    (emit "<img src=\"")
+    (emit img-file)
+    (emit "\"")
+    (when height (emit " height=") (emit height))
+    (when width (emit " width=") (emit width))
+    (emit ">")
+    (write-log #\))
+    (write-log :separation-space)))
+
+(defun do-xetexpicfile ()
+  (let ((img-file (get-filename))
+        height width)
+    (loop (cond ((eat-word "height") (setq height (get-pixels)))
+                ((eat-word "width") (setq width (get-pixels)))
+                (t (return))))
+    (emit "<img src=\"")
+    (emit img-file)
+    (emit "\"")
+    (when height (emit " height=") (emit height))
+    (when width (emit " width=") (emit width))
+    (emit ">")))
 
 (defun do-resizebox ()
   (let* ((arg1 (get-group))
@@ -7160,7 +7200,7 @@
               ((char= c #\}) (get-actual-char) (return))
               ((member c  *filename-delims* :test #'char=)
                (terror 'do-includeonly))
-              (t (push (get-plain-filename)
+              (t (push (get-filename)
                        *includeonly-list*)))))))
 
 (defun do-include ()
@@ -8871,6 +8911,8 @@ Try the commands
 (tex-def-prim "\\writenumberedtocline" #'do-writenumberedtocline)
 
 (tex-def-prim "\\xdef" (lambda () (do-def t t)))
+(tex-def-prim "\\XeTeXpdffile" #'do-xetexpdffile)
+(tex-def-prim "\\XeTeXpicfile" #'do-xetexpicfile)
 (tex-def-prim "\\xrdef" #'do-xrdef)
 (tex-def-prim "\\xrefn" #'do-ref)
 (tex-def-prim "\\xrtag" #'do-tag)

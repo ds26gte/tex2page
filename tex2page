@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161110") ;last change
+(define *tex2page-version* "20161111") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -1212,41 +1212,38 @@
               (loop))))))))
 
 (define get-filename
-  (lambda (braced?)
-    ;read a filename
-    (ignorespaces)
-    (when braced?
-      (let ((c (snoop-actual-char)))
-        (if (and (char? c) (char=? c #\{))
-            (get-actual-char)
-            (set! braced? #f))))
-    (list->string
-     (nreverse
-      (let loop ((s '()))
+  (lambda braced?
+    (let ((braced? (if (pair? braced?) (car braced?) #f)))
+      ;read a filename
+      (ignorespaces)
+      (when braced?
         (let ((c (snoop-actual-char)))
-          (cond ((eof-object? c) s)
-                ((and (not braced?)
-                      (or (char-whitespace? c)
-                          (and *comment-char* (char=? c *comment-char*))
-                          (ormap (lambda (d) (char=? c d)) *filename-delims*)))
-                 (unless *not-processing-p* (ignorespaces))
-                 s)
-                ((and braced? (char=? c #\}))
-                 (get-actual-char) s)
-                ((and *esc-char* (char=? c *esc-char*))
-                 (let ((x (get-ctl-seq)))
-                   (if (string=? x "\\jobname")
-                       (loop (nconc (nreverse (string->list *jobname*)) s))
-                       (begin
-                        (toss-back-char *invisible-space*)
-                        (toss-back-string x)
-                        s))))
-                (else (get-actual-char)
-                      (loop (cons c s))))))))))
-
-(define get-plain-filename
-  (lambda ()
-    (get-filename #f)))
+          (if (and (char? c) (char=? c #\{))
+              (get-actual-char)
+              (set! braced? #f))))
+      (list->string
+        (nreverse
+          (let loop ((s '()))
+            (let ((c (snoop-actual-char)))
+              (cond ((eof-object? c) s)
+                    ((and (not braced?)
+                          (or (char-whitespace? c)
+                              (and *comment-char* (char=? c *comment-char*))
+                              (ormap (lambda (d) (char=? c d)) *filename-delims*)))
+                     (unless *not-processing-p* (ignorespaces))
+                     s)
+                    ((and braced? (char=? c #\}))
+                     (get-actual-char) s)
+                    ((and *esc-char* (char=? c *esc-char*))
+                     (let ((x (get-ctl-seq)))
+                       (if (string=? x "\\jobname")
+                           (loop (nconc (nreverse (string->list *jobname*)) s))
+                           (begin
+                             (toss-back-char *invisible-space*)
+                             (toss-back-string x)
+                             s))))
+                    (else (get-actual-char)
+                          (loop (cons c s)))))))))))
 
 (define get-filename-possibly-braced
   (lambda ()
@@ -5360,7 +5357,7 @@
 (define do-open-stream
   (lambda (type)
     (let* ((n (get-number))
-           (f (get-plain-filename))
+           (f (get-filename))
            (sl (if (eqv? type ':out)
                    *output-streams* *input-streams*))
            (c (table-get sl n)))
@@ -5723,15 +5720,15 @@
           (string-append (substring *tex-prog-name*
                                     0 (- (string-length *tex-prog-name*) 3))
                          "latex"))))
-    (let* ((dvifile (string-append
+    (let* ((dvi-file (string-append
                       f (if (eq? tex-output-format ':pdf)
                           ".pdf" ".dvi")))
-           (outfile dvifile))
-      ;[shd we check if dvifile already exists? no]
+           (outfile dvi-file))
+      ;[shd we check if dvi-file already exists? no]
       (system (string-append
                 tex-prog-name
                " " f))
-      (and (file-exists? dvifile)
+      (and (file-exists? dvi-file)
            (let ((logfile (string-append f ".log")))
              (and (file-exists? logfile)
                   ;scan the log file for sign of problems
@@ -5748,19 +5745,19 @@
                     (and fine?
                          (begin
                           (unless (eq? tex-output-format ':pdf)
-                            (let ((psfile (string-append f ".ps")))
+                            (let ((ps-file (string-append f ".ps")))
                               (system
-                               (string-append "dvips " dvifile " -o " psfile))
-                              (set! outfile psfile)))
+                               (string-append "dvips " dvi-file " -o " ps-file))
+                              (set! outfile ps-file)))
                           outfile))))))))))
 
 (define ps-to-img/gif/netpbm
-  (lambda (psfile f)
+  (lambda (ps-file img-file)
     (system
-      (string-append *ghostscript* *ghostscript-options* " -sOutputFile=" f ".ppm.1 "
-                     psfile " quit.ps"))
+      (string-append *ghostscript* *ghostscript-options* " -sOutputFile=" img-file ".ppm.1 "
+                     ps-file " quit.ps"))
     (system
-      (string-append "pnmcrop " f ".ppm.1 > " f ".ppm.tmp"))
+      (string-append "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
 ;    (unless (= *img-magnification* 1)
 ;       (system
 ;         (string-append "pbmpscale " (number->string *img-magnification*)
@@ -5768,71 +5765,71 @@
 ;       (let ((swp f-ppm))
 ;         (set! f-ppm f-ppm-tmp) (set! f-ppm-tmp swp)))
     (system
-      (string-append "ppmquant 256 < " f ".ppm.tmp > " f ".ppm"))
+      (string-append "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
     (system
       (string-append "ppmtogif -transparent rgb:ff/ff/ff < "
-                     f ".ppm > " *aux-dir/* f ".gif"))
+                     img-file ".ppm > " *aux-dir/* img-file))
     (for-each
        (lambda (e)
-         (ensure-file-deleted (string-append f e)))
+         (ensure-file-deleted (string-append img-file e)))
        '(".ppm" ".ppm.tmp" ".ppm.1"))))
 
 (define ps-to-img/png/netpbm
-  (lambda (psfile f)
+  (lambda (ps-file img-file)
     (system
-      (string-append *ghostscript* *ghostscript-options* " -sOutputFile=" f ".ppm.1 "
-                    psfile " quit.ps"))
+      (string-append *ghostscript* *ghostscript-options* " -sOutputFile=" img-file ".ppm.1 "
+                    ps-file " quit.ps"))
     (system
-      (string-append "pnmcrop " f ".ppm.1 > " f ".ppm.tmp"))
+      (string-append "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
     '(system
-       (string-append "ppmquant 256 < " f ".ppm.tmp > " f ".ppm"))
+       (string-append "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
     (system
       (string-append "pnmtopng -interlace -transparent \"#FFFFFF\" "
-                     " < " f ".ppm.tmp > " *aux-dir/* f ".png"))
+                     " < " img-file ".ppm.tmp > " *aux-dir/* img-file))
     (for-each
       (lambda (e)
-        (ensure-file-deleted (string-append f e)))
+        (ensure-file-deleted (string-append img-file e)))
       '(".ppm.1" ".ppm.tmp" ".ppm"))
     ))
 
 (define ps-to-img/jpeg/netpbm
-  (lambda (psfile f)
+  (lambda (ps-file img-file)
     (system
-      (string-append *ghostscript* *ghostscript-options* " -sOutputFile=" f ".ppm.1 "
-                    psfile " quit.ps"))
+      (string-append *ghostscript* *ghostscript-options* " -sOutputFile=" img-file ".ppm.1 "
+                    ps-file " quit.ps"))
     (system
-      (string-append "pnmcrop " f ".ppm.1 > " f ".ppm.tmp"))
+      (string-append "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
     (system
-      (string-append "ppmquant 256 < " f ".ppm.tmp > " f ".ppm"))
+      (string-append "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
     (system
-      (string-append "ppmtojpeg --grayscale < " f ".ppm > "
-        *aux-dir/* f ".jpeg"))
+      (string-append "ppmtojpeg --grayscale < " img-file ".ppm > "
+        *aux-dir/* img-file))
     (for-each
       (lambda (e)
-        (ensure-file-deleted (string-append f e)))
+        (ensure-file-deleted (string-append img-file e)))
       '(".ppm.1" ".ppm.tmp" ".ppm"))
     ))
 
 (define ps-to-img
-  (lambda (psfile f)
+  (lambda (ps-file img-file)
     (case (tex2page-flag-value "\\TZPimageconverter")
       ((#\i #\I)
        (system
          (string-append "convert -transparent white -trim "
-                  psfile  " " f (find-img-file-extn))))
+                  ps-file  " " img-file)))
       (else
         ((case (tex2page-flag-value "\\TZPimageformat")
            ((#\p #\P) ps-to-img/png/netpbm)
            ((#\j #\J) ps-to-img/jpeg/netpbm)
-           (else ps-to-img/gif/netpbm)) psfile f)))))
+           (else ps-to-img/gif/netpbm)) ps-file img-file)))))
 
 (define tex-to-img
   (lambda (f)
-    ;converts the TeX subfile `f' into img.  Follows the same
+    ;converts the TeX subfile 'f' into img.  Follows the same
     ;route as used in LaTeX2HTML
     (set! *img-file-tally* (+ *img-file-tally* 1))
-    (let ((f.img (string-append *aux-dir/* f (find-img-file-extn))))
-      (unless (file-exists? f.img)
+    (let ((img-file (string-append *aux-dir/* f (find-img-file-extn))))
+      (unless (file-exists? img-file)
         (write-log ':separation-space)
         (write-log #\{)
         (write-log (string-append f ".tex"))
@@ -5840,9 +5837,9 @@
         (write-log "->")
         (write-log ':separation-space)
         (cond ((call-tex f)
-               => (lambda (psfile)
-               (ps-to-img psfile f)
-               (write-log f.img)
+               => (lambda (ps-file)
+               (ps-to-img ps-file f)
+               (write-log img-file)
                '(for-each
                   (lambda (e)
                     (ensure-file-deleted (string-append f e)))
@@ -5968,7 +5965,6 @@
            (b1 (get-bracketed-text-if-any))
            (b2 (and b1 (get-bracketed-text-if-any)))
            (f (get-filename-possibly-braced))
-           (img-file-stem (next-html-image-file-stem))
            (ffull (if (file-exists? f) f
                       (ormap (lambda (e)
                                (let ((f2 (string-append f e)))
@@ -5982,23 +5978,72 @@
             (else
               (fluid-let ((*imgpreamble-inferred*
                             (cons ':includegraphics *imgpreamble-inferred*)))
-                (call-with-lazy-image-port
-                  (or ffull f) img-file-stem
-                  (lambda (o)
-                    (display "\\includegraphics" o)
-                    (when star? (display #\* o))
-                    (when b1
-                      (display #\[ o)
-                      (display b1 o)
-                      (display #\] o))
-                    (when b2
-                      (display #\[ o)
-                      (display b2 o)
-                      (display #\] o))
-                    (display #\{ o)
-                    (display f o)
-                    (display #\} o))))
-              (source-img-file img-file-stem))))))
+                (let ((img-file-stem (next-html-image-file-stem)))
+                  (call-with-lazy-image-port
+                    (or ffull f) img-file-stem
+                    (lambda (o)
+                      (display "\\includegraphics" o)
+                      (when star? (display #\* o))
+                      (when b1
+                        (display #\[ o)
+                        (display b1 o)
+                        (display #\] o))
+                      (when b2
+                        (display #\[ o)
+                        (display b2 o)
+                        (display #\] o))
+                      (display #\{ o)
+                      (display f o)
+                      (display #\} o))))
+                (source-img-file img-file-stem)))))))
+
+(define do-xetexpdffile
+  (lambda ()
+    (let* ((pdf-file (get-filename))
+           (height #f) (width #f)
+           (img-file-stem (next-html-image-file-stem))
+           (img-file (string-append *aux-dir/* img-file-stem (find-img-file-extn))))
+      (let loop ()
+        (cond ((eat-word "height") (set! height (get-pixels)) (loop))
+              ((eat-word "width") (set! width (get-pixels)) (loop))
+              (else #f)))
+      (unless (file-exists? img-file)
+        (write-log ':separation-space)
+        (write-log #\{)
+        (write-log pdf-file)
+        (write-log ':separation-space)
+        (write-log "->")
+        (write-log ':separation-space)
+        (write-log img-file)
+        (write-log #\})
+        (write-log ':separation-space)
+        (ps-to-img pdf-file img-file))
+      (write-log #\()
+      (write-log img-file)
+      (write-log ':separation-space)
+      (emit "<img src=\"")
+      (emit img-file)
+      (emit "\"")
+      (when height (emit " height=") (emit height))
+      (when width (emit " width=") (emit width))
+      (emit ">")
+      (write-log #\))
+      (write-log ':separation-space))))
+
+(define do-xetexpicfile
+  (lambda ()
+    (let ((img-file (get-filename))
+          (height #f) (width #f))
+      (let loop ()
+        (cond ((eat-word "height") (set! height (get-pixels)) (loop))
+              ((eat-word "width") (set! width (get-pixels)) (loop))
+              (else #f)))      
+      (emit "<img src=\"")
+      (emit img-file)
+      (emit "\"")
+      (when height (emit " height=") (emit height))
+      (when width (emit " width=") (emit width))
+      (emit ">"))))
 
 (define do-resizebox
   (lambda ()
@@ -7544,7 +7589,7 @@
            (n1 (get-unsigned-number-optionally))
            (s2 (get-char-optionally '(#\+ #\-)))
            (n2 (get-unsigned-number-optionally))
-           (f (begin (get-char-definitely #\)) (get-filename #f)))
+           (f (begin (get-char-definitely #\)) (get-filename)))
            (n (let ((n (table-get *opmac-verbinput-table* f)))
                 (or n (begin
                         (table-put! *opmac-verbinput-table* f 0)
@@ -8816,7 +8861,7 @@
                  (terror 'do-includeonly))
                 (else
                   (set! *includeonly-list*
-                    (cons (get-plain-filename) *includeonly-list*))
+                    (cons (get-filename) *includeonly-list*))
                   (loop))))))))
 
 (define do-include
@@ -10693,6 +10738,8 @@ Try the commands
 (tex-def-prim "\\writenumberedtocline" do-writenumberedtocline)
 
 (tex-def-prim "\\xdef" (lambda () (do-def #t #t)))
+(tex-def-prim "\\XeTeXpdffile" do-xetexpdffile)
+(tex-def-prim "\\XeTeXpicfile" do-xetexpicfile)
 (tex-def-prim "\\xrdef" do-xrdef)
 (tex-def-prim "\\xrefn" do-ref)
 (tex-def-prim "\\xrtag" do-tag)

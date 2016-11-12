@@ -2,7 +2,11 @@ Last change 2016-11-11
 
 2016 Nov 11
 
-Added \XeTeXpdffile, \XeTeXpicfile.
+Accept \XeTeXpdffile, \XeTeXpicfile.
+
+\obeylines's <p class=nopadding> should have margin-bottom 0.
+
+tex2page.tex: Added a flavor of \activettchar if not already available via OPmac.
 
 2016 Nov 10
 

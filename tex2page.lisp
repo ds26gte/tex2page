@@ -264,6 +264,7 @@
 (defvar *not-processing-p* nil)
 
 (defvar *opmac-active-tt-char* nil)
+(defvar *opmac-item-style* #\o)
 (defvar *opmac-nonum-p* nil)
 (defvar *opmac-notoc-p* nil)
 (defvar *opmac-verbinput-table* nil)
@@ -3414,15 +3415,38 @@
   (emit "</ul>")
   (do-noindent))
 
+(defun do-opmac-item-style ()
+  (ignorespaces)
+  (setq *opmac-item-style* (get-actual-char)))
+
 (defun do-opmac-begitems ()
-  (do-itemize)
+  (do-end-para)
   (bgroup)
+  (tex-def-count "\\TIIPopmacliststarted" 0 nil)
   (activate-cdef #\*)
-  (tex-def-char #\* '() "\\item" nil))
+  (tex-def-char #\* '() "\\TIIPopmacitem" nil))
+
+(defun do-opmac-item ()
+  (when (= (find-count "\\TIIPopmacliststarted") 0)
+    (tex-def-count "\\TIIPopmacliststarted" 1 nil)
+    (push :opmac-itemize *tabular-stack*)
+    (emit "<")
+    (emit (case *opmac-item-style*
+            ((#\o #\- #\x #\X) "u")
+            (t "o")))
+    (emit "l>"))
+  (do-regular-item))
 
 (defun do-opmac-enditems ()
   (egroup)
-  (do-enditemize))
+  (do-end-para)
+  (pop-tabular-stack :opmac-itemize)
+  (emit "</")
+  (emit (case *opmac-item-style*
+          ((#\o #\- #\x #\X) "u")
+          (t "o")))
+  (emit "l>")
+  (do-noindent))
 
 (defun do-bigskip (type)
   (do-end-para)
@@ -8387,7 +8411,6 @@ Try the commands
 
 ;
 
-(tex-def-prim "\\\"" (lambda () (do-diacritic :umlaut)))
 
 (tex-defsym-prim "\\AA" "&#xc5;")
 (tex-defsym-prim "\\aa" "&#xe5;")
@@ -8815,6 +8838,7 @@ Try the commands
 (tex-def-prim "\\stepcounter" #'do-stepcounter)
 (tex-def-prim "\\strike" (lambda () (do-switch :strike)))
 (tex-def-prim "\\string" #'do-string)
+(tex-def-prim "\\style" #'do-opmac-item-style)
 (tex-def-prim "\\subject" #'do-subject)
 (tex-def-prim "\\subsection"
  (lambda () (get-bracketed-text-if-any) (do-heading 2)))
@@ -8882,6 +8906,7 @@ Try the commands
 (tex-def-prim "\\TIIPnbsp" (lambda () (emit-nbsp 1)))
 (tex-def-prim "\\TIIPnewline" #'do-newline)
 (tex-def-prim "\\TIIPnull" #'get-actual-char)
+(tex-def-prim "\\TIIPopmacitem" #'do-opmac-item)
 (tex-def-prim "\\TIIPopmacverb" #'do-opmac-intext-verb)
 (tex-def-prim "\\TIIPreuseimage" #'reuse-img)
 (tex-def-prim "\\TIIPrgb" (lambda () (do-switch :rgb)))
@@ -8965,6 +8990,7 @@ Try the commands
 
 (tex-def-prim "\\\\" (lambda () (do-cr "\\\\")))
 
+(tex-def-prim "\\\"" (lambda () (do-diacritic :umlaut)))
 (tex-def-prim "\\`" (lambda () (do-diacritic :grave)))
 
 (tex-def-prim "\\(" #'do-latex-intext-math)
@@ -9522,6 +9548,7 @@ Try the commands
         (*not-processing-p* nil)
         ;
         (*opmac-active-tt-char* nil)
+        (*opmac-item-style* #\o)
         (*opmac-nonum-p* nil)
         (*opmac-notoc-p* nil)
         (*opmac-verbinput-table* (make-hash-table :test #'equal))

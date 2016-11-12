@@ -2,6 +2,9 @@ Last change 2016-11-12
 
 2016 Nov 12
 
+OPmac's \style (for \{beg,end}items). Broadly distinguish between just ordered
+and unordered for now.
+
 \TZPhsize.
 
 2016 Nov 11

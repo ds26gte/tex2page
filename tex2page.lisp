@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161111" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161112" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -3798,6 +3798,18 @@
   (call-external-programs-if-necessary)
   (show-unresolved-xrefs-and-missing-pieces))
 
+(defun set-text-width ()
+  (let ((hsize (cond ((setq *it* (find-def "\\TZPhsize"))
+                      (tex2page-string (concatenate 'string "\\TIIPhsize=" (tdef*-expansion *it*)))
+                      (find-dimen "\\TIIPhsize"))
+                     (*tex-like-layout-p* (find-dimen "\\hsize"))
+                     (t nil))))
+    (when hsize
+      (princ "body { max-width: " *css-port*)
+      (princ (sp-to-pixels hsize) *css-port*)
+      (princ "pt; }" *css-port*)
+      (terpri *css-port*))))
+
 (defun note-down-tex2page-flags ()
   (write-aux `(!head-line ,(get-toks "\\headline")))
   (write-aux `(!foot-line ,(get-toks "\\footline")))
@@ -3826,6 +3838,7 @@
   (when (tex2page-flag-boolean "\\TZPsinglepage")
     (write-aux '(!single-page)))
   (when (tex2page-flag-boolean "\\TZPtexlayout")
+    (setq *tex-like-layout-p* t)
     (write-aux '(!tex-like-layout))
     (terpri *css-port*)
     (princ "body { margin-top: " *css-port*)
@@ -3858,12 +3871,9 @@
     (princ (sp-to-pixels (find-dimen "\\belowdisplayskip")) *css-port*)
     (princ "pt; }" *css-port*)
     (terpri *css-port*)
-    (princ "body { max-width: " *css-port*)
-    (princ (sp-to-pixels (find-dimen "\\hsize")) *css-port*)
-    (princ "pt; }" *css-port*)
-    (terpri *css-port*)
     (princ ".navigation { color: black; font-style: normal; }" *css-port*)
     (terpri *css-port*))
+  (set-text-width)
   (unless (tex2page-flag-boolean "\\TZPtextext")
     (write-aux `(!tex-text 1)))
   )
@@ -5362,6 +5372,7 @@
   (tex-def-count "\\year" 0 t)
   (tex-def-count "\\shellescape" 1 t)
   ;
+  (tex-def-dimen "\\TIIPhsize" 0 t)
   (tex-def-dimen "\\hsize" (tex-length 6.5 :in) t)
   (tex-def-dimen "\\vsize" (tex-length 8.9 :in) t)
   (tex-def-dimen "\\maxdepth" (tex-length 4 :pt) t)

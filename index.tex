@@ -7,7 +7,7 @@
 % tex2page is available at
 % http://ds26gte.github.io/tex2page/index.html
 
-% last change: 2016-11-11
+% last change: 2016-11-12
 
 \input tex2page-doc-mac
 
@@ -1701,6 +1701,18 @@ the ToC and Index respectively.
 Paragraphs preceded by \p{\noindent} will always have no initial
 indentation, even if \p{\TZPtexlayout=1} and \p{\parskip} is
 non-zero.
+
+\index{TZPhsize@\p{\TZPhsize}}
+%
+If you don't really need a full-blown \TeX-like layout, but would
+still like to have the HTML page’s text width be no more than,
+say, 6.25 inches, you could have
+
+\p{
+\def\TZPhsize{6.25 in}
+}
+The \p{\TZPhsize} value overrides the \p{\hsize} value, whether
+or not you set \p{\TZPtexlayout}.
 
 \index{TZPraggedright@\p{\TZPraggedright}}
 Because it is too drastic a change, \p{\TZPtexlayout=1} will not cause

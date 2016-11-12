@@ -6627,6 +6627,7 @@
     (tex-def-count "\\day" 0 #t)
     (tex-def-count "\\month" 0 #t)
     (tex-def-count "\\year" 0 #t)
+    (tex-def-count "\\shellescape" 1 #t)
     ;
     (tex-def-dimen "\\hsize" (tex-length 6.5 ':in) #t)
     (tex-def-dimen "\\vsize" (tex-length 8.9 ':in) #t)

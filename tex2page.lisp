@@ -3051,8 +3051,7 @@
     (let ((durl (doc-internal-url url)))
       (if durl
           (emit-page-node-link-start (car durl) (cadr durl))
-          (emit-link-start (fully-qualify url))))
-    (emit-link-start (fully-qualify-url url))
+          (emit-link-start (fully-qualify-url url))))
     (emit url)
     (emit-link-stop)))
 
@@ -7524,6 +7523,7 @@
 
                p.nopadding {
                margin-top: 0;
+               margin-bottom: 0;
                }
 
                pre {

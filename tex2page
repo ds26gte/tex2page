@@ -2313,7 +2313,7 @@
            (nonum? (or starred? too-deep?))
            (header (fluid-let ((*tabular-stack* (list ':header)))
                      (tex-string->html-string (get-group)))))
-      (do-heading-aux-1 seclvl starred? nonum? nil header))))
+      (do-heading-aux-1 seclvl starred? nonum? #f header))))
 
 (define do-heading-aux-1 
   (lambda (seclvl starred? nonum? notoc? header)
@@ -9230,6 +9230,7 @@
 
                p.nopadding {
                margin-top: 0;
+               margin-bottom: 0;
                }
 
                pre {

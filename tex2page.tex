@@ -194,6 +194,23 @@
 
 \let\verbdisplayskip\medbreak
 
+%
+
+\ifx\activettchar\UnDeFiNeD
+\def\activettchar#1{%
+  \ifx\activettcharQprev\UnDeFiNeD\else
+  \catcode\activettcharQprev \activettcharQprevQcatcode
+  \fi
+  \chardef\activettcharQprev`#1%
+  \chardef\activettcharQprevQcatcode \catcode`#1%
+  \defcsactive#1{\begingroup
+    \verbsetup\verbavoidligs\verbhook
+    \defcsactive\^^M{\leavevmode\ }%
+    \defcsactive#1{\verbQendgroup}}}%
+\fi
+
+%
+
 % \verbatiminput FILENAME
 % displays contents of file FILENAME verbatim.
 

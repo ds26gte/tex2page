@@ -3062,8 +3062,8 @@
     (emit-link-stop)))
 
 (defun do-ulink ()
-  (let* ((link-text (get-bracketed-text-if-any))
-         (url (get-url))
+  (let* ((url (get-bracketed-text-if-any))
+         (link-text (get-group))
          (durl (doc-internal-url url)))
     (if durl
         (emit-page-node-link-start (car durl) (cadr durl))

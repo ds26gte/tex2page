@@ -2,7 +2,7 @@ Last change 2016-11-11
 
 2016 Nov 11
 
-Accept \XeTeXpdffile, \XeTeXpicfile.
+Accept \XeTeXpdffile, \XeTeXpicfile. Preset count \shellescape to 1.
 
 \obeylines's <p class=nopadding> should have margin-bottom 0.
 

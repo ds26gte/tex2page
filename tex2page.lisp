@@ -1919,7 +1919,7 @@
     (write-aux `(!default-title ,header))
     (emit-newline)
     (when (= seclvl 0)
-      (!using-chapters) (write-aux `(!using-chapers)))
+      (!using-chapters) (write-aux `(!using-chapters)))
     (let ((nonum-p *opmac-nonum-p*)
           (notoc-p *opmac-notoc-p*))
       (setq *opmac-nonum-p* nil *opmac-notoc-p* nil)

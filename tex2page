@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161112") ;last change
+(define *tex2page-version* "20161113") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -279,7 +279,7 @@
 (define *not-processing-p* #f)
 
 (define *opmac-active-tt-char* #f)
-(define *opmac-item-style* #\o)
+(define *opmac-list-style* #\o)
 (define *opmac-nonum-p* #f)
 (define *opmac-notoc-p* #f)
 (define *opmac-verbinput-table* #f)
@@ -4398,10 +4398,10 @@
     (emit "</ul>")
     (do-noindent)))
 
-(define do-opmac-item-style
+(define do-opmac-list-style
   (lambda ()
     (ignorespaces)
-    (set! *opmac-item-style* (get-actual-char))))
+    (set! *opmac-list-style* (get-actual-char))))
 
 (define do-opmac-begitems
   (lambda ()
@@ -4417,10 +4417,22 @@
       (tex-def-count "\\TIIPopmacliststarted" 1 #f)
       (set! *tabular-stack* (cons ':opmac-itemize *tabular-stack*))
       (emit "<")
-      (emit (case *opmac-item-style*
+      (emit (case *opmac-list-style*
               ((#\o #\- #\x #\X) "u")
               (else "o")))
-      (emit "l>"))
+      (emit "l style=\"list-style-type: ")
+      (emit (case *opmac-list-style*
+              ((#\o) "disc")
+              ((#\O) "circle")
+              ((#\-) "'-'")
+              ((#\n #\N) "decimal")
+              ((#\i) "lower-roman")
+              ((#\I) "upper-roman")
+              ((#\a) "lower-alpha")
+              ((#\A) "upper-alpha")
+              ((#\x #\X) "square")
+              (else "disc")))
+      (emit "\">"))
     (do-regular-item)))
 
 (define do-opmac-enditems
@@ -4429,7 +4441,7 @@
     (do-end-para)
     (pop-tabular-stack ':opmac-itemize)
     (emit "</")
-    (emit (case *opmac-item-style*
+    (emit (case *opmac-list-style*
             ((#\o #\- #\x #\X) "u")
             (else "o")))
     (emit "l>")
@@ -10652,7 +10664,7 @@ Try the commands
 (tex-def-prim "\\stepcounter" do-stepcounter)
 (tex-def-prim "\\strike" (lambda () (do-switch ':strike)))
 (tex-def-prim "\\string" do-string)
-(tex-def-prim "\\style" do-opmac-item-style)
+(tex-def-prim "\\style" do-opmac-list-style)
 (tex-def-prim "\\subject" do-subject)
 (tex-def-prim "\\subsection"
 (lambda () (get-bracketed-text-if-any) (do-heading 2)))
@@ -11216,7 +11228,7 @@ Try the commands
                 (*not-processing-p* #f)
                 ;
                 (*opmac-active-tt-char* #f)
-                (*opmac-item-style* #\o)
+                (*opmac-list-style* #\o)
                 (*opmac-nonum-p* #f)
                 (*opmac-notoc-p* #f)
                 (*opmac-verbinput-table* (make-table 'equ string=?))

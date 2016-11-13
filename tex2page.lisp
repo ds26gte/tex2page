@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161112" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161113" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -264,7 +264,7 @@
 (defvar *not-processing-p* nil)
 
 (defvar *opmac-active-tt-char* nil)
-(defvar *opmac-item-style* #\o)
+(defvar *opmac-list-style* #\o)
 (defvar *opmac-nonum-p* nil)
 (defvar *opmac-notoc-p* nil)
 (defvar *opmac-verbinput-table* nil)
@@ -3415,9 +3415,9 @@
   (emit "</ul>")
   (do-noindent))
 
-(defun do-opmac-item-style ()
+(defun do-opmac-list-style ()
   (ignorespaces)
-  (setq *opmac-item-style* (get-actual-char)))
+  (setq *opmac-list-style* (get-actual-char)))
 
 (defun do-opmac-begitems ()
   (do-end-para)
@@ -3431,10 +3431,22 @@
     (tex-def-count "\\TIIPopmacliststarted" 1 nil)
     (push :opmac-itemize *tabular-stack*)
     (emit "<")
-    (emit (case *opmac-item-style*
+    (emit (case *opmac-list-style*
             ((#\o #\- #\x #\X) "u")
             (t "o")))
-    (emit "l>"))
+    (emit "l style=\"list-style-type: ")
+    (emit (case *opmac-list-style*
+            ((#\o) "disc")
+            ((#\O) "circle")
+            ((#\-) "'-'")
+            ((#\n #\N) "decimal")
+            ((#\i) "lower-roman")
+            ((#\I) "upper-roman")
+            ((#\a) "lower-alpha")
+            ((#\A) "upper-alpha")
+            ((#\x #\X) "square")
+            (t "disc")))
+    (emit "\">"))
   (do-regular-item))
 
 (defun do-opmac-enditems ()
@@ -3442,7 +3454,7 @@
   (do-end-para)
   (pop-tabular-stack :opmac-itemize)
   (emit "</")
-  (emit (case *opmac-item-style*
+  (emit (case *opmac-list-style*
           ((#\o #\- #\x #\X) "u")
           (t "o")))
   (emit "l>")
@@ -8838,7 +8850,7 @@ Try the commands
 (tex-def-prim "\\stepcounter" #'do-stepcounter)
 (tex-def-prim "\\strike" (lambda () (do-switch :strike)))
 (tex-def-prim "\\string" #'do-string)
-(tex-def-prim "\\style" #'do-opmac-item-style)
+(tex-def-prim "\\style" #'do-opmac-list-style)
 (tex-def-prim "\\subject" #'do-subject)
 (tex-def-prim "\\subsection"
  (lambda () (get-bracketed-text-if-any) (do-heading 2)))
@@ -8965,78 +8977,46 @@ Try the commands
 (tex-defsym-prim "\\yen" "&#xa5;")
 
 (tex-defsym-prim "\\contentsname" "Contents")
-
 (tex-defsym-prim "\\listfigurename" "List of Figures")
-
 (tex-defsym-prim "\\listtablename" "List of Tables")
-
 (tex-defsym-prim "\\refname" "References")
-
 (tex-defsym-prim "\\indexname" "Index")
-
 (tex-defsym-prim "\\figurename" "Figure")
-
 (tex-defsym-prim "\\tablename" "Table")
-
 (tex-defsym-prim "\\partname" "Part")
-
 (tex-defsym-prim "\\appendixname" "Appendix")
-
 (tex-defsym-prim "\\abstractname" "Abstract")
-
 (tex-defsym-prim "\\bibname" "Bibliography")
-
 (tex-defsym-prim "\\chaptername" "Chapter")
 
 (tex-def-prim "\\\\" (lambda () (do-cr "\\\\")))
-
 (tex-def-prim "\\\"" (lambda () (do-diacritic :umlaut)))
 (tex-def-prim "\\`" (lambda () (do-diacritic :grave)))
-
 (tex-def-prim "\\(" #'do-latex-intext-math)
-
 (tex-def-prim "\\[" #'do-latex-display-math)
-
 (tex-def-prim "\\)" #'egroup)
-
 (tex-def-prim "\\]" #'egroup)
-
 (tex-defsym-prim "\\{" "{")
-
 (tex-defsym-prim "\\}" "}")
-
 (tex-let-prim "\\-" "\\TIIPrelax")
-
 (tex-def-prim "\\'" (lambda () (do-diacritic :acute)))
-
 (tex-def-prim "\\="
               (lambda ()
                 (unless (eql (car *tabular-stack*) :tabbing))
                 (do-diacritic :macron)))
-
 (tex-def-prim "\\>"
               (lambda ()
                 (when (eql (car *tabular-stack*) :tabbing)
                   (emit-nbsp 3))))
-
 (tex-def-prim "\\^" (lambda () (do-diacritic :circumflex)))
-
 (tex-def-prim "\\~" (lambda () (do-diacritic :tilde)))
-
 (tex-defsym-prim "\\#" "#")
-
 (tex-def-prim "\\ " (lambda () (emit #\space)))
-
 (tex-defsym-prim "\\%" "%")
-
 (tex-defsym-prim "\\&" "&#x26;")
-
 (tex-defsym-prim "\\@" "@")
-
 (tex-defsym-prim "\\_" "_")
-
 (tex-defsym-prim "\\$" "$")
-
 (tex-def-prim (concatenate 'string (list #\\ #\Newline)) #'emit-newline)
 
 ;TeX logos
@@ -9548,7 +9528,7 @@ Try the commands
         (*not-processing-p* nil)
         ;
         (*opmac-active-tt-char* nil)
-        (*opmac-item-style* #\o)
+        (*opmac-list-style* #\o)
         (*opmac-nonum-p* nil)
         (*opmac-notoc-p* nil)
         (*opmac-verbinput-table* (make-hash-table :test #'equal))

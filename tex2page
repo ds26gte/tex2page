@@ -10649,6 +10649,7 @@ Try the commands
 (tex-def-prim "\\section" (lambda () (do-heading 1)))
 (tex-def-prim "\\seealso" do-see-also)
 (tex-def-prim "\\setbox" do-setbox)
+(tex-def-prim "\\setcmykcolor" (lambda () (do-switch ':cmyk)))
 (tex-def-prim "\\setcounter" do-setcounter)
 (tex-def-prim "\\sevenrm" (lambda () (do-switch ':sevenrm)))
 (tex-def-prim "\\sf" (lambda () (do-switch ':sf)))

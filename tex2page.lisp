@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161113" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161114" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1515,6 +1515,14 @@
     (write-aux `(!default-title ,(make-external-title title)))
     (output-title title)))
 
+(defun do-opmac-title ()
+  (tex-gdef-0arg "\\TZPtitleused" 1)
+  (do-end-para)
+  (let ((title (tex-string-to-html-string (get-till-par))))
+    (unless *title* (flag-missing-piece :document-title))
+    (write-aux `(!default-title ,(make-external-title title)))
+    (output-title title)))
+
 (defun do-latex-title ()
   (let ((title (get-group)))
     (unless *title* (flag-missing-piece :document-title))
@@ -1924,6 +1932,11 @@
           (notoc-p *opmac-notoc-p*))
       (setq *opmac-nonum-p* nil *opmac-notoc-p* nil)
       (do-heading-aux-1 seclvl nil nonum-p notoc-p header))))
+
+(defun do-opmac-sec ()
+  (if *math-mode-p*
+      (toss-back-string "\\TIIPsec")
+      (do-opmac-heading 1)))
 
 (defun do-appendix ()
   (unless *inside-appendix-p*
@@ -8037,6 +8050,40 @@ Try the commands
           (concatenate 'string "\\global\\imgdef" cs "{$" expn "$}"))
          (tex2page-string cs)))))
 
+;TeXbook, sec 18.2, non-italic letters in formulas
+
+(tex-defsym-math-prim "\\Pr" "Pr ")
+(tex-defsym-math-prim "\\TIIPsec" "sec ")
+(tex-defsym-math-prim "\\arccos" "arccos ")
+(tex-defsym-math-prim "\\arcsin" "arcsin ")
+(tex-defsym-math-prim "\\arctan" "arctan ")
+(tex-defsym-math-prim "\\arg" "arg ")
+(tex-defsym-math-prim "\\tan" "tan ")
+(tex-defsym-math-prim "\\tanh" "tanh ")
+(tex-defsym-math-prim "\\sin" "sin ")
+(tex-defsym-math-prim "\\sinh" "sinh ")
+(tex-defsym-math-prim "\\cos" "cos ")
+(tex-defsym-math-prim "\\cosh" "cosh ")
+(tex-defsym-math-prim "\\cot" "cot ")
+(tex-defsym-math-prim "\\coth" "coth ")
+(tex-defsym-math-prim "\\csc" "csc ")
+(tex-defsym-math-prim "\\deg" "deg ")
+(tex-defsym-math-prim "\\det" "det ")
+(tex-defsym-math-prim "\\dim" "dim ")
+(tex-defsym-math-prim "\\exp" "exp ")
+(tex-defsym-math-prim "\\gcd" "gcd ")
+(tex-defsym-math-prim "\\hom" "hom ")
+(tex-defsym-math-prim "\\sup" "sup ")
+(tex-defsym-math-prim "\\inf" "inf ")
+(tex-defsym-math-prim "\\ker" "ker ")
+(tex-defsym-math-prim "\\lg" "lg ")
+(tex-defsym-math-prim "\\liminf" "lim inf ")
+(tex-defsym-math-prim "\\limsup" "lim sup ")
+(tex-defsym-math-prim "\\ln" "ln ")
+(tex-defsym-math-prim "\\log" "log ")
+(tex-defsym-math-prim "\\max" "max ")
+(tex-defsym-math-prim "\\min" "min ")
+
 ;TeXbook, appendix F, p 434
 
 ;1. lowercase Greek
@@ -8830,7 +8877,7 @@ Try the commands
 (tex-def-prim "\\scmspecialsymbol" #'do-scm-set-specialsymbol)
 (tex-def-prim "\\scmvariable" #'do-scm-set-variables)
 (tex-def-prim "\\scriptsize" (lambda () (do-switch :scriptsize)))
-(tex-def-prim "\\sec" (lambda () (do-opmac-heading 1)))
+(tex-def-prim "\\sec" #'do-opmac-sec)
 (tex-def-prim "\\secc" (lambda () (do-opmac-heading 2)))
 (tex-def-prim "\\section" (lambda () (do-heading 1)))
 (tex-def-prim "\\seealso" #'do-see-also)
@@ -8927,6 +8974,7 @@ Try the commands
 (tex-def-prim "\\TIIPtheorem" #'do-theorem)
 (tex-def-prim "\\TIIPrelax" #'do-relax)
 (tex-def-prim "\\tiny" (lambda () (do-switch :tiny)))
+(tex-def-prim "\\tit" #'do-opmac-title)
 (tex-def-prim "\\title" #'do-title)
 (tex-def-prim "\\today" #'do-today)
 (tex-defsym-prim "\\TM" "&#x2122;")

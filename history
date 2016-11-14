@@ -1,4 +1,14 @@
-Last change 2016-11-13
+Last change 2016-11-14
+
+2016 Nov 14
+
+Added OPmac's \tit.
+
+Have \sec translate to OPmac's section only outside math mode; inside math
+mode, it's trig sec.
+
+Add the formulas in TeXbook, 18.2. (Math image gets triggered when math mode
+doesn't find a TeX2page definition for a ctrl seq. This prevents it.)
 
 2016 Nov 13
 

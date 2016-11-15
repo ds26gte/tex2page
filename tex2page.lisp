@@ -1689,10 +1689,8 @@
 (defun section-ctl-seq-p (s)
   (cond ((string= s "\\sectiond") (string-to-number (ungroup (get-token))))
         ((string= s "\\part") -1)
-        ((string= s "\\chapter") (!using-chapters) (write-aux '(!using-chapters))
-         (if (and (eq *tex-format* :latex) (< (get-gcount "\\secnumdepth") -1))
-             (tex-gdef-count "\\secnumdepth" 2))
-         0)
+        ((string= s "\\chapter") 0)
+        ;optional [...] after section commands?
         (t (let ((n (length s)))
              (cond ((< n 8) nil)
                    ((and (>= n 10) (string= (subseq s (- n 9) n) "paragraph"))
@@ -1722,17 +1720,23 @@
          (header
           (let ((*tabular-stack* (list :header)))
             (tex-string-to-html-string (get-group)))))
-    (do-heading-aux-1 seclvl starred-p nonum-p nil header)))
+    (do-heading-aux-1 seclvl starred-p nonum-p nil nil header)))
 
-(defun do-heading-aux-1 (seclvl starred-p nonum-p notoc-p header)
-  (when (<= seclvl 0) (do-eject))
+(defun do-heading-aux-1 (seclvl starred-p nonum-p notoc-p lbl-val header)
+  (write-aux `(!default-title ,header))
+  (when (= seclvl 0)
+    (!using-chapters) ;(write-aux '(!using-chapters))
+    (when (and (eq *tex-format* :latex) (< (get-gcount "\\secnumdepth") -1))
+      (tex-gdef-count "\\secnumdepth" 2))
+    (cond ((or (> *html-page-count* 0) (tex2page-flag-boolean "\\TZPtitleused"))
+           (do-eject))
+          (t (tex-gdef-0arg "\\TZPtitleused" "1")
+             (do-para))))
   (increment-section-counter seclvl nonum-p)
-  (let ((lbl-val (if nonum-p nil (section-counter-value seclvl))))
-    (do-heading-aux-2 seclvl starred-p nonum-p notoc-p lbl-val
-                      header)))
-
-(defun do-heading-aux-2 (seclvl starred-p nonum-p notoc-p lbl-val header)
-  (unless lbl-val (setq lbl-val "IGNORE"))
+  (when lbl-val (setq nonum-p nil))
+  (unless lbl-val
+    (setq lbl-val
+          (if nonum-p "IGNORE" (section-counter-value seclvl))))
   (let* ((htmlnum (max 1 (min 6 (if *using-chapters-p* (+ seclvl 1) seclvl))))
          (lbl
           (concatenate 'string *html-node-prefix*
@@ -1757,55 +1761,57 @@
                 (not
                  (and (eql *tex-format* :latex)
                       (string= header "Contents"))))))
-      (case seclvl
-        ((-1)
-         (emit "<div class=partheading>")
-         (if nonum-p (emit-nbsp 1)
-           (progn
-            (when write-to-toc-p
-              (emit-page-node-link-start *toc-page*
-                                         (concatenate 'string *html-node-prefix* "toc_" lbl)))
-            (tex2page-string "\\partname")
-            (emit " ")
-            (emit lbl-val)
-            (when write-to-toc-p (emit-link-stop))))
-         (emit "</div><br>")
-         (emit-newline))
-        ((0)
-         (emit-newline)
-         (emit "<div class=chapterheading>")
-         (if nonum-p (emit-nbsp 1)
-           (progn
-            (when write-to-toc-p
-              (emit-page-node-link-start *toc-page*
-                                         (concatenate 'string *html-node-prefix* "toc_" lbl)))
-            (tex2page-string
-              (if *inside-appendix-p* "\\appendixname" "\\chaptername"))
-            (emit " ")
-            (emit lbl-val)
-            (when write-to-toc-p (emit-link-stop))))
-         (emit "</div><br>")
-         (emit-newline)))
+      (when (eql *tex-format* :latex)
+        (case seclvl
+          ((-1)
+           (emit "<div class=partheading>")
+           (if nonum-p (emit-nbsp 1)
+               (progn
+                 (when write-to-toc-p
+                   (emit-page-node-link-start *toc-page*
+                                              (concatenate 'string *html-node-prefix* "toc_" lbl)))
+                 (tex2page-string "\\partname")
+                 (emit " ")
+                 (emit lbl-val)
+                 (when write-to-toc-p (emit-link-stop))))
+           (emit "</div><br>")
+           (emit-newline))
+          ((0)
+           (emit-newline)
+           (emit "<div class=chapterheading>")
+           (if nonum-p (emit-nbsp 1)
+               (progn
+                 (when write-to-toc-p
+                   (emit-page-node-link-start *toc-page*
+                                              (concatenate 'string *html-node-prefix* "toc_" lbl)))
+                 (tex2page-string
+                   (if *inside-appendix-p* "\\appendixname" "\\chaptername"))
+                 (emit " ")
+                 (emit lbl-val)
+                 (when write-to-toc-p (emit-link-stop))))
+           (emit "</div><br>")
+           (emit-newline))))
       (when write-to-toc-p
         (emit-page-node-link-start *toc-page*
                                    (concatenate 'string *html-node-prefix* "toc_" lbl)))
-      (unless (or (<= seclvl 0) nonum-p) (emit lbl-val) (emit-nbsp 2))
+      (unless (or (and (eql *tex-format* :latex) (<= seclvl 0)) nonum-p)
+        (emit lbl-val) (emit-nbsp 2))
       (emit header)
       (when write-to-toc-p (emit-link-stop))
       (emit "</h")
       (emit htmlnum)
       (emit ">")
-      (emit-newline)
-      (do-para)
+      (do-noindent)
+      ;(emit-newline)
+      ;(do-para)
       (let ((tocdepth (get-gcount "\\tocdepth")))
-        (when
-            (and write-to-toc-p (not (and (eq *tex-format* :latex) starred-p))
-                 (or (< tocdepth -1) (<= seclvl tocdepth)))
+        (when (and write-to-toc-p (not (and (eq *tex-format* :latex) starred-p))
+                   (or (< tocdepth -1) (<= seclvl tocdepth)))
           (write-aux
-           `(!toc-entry
-             ,(if (= seclvl -1) -1
-                (if *using-chapters-p* seclvl (- seclvl 1)))
-             ,lbl-val ,*html-page-count* ,lbl ,header)))))
+            `(!toc-entry
+               ,(if (= seclvl -1) -1
+                    (if *using-chapters-p* seclvl (- seclvl 1)))
+               ,lbl-val ,*html-page-count* ,lbl ,header)))))
     (when *recent-node-name*
       (do-label-aux *recent-node-name*)
       (setq *recent-node-name* nil))))
@@ -1861,7 +1867,8 @@
   (let ((x (get-peeled-group)))
     (when (member x '("report" "book") :test #'string=)
       (!using-chapters)
-      (write-aux '(!using-chapters)))))
+      ;(write-aux '(!using-chapters))
+      )))
 
 (defun get-till-par ()
   (let ((r '()) (newline-p nil))
@@ -1879,59 +1886,29 @@
               (t (push c r) (setq newline-p nil)))))))
 
 (defun do-beginsection ()
-  (do-para)
   (ignorespaces)
   (let ((header (let ((*tabular-stack* (list :header)))
                   (tex-string-to-html-string (get-till-par)))))
-    (write-aux `(!default-title ,header))
-    (emit-newline)
-    (emit "<h1 class=beginsection>")
-    (bgroup)
-    (if (string= header "") (emit-nbsp 1)
-      (emit header))
-    (egroup)
-    (emit "</h1>")
-    (do-noindent)))
+    (do-heading-aux-1 1 nil t t nil header)))
 
 (defun do-beginchapter ()
-  (if (or (> *html-page-count* 0)
-          (tex2page-flag-boolean "\\TZPtitleused"))
-      (do-eject)
-    (do-para))
   (ignorespaces)
   (let* ((chapno (tex-string-to-html-string
                    (get-till-char #\space)))
          (header (progn (ignorespaces)
                         (let ((*tabular-stack* (list :header)))
                           (tex-string-to-html-string (get-till-par))))))
-    (write-aux `(!default-title ,header))
-    (emit-newline)
     (tex-def-count "\\footnotenumber" 0 t)
-    (do-write-to-toc-aux 1 chapno header)
-    (emit "<h1 class=beginchapter>")
-    (bgroup)
-    (unless (string= chapno "")
-      (emit chapno)
-      (emit-nbsp 2))
-    (if (string= header "") (emit-nbsp 1)
-      (emit header))
-    (egroup)
-    (emit "</h1>")
-    (do-noindent)))
+    (do-heading-aux-1 0 nil t nil chapno header)))
 
 (defun do-opmac-heading (seclvl)
-  (do-para)
   (ignorespaces)
   (let ((header (let ((*tabular-stack* (list :header)))
                   (tex-string-to-html-string (get-till-par)))))
-    (write-aux `(!default-title ,header))
-    (emit-newline)
-    (when (= seclvl 0)
-      (!using-chapters) (write-aux `(!using-chapters)))
     (let ((nonum-p *opmac-nonum-p*)
           (notoc-p *opmac-notoc-p*))
       (setq *opmac-nonum-p* nil *opmac-notoc-p* nil)
-      (do-heading-aux-1 seclvl nil nonum-p notoc-p header))))
+      (do-heading-aux-1 seclvl nil nonum-p notoc-p nil header))))
 
 (defun do-opmac-sec ()
   (if *math-mode-p*
@@ -7000,9 +6977,6 @@
                       (tdef*-optarg y)
                       (tdef*-argpat y)
                       (tdef*-expansion y))))))
-        ((setq *it* (section-ctl-seq-p z))
-         (let ((n *it*))
-           (do-heading n)))
         (*math-mode-p*
           (do-math-ctl-seq z))
         (t (trace-if (> (find-count "\\tracingcommands") 0)
@@ -7521,20 +7495,6 @@
 
                .chapterheading {
                font-size: 100%;
-               }
-
-               .beginchapter,.beginsection {
-               font-family: sans-serif;
-               }
-
-               .beginchapter {
-               margin-top: 1.8em;
-               font-size: 150%;
-               }
-
-               .beginsection {
-               margin-top: 1.8em;
-               font-size: 110%;
                }
 
                .tiny {
@@ -8470,7 +8430,6 @@ Try the commands
 
 ;
 
-
 (tex-defsym-prim "\\AA" "&#xc5;")
 (tex-defsym-prim "\\aa" "&#xe5;")
 (tex-def-prim "\\abstract"
@@ -8518,13 +8477,7 @@ Try the commands
 (tex-def-prim "\\center" (lambda () (do-block :center)))
 (tex-def-prim "\\centerline" (lambda () (do-function "\\centerline")))
 (tex-def-prim "\\chap" (lambda () (do-opmac-heading 0)))
-(tex-def-prim "\\chapter"
- (lambda ()
-     (!using-chapters)
-     (write-aux '(!using-chapters))
-     (when (and (eql *tex-format* :latex) (< (get-gcount "\\secnumdepth") -1))
-       (tex-gdef-count "\\secnumdepth" 2))
-     (do-heading 0)))
+(tex-def-prim "\\chapter" (lambda () (do-heading 0)))
 (tex-defsym-prim "\\chaptername" "Chapter ")
 (tex-def-prim "\\char" #'do-char)
 (tex-def-prim "\\chardef" #'do-chardef)
@@ -8828,6 +8781,7 @@ Try the commands
  (lambda () (get-bracketed-text-if-any) (do-eject)))
 (tex-def-prim "\\pageno" (lambda () (emit *html-page-count*)))
 (tex-def-prim "\\pageref" #'do-pageref)
+(tex-def-prim "\\paragraph" (lambda () (do-heading 4)))
 (tex-def-prim "\\part" (lambda () (do-heading -1)))
 (tex-def-prim "\\pdfximage" #'do-pdfximage)
 (tex-def-prim "\\picture"
@@ -8900,8 +8854,8 @@ Try the commands
 (tex-def-prim "\\string" #'do-string)
 (tex-def-prim "\\style" #'do-opmac-list-style)
 (tex-def-prim "\\subject" #'do-subject)
-(tex-def-prim "\\subsection"
- (lambda () (get-bracketed-text-if-any) (do-heading 2)))
+(tex-def-prim "\\subparagraph" (lambda () (do-heading 5)))
+(tex-def-prim "\\subsection" (lambda () (do-heading 2)))
 (tex-def-prim "\\subsubsection" (lambda () (do-heading 3)))
 (tex-def-prim "\\symfootnote" #'do-symfootnote)
 

@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161114" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161115" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1508,7 +1508,7 @@
   (emit-newline))
 
 (defun do-subject ()
-  (tex-gdef-0arg "\\TZPtitleused" "1")
+  (tex-gdef-0arg "\\TIIPtitleused" "1")
   (do-end-para)
   (let ((title (get-group)))
     (unless *title* (flag-missing-piece :document-title))
@@ -1516,7 +1516,7 @@
     (output-title title)))
 
 (defun do-opmac-title ()
-  (tex-gdef-0arg "\\TZPtitleused" 1)
+  (tex-gdef-0arg "\\TIIPtitleused" 1)
   (do-end-para)
   (let ((title (tex-string-to-html-string (get-till-par))))
     (unless *title* (flag-missing-piece :document-title))
@@ -1728,9 +1728,9 @@
     (!using-chapters) ;(write-aux '(!using-chapters))
     (when (and (eq *tex-format* :latex) (< (get-gcount "\\secnumdepth") -1))
       (tex-gdef-count "\\secnumdepth" 2))
-    (cond ((or (> *html-page-count* 0) (tex2page-flag-boolean "\\TZPtitleused"))
+    (cond ((or (> *html-page-count* 0) (tex2page-flag-boolean "\\TIIPtitleused"))
            (do-eject))
-          (t (tex-gdef-0arg "\\TZPtitleused" "1")
+          (t (tex-gdef-0arg "\\TIIPtitleused" "1")
              (do-para))))
   (increment-section-counter seclvl nonum-p)
   (when lbl-val (setq nonum-p nil))
@@ -8927,6 +8927,8 @@ Try the commands
 (tex-def-prim "\\TIIPRGB" (lambda () (do-switch :rgb255)))
 (tex-def-prim "\\TIIPtheorem" #'do-theorem)
 (tex-def-prim "\\TIIPrelax" #'do-relax)
+(tex-def-prim "\\TIIPauxdir" (lambda () (emit *aux-dir/*)))
+(tex-def-prim "\\TIIPlastpageno" (lambda () (emit *last-page-number*)))
 (tex-def-prim "\\tiny" (lambda () (do-switch :tiny)))
 (tex-def-prim "\\tit" #'do-opmac-title)
 (tex-def-prim "\\title" #'do-title)
@@ -8935,8 +8937,6 @@ Try the commands
 (tex-def-prim "\\tracingall" #'do-tracingall)
 (tex-def-prim "\\tt" (lambda () (do-switch :tt)))
 (tex-def-prim "\\typein" #'do-typein)
-(tex-def-prim "\\TZPauxdir" (lambda () (emit *aux-dir/*)))
-(tex-def-prim "\\TZPlastpageno" (lambda () (emit *last-page-number*)))
 (tex-def-prim-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))
 
 (tex-def-prim "\\uccode" (lambda () (do-tex-case-code :uccode)))
@@ -9092,128 +9092,69 @@ Try the commands
 ;ignoring these
 
 (tex-let-prim "\\htmladvancedentities" "\\TIIPrelax")
-
 (tex-let-prim "\\displaystyle" "\\TIIPrelax")
-
 (tex-let-prim "\\textstyle" "\\TIIPrelax")
-
 (tex-let-prim "\\endsloppypar" "\\TIIPrelax")
-
 (tex-let-prim "\\frenchspacing" "\\TIIPrelax")
-
 (tex-let-prim "\\oldstyle" "\\TIIPrelax")
-
 (tex-let-prim "\\protect" "\\TIIPrelax")
-
 (tex-let-prim "\\raggedbottom" "\\TIIPrelax")
-
 (tex-let-prim "\\raggedright" "\\TIIPrelax")
-
 (tex-let-prim "\\sloppy" "\\TIIPrelax")
-
 (tex-let-prim "\\sloppypar" "\\TIIPrelax")
-
 (tex-let-prim "\\beginpackages" "\\TIIPrelax")
-
 (tex-let-prim "\\endpackages" "\\TIIPrelax")
-
 (tex-let-prim "\\normalfont" "\\TIIPrelax")
-
 (tex-let-prim "\\textnormal" "\\TIIPrelax")
-
 (tex-let-prim "\\unskip" "\\TIIPrelax")
-
 (tex-def-prim "\\cline" #'get-group)
-
 (tex-def-prim "\\externalref" #'get-group)
-
 (tex-def-prim "\\GOBBLEARG" #'get-group)
-
 (tex-def-prim "\\hyphenation" #'get-group)
-
 (tex-def-prim "\\newlength" #'get-group)
-
 (tex-def-prim "\\hphantom" #'get-group)
-
 (tex-def-prim "\\vphantom" #'get-group)
-
 (tex-def-prim "\\phantom" #'get-group)
-
 (tex-def-prim "\\pagenumbering" #'get-group)
-
 (tex-def-prim "\\pagestyle" #'get-group)
-
 (tex-def-prim "\\raisebox" #'get-group)
-
 (tex-def-prim "\\thispagestyle" #'get-group)
-
 (tex-def-prim "\\manpagesection" #'get-group)
-
 (tex-def-prim "\\manpagedescription" #'get-group)
-
 (tex-def-prim "\\lstset" #'get-group)
-
 (tex-def-prim "\\externallabels" (lambda () (get-group) (get-group)))
-
 (tex-let-prim "\\markboth" "\\externallabels")
 
-(tex-def-prim "\\columnsep" #'eat-dimen)
-
-(tex-def-prim "\\columnseprule" #'eat-dimen)
-
-(tex-def-prim "\\evensidemargin" #'eat-dimen)
-
-(tex-def-prim "\\fboxsep" #'eat-dimen)
-
-(tex-def-prim "\\headsep" #'eat-dimen)
-
-(tex-def-prim "\\itemsep" #'eat-dimen)
-
-(tex-def-prim "\\leftcodeskip" #'eat-dimen)
-
-(tex-def-prim "\\lower" #'eat-dimen)
-
-(tex-def-prim "\\oddsidemargin" #'eat-dimen)
-
-(tex-def-prim "\\parsep" #'eat-dimen)
-
-;(tex-def-prim "\\parskip" #'eat-dimen)
-
-(tex-def-prim "\\raise" #'eat-dimen)
-
-(tex-def-prim "\\rightcodeskip" #'eat-dimen)
-
-(tex-def-prim "\\sidemargin" #'eat-dimen)
-
-(tex-def-prim "\\textheight" #'eat-dimen)
-
-(tex-def-prim "\\topmargin" #'eat-dimen)
-
-(tex-def-prim "\\topsep" #'eat-dimen)
-
-(tex-def-prim "\\vertmargin" #'eat-dimen)
-
-(tex-def-prim "\\magstep" #'get-token)
-
-(tex-def-prim "\\textfont" #'get-token)
-
-(tex-def-prim "\\scriptfont" #'get-token)
-
-(tex-def-prim "\\scriptscriptfont" #'get-token)
-
 (tex-def-prim "\\addtolength" (lambda () (get-token) (get-token)))
-
-(tex-let-prim "\\addvspace" "\\vspace")
-
-(tex-let-prim "\\setlength" "\\addtolength")
-
-(tex-let-prim "\\settowidth" "\\addtolength")
-
-(tex-let-prim "\\hookaction" "\\addtolength")
-
+(tex-def-prim "\\columnsep" #'eat-dimen)
+(tex-def-prim "\\columnseprule" #'eat-dimen)
 (tex-def-prim "\\enlargethispage" (lambda () (eat-star) (get-group)))
-
+(tex-def-prim "\\evensidemargin" #'eat-dimen)
+(tex-def-prim "\\fboxsep" #'eat-dimen)
+(tex-def-prim "\\headsep" #'eat-dimen)
+(tex-def-prim "\\itemsep" #'eat-dimen)
+(tex-def-prim "\\leftcodeskip" #'eat-dimen)
+(tex-def-prim "\\leftmargin" #'eat-dimen)
+(tex-def-prim "\\lower" #'eat-dimen)
+(tex-def-prim "\\magstep" #'get-token)
+(tex-def-prim "\\oddsidemargin" #'eat-dimen)
+(tex-def-prim "\\pagewidth" #'eat-dimen)
 (tex-def-prim "\\parbox" (lambda () (get-bracketed-text-if-any) (get-group)))
+(tex-def-prim "\\parsep" #'eat-dimen)
+(tex-def-prim "\\raise" #'eat-dimen)
+(tex-def-prim "\\rightcodeskip" #'eat-dimen)
+(tex-def-prim "\\scriptfont" #'get-token)
+(tex-def-prim "\\scriptscriptfont" #'get-token)
+(tex-def-prim "\\sidemargin" #'eat-dimen)
+(tex-def-prim "\\spinemargin" #'eat-dimen)
+(tex-def-prim "\\textfont" #'get-token)
+(tex-def-prim "\\textheight" #'eat-dimen)
+(tex-def-prim "\\topmargin" #'eat-dimen)
+(tex-def-prim "\\topsep" #'eat-dimen)
+(tex-let-prim "\\addvspace" "\\vspace")
+(tex-let-prim "\\hookaction" "\\addtolength")
+(tex-let-prim "\\setlength" "\\addtolength")
+(tex-let-prim "\\settowidth" "\\addtolength")
 
 (tex-def-prim "\\ProvidesFile"
  (lambda () (get-group) (get-bracketed-text-if-any)))
@@ -9270,7 +9211,6 @@ Try the commands
 
 (tex-let-prim "\\documentstyle" "\\documentclass")
 
-(tex-let-prim "\\H" "\\\"")
 
 (tex-let-prim "\\/" "\\TIIPrelax")
 

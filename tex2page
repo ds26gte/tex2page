@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161114") ;last change
+(define *tex2page-version* "20161115") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -2054,7 +2054,7 @@
 
 (define do-subject
   (lambda ()
-    (tex-gdef-0arg "\\TZPtitleused" "1")
+    (tex-gdef-0arg "\\TIIPtitleused" "1")
     (do-end-para)
     (let ((title (get-group)))
       (unless *title* (flag-missing-piece ':document-title))
@@ -2065,7 +2065,7 @@
 
 (define do-opmac-title
   (lambda ()
-    (tex-gdef-0arg "\\TZPtitleused" 1)
+    (tex-gdef-0arg "\\TIIPtitleused" 1)
     (do-end-para)
     (let ((title (tex-string-to-html-string (get-till-par))))
       (unless *title* (flag-missing-piece ':document-title))
@@ -2323,9 +2323,9 @@
       (!using-chapters)
       (when (and (eqv? *tex-format* ':latex) (< (get-gcount "\\secnumdepth") -1))
         (tex-gdef-count "\\secnumdepth" 2))
-      (cond ((or (> *html-page-count* 0) (tex2page-flag-boolean "\\TZPtitleused"))
+      (cond ((or (> *html-page-count* 0) (tex2page-flag-boolean "\\TIIPtitleused"))
              (do-eject))
-            (else (tex-gdef-0arg "\\TZPtitleused" "1")
+            (else (tex-gdef-0arg "\\TIIPtitleused" "1")
                   (do-para))))
     (increment-section-counter seclvl nonum?)
     (when lbl-val (set! nonum? #f))
@@ -10729,6 +10729,8 @@ Try the commands
 (tex-def-prim "\\TIIPRGB" (lambda () (do-switch ':rgb255)))
 (tex-def-prim "\\TIIPtheorem" do-theorem)
 (tex-def-prim "\\TIIPrelax" do-relax)
+(tex-def-prim "\\TIIPauxdir" (lambda () (emit *aux-dir/*)))
+(tex-def-prim "\\TIIPlastpageno" (lambda () (emit *last-page-number*)))
 (tex-def-prim "\\tiny" (lambda () (do-switch ':tiny)))
 (tex-def-prim "\\tit" do-opmac-title)
 (tex-def-prim "\\title" do-title)
@@ -10737,8 +10739,6 @@ Try the commands
 (tex-def-prim "\\tracingall" do-tracingall)
 (tex-def-prim "\\tt" (lambda () (do-switch ':tt)))
 (tex-def-prim "\\typein" do-typein)
-(tex-def-prim "\\TZPauxdir" (lambda () (emit *aux-dir/*)))
-(tex-def-prim "\\TZPlastpageno" (lambda () (emit *last-page-number*)))
 (tex-def-prim-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))
 
 (tex-def-prim "\\uccode" (lambda () (do-tex-case-code ':uccode)))
@@ -10946,44 +10946,37 @@ Try the commands
 
 ;\advance
 
+(tex-def-prim "\\addtolength" (lambda () (get-token) (get-token)))
 (tex-def-prim "\\columnsep" eat-dimen)
 (tex-def-prim "\\columnseprule" eat-dimen)
+(tex-def-prim "\\enlargethispage" (lambda () (eat-star) (get-group)))
 (tex-def-prim "\\evensidemargin" eat-dimen)
 (tex-def-prim "\\fboxsep" eat-dimen)
 (tex-def-prim "\\headsep" eat-dimen)
 (tex-def-prim "\\itemsep" eat-dimen)
 (tex-def-prim "\\leftcodeskip" eat-dimen)
 (tex-def-prim "\\lower" eat-dimen)
+(tex-def-prim "\\magstep" get-token)
 (tex-def-prim "\\oddsidemargin" eat-dimen)
+(tex-def-prim "\\pagewidth" eat-dimen)
+(tex-def-prim "\\parbox" (lambda () (get-bracketed-text-if-any) (get-group)))
 (tex-def-prim "\\parsep" eat-dimen)
-(tex-def-prim "\\parskip" eat-dimen)
 (tex-def-prim "\\raise" eat-dimen)
 (tex-def-prim "\\rightcodeskip" eat-dimen)
+(tex-def-prim "\\scriptfont" get-token)
+(tex-def-prim "\\scriptscriptfont" get-token)
 (tex-def-prim "\\sidemargin" eat-dimen)
+(tex-def-prim "\\spinemargin" eat-dimen)
+(tex-def-prim "\\textfont" get-token)
 (tex-def-prim "\\textheight" eat-dimen)
 (tex-def-prim "\\topmargin" eat-dimen)
 (tex-def-prim "\\topsep" eat-dimen)
-(tex-def-prim "\\vertmargin" eat-dimen)
-
-(tex-def-prim "\\magstep" get-token)
-(tex-def-prim "\\textfont" get-token)
-(tex-def-prim "\\scriptfont" get-token)
-(tex-def-prim "\\scriptscriptfont" get-token)
-
-(tex-def-prim "\\addtolength" (lambda () (get-token) (get-token)))
 (tex-let-prim "\\addvspace" "\\vspace")
+(tex-let-prim "\\hookaction" "\\addtolength")
 (tex-let-prim "\\setlength" "\\addtolength")
 (tex-let-prim "\\settowidth" "\\addtolength")
-(tex-let-prim "\\hookaction" "\\addtolength")
 
-(tex-def-prim "\\enlargethispage"
-              (lambda () (eat-star) (get-group)))
-
-(tex-def-prim "\\parbox"
-  (lambda () (get-bracketed-text-if-any) (get-group)))
-
-(tex-def-prim "\\ProvidesFile"
-              (lambda () (get-group) (get-bracketed-text-if-any)))
+(tex-def-prim "\\ProvidesFile" (lambda () (get-group) (get-bracketed-text-if-any)))
 
 (tex-def-prim "\\DeclareGraphicsRule"
               (lambda () (get-group) (get-group) (get-group) (get-group)))

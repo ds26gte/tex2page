@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161115" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161116" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -5111,43 +5111,24 @@
        *scm-variables* (make-hash-table :test #'equal))
   (mapc (lambda (s) (setf (gethash s *scm-keywords*) t))
         '(
-
+          ;#include scmkeywords.lisp
           "=>"
           "and"
-          "assert"
           "begin"
           "begin0"
-          "block"
           "case"
           "cond"
-          "decf"
           "define"
           "define-macro"
           "define-syntax"
           "defmacro"
-          "defpackage"
-          "defparameter"
           "defstruct"
-          "defun"
-          "defvar"
           "delay"
-          "destructuring-bind"
           "do"
-          "do-all-symbols"
-          "do-external-symbols"
-          "do-symbols"
-          "dolist"
-          "dotimes"
-          "ecase"
           "else"
-          "etypecase"
-          "eval-when"
           "flet"
           "fluid-let"
-          "handler-bind"
-          "handler-case"
           "if"
-          "incf"
           "labels"
           "lambda"
           "let"
@@ -5156,36 +5137,59 @@
           "let-values"
           "letrec"
           "letrec-syntax"
-          "loop" ;NB! common variable in Scheme
           "macrolet"
+          "or"
+          "quasiquote"
+          "quote"
+          "set!"
+          "syntax-case"
+          "syntax-rules"
+          "unless"
+          "unquote"
+          "unquote-splicing"
+          "when"
+          "with"
+          "with-handlers"
+          ;#endinclude scmkeywords.lisp
+
+          ;#include lispkeywords.lisp
+          "assert"
+          "block"
+          "decf"
+          "defpackage"
+          "defparameter"
+          "defun"
+          "defvar"
+          "destructuring-bind"
+          "do-all-symbols"
+          "do-external-symbols"
+          "do-symbols"
+          "dolist"
+          "dotimes"
+          "ecase"
+          "etypecase"
+          "eval-when"
+          "handler-bind"
+          "handler-case"
+          "incf"
+          "loop" ;NB! common variable in Scheme
           "multiple-value-bind"
           "multiple-value-setq"
-          "or"
           "pop"
           "prog1"
           "progn"
           "push"
-          "quasiquote"
-          "quote"
-          "set!"
           "setf"
           "setq"
-          "syntax-case"
-          "syntax-rules"
           "typecase"
-          "unless"
-          "unquote"
-          "unquote-splicing"
           "unwind-protect"
-          "when"
-          "with"
-          "with-handlers"
           "with-input-from-string"
           "with-open-file"
           "with-open-socket"
           "with-open-stream"
           "with-output-to-string"
-          "with-slots"
+          "with-slots" 
+          ;#endinclude lispkeywords.lisp
 
           ))
   t)
@@ -5361,6 +5365,8 @@
   (setq *global-texframe* (make-texframe*)
         *section-counter-dependencies* (make-hash-table)
         *dotted-counters* (make-hash-table :test #'equal))
+
+  ;#include globdefs.lisp
   ;
   ;for TeX, 0 <= \language <= 255; for TeX2page, let's make \language =
   ;256
@@ -5441,6 +5447,7 @@
   (tex-gdef-0arg "\\TZPtexlayout" "0")
   (tex-gdef-0arg "\\TZPtextext" "1")
   (tex-gdef-0arg "\\TZPraggedright" "1")
+  ;#endinclude globdefs.lisp
 
   (initialize-scm-words)
 
@@ -8010,6 +8017,7 @@ Try the commands
           (concatenate 'string "\\global\\imgdef" cs "{$" expn "$}"))
          (tex2page-string cs)))))
 
+;#include primdefs.lisp
 ;TeXbook, sec 18.2, non-italic letters in formulas
 
 (tex-defsym-math-prim "\\Pr" "Pr ")
@@ -8060,7 +8068,7 @@ Try the commands
 (tex-defsym-math-prim "\\vartheta" "&#x3d1;")
 (tex-defsym-math-prim "\\iota" "&#x3b9;")
 (tex-defsym-math-prim "\\kappa" "&#x3ba;")
-(tex-defsym-math-prim "\\lambda" "#x3bb;")
+(tex-defsym-math-prim "\\lambda" "&#x3bb;")
 (tex-defsym-math-prim "\\mu" "&#x3bc;")
 (tex-defsym-math-prim "\\nu" "&#x3bd;")
 (tex-defsym-math-prim "\\xi" "&#x3be;")
@@ -8107,7 +8115,7 @@ Try the commands
 (tex-defsym-math-prim "\\Im" "&#x2111;")
 (tex-defsym-math-prim "\\partial" "&#x2202;")
 (tex-defsym-math-prim "\\infty" "&#x221e;")
-(tex-defsym-math-prim "\\prime" "&#x2044;")
+(tex-defsym-math-prim "\\prime" "&#x2044;") ;sic, not &#x2032;
 (tex-defsym-math-prim "\\emptyset" "&#x2205;")
 (tex-defsym-math-prim "\\nabla" "&#x2207;")
 (tex-defsym-math-prim "\\surd" "&#x221a;")
@@ -8179,6 +8187,7 @@ Try the commands
 ;8. relations
 
 (tex-defsym-math-prim "\\leq" "&#x2264;")
+(tex-defsym-math-prim "\\leqslant" "&#x2a7d;")
 (tex-defsym-math-prim "\\prec" "&#x227a;")
 (tex-defsym-math-prim "\\preceq" "&#x227c;")
 (tex-defsym-math-prim "\\ll" "&#x226a;")
@@ -8190,6 +8199,7 @@ Try the commands
 (tex-defsym-math-prim "\\smile" "&#x2323;")
 (tex-defsym-math-prim "\\frown" "&#x2322;")
 (tex-defsym-math-prim "\\geq" "&#x2265;")
+(tex-defsym-math-prim "\\geqslant" "&#x2a7e;")
 (tex-defsym-math-prim "\\succ" "&#x227b;")
 (tex-defsym-math-prim "\\succeq" "&#x227d;")
 (tex-defsym-math-prim "\\gg" "&#x226b;")
@@ -8243,11 +8253,10 @@ Try the commands
                       (t (toss-back-string x) "/"))))
       (case c
         ((#\< #\> #\=) (get-actual-char)
-         (emit (ecase c
-                 (#\< "&#x226e;")
-                 (#\> "&#x226f;")
-                 (#\= "&#x2260;"))))
-        (t (emit "/"))))))
+                       (emit (cond ((char= c #\<) "&#x226e;")
+                                   ((char= c #\>) "&#x226f;")
+                                   ((char= c #\=) "&#x2260;"))))
+        (t (emit "/")))))) ;#enddefun
 
 (tex-def-math-prim "\\not" #'do-not)
 (tex-defsym-math-prim "\\notin" "&#x2209;")
@@ -8371,50 +8380,38 @@ Try the commands
 ;
 
 (tex-def-math-prim "\\eqalign" (lambda () (do-eqalign :eqalign)))
-
 (tex-def-math-prim "\\eqalignno" (lambda () (do-eqalign :eqalignno)))
-
 (tex-def-math-prim "\\displaylines" (lambda () (do-eqalign :displaylines)))
-
 (tex-def-math-prim "\\noalign" #'do-noalign)
-
 (tex-def-math-prim "\\frac" #'do-frac)
-
 (tex-def-math-prim "\\pmatrix" #'do-pmatrix)
-
 (tex-def-math-prim "\\matrix" #'do-relax) ;??? better?
-
 (tex-def-math-prim "\\eqno" #'do-eqno)
 
 (defun do-math-font (f)
   (lambda ()
     (let ((*math-font* f))
-      (tex2page-string (get-token)))))
+      (tex2page-string (get-token))))) ;#enddefun
 
-(tex-def-math-prim "\\mathbf" #'do-relax)
-
+(tex-def-math-prim "\\mathbf" (do-math-font :bf))
 (tex-def-math-prim "\\mathrm" (do-math-font :rm))
-
 (tex-def-math-prim "\\mathbb" (do-math-font :bb))
-
 (tex-def-math-prim "\\mathcal" (do-math-font :cal))
-
 (tex-def-math-prim "\\mathfrak" (do-math-font :frak))
 
 (tex-def-math-prim "\\over" #'do-over); (lambda () (emit "/")))
-
 (tex-def-math-prim "\\sqrt"
  (lambda () (emit "&#x221a;(") (tex2page-string (get-token)) (emit ")")))
-
 (tex-def-math-prim "\\left" #'do-math-left)
-
 (tex-def-math-prim "\\right" #'do-math-right)
 
 ;spaces
 
 (defun kern (len)
   (concatenate 'string "<span style=\"margin-left: "
-               len "\"> </span>"))  ;zwnj causes table-row fault
+    ;in following, tried &#x200c; (= zwnj) instead of space,
+    ;but it causes table-row fault
+    len "\"> </span>")) ;#enddefun  
 
 (tex-def-prim "\\enspace" (lambda () (emit (kern ".5em"))))
 (tex-def-prim "\\thinspace" (lambda () (emit (kern ".16667em"))))
@@ -8487,7 +8484,7 @@ Try the commands
 (tex-def-prim "\\closeout" (lambda () (do-close-stream :out)))
 (tex-def-prim "\\color" #'do-color)
 (tex-def-prim "\\convertMPtoPDF" #'do-convertmptopdf)
-(tex-defsym-prim "\\copyright" "&#xa9")
+(tex-defsym-prim "\\copyright" "&#xa9;")
 (tex-def-prim "\\countdef" (lambda () (do-newcount t) (eat-integer)))
 (tex-def-prim "\\CR" (lambda () (do-cr "\\CR")))
 (tex-def-prim "\\cr" (lambda () (do-cr "\\cr")))
@@ -8521,11 +8518,11 @@ Try the commands
 (tex-def-prim "\\divide" (lambda () (do-divide (globally-p))))
 (tex-def-prim "\\document" #'probably-latex)
 (tex-def-prim "\\documentclass" #'do-documentclass)
-(tex-def-prim "\\dontuseimgforhtmlmath"
+(tex-def-prim "\\dontuseimgforhtmlmath" ;obsolete
  (lambda () (tex-def-0arg "\\TZPmathimage" "0")))
-(tex-def-prim "\\dontuseimgforhtmlmathdisplay"
+(tex-def-prim "\\dontuseimgforhtmlmathdisplay" ;obsolete
  (lambda () (tex-def-0arg "\\TZPmathimage" "0")))
-(tex-def-prim "\\dontuseimgforhtmlmathintext" (lambda () t))
+(tex-def-prim "\\dontuseimgforhtmlmathintext" (lambda () t)) ;obsolete
 (tex-defsym-prim "\\dots" "&#x2026;")
 
 (tex-def-prim "\\edef" (lambda () (do-def (globally-p) t)))
@@ -8628,14 +8625,14 @@ Try the commands
 (tex-def-prim "\\hskip" #'do-hskip)
 (tex-def-prim "\\hspace" #'do-hspace)
 (tex-def-prim "\\htmladdimg" #'do-htmladdimg)
-(tex-def-prim "\\htmlcolophon" #'do-htmlcolophon) ;obs
+(tex-def-prim "\\htmlcolophon" #'do-htmlcolophon) ;obsolete
 (tex-def-prim "\\htmldoctype" #'do-htmldoctype)
-(tex-def-prim "\\htmlgif" (lambda () (do-htmlimg "htmlgif")))
+(tex-def-prim "\\htmlgif" (lambda () (do-htmlimg "htmlgif"))) ;obsolete
 (tex-def-prim "\\htmlheadonly" #'do-htmlheadonly)
-(tex-def-prim "\\htmlimageconversionprogram" #'do-htmlimageconversionprogram)
-(tex-def-prim "\\htmlimageformat" #'do-htmlimageformat)
-(tex-def-prim "\\htmlimg" (lambda () (do-htmlimg "htmlimg")))
-(tex-def-prim "\\htmlimgmagnification" #'do-htmlimgmagnification)
+(tex-def-prim "\\htmlimageconversionprogram" #'do-htmlimageconversionprogram) ;obsolete
+(tex-def-prim "\\htmlimageformat" #'do-htmlimageformat) ;obsolete
+(tex-def-prim "\\htmlimg" (lambda () (do-htmlimg "htmlimg"))) ;obsolete
+(tex-def-prim "\\htmlimgmagnification" #'do-htmlimgmagnification) ;obsolete
 (tex-def-prim "\\htmlmathstyle" #'do-htmlmathstyle)
 (tex-def-prim "\\htmlonly" (lambda () (incf *html-only*)))
 (tex-def-prim "\\htmlpagelabel" #'do-htmlpagelabel)
@@ -8686,7 +8683,7 @@ Try the commands
 (tex-def-prim "\\inputcss" #'do-inputcss)
 (tex-def-prim "\\inputexternallabels" #'do-inputexternallabels)
 (tex-def-prim "\\InputIfFileExists" #'do-inputiffileexists)
-(tex-def-prim "\\inputindex" #'do-inputindex)
+(tex-def-prim "\\inputindex" (lambda () (do-inputindex nil)))
 (tex-def-prim "\\it" (lambda () (do-switch :it)))
 (tex-def-prim "\\item" #'do-item)
 (tex-def-prim "\\itemitem" (lambda () (do-plain-item 2)))
@@ -8808,8 +8805,8 @@ Try the commands
 (tex-def-prim "\\resetatcatcode" (lambda () (set-catcode #\@ 12)))
 (tex-def-prim "\\resizebox" #'do-resizebox)
 (tex-def-prim "\\rightline" (lambda () (do-function "\\rightline")))
-(tex-def-prim "\\rm" (lambda () (if *math-mode-p* (do-switch :rm))))
-(tex-def-prim "\\romannumeral" #'do-romannumeral)
+(tex-def-prim "\\rm" (lambda () (when *math-mode-p* (do-switch :rm))))
+(tex-def-prim "\\romannumeral" (lambda () (do-romannumeral nil)))
 (tex-def-prim "\\Romannumeral" (lambda () (do-romannumeral t)))
 (tex-def-prim "\\ruledtable" #'do-ruledtable)
 
@@ -8823,7 +8820,7 @@ Try the commands
 (tex-def-prim "\\schemeresponsebox"
  (lambda () (do-scm-slatex-lines "schemeresponsebox" nil :result)))
 (tex-def-prim "\\schemeresult" (lambda () (do-scm :result)))
-(tex-def-prim "\\scm" #'do-scm)
+(tex-def-prim "\\scm" (lambda () (do-scm nil)))
 (tex-def-prim "\\scmbuiltin" #'do-scm-set-builtins)
 (tex-def-prim "\\scmdribble" #'do-scmdribble)
 (tex-def-prim "\\scminput" #'do-scminput)
@@ -8864,7 +8861,7 @@ Try the commands
 (tex-def-prim "\\table" (lambda () (do-table/figure :table)))
 (tex-def-prim "\\tableplain" #'do-table-plain)
 (tex-def-prim "\\tableofcontents" #'do-toc)
-(tex-def-prim "\\tabular" #'do-tabular)
+(tex-def-prim "\\tabular" (lambda () (do-tabular nil)))
 (tex-def-prim "\\tag" #'do-tag)
 
 (tex-def-prim "\\texonly" (lambda () (ignore-tex-specific-text "texonly")))
@@ -9005,11 +9002,13 @@ Try the commands
 (tex-def-prim "\\'" (lambda () (do-diacritic :acute)))
 (tex-def-prim "\\="
               (lambda ()
-                (unless (eql (car *tabular-stack*) :tabbing))
-                (do-diacritic :macron)))
+                (unless (and (not (null *tabular-stack*))
+                             (eql (car *tabular-stack*) :tabbing))
+                  (do-diacritic :macron))))
 (tex-def-prim "\\>"
               (lambda ()
-                (when (eql (car *tabular-stack*) :tabbing)
+                (when (and (not (null *tabular-stack*))
+                           (eql (car *tabular-stack*) :tabbing))
                   (emit-nbsp 3))))
 (tex-def-prim "\\^" (lambda () (do-diacritic :circumflex)))
 (tex-def-prim "\\~" (lambda () (do-diacritic :tilde)))
@@ -9171,9 +9170,7 @@ Try the commands
  (lambda () (get-bracketed-text-if-any) (get-group) (get-group)))
 
 (tex-def-prim "\\GOBBLEOPTARG" #'get-bracketed-text-if-any)
-
 (tex-def-prim "\\nolinebreak" #'get-bracketed-text-if-any)
-
 (tex-def-prim "\\nopagebreak" #'get-bracketed-text-if-any)
 
 (tex-def-prim "\\hyphenchar" (lambda () (get-token) (eat-integer)))
@@ -9183,184 +9180,103 @@ Try the commands
 (tex-def-prim "\\usepackage"
  (lambda () (get-bracketed-text-if-any) (get-group) (probably-latex)))
 
-(tex-def-prim "\\readindexfile" (lambda () (get-token) (do-inputindex)))
+(tex-def-prim "\\readindexfile" (lambda () (get-token) (do-inputindex nil)))
 
 (tex-let-prim "\\colophon" "\\htmlcolophon")
-
 (tex-let-prim "\\path" "\\verb")
-
 (tex-let-prim "\\par" "\\endgraf")
-
 (tex-let-prim "\\u" "\\`")
-
 (tex-let-prim "\\vbox" "\\hbox")
-
 (tex-let-prim "\\endabstract" "\\endquote")
-
 (tex-let-prim "\\mbox" "\\hbox")
-
 (tex-let-prim "\\supereject" "\\eject")
-
 (tex-let-prim "\\dosupereject" "\\eject")
-
 (tex-let-prim "\\endgroup" "\\egroup")
-
 (tex-let-prim "\\begingroup" "\\bgroup")
-
 (tex-let-prim "\\ldots" "\\dots")
-
 (tex-let-prim "\\documentstyle" "\\documentclass")
-
-
 (tex-let-prim "\\/" "\\TIIPrelax")
-
 (tex-let-prim "\\leavevmode" "\\TIIPrelax")
-
 (tex-let-prim "\\space" "\\ ")
-
 (tex-let-prim "\\quotation" "\\quote")
-
 (tex-let-prim "\\endquotation" "\\endquote")
-
 (tex-let-prim "\\TIIPdate" "\\today")
-
 (tex-let-prim "\\schemeinput" "\\scminput")
-
 (tex-let-prim "\\lispinput" "\\scminput")
 
+;aliases
+
 (tex-let-prim "\\obeywhitespaces" "\\obeywhitespace")
-
 (tex-let-prim "\\ensuremath" "\\mathg")
-
 (tex-let-prim "\\epsffile" "\\epsfbox")
-
 (tex-let-prim "\\htmlimgformat" "\\htmlimageformat")
-
 (tex-let-prim "\\p" "\\verb")
-
 (tex-let-prim "\\ttraggedright" "\\tt")
-
 (tex-let-prim "\\ttfamily" "\\tt")
-
 (tex-let-prim "\\htmladdnormallink" "\\urlp")
-
 (tex-let-prim "\\htmladdnormallinkfoot" "\\urlp")
-
 (tex-let-prim "\\pagehtmlref" "\\htmlref")
-
 (tex-let-prim "\\circledR" "\\textregistered")
-
 (tex-let-prim "\\registered" "\\textregistered")
-
 (tex-let-prim "\\scmconstant" "\\scmbuiltin")
-
 (tex-let-prim "\\setbuiltin" "\\scmbuiltin")
-
 (tex-let-prim "\\setconstant" "\\scmconstant")
-
 (tex-let-prim "\\setkeyword" "\\scmkeyword")
-
 (tex-let-prim "\\setvariable" "\\scmvariable")
-
 (tex-let-prim "\\unssetspecialsymbol" "\\unscmspecialsymbol")
-
 (tex-let-prim "\\setspecialsymbol" "\\scmspecialsymbol")
-
 (tex-let-prim "\\scmp" "\\scm")
-
 (tex-let-prim "\\q" "\\scm")
-
 (tex-let-prim "\\scheme" "\\scm")
-
 (tex-let-prim "\\tagref" "\\ref")
-
 (tex-let-prim "\\numfootnote" "\\numberedfootnote")
-
 (tex-let-prim "\\f" "\\numberedfootnote")
-
 (tex-let-prim "\\newpage" "\\eject")
-
 (tex-let-prim "\\clearpage" "\\eject")
-
 (tex-let-prim "\\cleardoublepage" "\\eject")
-
 (tex-let-prim "\\htmlpagebreak" "\\eject")
-
 (tex-let-prim "\\typeout" "\\message")
-
 (tex-let-prim "\\unorderedlist" "\\itemize")
-
 (tex-let-prim "\\li" "\\item")
-
 (tex-let-prim "\\htmlstylesheet" "\\inputcss")
-
 (tex-let-prim "\\hr" "\\hrule")
-
 (tex-let-prim "\\htmlrule" "\\hrule")
-
 (tex-let-prim "\\numberedlist" "\\enumerate")
-
 (tex-let-prim "\\orderedlist" "\\enumerate")
-
 (tex-let-prim "\\endunorderedlist" "\\enditemize")
-
 (tex-let-prim "\\endnumberedlist" "\\endenumerate")
-
 (tex-let-prim "\\endorderedlist" "\\endenumerate")
-
 (tex-let-prim "\\newline" "\\break")
 
+;obsoletisms
+
 (tex-let-prim "\\gifdef" "\\imgdef")
-
 (tex-let-prim "\\schemeeval" "\\eval")
-
 (tex-let-prim "\\gifpreamble" "\\imgpreamble")
-
 (tex-let-prim "\\mathpreamble" "\\imgpreamble")
-
 (tex-let-prim "\\scmverbatim" "\\scm")
-
 (tex-let-prim "\\scmfilename" "\\verbwritefile")
-
 (tex-let-prim "\\scmwritefile" "\\verbwritefile")
-
 (tex-let-prim "\\verbfilename" "\\verbwritefile")
-
 (tex-let-prim "\\scmfileonly" "\\verbwrite")
-
 (tex-let-prim "\\scmverbatimfile" "\\scminput")
-
 (tex-let-prim "\\scmverbatiminput" "\\scminput")
-
 (tex-let-prim "\\scmwrite" "\\verbwrite")
-
 (tex-let-prim "\\scmfile" "\\scmdribble")
-
 (tex-let-prim "\\scmverb" "\\scm")
-
 ;(tex-let-prim "\\verbinput" "\\verbatiminput")
-
 (tex-let-prim "\\verbatimfile" "\\verbatiminput")
-
 (tex-let-prim "\\verbescapechar" "\\verbatimescapechar")
-
 (tex-let-prim "\\setverbatimescapechar" "\\verbescapechar")
-
 (tex-let-prim "\\nohtmlmathimg" "\\dontuseimgforhtmlmath")
-
 (tex-let-prim "\\nohtmlmathintextimg" "\\dontuseimgforhtmlmathintext")
 (tex-let-prim "\\leqalignno" "\\eqalignno")
-
 (tex-let-prim "\\nohtmlmathdisplayimg" "\\dontuseimgforhtmlmathdisplay")
-(tex-let-prim "\\writetotoc" "\\writenumberedtocline")
-
+(tex-let-prim "\\writetotoc" "\\writenumberedtocline") ;obsolete
 (tex-let-prim "\\textdegree" "\\degree")
 (tex-let-prim "\\leqno" "\\eqno")
-
 (tex-let-prim "\\trademark" "\\TM")
-
 (tex-let-prim "\\texttrademark" "\\TM")
-
 (tex-let-prim "\\n" "\\noindent")
 
 ;for use within inner \eval
@@ -9371,6 +9287,8 @@ Try the commands
 (tex-let-prim "\\Lrbrace" "\\char`\\}")
 (tex-let-prim "\\Lsup" "\\char`\\^")
 (tex-let-prim "\\Lsub" "\\char`\\_")
+
+;#endinclude primdefs.lisp
 
 (defun tex2page (tex-file)
   (unless (= *write-log-index* 0)

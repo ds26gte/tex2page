@@ -1,4 +1,9 @@
-Last change 2016-11-15
+Last change 2016-11-16
+
+2016 Nov 16
+
+Added some shell scripts to help tex2page.lisp and tex2page not skew. User
+doesn't need these.
 
 2016 Nov 15
 

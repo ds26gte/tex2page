@@ -7,7 +7,7 @@
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
-\message{version 20161111} % last change
+\message{version 20161115} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -843,12 +843,42 @@
 
 %
 
-\def\sidemargin{\afterassignment\sidemarginQadjustoffset
-  \hoffset}
+\newdimen\pagewidth
 
-\def\sidemarginQadjustoffset{%
-  \advance\hoffset -1true in
-  \advance\hsize -2\hoffset}
+\pagewidth 8.5 true in
+
+\def\leftmargin{\afterassignment\leftmarginQii \hoffset}
+
+\def\leftmarginQii{\advance\hoffset -1 true in \relax}
+
+\def\topmargin{\afterassignment\topmarginQii \voffset}
+
+\def\topmarginQii{\advance\voffset -1 true in \relax}
+
+\def\sidemargin{\afterassignment\sidemarginQii \hoffset}
+
+\def\sidemarginQii{%
+  \hsize = \pagewidth
+  \advance\hsize -2\hoffset
+  \advance\hoffset -1 true in
+  \relax}
+
+\def\spinemargin{%
+  \expandafter\csname newdimen\endcsname\spinemarginQii
+  \afterassignment\spinemarginQiii \spinemarginQii}
+
+\def\spinemarginQiii{%
+  \def\dualhoffset{\ifodd\pageno
+      \hoffset=\spinemarginQii
+      \advance\hoffset -1 true in
+    \else
+      \hoffset=\pagewidth
+      \advance\hoffset -\spinemarginQii
+      \advance\hoffset -\hsize
+      \advance\hoffset -1 true in
+    \fi\relax}%
+  \output={\dualhoffset\plainoutput}} 
+%
 
 \ifx\Gin@driver\UnDeFiNeD
   \ifx\pdfoutput\UnDeFiNeD\else\def\Gin@driver{pdftex.def}\fi

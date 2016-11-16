@@ -1,4 +1,9 @@
-Last change 2016-11-14
+Last change 2016-11-15
+
+2016 Nov 15
+
+tex2page.tex: Added \pagewidth \{left,top,spine}margin. Redefined \sidemargin 
+to respect \pagewidth.
 
 2016 Nov 14
 

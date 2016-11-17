@@ -7,7 +7,7 @@
 % tex2page is available at
 % http://ds26gte.github.io/tex2page/index.html
 
-% last change: 2016-11-12
+% last change: 2016-11-16
 
 \input tex2page-doc-mac
 
@@ -152,10 +152,8 @@ creates \p{|meta[jobname].html} in the working directory.
 
 \index{story.tex@\p{story.tex}}
 
-To try this out, copy into your working directory the
-example file \urlh{texample.html}{\p{story.tex}} provided in all \TeX\
-distributions.
-Call \TeX2page on it:
+To try this out, call \TeX2page on the example file \p{story.tex}
+provided in all \TeX\ distributions:
 
 \p{
 tex2page story
@@ -164,7 +162,10 @@ tex2page story
 \n
 \index{log file}
 %
-\TeX2page will get cracking on \p{story.tex}, providing
+\TeX2page will get cracking\f{\TeX2page, like \TeX, will find the
+file from your distribution as it is in the path \p{TEXINPUTS}.
+If this is too confusing, copy the file manually to your working
+directory.} on \p{story.tex}, providing
 the following commentary, or {\em log}, on your console:
 
 \medbreak
@@ -1704,7 +1705,7 @@ non-zero.
 
 \index{TZPhsize@\p{\TZPhsize}}
 %
-If you don't really need a full-blown \TeX-like layout, but would
+If you don’t really need a full-blown \TeX-like layout, but would
 still like to have the HTML page’s text width be no more than,
 say, 6.25 inches, you could have
 
@@ -2117,7 +2118,7 @@ stream number} and a \TeX\ expression to be output.
 Recall that \TeX\ allows only the numbers 0–15 for
 output streams that can be associated with files;
 numbers outside this range are deemed to represent
-standard output.  
+standard output.
 
 \xrdef{write18}
 \index{write@\p{\write}!to stream 18}
@@ -2555,9 +2556,9 @@ supported by HTML, so \TeX2page does not need to convert them.
 \p{\XeTeXpdffile} for PDF images, and \p{\XeTeXpicfile} for PNG,
 JPEG and GIF images.  To load a graphic specified in MetaPost,
 you can either (a) convert MetaPost spec into EPS and
-thence to PDF using a utility like \p{epstopdf}; or (b) 
+thence to PDF using a utility like \p{epstopdf}; or (b)
 convert the spec to PNG. Let’s start with a MetaPost file
-\urlh{mpexample.html}{\p{lambda.mp}}. 
+\urlh{mpexample.html}{\p{lambda.mp}}.
 
 (a) At the OS shell, type
 
@@ -2565,7 +2566,6 @@ convert the spec to PNG. Let’s start with a MetaPost file
 mpost lambda.mp
 epstopdf lambda-1.eps
 }
-
 
 This creates a PDF file \p{lambda-1.pdf}, which is inserted in
 the source document via

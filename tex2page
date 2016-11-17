@@ -10192,19 +10192,12 @@ Try the commands
 ;
 
 (tex-def-math-prim "\\eqalign" (lambda () (do-eqalign ':eqalign)))
-
 (tex-def-math-prim "\\eqalignno" (lambda () (do-eqalign ':eqalignno)))
-
 (tex-def-math-prim "\\displaylines" (lambda () (do-eqalign ':displaylines)))
-
 (tex-def-math-prim "\\noalign" do-noalign)
-
 (tex-def-math-prim "\\frac" do-frac)
-
 (tex-def-math-prim "\\pmatrix" do-pmatrix)
-
 (tex-def-math-prim "\\matrix" do-relax) ;??? better?
-
 (tex-def-math-prim "\\eqno" do-eqno)
 
 (define do-math-font (lambda (f)
@@ -10213,22 +10206,15 @@ Try the commands
       (tex2page-string (get-token))))) )
 
 (tex-def-math-prim "\\mathbf" (do-math-font ':bf))
-
 (tex-def-math-prim "\\mathrm" (do-math-font ':rm))
-
 (tex-def-math-prim "\\mathbb" (do-math-font ':bb))
-
 (tex-def-math-prim "\\mathcal" (do-math-font ':cal))
-
 (tex-def-math-prim "\\mathfrak" (do-math-font ':frak))
 
 (tex-def-math-prim "\\over" do-over); (lambda () (emit "/")))
-
 (tex-def-math-prim "\\sqrt"
  (lambda () (emit "&#x221a;(") (tex2page-string (get-token)) (emit ")")))
-
 (tex-def-math-prim "\\left" do-math-left)
-
 (tex-def-math-prim "\\right" do-math-right)
 
 ;spaces

@@ -7,7 +7,7 @@
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
-\message{version 20161115} % last change
+\message{version 20161116} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -764,13 +764,15 @@
 % plain's \beginsection splits pages too easily, and also doesn't allow
 % verbatim macros in its arg
 
+\let\sectionfont\bf
+
 \def\beginsection{\vskip-\lastskip
   \vskip1.5\bigskipamount
   \goodbreak
   \noindent
   \begingroup
   \def\par{\endgraf\endgroup\nobreak\noindent}%
-  \bf}
+  \sectionfont}
 
 \let\chapterfont\bf
 

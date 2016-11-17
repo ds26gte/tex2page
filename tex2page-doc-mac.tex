@@ -1,4 +1,4 @@
-% last change: 2016-11-14
+% last change: 2016-11-16
 
 \input tgtermes
 
@@ -19,12 +19,17 @@
 \def\ConTeXt{Con\TeX t}
 \fi
 
-\inputepsf
-
 \input like-plt-logo
 
-\font\twelvebf "TeX Gyre Heros/B" at 12pt
+\font\twelvebf "Ubuntu/B" at 12pt
+%\font\twelvebf "TeX Gyre Heros/B" at 12pt
 \def\chapterfont{\twelvebf \baselineskip=14.4pt }
+
+%\font\tensansbf "TeX Gyre Heros/B" at 10pt
+\font\tensansbf "Ubuntu/B" at 10pt
+\def\sectionfont{\tensansbf}
+
+\font\tentt "Ubuntu Mono" at 10pt
 
 \def\beginmulticols#1{}
 \def\endmulticols{}
@@ -170,13 +175,13 @@ font-family: sans-serif;
 }
 
 .chapter {
-margin-top: 1.8em; 
+margin-top: 1.8em;
 /* margin-top: 1.8em; */
 font-size: 150%;
 }
 
 .section {
- margin-top: 1.8em; 
+ margin-top: 1.8em;
 /* margin-top: 1.8em; */
 font-size: 110%;
 }

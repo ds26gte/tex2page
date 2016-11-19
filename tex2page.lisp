@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161116" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161118" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1510,6 +1510,7 @@
 (defun do-subject ()
   (tex-gdef-0arg "\\TIIPtitleused" "1")
   (do-end-para)
+  (ignorespaces)
   (let ((title (get-group)))
     (unless *title* (flag-missing-piece :document-title))
     (write-aux `(!default-title ,(make-external-title title)))
@@ -6161,16 +6162,17 @@
 
 (defun do-verbatiminput ()
   (ignorespaces)
-  (let ((f
-         (add-dot-tex-if-no-extension-provided (get-filename-possibly-braced))))
-    (cond ((probe-file f) (do-end-para) (bgroup) (emit "<pre class=verbatim>")
+  (let* ((f0 (get-filename-possibly-braced))
+         (f (find-tex-file f0)))
+    (cond ((and f (probe-file f))
+           (do-end-para) (bgroup) (emit "<pre class=verbatim>")
            (with-open-file (p f :direction :input)
              (loop
                (let ((c (read-char p nil :eof-object)))
                  (when (eq c :eof-object) (return))
                  (emit-html-char c))))
            (emit "</pre>") (egroup) (do-para))
-          (t (non-fatal-error "File " f " not found")))))
+          (t (non-fatal-error "File " f0 " not found")))))
 
 (defun get-char-definitely (c0)
   (ignorespaces)
@@ -6217,66 +6219,70 @@
          (n1 (get-unsigned-number-optionally))
          (s2 (get-char-optionally '(#\+ #\-)))
          (n2 (get-unsigned-number-optionally))
-         (f (progn (get-char-definitely #\)) (get-filename nil)))
-         (n (let ((n (gethash f *opmac-verbinput-table*)))
-              (or n
-                  (progn (setf (gethash f *opmac-verbinput-table*) 0)
-                         0)))))
-    (do-end-para)
-    (bgroup)
-    (emit "<pre class=verbatim>")
-    (with-open-file (i f :direction :input)
-      (cond ((and s1 n1 s2 n2 (char= s1 #\-) (char= s2 #\+))
-             ;skip n1 after current point, print n2
-             (opmac-verbinput-skip-lines i (+ n n1))
-             (opmac-verbinput-print-lines i n2)
-             (incf n (+ n1 n2)))
-            ;
-            ((and (not s1) n1 s2 n2 (char= s2 #\-))
-             ;print lines n1 thru n2
-             (opmac-verbinput-skip-lines i (- n1 1))
-             (opmac-verbinput-print-lines i (+ (- n2 n1) 1))
-             (setq n n2))
-            ;
-            ((and (not s1) n1 s2 n2 (char= s2 #\+))
-             ;print n2 lines starting at line n1
-             (opmac-verbinput-skip-lines i (- n1 1))
-             (opmac-verbinput-print-lines i n2)
-             (setq n (+ (- n1 1) n2)))
-            ;
-            ((and s1 n1 (not s2) (not n2) (char= s1 #\-))
-             ;print lines 1 thru n1
-             (opmac-verbinput-print-lines i n1)
-             (setq n n1))
-            ;
-            ((and s1 n1 (not s2) (not n2) (char= s1 #\+))
-             ;print n1 lines following current point
-             (opmac-verbinput-skip-lines i n)
-             (opmac-verbinput-print-lines i n1)
-             (incf n1))
-            ;
-            ((and (not s1) n1 s2 (not n2) (char= s2 #\-))
-             ;print from line n1 to eof
-             (opmac-verbinput-skip-lines i (- n1 1))
-             (opmac-verbinput-print-lines i t)
-             (setq n 0))
-            ;
-            ((and s1 (not n1) (not s2) (not n2) (char= s1 #\+))
-             ;print from current point to eof
-             (opmac-verbinput-skip-lines i n)
-             (opmac-verbinput-print-lines i t)
-             (setq n 0))
-            ;
-            ((and s1 (not n1) (not s2) (not n2) (char= s1 #\-))
-             ;print entire file
-             (opmac-verbinput-print-lines i t)
-             (setq n 0))
-            ;
-            (t (terror 'do-opmac-verbinput "Malformed \\verbinput" s1 n1 s2 n2 f))))
-    (setf (gethash f *opmac-verbinput-table*) n)
-    (emit "</pre>")
-    (egroup)
-    (do-para)))
+         (f0 (progn (get-char-definitely #\)) (get-filename)))
+         (f  (find-tex-file f0))
+         (n (and f
+                 (let ((n (gethash f *opmac-verbinput-table*)))
+                   (or n
+                       (progn (setf (gethash f *opmac-verbinput-table*) 0)
+                              0))))))
+    (cond ((and f (probe-file f))
+           (do-end-para)
+           (bgroup)
+           (emit "<pre class=verbatim>")
+           (with-open-file (i f :direction :input)
+             (cond ((and s1 n1 s2 n2 (char= s1 #\-) (char= s2 #\+))
+                    ;skip n1 after current point, print n2
+                    (opmac-verbinput-skip-lines i (+ n n1))
+                    (opmac-verbinput-print-lines i n2)
+                    (incf n (+ n1 n2)))
+                   ;
+                   ((and (not s1) n1 s2 n2 (char= s2 #\-))
+                    ;print lines n1 thru n2
+                    (opmac-verbinput-skip-lines i (- n1 1))
+                    (opmac-verbinput-print-lines i (+ (- n2 n1) 1))
+                    (setq n n2))
+                   ;
+                   ((and (not s1) n1 s2 n2 (char= s2 #\+))
+                    ;print n2 lines starting at line n1
+                    (opmac-verbinput-skip-lines i (- n1 1))
+                    (opmac-verbinput-print-lines i n2)
+                    (setq n (+ (- n1 1) n2)))
+                   ;
+                   ((and s1 n1 (not s2) (not n2) (char= s1 #\-))
+                    ;print lines 1 thru n1
+                    (opmac-verbinput-print-lines i n1)
+                    (setq n n1))
+                   ;
+                   ((and s1 n1 (not s2) (not n2) (char= s1 #\+))
+                    ;print n1 lines following current point
+                    (opmac-verbinput-skip-lines i n)
+                    (opmac-verbinput-print-lines i n1)
+                    (incf n1))
+                   ;
+                   ((and (not s1) n1 s2 (not n2) (char= s2 #\-))
+                    ;print from line n1 to eof
+                    (opmac-verbinput-skip-lines i (- n1 1))
+                    (opmac-verbinput-print-lines i t)
+                    (setq n 0))
+                   ;
+                   ((and s1 (not n1) (not s2) (not n2) (char= s1 #\+))
+                    ;print from current point to eof
+                    (opmac-verbinput-skip-lines i n)
+                    (opmac-verbinput-print-lines i t)
+                    (setq n 0))
+                   ;
+                   ((and s1 (not n1) (not s2) (not n2) (char= s1 #\-))
+                    ;print entire file
+                    (opmac-verbinput-print-lines i t)
+                    (setq n 0))
+                   ;
+                   (t (terror 'do-opmac-verbinput "Malformed \\verbinput" s1 n1 s2 n2 f))))
+           (setf (gethash f *opmac-verbinput-table*) n)
+           (emit "</pre>")
+           (egroup)
+           (do-para))
+          (t (non-fatal-error "File " f0 " not found")))))
 
 (defun do-verbwritefile ()
   (let* ((f (get-filename-possibly-braced))

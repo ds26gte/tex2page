@@ -1,4 +1,8 @@
-Last change 2016-11-16
+Last change 2016-11-18
+
+2016 Nov 17
+
+\verbatiminput, \verbinput should scan TEXINPUTS.
 
 2016 Nov 16
 
@@ -7,7 +11,7 @@ doesn't need these.
 
 2016 Nov 15
 
-tex2page.tex: Added \pagewidth \{left,top,spine}margin. Redefined \sidemargin 
+tex2page.tex: Added \pagewidth \{left,top,spine}margin. Redefined \sidemargin
 to respect \pagewidth.
 
 2016 Nov 14
@@ -24,7 +28,7 @@ doesn't find a TeX2page definition for a ctrl seq. This prevents it.)
 
 Added OPmac's \setcmykcolor.
 
-Translate OPmac list \style arg to appropriate CSS list-style-type. 
+Translate OPmac list \style arg to appropriate CSS list-style-type.
 
 2016 Nov 12
 

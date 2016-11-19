@@ -7,7 +7,7 @@
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
-\message{version 20161116} % last change
+\message{version 20161118} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -465,23 +465,25 @@
 
 % Title
 
-\def\subject{%
+\let\titlefont\bf
+
+\def\title{%
   \immediate\openout\sectionQscratchfileport Z-sec-temp
   \begingroup
     \def\do##1{\catcode`##1=11 }\dospecials
     \catcode`\{=1 \catcode`\}=2
-    \subjectI}
+    \titleI}
 
-\def\subjectI#1{\endgroup
+\def\titleI#1{\endgroup
   \immediate\write\sectionQscratchfileport {#1}%
   \immediate\closeout\sectionQscratchfileport
-  $$\vbox{\bf \def\\{\cr}%
+  $$\vbox{\titlefont \def\\{\cr}%
       \halign{\hfil##\hfil\cr
         \input Z-sec-temp
         \cr}}$$%
   \medskip}
 
-\let\title\subject
+\let\subject\title
 
 % toc
 

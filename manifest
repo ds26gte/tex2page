@@ -32,7 +32,6 @@ man/man1/tex2page.1
 
 tex2pagedeprecated.tex
 plainsection.tex
-plainitemize.tex
 
 texi2p.tex
 texinfo.t2p
@@ -50,7 +49,6 @@ history
 
 texample.tex
 mpexample.tex
-story.tex
 
 ;html to Info
 
@@ -71,7 +69,7 @@ tex2page.bat
 
 ;some useful TeX files
 
-*fonts.tex
+tgtermes.tex
 2col.tex
 8pt.tex
 
@@ -80,4 +78,4 @@ tex2page.bat
 t2p-example/*.t2p
 t2p-example/scshdoc.tex
 
-;last change: 2015-12-13
+;last change: 2016-11-17

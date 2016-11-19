@@ -1,4 +1,4 @@
-% last change: 2016-11-16
+% last change: 2016-11-17
 
 \input tgtermes
 
@@ -12,24 +12,40 @@
 \input eval4tex
 
 \input path.sty
-
 \input texnames.sty
+
+\def\TZPhsize{40em}
+\let\TZPtexlayout=1
+\def\TZPimageformat{png}
+
+\advance\hoffset .5truein
+\advance\hsize -1truein
+
+\overfullrule0pt
+\tocdepth 1
+
+\font\tentt "Ubuntu Mono" at 10pt
+
+%\font\fourteenrm "TeX Gyre Schola" at 14pt
+\font\fourteenrm "Ubuntu" at 14pt
+%\font\fourteenrm "Latin Modern Roman/B" at 14pt
+\font\twelvebf "Ubuntu/B" at 12pt
+%\font\twelvebf "TeX Gyre Heros/B" at 12pt
+\font\tensansbf "Ubuntu/B" at 10pt
+\font\eightrm "TeX Gyre Termes" at 8pt
+\font\eightit "TeX Gyre Termes/I" at 8pt
+
+\def\titlefont{\fourteenrm \baselineskip=16.8pt }
+\def\chapterfont{\twelvebf \baselineskip=14.4pt }
+\def\sectionfont{\tensansbf}
+\def\eightfont{\eightrm\let\it\eightit\baselineskip 9.6pt }
+
 \ifx\shipout\UnDeFiNeD\else
 \def\XeTeX{Xe\TeX}
 \def\ConTeXt{Con\TeX t}
 \fi
 
 \input like-plt-logo
-
-\font\twelvebf "Ubuntu/B" at 12pt
-%\font\twelvebf "TeX Gyre Heros/B" at 12pt
-\def\chapterfont{\twelvebf \baselineskip=14.4pt }
-
-%\font\tensansbf "TeX Gyre Heros/B" at 10pt
-\font\tensansbf "Ubuntu/B" at 10pt
-\def\sectionfont{\tensansbf}
-
-\font\tentt "Ubuntu Mono" at 10pt
 
 \def\beginmulticols#1{}
 \def\endmulticols{}
@@ -38,20 +54,11 @@
 \IfFileExists{mimulcol}{\input mimulcol }{}
 \fi
 
-\advance\hoffset .5truein
-\ifx\shipout\UnDeFiNeD\else
-\advance\hsize -1truein
-\fi
-
-\overfullrule0pt
-
 \ifx\shipout\UnDeFiNeD
 \headline={\folio, ~~ \urlh{#ToC}{ToC}, ~~ \urlh{#Index}{Index}}
 \footline={\the\headline}
 %\footline={\folio, ~~ \urlh{#ToC}{ToC}, ~~ \urlh{#Index}{Index}}
 \fi
-
-\tocdepth 1
 
 \def\meta[#1]{\leavevmode\hbox{\em #1}}
 
@@ -62,8 +69,6 @@
 \def\proto#1#2#3{\noindent
 \hbox{{\tt(#1}\spaceifnotempty{#2}{\it#2}{\tt)}%
 \qquad ;#3}\par}
-
-\def\TZPimageformat{png}
 
 \ifx\shipout\UnDeFiNeD
 \imgdef\ohm{$\Omega$}
@@ -150,9 +155,6 @@ $\Vert$\or
 \maybeendinput
 
 %\parskip=.5em
-\hsize=40em
-
-\let\TZPtexlayout=1
 \parskip=5pt
 
 %\inputcss http://www.w3.org/StyleSheets/Core/Oldstyle

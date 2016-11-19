@@ -2,10 +2,17 @@
 *.eps
 *.html
 *.mp
+*.mpx
 *.pdf
+*.toc
+*.xrf
 *Z-*
 *~
+.scmport/*.lisp
+.scmport/*.scm
+.scmport/t*
 ?.*
+??.*
 [^s]*log
 index.[^t]*
 lambda*

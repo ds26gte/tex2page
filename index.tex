@@ -7,8 +7,6 @@
 % tex2page is available at
 % http://ds26gte.github.io/tex2page/index.html
 
-% last change: 2016-11-16
-
 \input tex2page-doc-mac
 
 \ifx\TZPtitle\UnDeFiNeD
@@ -26,6 +24,8 @@
 \urlh{https://github.com/ds26gte/tex2page}{Version
 \ifx\TZPcommonlisp 1\eval{(princ *tex2page-version*)}\else
 \eval{(display *tex2page-version*)}\fi }}
+\else
+\c{2016-11-17} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -40,7 +40,7 @@
 \fi
 
 {\obeylines\raggedleft
-\ifx\shipout\UnDeFiNeD\small\fi
+\ifx\shipout\UnDeFiNeD\small\else\eightfont\fi
 {\it Making books is a skilled trade,
 like making clocks.}
 — Jean de la Bruyère (†1696)
@@ -152,7 +152,8 @@ creates \p{|meta[jobname].html} in the working directory.
 
 \index{story.tex@\p{story.tex}}
 
-To try this out, call \TeX2page on the example file \p{story.tex}
+To try this out, call \TeX2page on the example file
+\urlh{texample.html}{\p{story.tex}}
 provided in all \TeX\ distributions:
 
 \p{
@@ -202,7 +203,7 @@ in this log refers to the only HTML file created, viz.,
 \p{story.html}.
 
 All this is of course almost exactly analogous to the
-way you type \p{tex story} (or \p{pdftex story}) to get
+way you type \p{tex story} (or \p{xetex story} or \p{pdftex story}) to get
 \p{story.dvi} (or \p{story.pdf})
 from \p{story.tex}, with the log going into
 \p{story.log}.

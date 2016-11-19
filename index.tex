@@ -25,7 +25,7 @@
 \ifx\TZPcommonlisp 1\eval{(princ *tex2page-version*)}\else
 \eval{(display *tex2page-version*)}\fi }}
 \else
-\c{2016-11-17} %last change
+\c{2016-11-18} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -2568,6 +2568,8 @@ mpost lambda.mp
 epstopdf lambda-1.eps
 }
 
+\write18{if test ! -f lambda-1.pdf -a -f lambda.mp; then mpost lambda.mp; epstopdf
+lambda-1.eps; fi}
 This creates a PDF file \p{lambda-1.pdf}, which is inserted in
 the source document via
 

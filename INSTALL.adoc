@@ -110,6 +110,7 @@ at TeX’s interactive prompt.  Then do
   makeindex index
   bibtex index
   mpost lambda
+  epstopdf lambda-1.eps
   xetex index
   xetex index
 

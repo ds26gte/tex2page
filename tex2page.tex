@@ -585,12 +585,6 @@
   \def\end##1{\csname end#1\endcsname\endgroup}%
   \csname #1\endcsname}
 
-\ifx\TM\undefined
-% using fontch names
-\def\TM{\ifmmode^{\rm TM}\else$^{\rm TM}$\fi}
-\def\degree{\ifmmode^\circ\else$^\circ$\fi}
-\fi
-
 % STOP LOADING HERE FOR EPLAIN
 
 \ifx\eplain\UnDeFiNeD
@@ -599,7 +593,6 @@
 \atcatcodebeforetexzpage
 \let\maybeloadfollowing\endinput
 \fi\maybeloadfollowing
-
 
 % Index generation
 %

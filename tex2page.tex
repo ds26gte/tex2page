@@ -7,7 +7,7 @@
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
-\message{version 20161118} % last change
+\message{version 20161119} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -208,8 +208,6 @@
     \defcsactive\^^M{\leavevmode\ }%
     \defcsactive#1{\verbQendgroup}}}%
 \fi
-
-%
 
 % \verbatiminput FILENAME
 % displays contents of file FILENAME verbatim.
@@ -601,7 +599,7 @@
 \atcatcodebeforetexzpage
 \let\maybeloadfollowing\endinput
 \fi\maybeloadfollowing
-%
+
 
 % Index generation
 %
@@ -820,6 +818,7 @@
 \fi
 
 \ifx\frac\UnDeFiNeD
+% from manmac
 \def\frac#1/#2{\leavevmode\kern.1em
   \raise.5ex\hbox{\the\scriptfont0 #1}\kern-.1em
   /\kern-.15em\lower.25ex\hbox{\the\scriptfont0 #2}}
@@ -829,27 +828,36 @@
   \defcsactive\^^M{\endgraf\leavevmode}%
   \obeyspaces}
 
-%
-% Numbered footnotes
+% Add a hook to plain's \footnote, but ensure final strut is left
+% out, as it's too high if hook introduces a small font
 
-\ifx\plainfootnote\UnDeFiNeD
-  \let\plainfootnote\footnote
+\ifx\origplainfootnote\UnDeFiNeD
+  \let\origplainfootnote\footnote
+  \def\@foot{\egroup}
+  \def\footnoteend{\egroup}
+  \def\footnote#1{\bgroup
+    \csname footnotehook\endcsname
+    \origplainfootnote{#1}\bgroup
+    \aftergroup\egroup
+    \let\dummy=}
 \fi
+
+% Numbered footnotes
 
 \newcount\footnotenumber
 
 \def\numberedfootnote{\global\advance\footnotenumber 1
-  \bgroup\csname footnotehook\endcsname
-    \plainfootnote{$^{\the\footnotenumber}$}\bgroup
-      \edef\@currentlabel{\the\footnotenumber}%
-      \aftergroup\egroup
-      \let\dummy=}
+  \footnote{$^{\the\footnotenumber}$}\bgroup
+    \edef\@currentlabel{\the\footnotenumber}%
+    \let\dummy=}
 
 %
 
 \newdimen\pagewidth
 
-\pagewidth 8.5 true in
+\def\pagewidthQdefault{\ifdim\pagewidth=0pt 
+  \pagewidth 8.5 true in 
+  \fi\relax}
 
 \def\leftmargin{\afterassignment\leftmarginQii \hoffset}
 
@@ -862,6 +870,7 @@
 \def\sidemargin{\afterassignment\sidemarginQii \hoffset}
 
 \def\sidemarginQii{%
+  \pagewidthQdefault
   \hsize = \pagewidth
   \advance\hsize -2\hoffset
   \advance\hoffset -1 true in
@@ -876,12 +885,14 @@
       \hoffset=\spinemarginQii
       \advance\hoffset -1 true in
     \else
+      \pagewidthQdefault
       \hoffset=\pagewidth
       \advance\hoffset -\spinemarginQii
       \advance\hoffset -\hsize
       \advance\hoffset -1 true in
     \fi\relax}%
-  \output={\dualhoffset\plainoutput}} 
+  \output={\dualhoffset\plainoutput}}
+
 %
 
 \ifx\Gin@driver\UnDeFiNeD

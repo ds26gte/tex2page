@@ -7,7 +7,7 @@
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
-\message{version 20161119} % last change
+\message{version 20161120} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -126,7 +126,7 @@
 %\def\verb{\begingroup
 %  \verbsetup\verbQii}
 
-\ifx\verb\UnDeFiNeD\else % save away LaTeX's \verb
+\ifx\verb\UnDeFiNeD\else % save away LaTeX’s \verb
   \let\LaTeXverb\verb
 \fi
 
@@ -154,7 +154,7 @@
 \def\verbrbrace{\char`\}}
 
 \ifx\verbatimescapechar\UnDeFiNeD
-% don't clobber Eplain's \verbatimescapechar
+% don’t clobber Eplain’s \verbatimescapechar
 \def\verbatimescapechar#1{%
   \def\@makeverbatimescapechar{\catcode`#1=0 }}%
 \fi
@@ -218,8 +218,8 @@
 % ^ original \verbatiminput
 
 \ifx\verbatiminput\UnDeFiNeD
-% LaTeX's (optional) verbatim package defines a \verbatiminput --
-% don't clobber it
+% LaTeX’s (optional) verbatim package defines a \verbatiminput —
+% don’t clobber it
 \def\verbatiminput{%
   \futurelet\verbatiminputQnext\verbatiminputQcheckchar}%
 \fi
@@ -328,7 +328,7 @@
 \fi
 
 % \path is like \verb except that its argument
-% can break across lines at `.' and `/'.
+% can break across lines at ‘.’ and ‘/’.
 
 \ifx\path\UnDeFiNeD
 \def\path{\begingroup\verbsetup
@@ -617,7 +617,7 @@
 % Use \inputindex (without arguments) to include this
 % sorted index, typically somewhere to the end of your
 % document.  This will produce the items and subitems.
-% It won't produce a section heading however -- you
+% It won’t produce a section heading however — you
 % will have to typeset one yourself.
 
 %\def\sanitizeidxletters{\def\do##1{\catcode`##1=11 }%
@@ -681,16 +681,16 @@
   \openout\xrefout=\jobname.xrf
 }
 
-% I'd like to call \openxrefout lazily, but
+% I’d like to call \openxrefout lazily, but
 % unfortunately it produces a bug in MiKTeX.
-% So let's call it up front.
+% So let’s call it up front.
 
 \openxrefout
 
 % \xrtag{TAG}{VALUE} associates TAG with VALUE.
 % Hereafter, \ref{TAG} will output VALUE.
 % \xrtag stores its associations in \xrefout.
-% \xrtag calls \openxrefout if \jobname.xrf hasn't
+% \xrtag calls \openxrefout if \jobname.xrf hasn’t
 % already been opened
 
 \def\xrtag#1#2{\ifx\xrefout\UnDeFiNeD\openxrefout\fi
@@ -718,13 +718,13 @@
 
 % \ref{TAG} outputs VALUE, assuming \xrtag put such
 % an association into \xrefout.  \ref calls
-% \openxrefout if \jobname.xrf hasn't already
+% \openxrefout if \jobname.xrf hasn’t already
 % been opened
 
 \def\ref#1{\ifx\xrefout\UnDeFiNeD\openxrefout\fi
   \expandafter\ifx\csname XREF#1\endcsname\relax
   %\message or \write16 ?
-  \message{\the\inputlineno: Unresolved label `#1'.}?\else
+  \message{\the\inputlineno: Unresolved label ‘#1’.}?\else
   \csname XREF#1\endcsname\fi}
 
 % \pageref, as in LaTeX
@@ -761,7 +761,7 @@
     \input Z-T-\jobname.tex
   \fi}
 
-% plain's \beginsection splits pages too easily, and also doesn't allow
+% plain’s \beginsection splits pages too easily, and also doesn’t allow
 % verbatim macros in its arg
 
 \let\sectionfont\bf
@@ -780,7 +780,7 @@
   \edef\beginchapterQnr{#1}%
   % space before \par ensures trailing space not picked
   % up.
-  % (We don't worry about verbatim text in header.)
+  % (We don’t worry about verbatim text in header.)
   % Some vert space in print
   \vskip 2.5\bigskipamount
   \goodbreak
@@ -797,7 +797,7 @@
 % robust
 
 \def\plaintextweaks{%
-% plain's \{left,center,right}line can't handle catcode change
+% plain’s \{left,center,right}line can’t handle catcode change
 % within their argument
 \def\leftline{\line\bgroup\bgroup
   \aftergroup\leftlinefinish
@@ -828,8 +828,8 @@
   \defcsactive\^^M{\endgraf\leavevmode}%
   \obeyspaces}
 
-% Add a hook to plain's \footnote, but ensure final strut is left
-% out, as it's too high if hook introduces a small font
+% Add a hook to plain’s \footnote, but ensure final strut is left
+% out, as it’s too high if hook introduces a small font
 
 \ifx\origplainfootnote\UnDeFiNeD
   \let\origplainfootnote\footnote
@@ -855,8 +855,8 @@
 
 \newdimen\pagewidth
 
-\def\pagewidthQdefault{\ifdim\pagewidth=0pt 
-  \pagewidth 8.5 true in 
+\def\pagewidthQdefault{\ifdim\pagewidth=0pt
+  \pagewidth 8.5 true in
   \fi\relax}
 
 \def\leftmargin{\afterassignment\leftmarginQii \hoffset}
@@ -904,7 +904,7 @@
 \ifx\XeTeXversion\UnDeFiNeD\else
   \newdimen\epsfxsize \newdimen\epsfysize
   \def\epsfbox#1{%
-    \message{doing xetex's version of epsfbox!}%
+    \message{doing xetex’s version of epsfbox!}%
     \ifnum\shellescape=1
     \epsfboxQii #1\end
     \epsfxsize=0pt \epsfysize=0pt

@@ -1,4 +1,4 @@
-% last change: 2016-11-17
+% last change: 2016-11-19
 
 \input tgtermes
 
@@ -25,6 +25,7 @@
 \tocdepth 1
 
 \font\tentt "Ubuntu Mono" at 10pt
+\font\eighttt "Ubuntu Mono" at 8pt
 
 %\font\fourteenrm "TeX Gyre Schola" at 14pt
 \font\fourteenrm "Ubuntu" at 14pt
@@ -38,7 +39,9 @@
 \def\titlefont{\fourteenrm \baselineskip=16.8pt }
 \def\chapterfont{\twelvebf \baselineskip=14.4pt }
 \def\sectionfont{\tensansbf}
-\def\eightfont{\eightrm\let\it\eightit\baselineskip 9.6pt }
+\def\eightfont{\eightrm\let\it\eightit\let\tt\eighttt\baselineskip 9.6pt }
+
+\def\footnotehook{\eightfont}
 
 \ifx\shipout\UnDeFiNeD\else
 \def\XeTeX{Xe\TeX}

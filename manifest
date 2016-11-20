@@ -71,11 +71,10 @@ tex2page.bat
 
 tgtermes.tex
 2col.tex
-8pt.tex
 
 ;sample .t2p files
 
 t2p-example/*.t2p
 t2p-example/scshdoc.tex
 
-;last change: 2016-11-17
+;last change: 2016-11-20

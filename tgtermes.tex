@@ -1,11 +1,16 @@
 % Dorai Sitaram
-% last change 2016-11-11
+% last change 2016-11-19
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
+\let\maybeloadfollowing\relax
 \ifx\XeTeXversion\UnDeFiNeD
-\message{This isn't XeTeX!}%
-\endinput\fi
+  \ifx\directlua\UnDeFiNeD
+    \message{Use XeTeX or luaTeX!}
+    \let\maybeloadfollowing\endinput
+  \else\input luaotfload.sty
+  \fi
+\fi
 
 \font\tenrm "TeX Gyre Termes" at 10pt
 \font\sevenrm "TeX Gyre Termes" at 7pt

@@ -7,7 +7,7 @@
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
-\message{version 20161120} % last change
+\message{version 20161121} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -120,8 +120,7 @@
     \aftergroup\verbdisplayskip
     \aftergroup\noindent % to get automatic noindent after display
     \aftergroup\ignorespaces % ,,
-    \else\leavevmode\fi\endgraf}%
-  \verbhook}
+    \else\leavevmode\fi\endgraf}}
 
 %\def\verb{\begingroup
 %  \verbsetup\verbQii}
@@ -194,19 +193,32 @@
 
 \let\verbdisplayskip\medbreak
 
-%
+% \activettchar,\begtt, if not in OPmac
 
 \ifx\activettchar\UnDeFiNeD
 \def\activettchar#1{%
-  \ifx\activettcharQprev\UnDeFiNeD\else
-  \catcode\activettcharQprev \activettcharQprevQcatcode
+  \ifx\activettcharQcurr\UnDeFiNeD\else
+  \catcode\activettcharQcurr \activettcharQcurrQcatcode
   \fi
-  \chardef\activettcharQprev`#1%
-  \chardef\activettcharQprevQcatcode \catcode`#1%
+  \chardef\activettcharQcurr`#1%
+  \chardef\activettcharQcurrQcatcode \catcode`#1%
   \defcsactive#1{\begingroup
     \verbsetup\verbavoidligs\verbhook
     \defcsactive\^^M{\leavevmode\ }%
-    \defcsactive#1{\verbQendgroup}}}%
+    \defcsactive#1{\verbQendgroup}}}
+
+\def\begtt{\begingroup
+  \verbsetup
+  \verbavoidligs
+  \verbinsertskip
+  \ifx\activettcharQcurr\UnDeFiNeD\else
+  \catcode\activettcharQcurr=12 \fi
+  \begttQii}
+
+{\ifx\activettcharQcurr\UnDeFiNeD\else
+  \catcode\activettcharQcurr=12 \fi
+  \catcode`\|=0 |catcode`|\=12
+  |long|gdef|begttQii#1\endtt{#1|endgroup}}
 \fi
 
 % \verbatiminput FILENAME
@@ -437,11 +449,11 @@
 \let\setvariable\scmvariable
 \def\schemedisplay{\begingroup
   \verbsetup\verbavoidligs
-  \verbinsertskip
+  \verbinsertskip\verbhook
   \schemedisplayI}%
 \def\schemeresponse{\begingroup
   \verbsetup\verbavoidligs
-  \verbinsertskip
+  \verbinsertskip\verbhook
   \schemeresponseI}%
 {\catcode`\|0 |catcode`|\12
   |long|gdef|schemedisplayI#1\endschemedisplay{%

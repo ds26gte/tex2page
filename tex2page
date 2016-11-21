@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161118") ;last change
+(define *tex2page-version* "20161120") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -1808,7 +1808,8 @@
                   (kopy-tdef lft-def rt-def)))
             (else
               (cleanse-tdef lft-def)
-              (set!tdef.defer lft-def rt))))))
+              ;(set!tdef.defer lft-def rt)
+              )))))
 
 (define tex-let-prim
   (lambda (lft rt)
@@ -6673,6 +6674,7 @@
   (tex-def-count "\\month" 0 #t)
   (tex-def-count "\\year" 0 #t)
   (tex-def-count "\\shellescape" 1 #t)
+  (tex-def-count "\\suppressfontnotfounderror" 1 #t)
   ;
   (tex-def-dimen "\\TIIPhsize" 0 #t)
   (tex-def-dimen "\\hsize" (tex-length 6.5 ':in) #t)
@@ -10227,7 +10229,7 @@ Try the commands
   (string-append "<span style=\"margin-left: "
     ;in following, tried &#x200c; (= zwnj) instead of space,
     ;but it causes table-row fault
-    len "\"> </span>")) )  
+    len "\"> </span>")) )
 
 (tex-def-prim "\\enspace" (lambda () (emit (kern ".5em"))))
 (tex-def-prim "\\thinspace" (lambda () (emit (kern ".16667em"))))

@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161118" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161120" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1331,7 +1331,8 @@
            (let ((rt-def *it*))
              (kopy-tdef lft-def rt-def)))
           (t (cleanse-tdef lft-def)
-             (setf (tdef*-defer lft-def) rt)))))
+             ;(setf (tdef*-defer lft-def) rt)
+             ))))
 
 (defun tex-let-prim (lft rt)
   (tex-let lft rt *primitive-texframe*)
@@ -5189,7 +5190,7 @@
           "with-open-socket"
           "with-open-stream"
           "with-output-to-string"
-          "with-slots" 
+          "with-slots"
           ;#endinclude lispkeywords.lisp
 
           ))
@@ -5404,6 +5405,7 @@
   (tex-def-count "\\month" 0 t)
   (tex-def-count "\\year" 0 t)
   (tex-def-count "\\shellescape" 1 t)
+  (tex-def-count "\\suppressfontnotfounderror" 1 t)
   ;
   (tex-def-dimen "\\TIIPhsize" 0 t)
   (tex-def-dimen "\\hsize" (tex-length 6.5 :in) t)
@@ -8417,7 +8419,7 @@ Try the commands
   (concatenate 'string "<span style=\"margin-left: "
     ;in following, tried &#x200c; (= zwnj) instead of space,
     ;but it causes table-row fault
-    len "\"> </span>")) ;#enddefun  
+    len "\"> </span>")) ;#enddefun
 
 (tex-def-prim "\\enspace" (lambda () (emit (kern ".5em"))))
 (tex-def-prim "\\thinspace" (lambda () (emit (kern ".16667em"))))

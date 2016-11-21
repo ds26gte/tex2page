@@ -1,4 +1,11 @@
-\ifx\shipout\UnDeFiNeD\endinput\fi
+% plainsection.tex
+% Dorai Sitaram
+% Last change 2016-11-21 
+
+\let\maybeendinput\relax
+\ifx\shipout\UnDeFiNeD
+  \let\maybeendinput\endinput
+\fi\maybeendinput
 
 \edef\atcatcodebeforetexzpage{%
   \noexpand\catcode`\noexpand\@=\the\catcode`\@}

@@ -1,7 +1,9 @@
-% The following, most of which duplicates LaTeX behavior in plain TeX,
-% really should go away, perhaps into a utility macro file
+% last change 2016-11-21
 
-\ifx\shipout\UnDeFiNeD\endinput\fi
+\let\maybeendinput\relax
+\ifx\shipout\UnDeFiNeD
+  \let\maybeendinput\endinput
+\fi\maybeendinput
 
 \input plainsection
 

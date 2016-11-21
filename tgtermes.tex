@@ -1,20 +1,36 @@
 % Dorai Sitaram
-% last change 2016-11-20
+% last change 2016-11-21
 
-\let\TZPtextext=0
+\let\maybeendinput\relax
 
-\ifx\shipout\UnDeFiNeD\endinput\fi
+\ifx\shipout\UnDeFiNeD
+  % no need to load for TeX2page,
+  % but allow Unicode chars directly
+  \let\TZPtextext=0
+  \let\maybeendinput\endinput
+\fi\maybeendinput
 
-\let\maybeloadfollowing\relax
 \ifx\XeTeXversion\UnDeFiNeD
   \ifx\directlua\UnDeFiNeD
-    \message{Use XeTeX or luaTeX!}
-    \let\maybeloadfollowing\endinput
-  \else\input luaotfload.sty
+    % using neither XeTeX nor luaTeX
+    \message{Use XeTeX or luaTeX!}%
+    \let\maybeendinput\endinput
+  \else
+    % extra file needed for luaTeX
+    \input luaotfload.sty
   \fi
-\fi
+\fi\maybeendinput
+
+\let\oldtenrm\tenrm
 
 \font\tenrm "TeX Gyre Termes" at 10pt
+
+\ifx\tenrm\nullfont
+  \let\tenrm\oldtenrm
+  \message{Please install TeX Gyre fonts on your system!}%
+  \let\maybeendinput\endinput
+\fi\maybeendinput
+
 \font\sevenrm "TeX Gyre Termes" at 7pt
 \font\fiverm "TeX Gyre Termes" at 5pt
 

@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161120") ;last change
+(define *tex2page-version* "20161121") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -4816,6 +4816,11 @@
     (display ".")
     (newline)))
 
+(define do-endinput
+  (lambda ()
+    (toss-back-char *invisible-space*)
+    (toss-back-string "\\TIIPendinput")))
+
 (define do-bye
   (lambda ()
     (note-down-tex2page-flags)
@@ -6691,6 +6696,10 @@
   (tex-def-dimen "\\hfuzz" (tex-length 0.1 ':pt) #t)
   (tex-def-dimen "\\vfuzz" (tex-length 0.1 ':pt) #t)
   (tex-def-dimen "\\textwidth" (tex-length 6.5 ':in) #t)
+  (tex-def-dimen "\\smallskipamount" (tex-length 3 ':pt) #t)
+  (tex-def-dimen "\\medskipamount" (tex-length 6 ':pt) #t)
+  (tex-def-dimen "\\bigskipamount" (tex-length 12 ':pt) #t)
+  (tex-def-dimen "\\lastskip" 0 #t)
   (tex-def-dimen "\\baselineskip" (tex-length 12 ':pt) #t)
   (tex-def-dimen "\\overfullrule" (tex-length 5 ':pt) #t)
   (tex-def-dimen "\\parindent" (tex-length 20 ':pt) #t)
@@ -8765,7 +8774,8 @@
            ':encountered-bye)
           ((or (string=? z "\\bye")
                (string=? z "\\TIIPbye")) ':encountered-bye)
-          ((string=? z "\\endinput")
+          ((or (string=? z "\\endinput")
+               (string=? z "\\TIIPendinput"))
            (let ((next-token (get-token)))
              (when (and (not (eof-object? next-token)) (string=? next-token "\\fi"))
                (do-fi)))
@@ -10379,6 +10389,7 @@ Try the commands
  (lambda () (terror 'tex-def-prim "Unmatched \\endhtmlimg")))
 (tex-def-prim "\\endhtmlonly"
  (lambda () (set! *html-only* (- *html-only* 1))))
+(tex-def-prim "\\endinput" do-endinput)
 (tex-def-prim "\\enditemize" do-enditemize)
 (tex-def-prim "\\enditems" do-opmac-enditems)
 (tex-def-prim "\\endminipage" do-endminipage)

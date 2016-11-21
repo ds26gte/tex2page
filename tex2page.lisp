@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161120" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161121" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -3803,6 +3803,10 @@
   (when *log-port* (close *log-port*))
   (format t "Transcript written on ~a.~%" *log-file*))
 
+(defun do-endinput ()
+  (toss-back-char *invisible-space*)
+  (toss-back-string "\\TIIPendinput"))
+
 (defun do-bye ()
   (note-down-tex2page-flags)
   (unless (null *tex-if-stack*)
@@ -5422,6 +5426,10 @@
   (tex-def-dimen "\\hfuzz" (tex-length 0.1 :pt) t)
   (tex-def-dimen "\\vfuzz" (tex-length 0.1 :pt) t)
   (tex-def-dimen "\\textwidth" (tex-length 6.5 :in) t)
+  (tex-def-dimen "\\smallskipamount" (tex-length 3 :pt) t)
+  (tex-def-dimen "\\medskipamount" (tex-length 6 :pt) t)
+  (tex-def-dimen "\\bigskipamount" (tex-length 12 :pt) t)
+  (tex-def-dimen "\\lastskip" 0 t)
   (tex-def-dimen "\\baselineskip" (tex-length 12 :pt) t)
   (tex-def-dimen "\\overfullrule" (tex-length 5 :pt) t)
   (tex-def-dimen "\\parindent" (tex-length 20 :pt) t)
@@ -5575,6 +5583,7 @@
            (frame (and globalp *global-texframe*)))
       (if (ctl-seq-p rhs) (tex-let lhs rhs frame)
         (tex-def lhs '() rhs nil nil nil nil frame)))))
+
 
 (defun do-def (globalp e-p)
   (unless (inside-false-world-p)
@@ -7137,7 +7146,7 @@
          :encountered-bye)
         ((member z '("\\bye" "\\TIIPbye") :test #'string=)
          :encountered-bye)
-        ((string= z "\\endinput")
+        ((member z '("\\endinput" "\\TIIPendinput") :test #'string=)
          (let ((next-token (get-token)))
            (when (and (not (eq next-token :eof-object))
                       (string= next-token "\\fi"))
@@ -7147,6 +7156,7 @@
         ((find-toks z) (do-toks= z nil))
         ((find-dimen z) (do-dimen= z nil))
         (t (do-tex-prim z))))
+
 
 (defun generate-html ()
   (let ((*outer-p* t))
@@ -8569,6 +8579,7 @@ Try the commands
  (lambda () (terror 'tex-def-prim "Unmatched \\endhtmlimg")))
 (tex-def-prim "\\endhtmlonly"
  (lambda () (decf *html-only*)))
+(tex-def-prim "\\endinput" #'do-endinput)
 (tex-def-prim "\\enditemize" #'do-enditemize)
 (tex-def-prim "\\enditems" #'do-opmac-enditems)
 (tex-def-prim "\\endminipage" #'do-endminipage)

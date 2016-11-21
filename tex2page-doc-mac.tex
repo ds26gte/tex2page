@@ -1,4 +1,4 @@
-% last change: 2016-11-19
+% last change: 2016-11-20
 
 \input tgtermes
 
@@ -24,15 +24,27 @@
 \overfullrule0pt
 \tocdepth 1
 
-\font\tentt "Ubuntu Mono" at 10pt
-\font\eighttt "Ubuntu Mono" at 8pt
+\ifx\suppressfontnotfounderror\UnDeFiNeD\else
+  \suppressfontnotfounderror=1
+\fi
 
+\let\oldtentt\tentt
+\font\tentt "Ubuntu Mono" at 10pt
+\ifx\tentt\nullfont
+\let\tentt\oldtentt
+\font\eighttt "TeX Gyre Cursor:-liga:embolden=1" at 8pt
+\font\fourteenrm "TeX Gyre Termes" at 14pt
+\font\twelvebf "TeX Gyre Termes/B" at 12pt
+\font\tensansbf "TeX Gyre Heros/B" at 12pt
+\else
+\font\eighttt "Ubuntu Mono" at 8pt
 %\font\fourteenrm "TeX Gyre Schola" at 14pt
 \font\fourteenrm "Ubuntu" at 14pt
 %\font\fourteenrm "Latin Modern Roman/B" at 14pt
 \font\twelvebf "Ubuntu/B" at 12pt
-%\font\twelvebf "TeX Gyre Heros/B" at 12pt
 \font\tensansbf "Ubuntu/B" at 10pt
+\fi
+
 \font\eightrm "TeX Gyre Termes" at 8pt
 \font\eightit "TeX Gyre Termes/I" at 8pt
 

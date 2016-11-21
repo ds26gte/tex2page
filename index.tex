@@ -25,7 +25,7 @@
 \ifx\TZPcommonlisp 1\eval{(princ *tex2page-version*)}\else
 \eval{(display *tex2page-version*)}\fi }}
 \else
-\c{2016-11-19} %last change
+\c{2016-11-21} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -491,7 +491,7 @@ are loaded from \LaTeX\ packages (e.g.,
 \p{path.sty},
 \p{verbatim.sty})
 or from external macro
-files (e.g., \p{btxmac.tex}, \p{eplain.tex}~\cite{eplain},
+files (e.g., \p{btxmac.tex}, \p{eplain.tex}~\cite{eplain}, \p{opmac.tex}~\cite{opmac},
 \p{epsf.tex}).
 
 %With the aid of a macro file \p{texi2p.tex}, \TeX2page
@@ -2009,8 +2009,9 @@ spaces or tell if there is trailing space on a line.
 \index{path@\p{\path}}
 
 \TeX2page also understands \LaTeX’s \p{{verbatim}}
-environment, the \p{\path} macro from \p{path.sty}, and
-Eplain’s \p{\verbatim}.
+environment, the \p{\path} macro from \p{path.sty},
+Eplain’s \p{\verbatim}, and OPmac’s
+\p{\activettchar}.
 
 \beginsection Commands within verbatim
 

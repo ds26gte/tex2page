@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161121" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161122" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -8189,8 +8189,8 @@ Try the commands
 (tex-defsym-math-prim "\\uplus" "&#x2283;")
 (tex-defsym-math-prim "\\sqcap" "&#x2293;")
 (tex-defsym-math-prim "\\sqcup" "&#x2294;")
-(tex-defsym-math-prim "\\triangleleft" "&#x2282;")
-(tex-defsym-math-prim "\\triangleright" "&#x2283;")
+(tex-defsym-math-prim "\\triangleleft" "&#x22b2;")
+(tex-defsym-math-prim "\\triangleright" "&#x22b3;")
 (tex-defsym-math-prim "\\wr" "&#x2240;")
 (tex-defsym-math-prim "\\vee" "&#x2228;")
 (tex-defsym-math-prim "\\wedge" "&#x2227;")

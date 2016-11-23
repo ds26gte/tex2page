@@ -9090,7 +9090,7 @@ Try the commands
               "top: 0.5ex; "
               "margin-left: -0.125em; "
               "margin-right: -0.1667em"
-              "\">&#x18e;</span>"))
+              "\">&#x1dd;</span>"))
        (thinspace (kern ".16667em"))
        (_2e (concatenate 'string "<span style=\""
               "margin-left: .05em"

@@ -3508,7 +3508,7 @@
   (multiple-value-bind (sec m h d mo y dow dst tz)
       (decode-universal-time s)
       (declare (ignore sec))
-    (format nil "~a, ~a ~a, ~a, ~a:~a~a ~am ~a ~a"
+    (format nil "~a, ~a ~a, ~a, ~a:~a~a ~am ~a~a"
             (svref *week-day-names* dow)
             (svref *short-month-names* (1- mo))
             d

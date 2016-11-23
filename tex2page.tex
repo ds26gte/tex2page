@@ -7,7 +7,7 @@
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
-\message{version 20161121} % last change
+\message{version 20161123} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -596,6 +596,34 @@
 \def\begin#1{\begingroup
   \def\end##1{\csname end#1\endcsname\endgroup}%
   \csname #1\endcsname}
+
+% itemize
+
+\newcount\@itemdepth
+
+\@itemdepth=0
+
+\def\labelitemi{$\bullet$}
+\def\labelitemii{$-$}
+\def\labelitemiii{$\star$}
+\def\labelitemiv{$\circ$}
+
+\def\itemize{\par\begingroup
+  \ifnum\@itemdepth>3
+    \message{Too deeply nested.}%
+  \fi
+  \advance\@itemdepth by 1
+  \advance\leftskip\parindent
+  \smallbreak
+  \def\item{\smallbreak\noindent
+  \llap{\csname labelitem\romannumeral
+    \the\@itemdepth\endcsname\enspace}%
+  \ignorespaces}}
+
+\def\enditemize{\smallbreak\smallbreak\endgroup\noindent}
+
+\def\begitems{\itemize\defcsactive*{\item}}
+\def\enditems{\enditemize}
 
 % STOP LOADING HERE FOR EPLAIN
 

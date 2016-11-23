@@ -1,4 +1,9 @@
-Last change 2016-11-18
+Last change 2016-11-23
+
+2016 Nov 23
+
+tex2page.tex: LaTeX {itemize} and OPmac's \{beg,end}items. Also included:
+user-settable \labelitem{i,ii,iii,iv}.
 
 2016 Nov 17
 

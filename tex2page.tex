@@ -7,7 +7,7 @@
 
 \ifx\shipout\UnDeFiNeD\endinput\fi
 
-\message{version 20161123} % last change
+\message{version 20161124} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -192,39 +192,6 @@
   \defcsactive\^^M{\leavevmode\ }\fi}}
 
 \let\verbdisplayskip\medbreak
-
-% \activettchar,\ulink, \begtt, if not in OPmac
-
-\ifx\activettchar\UnDeFiNeD
-\def\activettchar#1{%
-  \ifx\activettcharQcurr\UnDeFiNeD\else
-  \catcode\activettcharQcurr \activettcharQcurrQcatcode
-  \fi
-  \chardef\activettcharQcurr`#1%
-  \chardef\activettcharQcurrQcatcode \catcode`#1%
-  \defcsactive#1{\begingroup
-    \verbsetup\verbavoidligs\verbhook
-    \defcsactive\^^M{\leavevmode\ }%
-    \defcsactive#1{\verbQendgroup}}}
-
-\def\ulink{\bgroup\urlsetup
-  \catcode`\[=1 \catcode`\]=2
-  \afterassignment\urlhQii
-  \gdef\urlhQurlarg}
-
-\def\begtt{\begingroup
-  \verbsetup
-  \verbavoidligs
-  \verbinsertskip
-  \ifx\activettcharQcurr\UnDeFiNeD\else
-  \catcode\activettcharQcurr=12 \fi
-  \begttQii}
-
-{\ifx\activettcharQcurr\UnDeFiNeD\else
-  \catcode\activettcharQcurr=12 \fi
-  \catcode`\|=0 |catcode`|\=12
-  |long|gdef|begttQii#1\endtt{#1|endgroup}}
-\fi
 
 % \verbatiminput FILENAME
 % displays contents of file FILENAME verbatim.
@@ -627,9 +594,6 @@
 
 \def\enditemize{\smallbreak\smallbreak\endgroup\noindent}
 
-\def\begitems{\itemize\defcsactive*{\item}}
-\def\enditems{\enditemize}
-
 % STOP LOADING HERE FOR EPLAIN
 
 \ifx\eplain\UnDeFiNeD
@@ -830,6 +794,47 @@
   \beginchapterQnr\enspace\fi
   #2%
   \egroup\medskip\nobreak\noindent}
+
+% OPmac stuff, unless OPmac already loaded
+
+\ifx\activettchar\UnDeFiNeD
+\def\activettchar#1{%
+  \ifx\activettcharQcurr\UnDeFiNeD\else
+  \catcode\activettcharQcurr \activettcharQcurrQcatcode
+  \fi
+  \chardef\activettcharQcurr`#1%
+  \chardef\activettcharQcurrQcatcode \catcode`#1%
+  \defcsactive#1{\begingroup
+    \verbsetup\verbavoidligs\verbhook
+    \defcsactive\^^M{\leavevmode\ }%
+    \defcsactive#1{\verbQendgroup}}}
+
+\def\begtt{\begingroup
+  \verbsetup
+  \verbavoidligs
+  \verbinsertskip
+  \ifx\activettcharQcurr\UnDeFiNeD\else
+  \catcode\activettcharQcurr=12 \fi
+  \begttQii}
+
+{\ifx\activettcharQcurr\UnDeFiNeD\else
+  \catcode\activettcharQcurr=12 \fi
+  \catcode`\|=0 |catcode`|\=12
+  |long|gdef|begttQii#1\endtt{#1|endgroup}}
+
+\def\ulink{\bgroup\urlsetup
+  \catcode`\[=1 \catcode`\]=2
+  \afterassignment\urlhQii
+  \gdef\urlhQurlarg}
+
+\def\begitems{\itemize\defcsactive*{\item}}
+\def\enditems{\enditemize}
+
+\def\tit#1 \par{\title{#1}}
+\def\chap{\beginchapter {} }
+\def\sec{\beginsection}
+\def\secc{\beginsection\it}
+\fi
 
 % \plaintextweaks modifies some plain TeX macros to be more
 % robust

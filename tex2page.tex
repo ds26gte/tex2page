@@ -832,7 +832,8 @@
 
 \def\tit#1 \par{\title{#1}}
 \def\chap{\beginchapter {} }
-\def\sec{\beginsection}
+\let\secQtrig\sec
+\def\sec{\ifmmode\secQtrig\else\beginsection\fi}
 \def\secc{\beginsection\it}
 \fi
 

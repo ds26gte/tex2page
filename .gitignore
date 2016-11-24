@@ -17,5 +17,6 @@
 index.[^t]*
 lambda*
 my-tex2page*
+ossuary/*
 tmp/*
 z*

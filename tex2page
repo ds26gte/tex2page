@@ -1874,17 +1874,16 @@
 (define find-chardef-in-top-frame
   (lambda (c)
     (let ((x (if (null? *tex-env*)
-                 (or (table-get  (texframe.chardefinitions *global-texframe*) c)
+                 (or (table-get (texframe.chardefinitions *global-texframe*) c)
                      (table-get (texframe.chardefinitions *primitive-texframe*) c))
                (table-get (texframe.chardefinitions (car *tex-env*)) c))))
       (and x (cdef.active x) x))))
 
 (define do-defcsactive
   (lambda (g?)
-    (ignorespaces)
-    (let* ((cs (get-ctl-seq))
-           (c (string-ref cs 1))
-           (argpat (get-def-arguments c))
+    (let* ((cs (get-token))
+           (c (string-ref cs (if (ctl-seq? cs) 1 0)))
+           (argpat (begin (ignorespaces) (get-def-arguments c)))
            (rhs (ungroup (get-group)))
            (f (and g? *global-texframe*)))
       (activate-cdef c)

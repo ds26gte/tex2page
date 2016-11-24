@@ -1031,10 +1031,13 @@
              (get-ctl-seq)))
           (t (concatenate 'string (list (get-actual-char)))))))
 
+(trace get-raw-token)
+
 (defun get-raw-token/is ()
   (ignorespaces)
   (let ((c (snoop-actual-char)))
-    (cond ((eq c :eof-object) c) ((char= c *esc-char*) (get-ctl-seq))
+    (cond ((eq c :eof-object) c)
+          ((char= c *esc-char*) (get-ctl-seq))
           ((and *comment-char* (char= c *comment-char*)) (eat-till-eol)
            (get-raw-token/is))
           (t (concatenate 'string (list (get-actual-char)))))))
@@ -1385,10 +1388,9 @@
     (and x (cdef*-active x) x)))
 
 (defun do-defcsactive (globalp)
-  (ignorespaces)
-  (let* ((cs (get-ctl-seq))
-         (c (char cs 1))
-         (argpat (get-def-arguments c))
+  (let* ((cs (get-token))
+         (c (char cs (if (ctl-seq-p cs) 1 0)))
+         (argpat (progn (ignorespaces) (get-def-arguments c)))
          (rhs (ungroup (get-group)))
          (f (and globalp *global-texframe*)))
     (activate-cdef c)

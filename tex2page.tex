@@ -193,7 +193,7 @@
 
 \let\verbdisplayskip\medbreak
 
-% \activettchar,\begtt, if not in OPmac
+% \activettchar,\ulink, \begtt, if not in OPmac
 
 \ifx\activettchar\UnDeFiNeD
 \def\activettchar#1{%
@@ -206,6 +206,11 @@
     \verbsetup\verbavoidligs\verbhook
     \defcsactive\^^M{\leavevmode\ }%
     \defcsactive#1{\verbQendgroup}}}
+
+\def\ulink{\bgroup\urlsetup
+  \catcode`\[=1 \catcode`\]=2
+  \afterassignment\urlhQii
+  \gdef\urlhQurlarg}
 
 \def\begtt{\begingroup
   \verbsetup

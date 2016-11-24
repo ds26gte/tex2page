@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161123" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161124" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1520,7 +1520,7 @@
     (output-title title)))
 
 (defun do-opmac-title ()
-  (tex-gdef-0arg "\\TIIPtitleused" 1)
+  (tex-gdef-0arg "\\TIIPtitleused" "1")
   (do-end-para)
   (let ((title (tex-string-to-html-string (get-till-par))))
     (unless *title* (flag-missing-piece :document-title))

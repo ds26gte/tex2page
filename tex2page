@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161123") ;last change
+(define *tex2page-version* "20161124") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -2066,7 +2066,7 @@
 
 (define do-opmac-title
   (lambda ()
-    (tex-gdef-0arg "\\TIIPtitleused" 1)
+    (tex-gdef-0arg "\\TIIPtitleused" "1")
     (do-end-para)
     (let ((title (tex-string-to-html-string (get-till-par))))
       (unless *title* (flag-missing-piece ':document-title))

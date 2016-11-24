@@ -1,4 +1,4 @@
-% last change 2016-11-21
+% last change 2016-11-24
 
 \let\maybeendinput\relax
 \ifx\shipout\UnDeFiNeD
@@ -12,14 +12,6 @@
 \catcode`\@11
 
 %
-
-\def\itemize{\par\begingroup
-  \advance\leftskip\parindent
-  \smallbreak
-  \def\item{\smallbreak\noindent
-  \llap{$\bullet$\enspace}\ignorespaces}}
-
-\def\enditemize{\smallbreak\smallbreak\endgroup\par}
 
 \newtally\enumeratelevel
 
@@ -50,22 +42,8 @@
 
 %
 
-% plain's \{left,center,right}line can't handle catcode change
-% within their argument
+\csname plaintextweaks\endcsname
 
-\def\leftline{\line\bgroup\bgroup
-  \aftergroup\leftlinefinish
-  \let\dummy=}
-
-\def\leftlinefinish{\hss\egroup}
-
-\def\centerline{\line\bgroup\bgroup
-  \aftergroup\leftlinefinish
-  \hss\let\dummy=}
-
-\def\rightline{\line\bgroup\hss\let\dummy=}
-
-%
 % definitions (useful in reference manuals)
 
 \def\defun#1{\def\defuntype{#1}%
@@ -286,8 +264,6 @@
 
 \let\htmladvancedentities\relax
 \let\n\noindent
-\let\p\verb
-\let\q\scm
 \let\f\numberedfootnote
 \let\scmp\scm
 \let\numfootnote\numberedfootnote

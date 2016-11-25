@@ -5586,7 +5586,6 @@
       (if (ctl-seq-p rhs) (tex-let lhs rhs frame)
         (tex-def lhs '() rhs nil nil nil nil frame)))))
 
-
 (defun do-def (globalp e-p)
   (unless (inside-false-world-p)
     (let ((lhs (get-raw-token/is)))
@@ -5645,18 +5644,6 @@
   (let* ((counter-name (ungroup (get-group)))
          (within (get-bracketed-text-if-any)))
     (tex-def-dotted-count counter-name within)))
-
-(defun do-advancetally (globalp)
-  (let* ((ctlseq (get-ctl-seq))
-         (increment
-          (read-from-string
-           (string-trim-blanks (ungroup (get-token))))))
-    (tex-def ctlseq '()
-             (write-to-string
-              (+ (read-from-string
-                  (or (resolve-defs ctlseq) ctlseq))
-                 increment))
-             nil nil nil nil globalp)))
 
 (defun do-newenvironment (renewp)
   (ignorespaces)
@@ -7159,7 +7146,6 @@
         ((find-dimen z) (do-dimen= z nil))
         (t (do-tex-prim z))))
 
-
 (defun generate-html ()
   (let ((*outer-p* t))
     (loop
@@ -7463,7 +7449,7 @@
   (let ((css-file (concatenate 'string *aux-dir/* *jobname* *css-file-suffix*)))
     (setq *css-port* (open css-file :direction :output
                            :if-exists :supersede))
-    (princ 
+    (princ
       ;#include tex2page.css
       "body {
       color: black;
@@ -8475,7 +8461,6 @@ Try the commands
 (tex-def-prim "\\addcontentsline" #'do-addcontentsline)
 (tex-def-prim "\\addtocounter" #'do-addtocounter)
 (tex-def-prim "\\advance" (lambda () (do-advance (globally-p))))
-(tex-def-prim "\\advancetally" (lambda () (do-advancetally (globally-p))))
 (tex-defsym-prim "\\AE" "&#xc6;")
 (tex-defsym-prim "\\ae" "&#xe6;")
 (tex-def-prim "\\afterassignment" #'do-afterassignment)
@@ -8650,7 +8635,6 @@ Try the commands
 
 (tex-def-prim "\\gdef" (lambda () (do-def t nil)))
 (tex-def-prim "\\global" #'do-global)
-(tex-def-prim "\\globaladvancetally" (lambda () (do-advancetally t)))
 (tex-def-prim "\\gobblegroup" #'get-group)
 
 (tex-def-prim "\\H" (lambda () (do-diacritic :hungarianumlaut)))

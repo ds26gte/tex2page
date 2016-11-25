@@ -6992,19 +6992,6 @@
            (within (get-bracketed-text-if-any)))
       (tex-def-dotted-count counter-name within))))
 
-(define do-advancetally
-  (lambda (g?)
-    (let* ((ctlseq (get-ctl-seq))
-           (increment (string->number
-                       (string-trim-blanks (ungroup (get-token))))))
-      (tex-def ctlseq '()
-               (number->string
-                (+ (string->number
-                    (or (resolve-defs ctlseq) ctlseq))
-                   increment))
-               #f #f #f #f
-               g?))))
-
 (define do-newenvironment
   (lambda (renew?)
     (ignorespaces)
@@ -10282,7 +10269,6 @@ Try the commands
 (tex-def-prim "\\addcontentsline" do-addcontentsline)
 (tex-def-prim "\\addtocounter" do-addtocounter)
 (tex-def-prim "\\advance" (lambda () (do-advance (globally-p))))
-(tex-def-prim "\\advancetally" (lambda () (do-advancetally (globally-p))))
 (tex-defsym-prim "\\AE" "&#xc6;")
 (tex-defsym-prim "\\ae" "&#xe6;")
 (tex-def-prim "\\afterassignment" do-afterassignment)
@@ -10457,7 +10443,6 @@ Try the commands
 
 (tex-def-prim "\\gdef" (lambda () (do-def #t #f)))
 (tex-def-prim "\\global" do-global)
-(tex-def-prim "\\globaladvancetally" (lambda () (do-advancetally #t)))
 (tex-def-prim "\\gobblegroup" get-group)
 
 (tex-def-prim "\\H" (lambda () (do-diacritic ':hungarianumlaut)))

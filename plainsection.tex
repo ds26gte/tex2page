@@ -1,65 +1,39 @@
 % plainsection.tex
 % Dorai Sitaram
-% Last change 2016-11-21 
+% Last change 2016-11-24 
 
 \let\maybeendinput\relax
 \ifx\shipout\UnDeFiNeD
   \let\maybeendinput\endinput
 \fi\maybeendinput
 
-\edef\atcatcodebeforetexzpage{%
+\edef\atcatcodebeforeplainsection{%
   \noexpand\catcode`\noexpand\@=\the\catcode`\@}
 \catcode`\@11
-
-% Tally control sequences are cheap count
-% registers: they doesn't use up TeX's limited number of
-% real count registers.
-
-% A tally is a macro that expands to the
-% number kept track of.  Thus \edef\kount{0} defines a
-% tally \kount that currently contains 0.
-
-% \advancetally\kount n increments \kount by n.
-% \globaladvancetally increments the global \kount.
-% If \kount is not defined, the \[global]advancetally
-% macros define it to be 0 before proceeding with the
-% incrementation.
-
-\def\newtally#1{\edef#1{0}}
-
-\def\advancetallyhelper#1#2#3{%
-  \ifx#2\UnDeFiNeD
-    #1\edef#2{0}\fi
-  \edef\setcountCCLV{\count255=#2 }%
-  \setcountCCLV
-  \advance\count255 by #3
-  #1\edef#2{\the\count255 }}
-
-\def\advancetally{\advancetallyhelper\relax}
-\def\globaladvancetally{\advancetallyhelper\global}
 
 % Sections
 
 \def\tracksectionchangeatlevel#1{%
-  \expandafter\let\expandafter\thiscount\csname
-    sectionnumber#1\endcsname
+  \expandafter\let\expandafter\thiscount
+    \csname sectionnumber#1\endcsname
   \ifx\thiscount\relax
-    \expandafter\edef\csname sectionnumber#1\endcsname{0}%
+    \expandafter\expandafter\csname newcount\endcsname
+      \csname sectionnumber#1\endcsname
+    \csname sectionnumber#1\endcsname=0
   \fi
-  \expandafter\advancetally
-    \csname sectionnumber#1\endcsname 1%
+  \expandafter\advance\csname sectionnumber#1\endcsname by 1
   \ifx\doingappendix0%
-    \edef\@currentlabel{\csname sectionnumber1\endcsname}%
+    \edef\@currentlabel{\the\csname sectionnumber1\endcsname}%
   \else
-    %\count255=\expandafter\csname sectionnumber1\endcsname
     \edef\@currentlabel{\char\csname sectionnumber1\endcsname}%
   \fi
   \count255=0
   \loop
     \advance\count255 by 1
     \ifnum\count255=1
-    \else\edef\@currentlabel{\@currentlabel.\csname
-      sectionnumber\the\count255\endcsname}\fi
+    \else\edef\@currentlabel{\@currentlabel.\the\csname
+      sectionnumber\the\count255\endcsname}%
+    \fi
   \ifnum\count255<#1%
   \repeat
   \loop
@@ -69,11 +43,11 @@
     \ifx\nextcount\relax
       \let\continue0%
     \else
-      \expandafter\edef\csname
-        sectionnumber\the\count255\endcsname{0}%
+      \csname sectionnumber\the\count255\endcsname=0
       \let\continue1\fi
   \ifx\continue1%
   \repeat}
+
 \newcount\secnumdepth
 
 \secnumdepth=3
@@ -119,7 +93,7 @@
     \raggedright
     \noindent\bf
     \ifx\sectionnr\empty\else
-    \sectionnr\enspace\fi
+      \sectionnr\enspace\fi
     \input Z-sec-temp }}%
   \nobreak
   \smallskip
@@ -187,6 +161,6 @@
   \expandafter\edef\csname
     sectionnumber1\endcsname{\the\count255 }}
 
-\atcatcodebeforetexzpage
+\atcatcodebeforeplainsection
 
 % end of file

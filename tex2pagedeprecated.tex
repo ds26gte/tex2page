@@ -13,30 +13,29 @@
 
 %
 
-\newtally\enumeratelevel
-
 \def\enumerate{\par\begingroup
-  \advancetally\enumeratelevel1%
-  \newtally\enumeratenumber
+  \advance\@itemdepth by 1
+  \expandafter\csname newcount\endcsname\enumeratenumber
+  \enumeratenumber=0
   \advance\leftskip\parindent
   \smallbreak
   \def\item{\smallbreak\noindent
-    \advancetally\enumeratenumber1%
-    \ifnum\enumeratelevel=1
-      \edef\enumeratemark{\enumeratenumber}\else
-    \ifnum\enumeratelevel=2
-      \count255=\enumeratenumber
+    \advance\enumeratenumber by 1
+    \ifnum\@itemdepth=1
+      \edef\enumeratemark{\the\enumeratenumber.}\else
+    \ifnum\@itemdepth=2
+      \count255=\the\enumeratenumber
       \advance\count255 by -1 \advance\count255 by `a
-      \edef\enumeratemark{\noexpand\char\the\count255 }\else
-    \ifnum\enumeratelevel=3
-      \edef\enumeratemark{\Romannumeral\enumeratenumber}\else
-    \ifnum\enumeratelevel=4
-      \count255=\enumeratenumber
+      \edef\enumeratemark{(\noexpand\char\the\count255 )}\else
+    \ifnum\@itemdepth=3
+      \edef\enumeratemark{\noexpand\romannumeral\the\enumeratenumber.}\else
+    \ifnum\@itemdepth=4
+      \count255=\the\enumeratenumber
       \advance\count255 by -1 \advance\count255 by `A
-      \edef\enumeratemark{\noexpand\char\the\count255 }\else
-    \edef\enumeratemark{\enumeratenumber}\fi\fi\fi\fi
+      \edef\enumeratemark{\noexpand\char\the\count255 .}\else
+    \edef\enumeratemark{\the\enumeratenumber.}\fi\fi\fi\fi
     \edef\@currentlabel{\enumeratemark}% needed?
-    \llap{\enumeratemark.\enspace}\ignorespaces}}
+    \llap{\enumeratemark\enspace}\ignorespaces}}
 
 \def\endenumerate{\smallbreak\smallbreak\endgroup\par}
 
@@ -185,9 +184,9 @@
 
 % uppercase version of \romannumeral
 
-\def\Romannumeral{\afterassignment\RomannumeralI\count255=}
+\def\Romannumeral{\afterassignment\RomannumeralQii\count255=}
 
-\def\RomannumeralI{\uppercase\expandafter{\romannumeral\the\count255 }}
+\def\RomannumeralQii{\uppercase\expandafter{\romannumeral\the\count255 }}
 
 %
 

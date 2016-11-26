@@ -1,13 +1,11 @@
 % eval4tex.tex
 % Dorai Sitaram
-% Last change 2016-11-21 
+% Last change 2016-11-26 
 
 \let\maybeendinput\relax
 \ifx\shipout\UnDeFiNeD
-  \message{in tex2page so end input}
   \let\maybeendinput\endinput
 \fi
-\message{waiting to maybe endinput}
 \maybeendinput
 
 \newcount\evalQauxfilecount

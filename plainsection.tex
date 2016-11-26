@@ -1,6 +1,6 @@
 % plainsection.tex
 % Dorai Sitaram
-% Last change 2016-11-24 
+% Last change 2016-11-26
 
 \let\maybeendinput\relax
 \ifx\shipout\UnDeFiNeD
@@ -25,7 +25,8 @@
   \ifx\doingappendix0%
     \edef\@currentlabel{\the\csname sectionnumber1\endcsname}%
   \else
-    \edef\@currentlabel{\char\csname sectionnumber1\endcsname}%
+    \edef\@currentlabel{\appendixchar{\the\csname
+      sectionnumber1\endcsname}}%
   \fi
   \count255=0
   \loop
@@ -47,6 +48,10 @@
       \let\continue1\fi
   \ifx\continue1%
   \repeat}
+
+\def\appendixchar#1{\ifcase#1\or A\or B\or C\or D\or E\or F\or
+G\or H\or I\or J\or K\or L\or M\or N\or O\or P\or Q\or R\or S\or
+T\or U\or V\or W\or X\or Y\or Z\else AA\fi}
 
 \newcount\secnumdepth
 
@@ -155,11 +160,9 @@
 
 \let\doingappendix=0
 
-\def\appendix{\let\doingappendix=1%
-  \count255=`\A%
-  \advance\count255 by -1
-  \expandafter\edef\csname
-    sectionnumber1\endcsname{\the\count255 }}
+\def\appendix{\let\doingappendix=1
+  \csname sectionnumber1\endcsname=0
+  \relax}
 
 \atcatcodebeforeplainsection
 

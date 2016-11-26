@@ -946,9 +946,10 @@
 \fi
 
 \ifx\XeTeXversion\UnDeFiNeD\else
-  \newdimen\epsfxsize \newdimen\epsfysize
+  \message{inside xetex}
+  \expandafter\csname newdimen\endcsname\epsfxsize
+  \expandafter\csname newdimen\endcsname\epsfysize
   \def\epsfbox#1{%
-    \message{doing xetex’s version of epsfbox!}%
     \ifnum\shellescape=1
     \epsfboxQii #1\end
     \epsfxsize=0pt \epsfysize=0pt
@@ -960,29 +961,33 @@
       \ifdim\epsfysize=0pt \else height\epsfysize \fi}}%
 \fi
 
-\def\inputepsf{%
-  \ifx\epsfbox\UnDeFiNeD
-    \ifx\pdfoutput\UnDeFiNeD
-      \input epsf
-    \else
-      \ifx\convertMPtoPDF\UnDeFiNeD
-        \input supp-pdf
-      \fi
-      \def\epsfbox##1{\convertMPtoPDF{##1}{1}{1}}%
-    \fi
-  \fi}
+\let\maybeloadsupppdf=0
+\ifx\directlua\UnDeFiNeD\else
+  \let\maybeloadsupppdf=1%
+\fi
+\ifx\pdfoutput\UnDeFiNeD\else
+  \let\maybeloadsupppdf=1%
+\fi
 
-\let\epsfboxSAVE\epsfbox
+\ifx\maybeloadsupppdf1%
+  \input supp-pdf
+  \def\epsfbox#1{\convertMPtoPDF{#1}{1}{1}}%
+\fi
+
+\ifx\XeTeXversion\UnDeFiNeD
+\ifx\directlua\UnDeFiNeD
+  \input epsf
+\fi\fi
+
+\let\epsfboxQsave\epsfbox
 \def\epsfbox#1{%
+  \message{calling epsfbox}%
   \openin0 #1
   \ifeof0 \closein0
     \message{#1 missing.}%
   \else\closein0
-    \epsfboxSAVE{#1}%
+    \epsfboxQsave{#1}%
   \fi}
-
-% fluff
-
 
 \atcatcodebeforetexzpage
 

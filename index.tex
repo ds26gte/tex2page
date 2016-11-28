@@ -25,7 +25,7 @@
 \ifx\TZPcommonlisp 1\eval{(princ *tex2page-version*)}\else
 \eval{(display *tex2page-version*)}\fi }}
 \else
-\c{2016-11-21} %last change
+\c{2016-11-28} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -62,7 +62,7 @@ makes Web pages
 from \TeX~\cite{tex} manuscripts.
 It reads an
 input document that is marked up in
-plain \TeX\ or \LaTeX~\cite{latex}
+plain \TeX~\cite{clark:tex} or \LaTeX~\cite{latex}
 and
 produces an output document with the functionally
 equivalent HTML markup.
@@ -539,7 +539,7 @@ ignored by \TeX2page.
 
 \index{Unicode}
 Modern \TeX s, e.g., \XeTeX~\cite{xetex}, allow the use of
-Unicode~\cite{unicode,haralambous:fonts} fonts,
+Unicode~\cite{unicode,haralambous:fonts,korpela:unicode,unicode4} fonts,
 thereby permitting a vast cornucopia of characters
 \ifx\shipout\UnDeFiNeD such as
 \char"950 , \char"101, \char"222e\ and \char"2388\
@@ -2419,7 +2419,8 @@ result is all-upper-case  (\p{\Romannumeral 1986} =
 %\index{MFpic}
 %
 Encapsulated PostScript files (EPS) are a convenient
-and popular way to insert pictures (graphics) into \TeX\ documents.
+and popular way to insert pictures (graphics) into \TeX\
+documents~\cite{latex-graphics-companion}.
 Users create EPS files with their favorite external
 programs, which can be GUI tools such as
 Inkscape~\cite{inkscape},

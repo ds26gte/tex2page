@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161124") ;last change
+(define *tex2page-version* "20161128") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -157,7 +157,7 @@
     "\">e</span>" "X"))
 
 (define *tex-files-to-ignore*
-  '("btxmac" "eplain" "epsf" "lmfonts" "opmac" "supp-pdf"))
+  '("btxmac" "eplain" "epsf" "lmfonts" "supp-pdf"))
 
 (define *filename-delims* '())
 
@@ -1400,28 +1400,21 @@
 
 (define get-csv
   ;csv == comma-separated value
-  (lambda ()
+  (lambda (closing-delim)
     (ignorespaces)
     (let ((rev-lbl
-            (let loop ((s '()) (nesting 0))
+            (let loop ((s '()))
               (let ((c (get-actual-char)))
-                (cond ((eof-object? c)
-                       (terror 'get-csv
-                         "Runaway argument of \\cite, "
-                         "\\nocite, \\expandhtmlindex?")
+                (when (eof-object? c)
+                  (terror 'get-csv
+                          "Runaway argument of \\cite, "
+                          "\\nocite, \\expandhtmlindex?")) 
+                (cond ((char=? c #\,) 
                        s)
-                      ((and (char=? c #\,) (= nesting 0))
-                       s)
-                      ((char=? c #\{)
-                       (loop (cons c s)
-                         (+ nesting 1)))
-                      ((char=? c #\})
-                       (if (= nesting 0)
-                           (begin (toss-back-char c) s)
-                           (loop (cons c s)
-                             (- nesting 1))))
+                      ((char=? c closing-delim)
+                       (toss-back-char c) s)
                       (else
-                        (loop (cons c s) nesting)))))))
+                        (loop (cons c s))))))))
       (if (null? rev-lbl) #f
           (list->string (nreverse rev-lbl))))))
 
@@ -3941,7 +3934,7 @@
       (emit addr)
       (emit-link-stop))))
 
-(define do-ulink
+(define do-opmac-ulink
   (lambda ()
     (let* ((url (get-bracketed-text-if-any))
            (link-text (get-group))
@@ -4037,41 +4030,55 @@
 
 ;bibliography
 
-(define do-cite
-  (lambda ()
-    (let ((extra-text (get-bracketed-text-if-any)))
-      (emit "[")
+(define do-cite-help
+  (lambda (delim extra-text)
+    (let ((closing-delim (cond ((char=? delim #\{) #\})
+                               ((char=? delim #\[) #\])
+                               (else (terror 'do-cite "faulty delim" delim)))))
       (ignorespaces)
-      (unless (char=? (get-actual-char) #\{)
-        (terror 'do-cite "Missing {"))
+      (unless (char=? (get-actual-char) delim)
+        (terror 'do-cite "Missing" delim))
+      (emit "[")
       (let ((first-key? #t))
         (let loop ()
-          (cond ((get-csv)
+          (cond ((get-csv closing-delim)
                  => (lambda (key)
-                      (if first-key? (set! first-key? #f)
-                          (begin (emit ",") (emit-nbsp 1)))
+                      (cond (first-key? (set! first-key? #f))
+                            (else (emit ",") (emit-nbsp 1)))
                       (write-bib-aux "\\citation{")
                       (write-bib-aux key)
                       (write-bib-aux "}")
                       (write-bib-aux #\newline)
                       (do-ref-aux (string-append "cite{" key "}")
                                   #f #f)
-                      (loop)))
-                (extra-text
-                  (emit ",")
-                  (emit-nbsp 1)
-                  (tex2page-string extra-text))))
-        (unless (char=? (get-actual-char) #\})
-          (terror 'do-cite "Missing }"))
+                      (loop)))))
+        (when extra-text
+          (emit ",") (emit-nbsp 1)
+          (tex2page-string extra-text))
+        (unless (char=? (get-actual-char) closing-delim)
+          (terror 'do-cite "Missing" closing-delim))
         (when first-key? (terror 'do-cite "Empty \\cite")))
       (emit "]"))))
+
+(define do-cite
+  (lambda () 
+    (if (tex2page-flag-boolean "\\TZPopmac")
+        (do-cite-help #\[ #f)
+        (do-cite-help #\{ (get-bracketed-text-if-any)))))
+
+(define do-rcite
+  (lambda ()
+    (do-cite-help #\[ #f)))
 
 (define do-nocite
   (lambda ()
     (ignorespaces)
-    (unless (char=? (get-actual-char) #\{) (terror 'do-cite "Missing {"))
+    (let* ((delim (if (tex2page-flag-boolean "\\TZPopmac") #\[ #\{))
+           (closing-delim (if (char=? delim #\{) #\} #\])))
+    (unless (char=? (get-actual-char) delim)
+      (terror 'do-cite "Missing" delim))
     (let loop ()
-      (cond ((get-csv)
+      (cond ((get-csv closing-delim)
              => (lambda (key)
                   (write-bib-aux "\\citation{")
                   (write-bib-aux key)
@@ -4079,23 +4086,28 @@
                   (label-bound? (string-append "cite{" key "}"))
                   (write-bib-aux #\newline)
                   (loop)))))
-    (unless (char=? (get-actual-char) #\})
-      (terror 'do-nocite "Missing }"))
-    ))
+    (unless (char=? (get-actual-char) closing-delim)
+      (terror 'do-nocite "Missing" closing-delim)))))
 
 (define do-bibliographystyle
   (lambda ()
-    (let ((s (ungroup (get-token))))
-      (write-bib-aux "\\bibstyle{")
-      (write-bib-aux s)
-      (write-bib-aux "}")
-      (write-bib-aux #\newline))))
+    (do-bibliographystyle-help (ungroup (get-token)))))
+
+(define do-bibliographystyle-help
+  (lambda (s)
+    (write-bib-aux "\\bibstyle{")
+    (write-bib-aux s)
+    (write-bib-aux "}")
+    (write-bib-aux #\newline)))
 
 (define do-bibliography
   (lambda ()
+    (do-bibliography-help (ungroup (get-token)))))
+
+(define do-bibliography-help
+  (lambda (bibdata)
     (set! *using-bibliography-p* #t)
-    (let ((bibdata (ungroup (get-token)))
-          (bbl-file (string-append *aux-dir/* *jobname*
+    (let ((bbl-file (string-append *aux-dir/* *jobname*
                                    *bib-aux-file-suffix* ".bbl")))
       (write-bib-aux "\\bibdata{")
       (write-bib-aux bibdata)
@@ -4109,6 +4121,13 @@
              (flag-missing-piece ':bibliography)
              (non-fatal-error
               "Bibliography not generated; rerun TeX2page"))))))
+
+(define do-opmac-usebibtex
+  (lambda ()
+    (let* ((bibfile (ungroup (get-token)))
+           (bibstyle (ungroup (get-token))))
+      (do-bibliographystyle-help bibstyle)
+      (do-bibliography-help bibfile))))
 
 (define do-thebibliography
   (lambda ()
@@ -7695,7 +7714,7 @@
                         (opmac-verbinput-print-lines i #t)
                         (set! n 0))
                        ;
-                       (t (terror 'do-opmac-verbinput "Malformed \\verbinput" s1 n1 s2 n2 f)))))
+                       (else (terror 'do-opmac-verbinput "Malformed \\verbinput" s1 n1 s2 n2 f)))))
              (table-put! *opmac-verbinput-table* f n)
              (emit "</pre>")
              (egroup)
@@ -8853,7 +8872,10 @@
       (cond ((string-ci=? e ".sty") #t)
             (else (when (string-ci=? e ".tex")
                     (set! f (substring f 0 (- (string-length f) 4))))
-                  (member/string-ci=? f *tex-files-to-ignore*))))))
+                  (cond ((string=? f "opmac")
+                         (tex-gdef-0arg "\\TZPopmac" "1")
+                         #t)
+                        (else (member/string-ci=? f *tex-files-to-ignore*))))))))
 
 (define do-input
   (lambda ()
@@ -10625,6 +10647,7 @@ Try the commands
 (tex-def-prim "\\r" (lambda () (do-diacritic ':ring)))
 (tex-def-prim "\\raggedleft" (lambda () (do-switch ':raggedleft)))
 (tex-def-prim "\\rawhtml" do-rawhtml)
+(tex-def-prim "\\rcite" do-rcite)
 (tex-def-prim "\\read" (lambda () (do-read (globally-p))))
 (tex-def-prim "\\readtocfile" do-toc)
 (tex-def-prim "\\ref" do-ref)
@@ -10768,7 +10791,7 @@ Try the commands
 (tex-def-prim-0arg "\\TZPcommonlisp" (if #t "0" "1"))
 
 (tex-def-prim "\\uccode" (lambda () (do-tex-case-code ':uccode)))
-(tex-def-prim "\\ulink" do-ulink)
+(tex-def-prim "\\ulink" do-opmac-ulink)
 (tex-def-prim "\\undefcsactive" do-undefcsactive)
 (tex-def-prim "\\undefschememathescape" (lambda () (scm-set-mathescape #f)))
 (tex-def-prim "\\underline" (lambda () (do-function "\\underline")))
@@ -10778,6 +10801,7 @@ Try the commands
 (tex-def-prim "\\urlh" do-urlh)
 (tex-def-prim "\\urlhd" do-urlhd)
 (tex-def-prim "\\urlp" do-urlp)
+(tex-def-prim "\\usebibtex" do-opmac-usebibtex)
 
 (tex-def-prim "\\v" (lambda () (do-diacritic ':hacek)))
 (tex-defsym-prim "\\vdots" "&#x22ee;")

@@ -1,4 +1,10 @@
-Last change 2016-11-23
+Last change 2016-11-28
+
+2016 Nov 28
+
+Added OPmac's \usebibtex \cite \rcite \nocite. OPmac shares the names \cite and
+\nocite with LaTeX, but uses brackets instead of braces. Use heuristic or the
+boolean flag \TZPopmac to disambiguate. 
 
 2016 Nov 23
 

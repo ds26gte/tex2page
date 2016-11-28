@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161127" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161128" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -3253,6 +3253,24 @@
       (emit-nbsp 2)
       (do-label-aux key)
       (emit "</td><td>"))))
+
+(defun do-opmac-bib ()
+  (do-para)
+  (incf *bibitem-num*)
+  (let* ((key0 (get-bracketed-text-if-any))
+         (bibitem-num-s (write-to-string *bibitem-num*))
+         (key (concatenate 'string "cite{" key0 "}"))
+         (node-name (concatenate 'string *html-node-prefix* "bib_" bibitem-num-s)))
+    (unless key0
+      (terror 'do-opmac-bib "Improper \\bib entry"))
+    (tex-def-0arg "\\TIIPcurrentnodename" node-name)
+    (tex-def-0arg "\\@currentlabel" bibitem-num-s)
+    (emit-anchor node-name)
+    (emit "[")
+    (tex2page-string bibitem-num-s)
+    (emit "]")
+    (emit-nbsp 2)
+    (do-label-aux key)))
 
 (defun display-index-entry (s o)
   (mapc (lambda (c) (princ (if (or (char= c #\Newline)) #\space c) o))
@@ -8504,6 +8522,7 @@ Try the commands
 (tex-def-prim "\\bf" (lambda () (do-switch :bf)))
 (tex-def-prim "\\bgcolor" (lambda () (do-switch :bgcolor)))
 (tex-def-prim-0arg "\\bgroup" "{")
+(tex-def-prim "\\bib" #'do-opmac-bib)
 (tex-def-prim "\\bibitem" #'do-bibitem)
 (tex-def-prim "\\bibliography" #'do-bibliography)
 (tex-def-prim "\\bibliographystyle" #'do-bibliographystyle)

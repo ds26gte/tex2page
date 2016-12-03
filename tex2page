@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161128") ;last change
+(define *tex2page-version* "20161203") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -1250,6 +1250,21 @@
     (let ((c (snoop-actual-char)))
       (get-filename
        (and (char? c) (char=? c #\{))))))
+
+(define get-word
+  (lambda ()
+    (ignorespaces)
+    (list->string
+      (nreverse (let loop ((s '()))
+                  (let ((c (snoop-actual-char)))
+                    (cond ((eof-object? c) s)
+                          ((or (char-whitespace? c)
+                               (and *comment-char* (char=? c *comment-char*))
+                               (and *esc-char* (char=? c *esc-char*)))
+                           (unless *not-processing-p* (ignorespaces))
+                           s)
+                          (else (get-actual-char)
+                                (loop (cons c s))))))))))
 
 (define get-integer
   (lambda (base)
@@ -4207,47 +4222,67 @@
           o))
       (string->list s))))
 
+(define do-index-help
+  (lambda (idx-entry)
+    (set! *index-count* (+ *index-count* 2))
+    ;
+    ;increment by 2 rather than 1, effectively disabling
+    ;makeindex from creating ranges, which are meaningless for
+    ;HTML.  Actually, makeindex called with the -r option prevents
+    ;ranging but who remembers these things?
+    ;
+    (!index *index-count* *html-page-count*)
+    (write-aux
+      `(!index ,*index-count* ,*html-page-count*))
+    ;(set! *index-table*
+    ;      (cons (cons *index-count* *html-page-count*) *index-table*))
+    (let ((tag (string-append *html-node-prefix* "index_"
+                              (number->string *index-count*))))
+      (emit-anchor tag)
+      (unless *index-port*
+        (let ((idx-file (string-append *aux-dir/* *jobname*
+                                       *index-file-suffix* ".idx")))
+          (ensure-file-deleted idx-file)
+          (set! *index-port* (open-output-file idx-file))))
+      (display "\\indexentry{" *index-port*)
+      (cond ((substring? "|see{" idx-entry)
+             (display-index-entry idx-entry *index-port*))
+            ((substring? "|seealso{" idx-entry)
+             (display-index-entry idx-entry *index-port*))
+            ((substring? "|(" idx-entry)
+             => (lambda (i)
+                  (display-index-entry (substring idx-entry 0 i)
+                                       *index-port*)
+                  (display "|expandhtmlindex" *index-port*)))
+            (else (display-index-entry idx-entry *index-port*)
+                  (display "|expandhtmlindex" *index-port*)))
+      (display "}{" *index-port*)
+      (display *index-count* *index-port*)
+      (display "}" *index-port*)
+      (newline *index-port*))))
+
 (define do-index
   (lambda ()
     (let ((idx-entry (ungroup (get-group))))
       (ignorespaces) ;?
       (unless (substring? "|)" idx-entry)
-        (set! *index-count* (+ *index-count* 2))
-        ;
-        ;increment by 2 rather than 1, effectively disabling
-        ;makeindex from creating ranges, which are meaningless for
-        ;HTML.  Actually, makeindex called with the -r option prevents
-        ;ranging but who remembers these things?
-        ;
-        (!index *index-count* *html-page-count*)
-        (write-aux
-          `(!index ,*index-count* ,*html-page-count*))
-        ;(set! *index-table*
-        ;      (cons (cons *index-count* *html-page-count*) *index-table*))
-        (let ((tag (string-append *html-node-prefix* "index_"
-                                  (number->string *index-count*))))
-          (emit-anchor tag)
-          (unless *index-port*
-            (let ((idx-file (string-append *aux-dir/* *jobname*
-                                           *index-file-suffix* ".idx")))
-              (ensure-file-deleted idx-file)
-              (set! *index-port* (open-output-file idx-file))))
-          (display "\\indexentry{" *index-port*)
-          (cond ((substring? "|see{" idx-entry)
-                 (display-index-entry idx-entry *index-port*))
-                ((substring? "|seealso{" idx-entry)
-                 (display-index-entry idx-entry *index-port*))
-                ((substring? "|(" idx-entry)
-                 => (lambda (i)
-                      (display-index-entry (substring idx-entry 0 i)
-                                           *index-port*)
-                      (display "|expandhtmlindex" *index-port*)))
-                (else (display-index-entry idx-entry *index-port*)
-                      (display "|expandhtmlindex" *index-port*)))
-          (display "}{" *index-port*)
-          (display *index-count* *index-port*)
-          (display "}" *index-port*)
-          (newline *index-port*))))))
+        (do-index-help idx-entry)))))
+
+
+(define do-opmac-ii 
+  (lambda ()
+    (let* ((word (get-word))
+           (subwords (path-to-list word #\/))
+           (newword (let ((word0 (car subwords)))
+                      (set! subwords (cdr subwords)) word0)))
+      (ignorespaces)
+      (let loop ()
+        (cond ((null? subwords) newword)
+              (else (set! newword (string-append newword "!" (car subwords)))
+                    (set! subwords (cdr subwords))
+                    (loop))))
+      (do-index-help newword))))
+
 
 (define do-inputindex
   (lambda (insert-heading?)
@@ -4273,7 +4308,7 @@
   (lambda ()
     (bgroup)
     (tex2page-string "\\let\\endtheindex\\egroup")
-    (tex2page-string "\\let\\indexspace\\medskip")
+    (tex2page-string "\\let\\indexspace\\relax")
     (tex2page-string "\\let\\item\\indexitem")
     (tex2page-string "\\let\\subitem\\indexsubitem")
     (tex2page-string "\\let\\subsubitem\\indexsubsubitem")
@@ -6363,11 +6398,11 @@
     ))
 
 (define path-to-list
-  (lambda (p)
+  (lambda (p sepc)
     ;convert an OS path into a Scheme list
     (if (not p) '()
         (let loop ((p p) (r '()))
-          (let ((i (string-index p *path-separator*)))
+          (let ((i (string-index p sepc)))
             (if i
                 (loop (substring p (+ i 1) (string-length p))
                   (cons (substring p 0 i) r))
@@ -10538,6 +10573,7 @@ Try the commands
   (lambda ()
     (unless *inputting-boilerplate-p* (set! *inputting-boilerplate-p* 0))))
 (tex-def-prim "\\ignorespaces" ignorespaces)
+(tex-def-prim "\\ii" do-opmac-ii)
 (tex-def-prim "\\imgdef" (lambda () (make-reusable-img (globally-p))))
 (tex-def-prim "\\imgpreamble" do-img-preamble)
 (tex-def-prim "\\IMGtabbing"
@@ -10595,6 +10631,7 @@ Try the commands
 (tex-def-prim "\\makeatletter" (lambda () (set-catcode #\@ 11)))
 (tex-def-prim "\\makeatother" (lambda () (set-catcode #\@ 12)))
 (tex-def-prim "\\makehtmlimage" do-makehtmlimage)
+(tex-def-prim "\\makeindex" (lambda () (do-inputindex #f)))
 (tex-def-prim "\\maketitle" do-maketitle)
 (tex-def-prim "\\maketoc" do-toc)
 (tex-def-prim "\\marginnote" do-marginnote)
@@ -11298,7 +11335,7 @@ Try the commands
                 (*temp-string-count* 0)
                 (*temporarily-use-utf8-for-math-p* #f)
                 (*tex2page-inputs* (path-to-list (or (getenv "TEX2PAGEINPUTS")
-                                                     (getenv "TIIPINPUTS"))))
+                                                     (getenv "TIIPINPUTS")) *path-separator*))
                 (*tex-env* '())
                 (*tex-format* ':plain)
                 (*tex-if-stack* '())

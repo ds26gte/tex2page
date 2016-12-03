@@ -1,8 +1,12 @@
-Last change 2016-11-28
+Last change 2016-12-03
+
+2016 Dec 3
+
+Added OPmac's \ii, \makeindex.
 
 2016 Nov 28
 
-Added OPmac's \cite \rcite \nocite \bib \usebibtex. OPmac shares the names
+Added OPmac's \cite, \rcite, \nocite, \bib, \usebibtex. OPmac shares the names
 \cite and \nocite with LaTeX, but uses brackets instead of braces. Use
 heuristic or the boolean flag \TZPopmac to disambiguate. 
 

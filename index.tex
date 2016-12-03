@@ -25,7 +25,7 @@
 \ifx\TZPcommonlisp 1\eval{(princ *tex2page-version*)}\else
 \eval{(display *tex2page-version*)}\fi }}
 \else
-\c{2016-11-28} %last change
+\c{2016-12-03} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1816,10 +1816,24 @@ p.~\ref{eject}. To do this, set the \p{\TZPsinglepage} flag:
 \def\TZPsinglepage{1}
 }
 
+\beginsection OPmac
+
+The flag \p{\TZPopmac} can be set to 1 to inform \TeX2page that
+you’re using OPmac macros~\cite{opmac} in your document.
+Typically this isn't necessary as \TeX2page can spot if you’ve
+\p{\input opmac}. The flag need be set only if somehow the
+loading of \p{opmac} occurs in a \TeX-only portion of your
+document.
+
+This flag, whether explicitly or implicitly set, helps \TeX2page
+decide which form of the macros \p{\cite} and \p{\nocite} to use.
+In contrast to most other styles (including \LaTeX), which use
+\p{{}} for these macros' argument, OPmac uses \p{[]}.
+
 \beginsection Scheme or Common Lisp?
 
 \index{TZPcommonlisp@\p{\TZPcommonlisp}}
-Finally, the flag \p{\TZPcommonlisp} can be used to decide whether calls to
+The flag \p{\TZPcommonlisp} can be used to decide whether calls to
 \p{\eval} (p.~\ref{eval}) should contain Scheme or Common Lisp code.
 Typically, the construct \p{\ifx\TZPcommonlisp 1} is used to introduce
 the Common Lisp and Scheme versions as the two conditional clauses, so

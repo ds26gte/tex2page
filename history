@@ -2,6 +2,10 @@ Last change 2016-12-03
 
 2016 Dec 3
 
+Reorg TZP boolean flag names so that their default values are 0. (\TZPmathtext,
+\TZPcolophondisabletimestamp, \TZPcolophondisablecredit,
+\TZPcolophondisableweblink, \TZPrightjustify.)
+
 Added OPmac's \ii, \makeindex.
 
 2016 Nov 28

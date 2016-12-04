@@ -2055,7 +2055,8 @@
   (do-para))
 
 (defun do-equation (type)
-  (cond ((and (tex2page-flag-boolean "\\TZPmathimage")
+  (cond ((and (or (not (tex2page-flag-boolean "\\TZPmathtext"))
+                  (tex2page-flag-boolean "\\TZPmathimage"))
               (not *temporarily-use-utf8-for-math-p*))
          (do-latex-env-as-image
           (case type
@@ -3550,8 +3551,10 @@
          (when (eq c :eof-object) (return))
          (case (intern (string-upcase (scm-get-token)) :keyword)
            ((:image :display-image)
+            (tex-def-0arg "\\TZPmathtext" "0")
             (tex-def-0arg "\\TZPmathimage" "1"))
            ((:no-image :no-display-image)
+            (tex-def-0arg "\\TZPmathtext" "1")
             (tex-def-0arg "\\TZPmathimage" "0"))))))))
 
 (defun do-htmldoctype ()
@@ -3592,11 +3595,14 @@
 
 (defun output-colophon ()
   (let ((colophon-mentions-last-mod-time-p
-         (tex2page-flag-boolean "\\TZPcolophontimestamp"))
+          (or (not (tex2page-flag-boolean "\\TZPcolophondisabletimestamp"))
+              (tex2page-flag-boolean "\\TZPcolophontimestamp")))
         (colophon-mentions-tex2page-p
-         (tex2page-flag-boolean "\\TZPcolophoncredit"))
+          (or (not (tex2page-flag-boolean "\\TZPcolophondisablecredit"))
+              (tex2page-flag-boolean "\\TZPcolophoncredit")))
         (colophon-links-to-tex2page-website-p
-         (tex2page-flag-boolean "\\TZPcolophonweblink")))
+          (or (not (tex2page-flag-boolean "\\TZPcolophondisableweblink"))
+              (tex2page-flag-boolean "\\TZPcolophonweblink"))))
     (when (or colophon-mentions-last-mod-time-p colophon-mentions-tex2page-p)
       (do-end-para)
       (emit "<div align=right class=colophon>")
@@ -3919,11 +3925,14 @@
          ,(tex-string-to-html-string (tdef*-expansion d))))))
   (when (tex2page-flag-boolean "\\TZPcolophonlastpage")
     (write-aux `(!colophon :last-page)))
-  (unless (tex2page-flag-boolean "\\TZPcolophontimestamp")
+  (when (or (tex2page-flag-boolean "\\TZPcolophondisabletimestamp")
+            (not (tex2page-flag-boolean "\\TZPcolophontimestamp")))
     (write-aux `(!colophon :no-timestamp)))
-  (unless (tex2page-flag-boolean "\\TZPcolophoncredit")
+  (when (or (tex2page-flag-boolean "\\TZPcolophondisablecredit")
+            (not (tex2page-flag-boolean "\\TZPcolophoncredit")))
     (write-aux `(!colophon :dont-credit-tex2page)))
-  (unless (tex2page-flag-boolean "\\TZPcolophonweblink")
+  (when (or (tex2page-flag-boolean "\\TZPcolophondisableweblink")
+            (not (tex2page-flag-boolean "\\TZPcolophonweblink")))
     (write-aux `(!colophon :dont-link-to-tex2page-website)))
   (when (setq *it* (ctl-seq-no-arg-expand-once "\\TZPredirect"))
     (unless *redirect-url*
@@ -3951,7 +3960,8 @@
            *css-port*)
     (princ "em; }" *css-port*)
     (terpri *css-port*)
-    (unless (tex2page-flag-boolean "\\TZPraggedright")
+    (when (or (tex2page-flag-boolean "\\TZPrightjustify")
+              (not (tex2page-flag-boolean "\\TZPraggedright")))
       (princ "body { text-align: justify; }" *css-port*)
       (terpri *css-port*))
     (princ "p { margin-bottom: 0pt; }" *css-port*)
@@ -4132,7 +4142,8 @@
 
 (defun do-display-math (tex-string)
   (do-end-para)
-  (if (and (tex2page-flag-boolean "\\TZPmathimage")
+  (if (and (or (not (tex2page-flag-boolean "\\TZPmathtext"))
+               (tex2page-flag-boolean "\\TZPmathimage"))
            (not *temporarily-use-utf8-for-math-p*))
       (progn
        (emit "<div class=mathdisplay align=")
@@ -4195,7 +4206,8 @@
 (defun do-intext-math (tex-string)
   (let* ((*math-needs-image-p* nil)
          (html-string (tex-math-string-to-html-string tex-string)))
-    (if (and (tex2page-flag-boolean "\\TZPmathimage")
+    (if (and (or (not (tex2page-flag-boolean "\\TZPmathtext"))
+                 (tex2page-flag-boolean "\\TZPmathimage"))
              *math-needs-image-p*
              (not *temporarily-use-utf8-for-math-p*))
       (call-with-html-image-port
@@ -5513,16 +5525,13 @@
   (tex-def-dotted-count "equation" nil)
   (tex-gdef-0arg "\\TIIPcurrentnodename" "no value yet")
   (tex-gdef-0arg "\\@currentlabel" "no value yet")
-  (tex-gdef-0arg "\\TZPcolophonlastpage" "0")
-  (tex-gdef-0arg "\\TZPcolophontimestamp" "1")
-  (tex-gdef-0arg "\\TZPcolophoncredit" "1")
-  (tex-gdef-0arg "\\TZPcolophonweblink" "1")
-  (tex-gdef-0arg "\\TZPmathimage" "1")
+  (tex-gdef-0arg "\\TZPcolophontimestamp" "1") ;obsolete
+  (tex-gdef-0arg "\\TZPcolophoncredit" "1") ;obsolete
+  (tex-gdef-0arg "\\TZPcolophonweblink" "1") ;obsolete
   (tex-gdef-0arg "\\TZPimageformat" "PNG")
   (tex-gdef-0arg "\\TZPimageconverter" "NetPBM")
   (tex-gdef-0arg "\\TZPredirectseconds" "0")
   (tex-gdef-0arg "\\TZPtextext" "1")
-  (tex-gdef-0arg "\\TZPraggedright" "1")
   ;#endinclude globdefs.lisp
 
   (initialize-scm-words)
@@ -7835,7 +7844,8 @@
                      (> s *last-modification-time*)))
       (setq *source-changed-since-last-run-p* t
             *last-modification-time* s)
-      (when (and (tex2page-flag-boolean "\\TZPcolophontimestamp")
+      (when (and (or (not (tex2page-flag-boolean "\\TZPcolophondisabletimestamp"))
+                     (tex2page-flag-boolean "\\TZPcolophontimestamp"))
                  (not (tex2page-flag-boolean "\\TZPcolophonlastpage"))
                  (> *html-page-count* 1))
         ;i.e. time to print mod-time is past, and this update is too
@@ -7912,11 +7922,17 @@
 
 (defun !colophon (x)
   (case x
-    (:last-page (tex-def-0arg "\\TZPcolophonlastpage" "1"))
-    (:no-timestamp (tex-def-0arg "\\TZPcolophontimestamp" "0"))
-    (:dont-credit-tex2page (tex-def-0arg "\\TZPcolophoncredit" "0"))
+    (:last-page
+      (tex-def-0arg "\\TZPcolophonlastpage" "1"))
+    (:no-timestamp
+      (tex-def-0arg "\\TZPcolophondisabletimestamp" "1")
+      (tex-def-0arg "\\TZPcolophontimestamp" "0"))
+    (:dont-credit-tex2page
+      (tex-def-0arg "\\TZPcolophondisablecredit" "1")
+      (tex-def-0arg "\\TZPcolophoncredit" "0"))
     (:dont-link-to-tex2page-website
-     (tex-def-0arg "\\TZPcolophonweblink" "0"))))
+      (tex-def-0arg "\\TZPcolophondisableweblink" "1")
+      (tex-def-0arg "\\TZPcolophonweblink" "0"))))
 
 (defun !tex-text (n)
   (when (= n 0)
@@ -8608,10 +8624,8 @@ Try the commands
 (tex-def-prim "\\divide" (lambda () (do-divide (globally-p))))
 (tex-def-prim "\\document" #'probably-latex)
 (tex-def-prim "\\documentclass" #'do-documentclass)
-(tex-def-prim "\\dontuseimgforhtmlmath" ;obsolete
- (lambda () (tex-def-0arg "\\TZPmathimage" "0")))
-(tex-def-prim "\\dontuseimgforhtmlmathdisplay" ;obsolete
- (lambda () (tex-def-0arg "\\TZPmathimage" "0")))
+(tex-def-prim "\\dontuseimgforhtmlmath" (lambda () (tex-def-0arg "\\TZPmathtext" "1"))) ;obsolete
+(tex-def-prim "\\dontuseimgforhtmlmathdisplay" (lambda () (tex-def-0arg "\\TZPmathtext" "1"))) ;obsolete
 (tex-def-prim "\\dontuseimgforhtmlmathintext" (lambda () t)) ;obsolete
 (tex-defsym-prim "\\dots" "&#x2026;")
 
@@ -8839,7 +8853,7 @@ Try the commands
 (tex-def-prim "\\newtheorem" #'do-newtheorem)
 (tex-def-prim "\\newtoks" (lambda () (do-newtoks (globally-p))))
 (tex-def-prim "\\newwrite" (lambda () (do-new-stream :out)))
-(tex-def-prim "\\noad" (lambda () (tex-def-0arg "\\TZPcolophoncredit" "0")))
+(tex-def-prim "\\noad" (lambda () (tex-def-0arg "\\TZPcolophondisablecredit" "1"))) ;obsolete
 (tex-def-prim "\\nocite" #'do-nocite)
 (tex-def-prim "\\node" #'do-node)
 (tex-def-prim "\\noindent" #'do-noindent)
@@ -8848,8 +8862,7 @@ Try the commands
 (tex-def-prim "\\noslatexlikecomments"
  (lambda () (tex-def-0arg "\\TZPslatexcomments" "0")))
 (tex-def-prim "\\notoc" (lambda () (setq *opmac-notoc-p* t)))
-(tex-def-prim "\\notimestamp"
- (lambda () (tex-def-0arg "\\TZPcolophontimestamp" "0")))
+(tex-def-prim "\\notimestamp" (lambda () (tex-def-0arg "\\TZPcolophondisabletimestamp" "1"))) ;obsolete
 (tex-def-prim "\\nr" (lambda () (do-cr "\\nr")))
 (tex-def-prim "\\number" #'do-number)
 (tex-def-prim "\\numberedfootnote" #'do-numbered-footnote)

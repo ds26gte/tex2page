@@ -507,7 +507,7 @@ simply types the command’s name without the leading
 escape character.  This is sometimes a good choice, as
 in the following text (where \p{\sin} and \p{\cos} are not
 explicitly recognized by \TeX2page):
-\let\TZPmathimage=0
+\let\TZPmathtext=1
 
 \p{
 $$\sin^2 x + \cos^2 x = 1$$
@@ -517,7 +517,7 @@ $$\sin^2 x + \cos^2 x = 1$$
 
 $$\sin^2 x + \cos^2 x = 1$$
 
-\let\TZPmathimage=1
+\let\TZPmathtext=0
 \n which is clear enough.
 
 If in non-math mode, \TeX2page simply ignores commands
@@ -1429,7 +1429,8 @@ parentheses.  \p{\urlp{|meta[text]}{|meta[URL]}} abbreviates
 \index{flags}
 %
 \TeX2page has a handful of flags that you can set to govern the HTML output.
-These flags are \TeX\ control sequences such as \p{\TZPcolophontimestamp},
+These flags are \TeX\ control sequences such as
+\p{\TZPcolophondisabletimestamp},
 etc., and are set using \p{\let} or \p{\def} or even \p{\gdef},
 \p{\edef}, or \p{\xdef}.
 (If using one of the \p{\def}s for a boolean flag, only the
@@ -1437,7 +1438,7 @@ first character in the \p{\def}-body is significant.)
 
 All these \TeX2page flags are named \p{\TZP...}, and as long as
 you avoid using these names for other purposes, setting these
-flags should not affect the print output.
+flags should have no effect on the print output.
 
 \beginsection External title
 
@@ -1488,40 +1489,40 @@ before the text for the second HTML page starts.  Otherwise, the default
 first-page placement of the colophon will have already taken effect.
 \fi
 
-\index{TZPcolophontimestamp@\p{\TZPcolophontimestamp}}
+\index{TZPcolophondisabletimestamp@\p{\TZPcolophondisabletimestamp}}
 To avoid mentioning the timestamp of the document in the
 colophon,
 
 \p{
-\let\TZPcolophontimestamp=0
+\let\TZPcolophondisabletimestamp=1
 }
 
 \n If the underlying
 Scheme is incapable of determining a file’s write date, \TeX2page will
-not mention the timestamp, regardless of the \p{\TZPcolophontimestamp} setting.
+not mention the timestamp, regardless of the \p{\TZPcolophondisabletimestamp} setting.
 
-\index{TZPcolophoncredit@\p{\TZPcolophoncredit}}
+\index{TZPcolophondisablecredit@\p{\TZPcolophondisablecredit}}
 To avoid crediting \TeX2page in the colophon,
 
 \p{
-\let\TZPcolophoncredit=0
+\let\TZPcolophondisablecredit=1
 }
 
-\index{TZPcolophonweblink@\p{\TZPcolophonweblink}}
+\index{TZPcolophondisableweblink@\p{\TZPcolophondisableweblink}}
 To avoid linking to the \TeX2page website in the colophon,
 
 \p{
-\let\TZPcolophonweblink=0
+\let\TZPcolophondisableweblink=1
 }
 
-\n If \p{\TZPcolophoncredit} is 0, the colophon won’t link to the \TeX2page
-site, regardless of the \p{\TZPcolophonweblink} setting.
+\n If \p{\TZPcolophondisablecredit} is 0, the colophon won’t link to the \TeX2page
+site, regardless of the \p{\TZPcolophondisableweblink} setting.
 
 \beginsection Math image flag
 
 \xrdef{mathflag}
-\index{TZPmathimage@\p{\TZPmathimage}}
-The \p{\TZPmathimage} flag
+\index{TZPmathtext@\p{\TZPmathtext}}
+The \p{\TZPmathtext} flag
 specifies whether mathematical fragments in the
 document should be rendered as image or text.  By default, \TeX2page will
 generate images for displayed math and for “complicated”
@@ -1532,12 +1533,12 @@ economize by generating its text (UTF-8) equivalent.
 The assignment
 
 \p{
-\let\TZPmathimage=0
+\let\TZPmathtext=1
 }
 forces subsequent math to be typeset as text, until the end of the document or
-until you reset to the flag to 1.
+until you reset to the flag to 0.
 
-It is a good idea to set this flag to 0 if the
+It is a good idea to set this flag to 1 if the
 mathematical notation in part or all of your document is simple enough to
 not require complicated notation.
 
@@ -1716,15 +1717,15 @@ say, 6.25 inches, you could have
 The \p{\TZPhsize} value overrides the \p{\hsize} value, whether
 or not you set \p{\TZPtexlayout}.
 
-\index{TZPraggedright@\p{\TZPraggedright}}
+\index{TZPrightjustify@\p{\TZPrightjustify}}
 Because it is too drastic a change, \p{\TZPtexlayout=1} will not cause
 text to be right-justified.  To make that happen,
 
 \p{
-\let\TZPraggedright=0
+\let\TZPrightjustify=1
 }
 
-\n Setting \p{\TZPraggedright} has no effect unless \p{\TZPtexlayout} is
+\n Setting \p{\TZPrightjustify} has no effect unless \p{\TZPtexlayout} is
 also set.
 
 \index{TZPtextext@\p{\TZPtextext}}
@@ -2383,14 +2384,14 @@ $\sqrt{ (\Delta x)^2 + (\Delta y)^2 }$.
 
 You can control whether your math displays should
 be specified as image or text with the
-flag \p{\TZPmathimage}
+flag \p{\TZPmathtext}
 (p.~\ref{mathflag}).
 \ifx\shipout\UnDeFiNeD
-With \p{\let\TZPmathimage=0},
+With \p{\let\TZPmathtext=1},
 the three examples above
 look as follows:
 
-\let\TZPmathimage=0
+\let\TZPmathtext=1
 $$ F = G {m_1 m_2 \over r^2 } $$
 
 $$ \int_0^\infty { t - ib \over t^2 + b^2} e^{iat}\,dt =
@@ -2403,7 +2404,7 @@ $$ A =
          0           & 0           & x - \lambda \cr}
 \right)
 $$
-\let\TZPmathimage=1
+\let\TZPmathtext=0
 \fi
 
 \iffalse

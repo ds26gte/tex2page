@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161203") ;last change
+(define *tex2page-version* "20161204") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -6807,6 +6807,7 @@
   (tex-gdef-0arg "\\TZPimageconverter" "NetPBM")
   (tex-gdef-0arg "\\TZPredirectseconds" "0")
   (tex-gdef-0arg "\\TZPtextext" "1")
+  (tex-gdef-0arg "\\TZPraggedright" "1")
     ;#endinclude globdefs.scm
 
     (initialize-scm-words)

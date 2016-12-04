@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161203" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161204" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -5532,6 +5532,7 @@
   (tex-gdef-0arg "\\TZPimageconverter" "NetPBM")
   (tex-gdef-0arg "\\TZPredirectseconds" "0")
   (tex-gdef-0arg "\\TZPtextext" "1")
+  (tex-gdef-0arg "\\TZPraggedright" "1")
   ;#endinclude globdefs.lisp
 
   (initialize-scm-words)

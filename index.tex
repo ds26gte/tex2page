@@ -59,7 +59,7 @@ like making clocks.}
 \n
 \TeX2page
 makes Web pages
-from \TeX~\cite{tex} manuscripts.
+from \TeX~\cite{texbook} manuscripts.
 It reads an
 input document that is marked up in
 plain \TeX~\cite{clark:tex} or \LaTeX~\cite{latex}
@@ -455,7 +455,7 @@ recognizes a list of primitive commands, is invariably
 called with a {\em format}, which is essentially a
 preloaded set of definitions of some additional
 commands.  The two most popular formats
-are plain \TeX~\cite{tex} and \LaTeX~\cite{latex}.
+are plain \TeX~\cite{texbook} and \LaTeX~\cite{latex}.
 
 %\index{texi2p.tex@\p{texi2p.tex} (\TeX2page macro file)}
 
@@ -2438,11 +2438,11 @@ and popular way to insert pictures (graphics) into \TeX\
 documents~\cite{latex-graphics-companion}.
 Users create EPS files with their favorite external
 programs, which can be GUI tools such as
-Inkscape~\cite{inkscape},
-The Gimp~\cite{gimp},
+Inkscape~\cite{inkscape,kirsanov:inkscape,bah:inkscape},
+Gimp~\cite{gimp,gimpbook},
 and Xfig~\cite{xfig},
 or algebraic
-ones like MetaPost~\cite{metapost}.
+ones like MetaPost~\cite{metapost,mfbook}.
 \iffalse
 It is also
 possible to write a picture’s specification in
@@ -2450,7 +2450,7 @@ the document, while still relying on an external
 program to make sense of it.  An example is
 MFpic~\cite{mfpic}, whose \TeX\ macros transform
 a picture specification inside the document into
-an external \MF~\cite{metafont} or MetaPost file.
+an external \MF~\cite{mfbook} or MetaPost file.
 \fi
 
 \index{epsfbox@\p{\epsfbox}}
@@ -2657,7 +2657,7 @@ can be inserted with
 %MFpic~\cite{mfpic} diagrams.\f{MFpic diagrams are
 %enclosed between \p{\mfpic ... \endmfpic}.  The MFpic
 %macros translate picture specifications into
-%METAFONT~\cite{metafont} or MetaPost~\cite{metapost}
+%METAFONT~\cite{mfbook} or MetaPost~\cite{metapost}
 %programs.  Both METAFONT and MetaPost are included in
 %modern \TeX\ distributions, which makes MFpic an
 %attractive option for picture-drawing in TeX.  Please
@@ -2672,7 +2672,7 @@ to be converted into images for your HTML output.  The
 fragment of the document to be converted to image is
 given as an \p{\makehtmlimage} argument.
 Here’s an example \TeX-based diagram from {\em
-The \TeX book}~\cite[p~389]{tex}:
+The \TeX book}~\cite[p~389]{texbook}:
 
 \verbatiminput ursa-major.tex
 
@@ -2775,7 +2775,7 @@ you can specify an alternate \p{\magnification}
 outside \p{\imgpreamble}, and that will affect
 overall size of the entire DVI output, inclusive of
 math and pictures, as advertised in {\em The \TeX book}
-\cite{tex}.
+\cite{texbook}.
 
 In sum: \p{\magnification}, when called {\em
 outside} the \p{\imgpreamble}, magnifies the

@@ -25,7 +25,7 @@
 \ifx\TZPcommonlisp 1\eval{(princ *tex2page-version*)}\else
 \eval{(display *tex2page-version*)}\fi }}
 \else
-\c{2016-12-03} %last change
+\c{2016-12-04} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -2571,8 +2571,17 @@ supported by HTML, so \TeX2page does not need to convert them.
 \index{epstopdf@\p{epstopdf}}
 
 \XeTeX\ has its own duo of graphics-insertion commands:
-\p{\XeTeXpdffile} for PDF images, and \p{\XeTeXpicfile} for PNG,
-JPEG and GIF images.  To load a graphic specified in MetaPost,
+\p{\XeTeXpdffile} for PDF images, and \p{\XeTeXpicfile} for
+JPEG and GIF images. E.g.,
+
+\p{
+\centerline{\XeTeXpicfile tbdek.jpg width 3in \relax}
+}
+for
+
+\centerline{\hbox{\XeTeXpicfile tbdek.jpg width 3in \relax}}
+
+To load a graphic specified in MetaPost,
 you can either (a) convert MetaPost spec into EPS and
 thence to PDF using a utility like \p{epstopdf}; or (b)
 convert the spec to PNG. Let’s start with a MetaPost file

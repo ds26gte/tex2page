@@ -253,7 +253,7 @@ in a standard list of
 directories, which can be modified by the user via the
 environment variable \p{TEXINPUTS}.
 The filename \p{|meta[f].tex} is tried before
-\p{|meta[f]} itself is tried.  In most modern TeXs, the
+\p{|meta[f]} itself is tried.  In most modern \TeX s, the
 search is performed using the \p{kpathsea} library.
 
 By default, \TeX2page will look for files using the same \p{kpathsea}
@@ -642,7 +642,8 @@ definition for \TeX2page:
 
 \n Of course, we want this definition to be seen only
 by \TeX2page, as we don’t want to override the
-original, more sophisticated \p{\vrule}-based definition as seen by TeX.
+original, more sophisticated \p{\vrule}-based definition as seen
+by \TeX.
 We therefore make our
 definition HTML-only
 using a conditional:
@@ -1515,7 +1516,7 @@ To avoid linking to the \TeX2page website in the colophon,
 \let\TZPcolophondisableweblink=1
 }
 
-\n If \p{\TZPcolophondisablecredit} is 0, the colophon won’t link to the \TeX2page
+\n If \p{\TZPcolophondisablecredit} is set, the colophon won’t link to the \TeX2page
 site, regardless of the \p{\TZPcolophondisableweblink} setting.
 
 \beginsection Math image flag
@@ -1731,7 +1732,7 @@ also set.
 \index{TZPtextext@\p{\TZPtextext}}
 Finally, \TeX\ uses pseudo-ligatures to convert occurrences of \p{`}, \p{'}, \p{``}, \p{''}, \p{--}, and \p{---}
 in the source to left quote, right quote, left double quote, right double quote, en-dash, and em-dash respectively.
-If you use a Unicode-friendly TeX such as \XeTeX\ with a Unicode font and a text editor that lets you enter these quotes and dashes directly, then you may
+If you use a Unicode-friendly \TeX\ such as \XeTeX\ with a Unicode font and a text editor that lets you enter these quotes and dashes directly, then you may
 not need the ligatures, and may indeed, want \p{--} to show up as two hyphens, both in the HTML and the DVI.  To disable the ligatures,
 
 \p{
@@ -2536,7 +2537,7 @@ pixels.
 \index{convertMPtoPDF@\p{\convertMPtoPDF}}
 \index{supp-pdf.tex@\p{supp-pdf.tex}}
 
-If you use the pdf\TeX\ or lua\TeX\ (which produce PDF
+If you use pdf\TeX\ or lua\TeX\ (which produce PDF
 instead of DVI output), you can insert
 MetaPost-created EPS files with the
 \p{\convertMPtoPDF} command:

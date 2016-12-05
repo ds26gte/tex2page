@@ -1,4 +1,9 @@
-Last change 2016-12-04
+Last change 2016-12-05
+
+2016 Dec 5
+
+\TZPcommonlisp can be set by user to require Scheme or CL version of TeX2page
+for their document. Warning (but not error) if wrong version is used.
 
 2016 Dec 4
 

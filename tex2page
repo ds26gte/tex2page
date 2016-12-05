@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161204") ;last change
+(define *tex2page-version* "20161205") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -4812,8 +4812,17 @@
       (emit *redirect-url*)
       (emit-link-stop))))
 
+(define check-tex2page-lisp
+  (lambda ()
+    (when (tex2page-flag-boolean "\\TZPcommonlisp")
+      (write-log ':separation-newline)
+      (write-log "! Document ")
+      (write-log *main-tex-file*)
+      (write-log " appears to require Common Lisp version of TeX2page."))))
+
 (define do-start
   (lambda ()
+    (check-tex2page-lisp)
     (set! *footnote-list* '())
     (output-html-preamble)
     (output-head-or-foot-line ':head)
@@ -4901,6 +4910,7 @@
 
 (define do-bye
   (lambda ()
+    (check-tex2page-lisp)
     (note-down-tex2page-flags)
     (unless (null? *tex-if-stack*)
       (let ((n (length *tex-if-stack*)))
@@ -6808,6 +6818,7 @@
   (tex-gdef-0arg "\\TZPredirectseconds" "0")
   (tex-gdef-0arg "\\TZPtextext" "1")
   (tex-gdef-0arg "\\TZPraggedright" "1")
+  (tex-gdef-0arg "\\TZPcommonlisp" (if #t "0" "1"))
     ;#endinclude globdefs.scm
 
     (initialize-scm-words)
@@ -10853,7 +10864,6 @@ Try the commands
 (tex-def-prim "\\tracingall" do-tracingall)
 (tex-def-prim "\\tt" (lambda () (do-switch ':tt)))
 (tex-def-prim "\\typein" do-typein)
-(tex-def-prim-0arg "\\TZPcommonlisp" (if #t "0" "1"))
 
 (tex-def-prim "\\uccode" (lambda () (do-tex-case-code ':uccode)))
 (tex-def-prim "\\ulink" do-opmac-ulink)

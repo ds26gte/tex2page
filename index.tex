@@ -25,7 +25,7 @@
 \ifx\TZPcommonlisp 1\eval{(princ *tex2page-version*)}\else
 \eval{(display *tex2page-version*)}\fi }}
 \else
-\c{2016-12-04} %last change
+\c{2016-12-05} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1450,7 +1450,9 @@ flags should have no effect on the print output.
 By default, the “external” title of the HTML document —
 i.e., the string that appears on the title bar of the
 browser window — is either the same as the internal title,
-as specified with the \p{\title} command, or, if that is not
+as specified with the \p{\title} command, or, the first heading
+(i.e., chapter or section),
+or, if none such is
 available, the basename of the document source file.  If you
 wish the external title to be something else, you can set
 the control sequence \p{\TZPtitle}, e.g.,
@@ -1668,7 +1670,7 @@ do
 The HTML page will be set according to the values of the
 lengths \p{\hsize}, \p{\hoffset}, \p{\voffset},
 \p{\parskip}, \p{\parindent}, and the tokens \p{\headline}
-and \p{\footline} as they are at the end of
+and \p{\footline} as they are at the end (!) of
 the document.
 
 The command \p{\folio} inside the tokens \p{\headline} and \p{\footline}
@@ -1842,6 +1844,11 @@ the Common Lisp and Scheme versions as the two conditional clauses, so
 the document remains processable in both languages.
 
 \TeX2page pre-sets \p{\TZPcommonlisp} to 1 in Common Lisp and 0 in Scheme.
+
+You may set \p{\TZPcommonlisp} to specify that the document needs
+either the Scheme or Common Lisp version of \TeX2page. If
+the incorrect version is used, \TeX2page will display a warning
+message, but will not crash for this reason alone.
 
 \beginchapter  7 Style
 

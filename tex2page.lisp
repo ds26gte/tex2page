@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161204" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161205" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1040,8 +1040,6 @@
            (let ((*not-processing-p* t))
              (get-ctl-seq)))
           (t (concatenate 'string (list (get-actual-char)))))))
-
-(trace get-raw-token)
 
 (defun get-raw-token/is ()
   (ignorespaces)
@@ -3811,7 +3809,15 @@
       (emit *redirect-url*)
       (emit-link-stop)))
 
+(defun check-tex2page-lisp ()
+  (when (not (tex2page-flag-boolean "\\TZPcommonlisp"))
+    (write-log :separation-newline)
+    (write-log "! Document ")
+    (write-log *main-tex-file*)
+    (write-log " appears to require Scheme version of TeX2page.")))
+
 (defun do-start ()
+  (check-tex2page-lisp)
   (setq *footnote-list* '())
   (output-html-preamble)
   (output-head-or-foot-line :head)
@@ -3881,6 +3887,7 @@
   (toss-back-string "\\TIIPendinput"))
 
 (defun do-bye ()
+  (check-tex2page-lisp)
   (note-down-tex2page-flags)
   (unless (null *tex-if-stack*)
     (let ((n (length *tex-if-stack*)))
@@ -5533,6 +5540,7 @@
   (tex-gdef-0arg "\\TZPredirectseconds" "0")
   (tex-gdef-0arg "\\TZPtextext" "1")
   (tex-gdef-0arg "\\TZPraggedright" "1")
+  (tex-gdef-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))
   ;#endinclude globdefs.lisp
 
   (initialize-scm-words)
@@ -9041,7 +9049,6 @@ Try the commands
 (tex-def-prim "\\tracingall" #'do-tracingall)
 (tex-def-prim "\\tt" (lambda () (do-switch :tt)))
 (tex-def-prim "\\typein" #'do-typein)
-(tex-def-prim-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))
 
 (tex-def-prim "\\uccode" (lambda () (do-tex-case-code :uccode)))
 (tex-def-prim "\\ulink" #'do-opmac-ulink)

@@ -5,9 +5,12 @@
 % can be converted by the program
 % tex2page into HTML
 
-\ifx\shipout\UnDeFiNeD\endinput\fi
+\let\maybeendinput\relax
+\ifx\shipout\UnDeFiNeD
+  \let\maybeendinput\endinput\fi
+\maybeendinput
 
-\message{version 20161126} % last change
+\message{version 20161205} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax

@@ -10,7 +10,7 @@
   \let\maybeendinput\endinput\fi
 \maybeendinput
 
-\message{version 20161205} % last change
+\message{version 20161206} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -437,14 +437,13 @@
     #1|endgroup}}%
 \fi
 
-% STOP LOADING HERE FOR LATEX
+% STOP LOADING HERE FOR LaTeX
 
-\ifx\section\UnDeFiNeD
-\let\maybeloadfollowing\relax
-\else
-\atcatcodebeforetexzpage
-\let\maybeloadfollowing\endinput
-\fi\maybeloadfollowing
+\let\maybeendinput\relax
+\ifx\section\UnDeFiNeD\else
+  \atcatcodebeforetexzpage
+  \let\maybeendinput\endinput\fi
+\maybeendinput
 
 \newwrite\sectionQscratchfileport
 
@@ -572,39 +571,13 @@
   \def\end##1{\csname end#1\endcsname\endgroup}%
   \csname #1\endcsname}
 
-% itemize
-
-\newcount\@itemdepth
-
-\@itemdepth=0
-
-\def\labelitemi{$\bullet$}
-\def\labelitemii{$-$}
-\def\labelitemiii{$\star$}
-\def\labelitemiv{$\circ$}
-
-\def\itemize{\par\begingroup
-  \ifnum\@itemdepth>3
-    \message{Too deeply nested.}%
-  \fi
-  \advance\@itemdepth by 1
-  \advance\leftskip\parindent
-  \smallbreak
-  \def\item{\smallbreak\noindent
-  \llap{\csname labelitem\romannumeral
-    \the\@itemdepth\endcsname\enspace}%
-  \ignorespaces}}
-
-\def\enditemize{\smallbreak\smallbreak\endgroup\noindent}
-
 % STOP LOADING HERE FOR EPLAIN
 
-\ifx\eplain\UnDeFiNeD
-\let\maybeloadfollowing\relax
-\else
-\atcatcodebeforetexzpage
-\let\maybeloadfollowing\endinput
-\fi\maybeloadfollowing
+\let\maybeendinput\relax
+\ifx\eplain\UnDeFiNeD\else
+  \atcatcodebeforetexzpage
+  \let\maybeendinput\endinput\fi
+\maybeendinput
 
 % Index generation
 %
@@ -830,9 +803,6 @@
   \afterassignment\urlhQii
   \gdef\urlhQurlarg}
 
-\def\begitems{\itemize\defcsactive*{\item}}
-\def\enditems{\enditemize}
-
 \def\tit#1 \par{\title{#1}}
 \def\chap{\beginchapter {} }
 \let\secQtrig\sec
@@ -859,9 +829,19 @@
 \def\rightline{\line\bgroup\hss\let\dummy=}%
 }
 
-\ifx\bull\UnDeFiNeD
-% from manmac
-\def\bull{\vrule height .9ex width .8ex depth -.1ex } % square bullet
+\let\itemfont\it
+
+\ifx\itemQplain\UnDeFiNeD
+\let\itemQplain\item
+
+\def\itemQsimple(#1){({\itemfont #1\/})}
+
+\def\item{\futurelet\itemQnext\itemQii}
+
+\def\itemQii{\ifx\itemQnext\bgroup
+\let\itemQnext\itemQplain
+\else\let\itemQnext\itemQsimple\fi
+\itemQnext}
 \fi
 
 \ifx\frac\UnDeFiNeD

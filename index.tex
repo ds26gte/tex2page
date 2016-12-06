@@ -21,11 +21,9 @@
 \ifx\inpltdist\Undefined
 \ifx\shipout\UnDeFiNeD
 \c{Download
-\urlh{https://github.com/ds26gte/tex2page}{Version
-\ifx\TZPcommonlisp 1\eval{(princ *tex2page-version*)}\else
-\eval{(display *tex2page-version*)}\fi }}
+\urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-05} %last change
+\c{2016-12-06} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -62,7 +60,7 @@ makes Web pages
 from \TeX~\cite{texbook} manuscripts.
 It reads an
 input document that is marked up in
-plain \TeX~\cite{clark:tex} or \LaTeX~\cite{latex}
+plain \TeX\ or \LaTeX~\cite{latex}
 and
 produces an output document with the functionally
 equivalent HTML markup.
@@ -86,7 +84,7 @@ source requires no special-purpose software; any text
 editor will do.  Furthermore, an ecology of powerful and
 reliable tools such as \BibTeX~\cite{bibtex},
 MakeIndex~\cite{makeindex}, and
-MetaPost~\cite{metapost} has developed around \TeX, and
+MetaPost~\cite{metapost,mfbook} has developed around \TeX, and
 its benefits can be enjoyed by \TeX2page too.
 
 Finally, \TeX, unlike HTML, is a {\em programming}
@@ -1087,14 +1085,14 @@ For HTML, the page numbers listed for an index entry are
 of course the HTML page numbers, and are furthermore
 links to them.  Two things need be noted:
 
-\ytem{i} The link in the index goes directly to the spot where
+\item(i) The link in the index goes directly to the spot where
 the corresponding \p{\index} command was called.  This
 is convenient, especially as the target HTML page could
 be arbitrarily long, and it may not be as easy to hunt
 for the occurrence of the indexed item as on a paper
 page.
 
-\ytem{ii} An index entry could link to the same HTML page
+\item(ii) An index entry could link to the same HTML page
 several times.  In the print index, a page would be mentioned
 only once per entry, but since an HTML page could
 be equivalent to many contiguous paper pages, it makes
@@ -1562,8 +1560,8 @@ These flags specify the conversion tactics used
 for generating HTML-suitable images from the user’s graphics
 requests.  \TeX2page invokes a combination of \TeX\ and
 Dvips~\cite{dvips} to create a PostScript version of the
-graphic, and then Ghostscript~\cite{gs} and either \ytem{i} the
-NetPBM library~\cite{netpbm}, or \ytem{ii} the ImageMagick
+graphic, and then Ghostscript~\cite{gs} and either \item(i) the
+NetPBM library~\cite{netpbm}, or \item(ii) the ImageMagick
 library~\cite{imagemagick}, to convert the PS into the
 HTML-suitable image.
 
@@ -1905,11 +1903,11 @@ in the \TeX\ source between the control sequences
 
 \p{
 \ifx\shipout\UnDeFiNeD % HTML only
-  \cssblock
-  body {
-    max-width: 36em;
-  }
-  \endcssblock
+\cssblock
+body {
+  max-width: 36em;
+}
+\endcssblock
 \fi
 }
 
@@ -1922,9 +1920,22 @@ that
 does little beyond setting some margins.  You
 can augment or override the default style by supplying your
 own style info via \p{\cssblock} or by loading
-stylesheets with \p{\inputcss}.   Some general-purpose
-style sheets are the {\em W3C Core
-Styles}~\cite{w3ccorestyles}.
+style sheets with \p{\inputcss}.   Some general-purpose
+style sheets available on the Web are the W3C Core
+Styles~\cite{w3ccorestyles} and Google Fonts~\cite{googlefonts}.
+E.g., to use Libre Baskerville for your body text:
+
+\p{
+\ifx\shipout\UnDeFiNeD % HTML only
+\inputcss https://fonts.googleapis.com/css?family=Libre+Baskerville 
+
+\cssblock
+body {
+  font-family: 'libre baskerville', serif;
+}
+\endcssblock
+\fi
+}
 
 \beginchapter  8 Verbatim text
 %\label{verbatim}
@@ -2214,19 +2225,19 @@ syntax-highlighting to show.)
 
 Seven categories of code text are distinguished:
 
-\ytem{i} background punctuation;
+\item(i) background punctuation;
 
-\ytem{ii} self-evaluating atoms (numbers, booleans, characters, strings);
+\item(ii) self-evaluating atoms (numbers, booleans, characters, strings);
 
-\ytem{iii} syntactic keywords;
+\item(iii) syntactic keywords;
 
-\ytem{iv} builtin variables;
+\item(iv) builtin variables;
 
-\ytem{v} global or special variables, viz., identifiers that begin and end with an asterisk;
+\item(v) global or special variables, viz., identifiers that begin and end with an asterisk;
 
-\ytem{vi} other variables; and
+\item(vi) other variables; and
 
-\ytem{vii} comments.
+\item(vii) comments.
 
 To distinguish between the categories of Scheme code
 text, \TeX2page uses a style class called \p{scheme}
@@ -2597,12 +2608,12 @@ for
 \centerline{\hbox{\XeTeXpicfile tbdek.jpg width 3in \relax}}
 
 To load a graphic specified in MetaPost,
-you can either \ytem{i} have  MetaPost convert the spec into EPS and
-thence to PDF using a utility like \p{epstopdf}; or \ytem{ii}
+you can either \item(i) have  MetaPost convert the spec into EPS and
+thence to PDF using a utility like \p{epstopdf}; or \item(ii)
 have MetaPost directly convert the spec to PNG. Let’s start with a MetaPost file
 \urlh{mpexample.html}{\p{lambda.mp}}.
 
-\ytem{i} At the OS shell, type
+\item(i) At the OS shell, type
 
 \p{
 mpost lambda.mp
@@ -2646,7 +2657,7 @@ source file. See p.~\ref{write18}.}
 
 \centerline{\XeTeXpdffile lambda-1.pdf }
 
-\ytem{ii} To generate PNG, in \p{lambda.mp} set
+\item(ii) To generate PNG, in \p{lambda.mp} set
 
 \p{
 outputformat := "png";
@@ -2687,7 +2698,7 @@ to be converted into images for your HTML output.  The
 fragment of the document to be converted to image is
 given as an \p{\makehtmlimage} argument.
 Here’s an example \TeX-based diagram from {\em
-The \TeX book}~\cite[p~389]{texbook}:
+The \TeX book}~\cite[p.~389]{texbook}:
 
 \verbatiminput ursa-major.tex
 
@@ -3230,10 +3241,10 @@ setting the count registers
 \p{\tracingcommands} and \p{\tracingmacros} to a positive integer causes
 more log information.
 
-\ytem{i} Setting  \p{\tracingcommands=1} tells \TeX2page to log all calls
+\item(i) Setting  \p{\tracingcommands=1} tells \TeX2page to log all calls
 to atomic commands.
 
-\ytem{ii} Setting  \p{\tracingmacros=1} tells
+\item(ii) Setting  \p{\tracingmacros=1} tells
 \TeX2page to log all macro expansions.
 
 You may turn on
@@ -3243,19 +3254,19 @@ and \p{\tracingmacros=0} respectively.
 
 \index{tracingall@\p{\tracingall}}
 
-\ytem{iii} The command \p{\tracingall} turns {\em on} both
+\item(iii) The command \p{\tracingall} turns {\em on} both
 \p{\tracingcommands} and \p{\tracingmacros}.
 
 \index{errmessage@\p{\errmessage}}
 
-\ytem{iv} The command \p{\errmessage} can be used to generate
+\item(iv) The command \p{\errmessage} can be used to generate
 meaningful error messages.  \TeX2page, like \TeX, ceases
 processing the document on encountering
 \p{\errmessage}.
 
 \index{message@\p{\message}}
 
-\ytem{v} The command \p{\message}
+\item(v) The command \p{\message}
 can be used to print helpful information at selected
 points in the document.   \LaTeX\ users may
 prefer \p{\typeout}, which does the same thing.
@@ -3377,14 +3388,14 @@ directory.  To avoid cluttering up
 your working directory, you can specify a different target directory
 using one of the following three files:
 
-\ytem{i} \p{|meta[jobname].hdir} in the working directory, i.e.,
+\item(i) \p{|meta[jobname].hdir} in the working directory, i.e.,
 a file with the same basename as the input document but with
 extension \p{.hdir}.  For \p{story.tex}, this would
 be \p{story.hdir}.
 
-\ytem{ii} \p{.tex2page.hdir} in the working directory.
+\item(ii) \p{.tex2page.hdir} in the working directory.
 
-\ytem{iii} \p{.tex2page.hdir} in the user’s \p{HOME} directory.
+\item(iii) \p{.tex2page.hdir} in the user’s \p{HOME} directory.
 
 \n The first line of the first of these files that exists
 is taken to be the name of the target directory.  If none of
@@ -3486,11 +3497,11 @@ This method may not always work but is so easy that
 it’s worth a try.  It should work for most
 dialects on Unix.
 
-\ytem{i} Type \p{./configure --help} at your OS command line
+\item(i) Type \p{./configure --help} at your OS command line
 to get the list of dialects supported.
 If your dialect \p{|meta[D]} is one of them,
 
-\ytem{ii} Type  \p{./configure --dialect=|meta[D]}
+\item(ii) Type  \p{./configure --dialect=|meta[D]}
 
 \n If all goes well, this will create
 \p{my-tex2page}, a version of \p{tex2page} for your

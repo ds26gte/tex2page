@@ -1,4 +1,4 @@
-% last change 2016-11-24
+% last change 2016-12-06
 
 \let\maybeendinput\relax
 \ifx\shipout\UnDeFiNeD
@@ -11,7 +11,7 @@
   \noexpand\catcode`\noexpand\@=\the\catcode`\@}
 \catcode`\@11
 
-%
+% enumerate
 
 \def\enumerate{\par\begingroup
   \advance\@itemdepth by 1
@@ -38,6 +38,31 @@
     \llap{\enumeratemark\enspace}\ignorespaces}}
 
 \def\endenumerate{\smallbreak\smallbreak\endgroup\par}
+
+% itemize
+
+\newcount\@itemdepth
+
+\@itemdepth=0
+
+\def\labelitemi{$\bullet$}
+\def\labelitemii{$-$}
+\def\labelitemiii{$\star$}
+\def\labelitemiv{$\circ$}
+
+\def\itemize{\par\begingroup
+  \ifnum\@itemdepth>3
+    \message{Too deeply nested.}%
+  \fi
+  \advance\@itemdepth by 1
+  \advance\leftskip\parindent
+  \smallbreak
+  \def\item{\smallbreak\noindent
+  \llap{\csname labelitem\romannumeral
+    \the\@itemdepth\endcsname\enspace}%
+  \ignorespaces}}
+
+\def\enditemize{\smallbreak\smallbreak\endgroup\noindent}
 
 %
 
@@ -198,6 +223,14 @@
 % ADDRESS in DVI.
 
 \let\mailto\url
+
+%
+
+\ifx\bull\UnDeFiNeD
+% from manmac
+\def\bull{\vrule height .9ex width .8ex depth -.1ex } % square bullet
+\fi
+
 
 %\def\rawhtml{\errmessage{Can't occur outside
 %  \string\htmlonly}}

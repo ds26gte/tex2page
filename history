@@ -2,6 +2,11 @@ Last change 2016-12-05
 
 2016 Dec 5
 
+\inputcss sheets should be linked before \cssblock's so latter can 
+refer to any fonts loaded by the former.
+
+Special-case \item(...) without losing plain's version.
+
 \TZPcommonlisp can be set by user to require Scheme or CL version of TeX2page
 for their document. Warning (but not error) if wrong version is used.
 
@@ -21,12 +26,14 @@ Added OPmac's \ii, \makeindex.
 
 Added OPmac's \cite, \rcite, \nocite, \bib, \usebibtex. OPmac shares the names
 \cite and \nocite with LaTeX, but uses brackets instead of braces. Use
-heuristic or the boolean flag \TZPopmac to disambiguate. 
+heuristic or the boolean flag \TZPopmac to disambiguate.
 
 2016 Nov 23
 
-tex2page.tex: \ulink. LaTeX {itemize} and OPmac's \{beg,end}items. Also
-included: user-settable \labelitem{i,ii,iii,iv}.
+tex2page.tex: \ulink.
+
+tex2pagedeprecated.tex: LaTeX {itemize}, OPmac's \{beg,end}items, user-settable
+\labelitem{i,ii,iii,iv}.
 
 2016 Nov 17
 

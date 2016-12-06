@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161205") ;last change
+(define *tex2page-version* "20161206") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -2229,15 +2229,13 @@
 
 (define link-stylesheets
   (lambda ()
-    (emit "<link rel=\"stylesheet\" href=\"")
-    (emit *jobname*) (emit *css-file-suffix*)
-    (emit "\" title=default />") (emit-newline)
-    (for-each
-     (lambda (css)
-       (emit "<link rel=\"stylesheet\" href=\"")
-       (emit css)
-       (emit "\" title=default />") (emit-newline))
-     *stylesheets*)))
+    (let ((link-it (lambda (css)
+                     (emit "<link rel=\"stylesheet\" href=\"")
+                     (emit css)
+                     (emit "\" />")
+                     (emit-newline))))
+      (for-each link-it *stylesheets*)
+      (link-it (string-append *jobname* *css-file-suffix*)))))
 
 ;sections
 
@@ -4396,20 +4394,36 @@
   (lambda (n)
     (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
       (do-end-para)
-      (emit "<table><tr><td width=")
-      (emit parindent)
-      (emit " valign=top align=right>")
-      (let loop ((n n))
-        (unless (<= n 1)
-          (emit "</td><td width=")
+      (emit "<table><tr>")
+      (let loop ((i n))
+        (unless (<= i 0)
+          (unless (= i n) (emit "</td>"))
+          (emit "<td width=")
           (emit parindent)
-          (emit " valign=top align=right>")
-          (loop (- n 1))))
+          (emit " valign=top align=right")
+          (when (= i 1) (emit " class=item"))
+          (emit ">")
+          (loop (- i 1))))
       (tex2page-string (get-group))
       (emit-nbsp 2)
       (emit "</td><td>")
       (do-noindent)
       (add-afterpar (lambda () (emit "</td></tr></table>"))))))
+
+(define do-plain-item-1
+  (lambda ()
+    (ignorespaces)
+    (case (snoop-actual-char)
+      ((#\() (do-simple-item))
+      (else (do-plain-item 1)))))
+
+(define do-simple-item
+  (lambda ()
+    (emit "(<span class=item>")
+    (get-actual-char)
+    (tex2page-string (get-till-char #\)))
+    (get-actual-char)
+    (emit "</span>)")))
 
 (define do-textindent
   (lambda ()
@@ -4435,7 +4449,8 @@
       (case a
         ((:description) (do-description-item))
         ((:itemize :enumerate) (do-regular-item))
-        (else (do-plain-item 1))))))
+        (else (do-plain-item-1))))))
+
 
 (define do-itemize
   (lambda ()
@@ -9396,6 +9411,10 @@
       margin-bottom: 1.6em; */
       }
 
+      .item {
+      font-style: oblique;
+      }
+
       ol {
       list-style-type: decimal;
       }
@@ -9742,12 +9761,12 @@
 
 (define !stylesheet
   (lambda (css)
-    (if (file-exists? (ensure-url-reachable css))
-        (set! *stylesheets* (cons css *stylesheets*))
-        (begin
-          (write-log "! Can't find stylesheet ")
-          (write-log css)
-          (write-log ':separation-newline)))))
+    (cond ((or (fully-qualified-url? css)
+               (file-exists? (ensure-url-reachable css))f)
+           (set! *stylesheets* (cons css *stylesheets*)))
+          (else (write-log "! Can't find stylesheet ")
+                (write-log css)
+                (write-log ':separation-newline)))))
 
 (define !html-head
   (lambda (s)
@@ -10528,7 +10547,7 @@ Try the commands
 (tex-def-prim "\\flushleft" (lambda () (do-block ':flushleft)))
 (tex-def-prim "\\flushright" (lambda () (do-block ':flushright)))
 (tex-defsym-prim "\\fmtname" "TeX2page")
-(tex-def-prim "\\fmtversion" (lambda () (emit *tex2page-version*)))
+(tex-defsym-prim "\\fmtversion" *tex2page-version*)
 (tex-def-prim "\\folio" (lambda () (emit *html-page-count*)))
 (tex-def-prim "\\font" do-font)
 (tex-def-prim "\\fontdimen" do-fontdimen)

@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161205" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161206" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1646,18 +1646,13 @@
     (dump-till-end-env "cssblock" *css-port*)))
 
 (defun link-stylesheets ()
-  (emit "<link rel=\"stylesheet\" href=\"")
-  (emit *jobname*)
-  (emit *css-file-suffix*)
-  (emit "\" title=default />")
-  (emit-newline)
-  (mapc
-   (lambda (css)
-       (emit "<link rel=\"stylesheet\" href=\"")
-       (emit css)
-       (emit "\" title=default />")
-       (emit-newline))
-   *stylesheets*))
+  (let ((link-it (lambda (css)
+                   (emit "<link rel=\"stylesheet\" href=\"")
+                   (emit css)
+                   (emit "\" />")
+                   (emit-newline))))
+    (mapc link-it *stylesheets*)
+    (funcall link-it (concatenate 'string *jobname* *css-file-suffix*))))
 
 (defun increment-section-counter (seclvl nonum-p)
   (unless nonum-p
@@ -3048,7 +3043,8 @@
                                      (label*-page label-ref))
                    "#" (label*-name label-ref))
                url)))
-          ((fully-qualified-url-p url) url) (t (ensure-url-reachable url) url))))
+          ((fully-qualified-url-p url) url) 
+          (t (ensure-url-reachable url) url))))
 
 (defun do-url ()
   (let ((url (get-url)))
@@ -3144,7 +3140,6 @@
     (get-ctl-seq)
     (ignorespaces)
     (get-ctl-seq)))
-
 
 (defun do-cite-help (delim &optional extra-text)
   (let ((closing-delim (cond ((char= delim #\{) #\})
@@ -3289,7 +3284,6 @@
   (mapc (lambda (c) (princ (if (or (char= c #\Newline)) #\space c) o))
         (concatenate 'list s)))
 
-
 (defun do-index-help (idx-entry)
   (incf *index-count* 2)
   ;
@@ -3333,7 +3327,7 @@
          (subwords (path-to-list word #\/))
          (newword (pop subwords)))
     (ignorespaces)
-    (loop 
+    (loop
       (unless subwords (return))
       (setq newword (concatenate 'string newword "!" (pop subwords))))
     (do-index-help newword)))
@@ -3428,18 +3422,33 @@
 (defun do-plain-item (n)
   (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
     (do-end-para)
-    (emit "<table><tr><td width=")
-    (emit parindent)
-    (emit " valign=top align=right>")
-    (dotimes (i (1- n))
-      (emit "</td><td width=")
-      (emit parindent)
-      (emit " valign=top align=right>"))
+    (emit "<table><tr>")
+    (let ((n-1 (- n 1)))
+      (dotimes (i n)
+        (unless (= i 0) (emit "</td>"))
+        (emit "<td width=")
+        (emit parindent)
+        (emit " valign=top align=right")
+        (when (= i n-1) (emit " class=item"))
+        (emit ">")))
     (tex2page-string (get-group))
     (emit-nbsp 2)
     (emit "</td><td>")
     (do-noindent)
     (add-afterpar (lambda () (emit "</td></tr></table>")))))
+
+(defun do-plain-item-1 ()
+  (ignorespaces)
+  (case (snoop-actual-char)
+    (#\( (do-simple-item))
+    (t (do-plain-item 1))))
+
+(defun do-simple-item ()
+  (emit "(<span class=item>")
+  (get-actual-char)
+  (tex2page-string (get-till-char #\)))
+  (get-actual-char)
+  (emit "</span>)"))
 
 (defun do-textindent ()
   (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
@@ -3460,7 +3469,7 @@
   (case (car *tabular-stack*)
     (:description (do-description-item))
     ((:itemize :enumerate) (do-regular-item))
-    (t (do-plain-item 1))))
+    (t (do-plain-item-1))))
 
 (defun do-itemize ()
   (do-end-para)
@@ -7288,7 +7297,7 @@
     (cond ((string-equal e ".sty") t)
           (t (when (string-equal e ".tex")
                (setq f (subseq f 0 (- (length f) 4))))
-             (cond ((string= f "opmac") 
+             (cond ((string= f "opmac")
                     (tex-gdef-0arg "\\TZPopmac" "1")
                     t)
                    (t (member f *tex-files-to-ignore* :test #'string-equal)))))))
@@ -7685,6 +7694,10 @@
       margin-bottom: 1.6em; */
       }
 
+      .item {
+      font-style: oblique;
+      }
+
       ol {
       list-style-type: decimal;
       }
@@ -7968,12 +7981,12 @@
     f))
 
 (defun !stylesheet (css)
-  (if (probe-file (ensure-url-reachable css))
-      (push css *stylesheets*)
-    (progn
-     (write-log "! Can't find stylesheet ")
-     (write-log css)
-     (write-log :separation-newline))))
+  (cond ((or (fully-qualified-url-p css)
+             (probe-file (ensure-url-reachable css)))
+         (push css *stylesheets*))
+        (t (write-log "! Can't find stylesheet ")
+           (write-log css)
+           (write-log :separation-newline))))
 
 (defun !html-head (s)
   (push s *html-head*))
@@ -8713,7 +8726,7 @@ Try the commands
 (tex-def-prim "\\flushleft" (lambda () (do-block :flushleft)))
 (tex-def-prim "\\flushright" (lambda () (do-block :flushright)))
 (tex-defsym-prim "\\fmtname" "TeX2page")
-(tex-def-prim "\\fmtversion" (lambda () (emit *tex2page-version*)))
+(tex-defsym-prim "\\fmtversion" *tex2page-version*)
 (tex-def-prim "\\folio" (lambda () (emit *html-page-count*)))
 (tex-def-prim "\\font" #'do-font)
 (tex-def-prim "\\fontdimen" #'do-fontdimen)

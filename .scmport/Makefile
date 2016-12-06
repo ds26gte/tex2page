@@ -1,4 +1,4 @@
-#last modified 2016-11-23
+#last modified 2016-12-05
 
 tex2page: ../tex2page primdefs.scm globdefs.scm scmkeywords.lisp tex2page.css
 	cp -p ../tex2page .
@@ -23,4 +23,4 @@ tex2page.css: ../tex2page.lisp
 	extractsubfile.sh ../tex2page.lisp tex2page.css
 
 clean:
-	rm primdefs.* globdefs.* scmkeywords.lisp tex2page.css tex2page
+	rm -f primdefs.* globdefs.* scmkeywords.lisp tex2page.css tex2page

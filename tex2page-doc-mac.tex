@@ -1,4 +1,4 @@
-% last change: 2016-12-06
+% last change: 2016-12-07
 
 \input tgtermes
 
@@ -55,6 +55,10 @@
 
 \def\footnotehook{\eightfont}
 
+\def\tthook{\catcode`\|=0 \def\|{\char`\|}\def\ {·}}
+
+\activettchar`
+
 \ifx\shipout\UnDeFiNeD\else
 \def\XeTeX{Xe\TeX}
 \def\ConTeXt{Con\TeX t}
@@ -86,9 +90,15 @@
 \qquad ;#3}\par}
 
 \ifx\shipout\UnDeFiNeD
-\imgdef\ohm{$\Omega$}
+\imgpreamble
+\magnification\magstep2
+\endimgpreamble
+\fi
+
+\ifx\shipout\UnDeFiNeD
+\imgdef\um{$\mu$m}
 \else
-\def\ohm{$\Omega$}
+\def\um{$\mu$m}
 \fi
 
 \newdimen\templen
@@ -222,10 +232,6 @@ font-family: 'miltonian', sans-serif;
 
 % We want images to be a bit bigger
 
-\imgpreamble
-%  \magnification\magstep1
-  \magnification\magstep2
-\endimgpreamble
 
 \ifx\TZPcommonlisp 1
 \evalq{

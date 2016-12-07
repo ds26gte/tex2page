@@ -10,7 +10,7 @@
   \let\maybeendinput\endinput\fi
 \maybeendinput
 
-\message{version 20161206} % last change
+\message{version 20161207} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -109,8 +109,8 @@
 
 \def\verbavoidligs{% avoid ligatures
   \defcsactive\`{\relax\lq}%
-  \defcsactive\ {\leavevmode\ }%
-  \defcsactive\^^I{\leavevmode\ \ \ \ \ \ \ \ }%
+  \defcsactive\ {\leavevmode\space}%
+  \defcsactive\^^I{\leavevmode\space\space\space\space\space\space\space\space}%
   \defcsactive\^^M{\leavevmode\endgraf}%
   \ifx\noncmttQspecific\UnDeFiNeD\else\noncmttQspecific\fi}
 
@@ -118,9 +118,10 @@
   \let\firstpar y%
   \defcsactive\^^M{\ifx\firstpar y%
     \let\firstpar n%
-    \verbdisplayskip
+    \vskip.5\abovedisplayskip
     \parskip 0pt
-    \aftergroup\verbdisplayskip
+    \gdef\verbQbelowdisplayskip{\vskip.5\belowdisplayskip}%
+    \aftergroup\verbQbelowdisplayskip
     \aftergroup\noindent % to get automatic noindent after display
     \aftergroup\ignorespaces % ,,
     \else\leavevmode\fi\endgraf}}
@@ -146,8 +147,12 @@
   \fi
   \verbQcheckstarQnext}
 
+\ifx\visiblespace\UnDeFiNeD
+\def\visiblespace{\relax\char`\ }
+\fi
+
 \def\verbQcheckstarQiii#1{%
-  \defcsactive\ {\relax\char`\ }%
+  \defcsactive\ {\visiblespace}%
   \verbQii}
 
 \newcount\verbbracebalancecount
@@ -194,8 +199,6 @@
 \gdef\verbQiv{\ifx\verbQiiinext^^M\else%
   \defcsactive\^^M{\leavevmode\ }\fi}}
 
-\let\verbdisplayskip\medbreak
-
 % \verbatiminput FILENAME
 % displays contents of file FILENAME verbatim.
 
@@ -225,6 +228,41 @@
 \def\verbatiminputQdoit#1{{\verbsetup
   \verbavoidligs\verbhook
   \input #1 }}
+
+%
+
+\ifx\activettchar\UnDeFiNeD
+% like OPmac's
+\def\activettchar#1{%
+  \ifx\activettcharQcurr\UnDeFiNeD\else
+  \catcode\activettcharQcurr \activettcharQcurrQcatcode
+  \fi
+  \chardef\activettcharQcurr`#1%
+  \chardef\activettcharQcurrQcatcode \catcode`#1%
+  \defcsactive#1{\begingroup
+    \verbsetup\verbavoidligs\verbhook
+    \defcsactive\^^M{\leavevmode\ }%
+    \defcsactive#1{\verbQendgroup}}}
+\fi
+
+\ifx\begintt\UnDeFiNeD
+% like manmac's. For true manmac compatibility, do
+% \def\tthook{\catcode`\|=0 }
+%
+\def\begintt{\begingroup
+  \verbsetup
+  \verbavoidligs
+  \csname tthook\endcsname
+  \verbinsertskip
+  \ifx\activettcharQcurr\UnDeFiNeD\else
+  \catcode\activettcharQcurr=12 \fi
+  \beginttQii}
+
+{\ifx\activettcharQcurr\UnDeFiNeD\else
+  \catcode\activettcharQcurr=12 \fi
+  \catcode`\|=0 |catcode`|\=12
+  |long|gdef|beginttQii#1\endtt{#1|endgroup}}
+\fi
 
 % \url{URL} becomes
 % <a href="URL">URL</a> in HTML, and
@@ -604,7 +642,7 @@
 
 \def\sanitizeidxletters{\def\do##1{\catcode`##1=11 }%
   \do\\\do\$\do\&\do\#\do\^\do\_\do\%\do\~%
-  \do\@\do\"\do\!\do\|\do\-\do\ \do\'}
+  \do\@\do\"\do\!\do\|\do\-\do\ \do\'\do\`}
 
 \def\index{%\unskip
   \ifx\indexout\UnDeFiNeD
@@ -771,33 +809,9 @@
   #2%
   \egroup\medskip\nobreak\noindent}
 
-% OPmac stuff, unless OPmac already loaded
+% some OPmac stuff, unless OPmac already loaded
 
-\ifx\activettchar\UnDeFiNeD
-\def\activettchar#1{%
-  \ifx\activettcharQcurr\UnDeFiNeD\else
-  \catcode\activettcharQcurr \activettcharQcurrQcatcode
-  \fi
-  \chardef\activettcharQcurr`#1%
-  \chardef\activettcharQcurrQcatcode \catcode`#1%
-  \defcsactive#1{\begingroup
-    \verbsetup\verbavoidligs\verbhook
-    \defcsactive\^^M{\leavevmode\ }%
-    \defcsactive#1{\verbQendgroup}}}
-
-\def\begtt{\begingroup
-  \verbsetup
-  \verbavoidligs
-  \verbinsertskip
-  \ifx\activettcharQcurr\UnDeFiNeD\else
-  \catcode\activettcharQcurr=12 \fi
-  \begttQii}
-
-{\ifx\activettcharQcurr\UnDeFiNeD\else
-  \catcode\activettcharQcurr=12 \fi
-  \catcode`\|=0 |catcode`|\=12
-  |long|gdef|begttQii#1\endtt{#1|endgroup}}
-
+\ifx\ulink\UnDeFiNeD
 \def\ulink{\bgroup\urlsetup
   \catcode`\[=1 \catcode`\]=2
   \afterassignment\urlhQii
@@ -808,6 +822,7 @@
 \let\secQtrig\sec
 \def\sec{\ifmmode\secQtrig\else\beginsection\fi}
 \def\secc{\beginsection\it}
+\let\begtt\begintt
 \fi
 
 % \plaintextweaks modifies some plain TeX macros to be more

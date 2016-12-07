@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161206") ;last change
+(define *tex2page-version* "20161207") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -202,8 +202,8 @@
 (define *equation-number* #f)
 (define *equation-numbered-p* #t)
 (define *equation-position* 0)
-(define *esc-char* #\\ )
-(define *esc-char-std* #\\ )
+(define *esc-chars* '(#\\))
+(define *esc-char-std* #\\)
 (define *esc-char-verb* #\|)
 (define *eval-file-count* 0)
 (define *eval-for-tex-only-p* #f)
@@ -1038,6 +1038,10 @@
 (define do-relax
   (lambda () #t))
 
+(define esc-char-p
+  (lambda (c)
+    (memv c *esc-chars*)))
+
 ;
 
 (define get-ctl-seq
@@ -1045,7 +1049,7 @@
     ;read a tex \controlsequence
     ;(ignorespaces)
     (let ((bs (get-actual-char)))
-      (unless (char=? bs *esc-char*)
+      (unless (esc-char-p bs)
         (terror 'get-ctl-seq "Missing control sequence (" bs ")")))
     (let ((c (get-char)))
       (cond ((eof-object? c) "\\ ")
@@ -1101,7 +1105,7 @@
            (when (eof-object? c) (terror 'get-group "Runaway argument?"))
            (cond (escape?
                   (loop (cons c s) nesting #f))
-                 ((char=? c *esc-char*)
+                 ((esc-char-p c)
                   (if *expand-escape-p*
                       (let ((s1
                               (begin (toss-back-char c)
@@ -1111,8 +1115,7 @@
                                                      '("\\ " "\\{" "\\}"))
                                               (string (string-ref x 1)))
                                              (else
-                                               (fluid-let ((*esc-char* *esc-char-std*))
-                                                 (tex-string->html-string x))))))))
+                                                 (tex-string->html-string x)))))))
                         (loop (nconc (nreverse (string->list s1)) s)
                               nesting #f))
                       (loop (cons c s) nesting #t)))
@@ -1172,7 +1175,7 @@
                         "Runaway argument?"))
                     (cond (escape?
                             (loop (cons c s) nesting #f))
-                          ((char=? c *esc-char*)
+                          ((esc-char-p c)
                            (loop (cons c s) nesting #t))
                           ((char=? c #\{)
                            (loop (cons c s) (+ nesting 1) #f))
@@ -1233,7 +1236,7 @@
                      s)
                     ((and braced? (char=? c #\}))
                      (get-actual-char) s)
-                    ((and *esc-char* (char=? c *esc-char*))
+                    ((esc-char-p c)
                      (let ((x (get-ctl-seq)))
                        (if (string=? x "\\jobname")
                            (loop (nconc (nreverse (string->list *jobname*)) s))
@@ -1260,7 +1263,7 @@
                     (cond ((eof-object? c) s)
                           ((or (char-whitespace? c)
                                (and *comment-char* (char=? c *comment-char*))
-                               (and *esc-char* (char=? c *esc-char*)))
+                               (esc-char-p c))
                            (unless *not-processing-p* (ignorespaces))
                            s)
                           (else (get-actual-char)
@@ -1356,7 +1359,7 @@
   (lambda ()
     (ignorespaces)
     (let ((c (snoop-actual-char)))
-      (cond ((char=? c *esc-char*)
+      (cond ((esc-char-p c)
              (get-number-corresp-to-ctl-seq (get-ctl-seq)))
             ((char=? c #\') (get-actual-char)
              (get-integer 8))
@@ -1364,7 +1367,7 @@
              (get-integer 16))
             ((char=? c #\`) (get-actual-char) (ignorespaces)
              (char->integer
-               (if (char=? (snoop-actual-char) *esc-char*)
+               (if (esc-char-p (snoop-actual-char))
                    (string-ref (get-ctl-seq) 1)
                    (get-actual-char))))
             ((char=? c #\+) (get-actual-char)
@@ -1443,7 +1446,7 @@
     ;gets a raw char (incl space, brace, %) or a ctl seq
     (let ((c (snoop-actual-char)))
       (cond ((eof-object? c) c)
-            ((char=? c *esc-char*)
+            ((esc-char-p c)
              (fluid-let ((*not-processing-p* #t))
                (get-ctl-seq)))
             ;((and *comment-char* (char=? c *comment-char*))
@@ -1458,7 +1461,7 @@
     (ignorespaces)
     (let ((c (snoop-actual-char)))
       (cond ((eof-object? c) c)
-            ((char=? c *esc-char*) (get-ctl-seq))
+            ((esc-char-p c) (get-ctl-seq))
             ((and *comment-char* (char=? c *comment-char*))
              (eat-till-eol) (get-raw-token/is))
             (else (string (get-actual-char)))))))
@@ -1471,7 +1474,7 @@
     (ignorespaces)
     (let ((c (snoop-actual-char)))
       (cond ((eof-object? c) c)
-            ((char=? c *esc-char*) (get-ctl-seq))
+            ((esc-char-p c) (get-ctl-seq))
             ((char=? c #\{) (get-group))
             ((and *comment-char* (char=? c *comment-char*))
              (eat-till-eol) (get-token))
@@ -1502,7 +1505,7 @@
             (ignorespaces)
             (let ((c (snoop-actual-char)))
               (cond ((eof-object? c) 'done)
-                    ((and (char=? c *esc-char*) first?)
+                    ((and (esc-char-p c) first?)
                      (get-ctl-seq))
                     ((or (char-numeric? c) (char=? c #\.))
                      (get-real) (loop first?))
@@ -1946,7 +1949,7 @@
     (unless (= val 11)
       (set! *tex-extra-letters* (ldelete c *tex-extra-letters* char=?)))
     (case val
-      ((0) (set! *esc-char* 0))
+      ((0) (set! *esc-chars* (cons c *esc-chars*)))
       ((11) (set! *tex-extra-letters* (cons c *tex-extra-letters*)))
       ((13) (activate-cdef c))
       )
@@ -2199,16 +2202,16 @@
     (ignorespaces)
     (let loop ((r '()))
       (let ((c (snoop-actual-char)))
-        (cond ((char=? c *esc-char*)
+        (cond ((esc-char-p c)
                (let ((x (get-ctl-seq)))
                  (cond ((string=? x "\\endcsname")
                         ;(toss-back-char *invisible-space*)
                         (toss-back-char #\})
                         (for-each toss-back-string r)
-                        (toss-back-char *esc-char*)
+                        (toss-back-char c)
                         (toss-back-char #\{)
                         (toss-back-string "TIIPcsname")
-                        (toss-back-char *esc-char*)
+                        (toss-back-char c)
                         )
                        (else
                          (loop (cons (expand-ctl-seq-into-string x)
@@ -3390,7 +3393,7 @@
     (let ((n (or (get-real) 1)))
       (ignorespaces)
       (* n
-         (if (char=? (snoop-actual-char) *esc-char*)
+         (if (esc-char-p (snoop-actual-char))
              (let ((x (get-ctl-seq)))
                (get-dimen x)
                )
@@ -5364,7 +5367,7 @@
       (let loop ((nesting 0))
         (let ((c (snoop-actual-char)))
           (cond ((eof-object? c) (terror 'dump-till-ctl-seq))
-                ((char=? c *esc-char*)
+                ((esc-char-p c)
                  (let ((x (get-ctl-seq)))
                    (if (string=? x cs) #t
                        (begin (display x o)
@@ -5383,7 +5386,7 @@
         (let loop ((brace-nesting 0) (env-nesting 0))
           (let ((c (snoop-actual-char)))
             (cond ((eof-object? c) (terror 'dump-till-end-env env))
-                  ((char=? c *esc-char*)
+                  ((esc-char-p c)
                    (let ((x (get-ctl-seq)))
                      (cond ((string=? (find-corresp-prim x) endenv-prim) #t)
                            ((string=? x "\\begin") (display x o)
@@ -5446,7 +5449,7 @@
           (let ((c (snoop-actual-char)))
             (cond ((eof-object? c)
                    (terror 'do-img-preamble "Missing \\endimgpreamble"))
-                  ((char=? c *esc-char*)
+                  ((esc-char-p c)
                    (let ((x (get-ctl-seq)))
                      (cond ((ormap (lambda (z) (string=? x z))
                                    '("\\endimgpreamble"
@@ -5715,7 +5718,7 @@
                   (let ((c (snoop-actual-char)))
                     (cond ((eof-object? c)
                            (terror 'read-ifcase-clauses "Incomplete \\ifcase."))
-                          ((char=? c *esc-char*)
+                          ((esc-char-p c)
                            (let ((x (get-ctl-seq)))
                              (cond ((string=? x "\\or")
                                     (ignorespaces)
@@ -6593,7 +6596,7 @@
         (let ((c (snoop-actual-char)))
           (cond ((eof-object? c)
                  (terror 'ignore-tex-specific-text "Missing \\end" env))
-                ((char=? c *esc-char*)
+                ((esc-char-p c)
                  (let ((x (get-ctl-seq)))
                    (cond ((string=? x endenv) #t)
                          ((string=? x "\\end")
@@ -6609,7 +6612,7 @@
       (let ((c (snoop-actual-char)))
         (cond ((eof-object? c)
                (terror 'do-rawhtml "Missing \\endrawhtml"))
-              ((char=? c *esc-char*)
+              ((esc-char-p c)
                (let* ((x (get-ctl-seq))
                       (y (find-corresp-prim x)))
                  (cond ((string=? y "\\endrawhtml") 'done)
@@ -6634,7 +6637,7 @@
       (let ((c (snoop-actual-char)))
         (cond ((eof-object? c)
                (write-aux `(!html-head ,(list->string (nreverse s)))))
-              ((char=? c *esc-char*)
+              ((esc-char-p c)
                (write-aux `(!html-head ,(list->string (nreverse s))))
                (let ((x (get-ctl-seq)))
                  (cond ((string=? x "\\endhtmlheadonly") 'done)
@@ -6700,7 +6703,7 @@
 (define resolve-expandafters
   (lambda ()
     (let ((c (snoop-actual-char)))
-      (when (char=? c *esc-char*)
+      (when (esc-char-p c)
         (let ((x (get-ctl-seq)))
           (if (string=? x "\\expandafter")
               (do-expandafter)
@@ -7270,7 +7273,7 @@
         (cond ((eof-object? c)
                (terror 'get-def-arguments
                        "EOF found while scanning definition of " lhs))
-              ((char=? c *esc-char*)
+              ((esc-char-p c)
                (let ((x (get-ctl-seq)))
                  (if (string=? x "\\par")
                      (cons #\newline
@@ -7300,7 +7303,7 @@
                   (escape?
                     (loop (cons (get-actual-char) s) nesting #f))
                   ((char=? c c0) s)
-                  ((char=? c *esc-char*)
+                  ((esc-char-p c)
                    (loop (cons (get-actual-char) s) nesting #t))
                   ((char=? c #\{)
                    (loop (cons (get-actual-char) s) (+ nesting 1) #f))
@@ -7408,7 +7411,7 @@
                          (loop
                           (if (and (char=? d #\{)
                                    (or (null? ss)
-                                       (not (char=? (car ss) *esc-char*))))
+                                       (not (esc-char-p (car ss)))))
                               (append (get-group-as-reversed-chars) ss)
                               (begin
                                (if (and (char-whitespace? d)
@@ -7465,7 +7468,7 @@
               (let ((c (snoop-actual-char)))
                 (unless (eof-object? c)
                   (display
-                    (cond ((char=? c *esc-char*)
+                    (cond ((esc-char-p c)
                            (let ((x (get-ctl-seq)))
                              (toss-back-char *invisible-space*)
                              (cond ((or (string=? x "\\the")
@@ -7564,19 +7567,19 @@
     (ignorespaces)
     (let* ((c1 (get-actual-char))
            (c2 (get-actual-char)))
-      (unless (char=? c1 *esc-char*)
+      (unless (esc-char-p c1)
         (terror 'do-verbatimescapechar "Arg must be \\<char>"))
       (set! *esc-char-verb* c2))))
 
 (define do-verb-braced
   (lambda (ignore)
-    (fluid-let ((*esc-char* *esc-char-verb*)
+    (fluid-let ((*esc-chars* (list *esc-char-verb*))
                 (*tex-extra-letters* '()))
       (let loop ((nesting 0))
         (let ((c (get-actual-char)))
           (cond ((eof-object? c)
                  (terror 'do-verb-braced "Eof inside verbatim"))
-                ((char=? c *esc-char*)
+                ((esc-char-p c)
                  (toss-back-char c)
                  (let ((x (fluid-let ((*not-processing-p* #t))
                             (get-ctl-seq))))
@@ -7584,8 +7587,8 @@
                                  '("\\ " "\\{" "\\}"))
                           (emit (string-ref x 1)))
                          (else
-                          (fluid-let ((*esc-char* *esc-char-std*))
-                            (do-tex-ctl-seq-completely x)))))
+                           (fluid-let ((*esc-chars* (list *esc-char-std*)))
+                             (do-tex-ctl-seq-completely x)))))
                  (loop nesting))
                 ((char=? c #\{)
                  (emit #\{)
@@ -7595,16 +7598,11 @@
                    (emit #\})
                    (loop (- nesting 1))))
                 ((char=? c #\space)
-                 (emit
-                  (if *verb-visible-space-p*
-                      *verbatim-visible-space*
-                    #\space))
+                 (emit (if *verb-visible-space-p* *verbatim-visible-space* #\space))
                  (loop nesting))
                 ((char=? c #\newline)
-                 (cond (*verb-display-p* (emit "&#xa0;")
-                                        (emit-newline))
-                       (*verb-visible-space-p*
-                        (emit *verbatim-visible-space*))
+                 (cond (*verb-display-p* (emit "&#xa0;") (emit-newline))
+                       (*verb-visible-space-p* (emit *verbatim-visible-space*))
                        (else (emit-newline)))
                  (loop nesting))
                 ((and (char=? c #\-) (not *verb-display-p*))
@@ -7882,7 +7880,7 @@
   (lambda ()
     (let ((c (snoop-actual-char)))
       (cond ((eof-object? c) #f)
-            ((char=? c *esc-char*)
+            ((esc-char-p c)
              (get-actual-char) (toss-back-char *invisible-space*)
              (toss-back-string "\\TIIPbackslash"))
             ((char=? c *comment-char*) (eat-till-eol) (do-string))
@@ -7943,12 +7941,12 @@
 (define do-verbatim-eplain
   (lambda ()
     (fluid-let ((*inside-eplain-verbatim-p* #t)
-                (*esc-char* *esc-char-verb*))
+                (*esc-chars* (list *esc-char-verb*)))
       (let loop ()
         (when *inside-eplain-verbatim-p*
           (let ((c (get-actual-char)))
             (cond ((eof-object? c) (terror 'do-verbatim-eplain "Eof inside verbatim"))
-                  ((char=? c *esc-char*)
+                  ((esc-char-p c)
                    (toss-back-char c)
                    (let ((x (fluid-let ((*not-processing-p* #t))
                               (get-ctl-seq))))
@@ -7965,27 +7963,36 @@
   (lambda ()
     (set! *inside-eplain-verbatim-p* #f)))
 
-(define do-opmac-begtt
+(define do-begintt
   (lambda ()
     (do-end-para)
-    (bgroup)
-    (emit "<pre class=verbatim>")
-    (munched-a-newline?)
-    (fluid-let ((*ligatures-p* #f))
-      (let loop ()
-        (let ((c (snoop-actual-char)))
-          (when (eof-object? c)
-            (terror 'do-opmac-begtt "Eof inside \\begtt"))
-          (cond
-            ((char=? c #\\)
-             (let ((cs (get-ctl-seq)))
-               (unless (string=? cs "\\endtt")
-                 (emit-html-string cs)
-                 (loop))))
-            (else (emit-html-char (get-actual-char))
-                  (loop))))))
-    (emit "</pre>")
-    (egroup)
+    (let ((*esc-chars* *esc-chars*))
+      (bgroup)
+      (do-tex-ctl-seq-completely "\\tthook")
+      (set! *esc-chars* (ldelete *esc-char-std* *esc-chars* char=?))
+      (emit "<pre class=verbatim>")
+      (munched-a-newline?)
+      (fluid-let ((*ligatures-p* #f))
+        (let loop ()
+          (let ((c (snoop-actual-char)))
+            (when (eof-object? c)
+              (terror 'do-begintt "Eof inside \\begintt"))
+            (cond ((char=? c #\\)
+                   (fluid-let ((*esc-chars* (list *esc-char-std*)))
+                     (let ((cs (fluid-let ((*not-processing-p* #t))
+                                 (get-ctl-seq))))
+                       (unless (string=? cs "\\endtt")
+                         (emit-html-string cs)
+                         (loop)))))
+                  ((esc-char-p c) (let ((cs (fluid-let ((*not-processing-p* #t))
+                                              (get-ctl-seq))))
+                                    (fluid-let ((*esc-chars* (list *esc-char-std*)))
+                                      (do-tex-ctl-seq-completely cs)))
+                                  (loop))
+                  (else (emit-html-char (get-actual-char))
+                        (loop))))))
+      (emit "</pre>")
+      (egroup))
     (do-para)))
 
 ;
@@ -8120,7 +8127,7 @@
 
 (define scm-set-mathescape
   (lambda (yes?)
-    (let ((c (fluid-let ((*esc-char* (integer->char 0)))
+    (let ((c (fluid-let ((*esc-chars* '()))
                (string-ref (ungroup (get-group)) 0))))
       (cond (yes?
               (set! *slatex-math-escape* c)
@@ -8138,7 +8145,7 @@
       (get-actual-char)
       (unless (string=? math-text "")
         (emit "<span class=variable>")
-        (fluid-let ((*esc-char* *esc-char-std*))
+        (fluid-let ((*esc-chars* (list *esc-char-std*)))
           (tex2page-string (string-append "$" math-text "$")))
         (emit "</span>")))))
 
@@ -8149,7 +8156,7 @@
       (when *scm-dribbling-p*
         (display s *verb-port*)
         (newline *verb-port*))
-      (fluid-let ((*esc-char* *esc-char-std*))
+      (fluid-let ((*esc-chars* (list *esc-char-std*)))
         (tex2page-string s))
       (do-end-para)
       (emit "</span>")
@@ -8233,7 +8240,7 @@
   (lambda (s)
     (case (scm-get-type s)
       ((special-symbol)
-       (fluid-let ((*esc-char* *esc-char-std*))
+       (fluid-let ((*esc-chars* (list *esc-char-std*)))
          (tex2page-string
            (table-get *scm-special-symbols* s))))
       ((keyword)
@@ -8277,20 +8284,20 @@
              (emit ">"))
             (else (do-end-para) (emit "<pre class=scheme>")))
       (bgroup)
-      (fluid-let ((*esc-char* *esc-char-verb*)
+      (fluid-let ((*esc-chars* (list *esc-char-verb*))
                   (*verb-display-p* display?))
         (let loop ((nesting 0))
           (let ((c (snoop-actual-char)))
             (cond ((eof-object? c)
                    (terror 'do-scm-braced "Eof inside verbatim"))
-                  ((char=? c *esc-char*)
+                  ((esc-char-p c)
                    (let ((x (fluid-let ((*not-processing-p* #t))
                               (get-ctl-seq))))
                      (cond ((ormap (lambda (z) (string=? x z))
                                    '("\\ " "\\{" "\\}"))
                             (scm-emit-html-char (string-ref x 1)))
                            (else
-                            (fluid-let ((*esc-char* *esc-char-std*))
+                            (fluid-let ((*esc-chars* (list *esc-char-std*)))
                               (do-tex-ctl-seq-completely x)))))
                    (loop nesting))
                   ((char=? c #\{)
@@ -8403,7 +8410,7 @@
                               (toss-back-char #\;)
                               (scm-output-slatex-comment))))
                    (loop))
-                  ((char=? c *esc-char*)
+                  ((esc-char-p c)
                    (let ((x (get-ctl-seq)))
                      (cond ((string=? x endenv) #t)
                            ((string=? x "\\end")
@@ -8892,7 +8899,7 @@
                       (toss-back-char *invisible-space*)
                       (toss-back-string s)
                       (loop)))
-                ((char=? c *esc-char*)
+                ((esc-char-p c)
                  (let ((r (do-tex-ctl-seq (get-ctl-seq))))
                    (case r
                      ((:encountered-endinput) #t)
@@ -9056,7 +9063,7 @@
                ;Careful: This could break existing docs that rely on
                ;this!
                (ungroup
-               (fluid-let ((*esc-char* *esc-char-verb*)
+               (fluid-let ((*esc-chars* (list *esc-char-verb*))
                            (*expand-escape-p* #t))
                  (get-group)))
               (tex-write-output-string
@@ -10177,7 +10184,7 @@ Try the commands
 (define do-not (lambda ()
   (ignorespaces)
   (let ((c (snoop-actual-char)))
-    (if (char=? c *esc-char*)
+    (if (esc-char-p c)
         (let ((x (get-ctl-seq)))
           (emit (cond ((string=? x "\\leq") "&#x2270;")
                       ((string=? x "\\le") "&#x2270;")
@@ -10402,8 +10409,8 @@ Try the commands
 (tex-def-prim "\\begin" do-begin)
 (tex-def-prim "\\beginchapter" do-beginchapter)
 (tex-def-prim "\\beginsection" do-beginsection)
+(tex-def-prim "\\begintt" do-begintt)
 (tex-def-prim "\\begitems" do-opmac-begitems)
-(tex-def-prim "\\begtt" do-opmac-begtt)
 (tex-def-prim "\\bf" (lambda () (do-switch ':bf)))
 (tex-def-prim "\\bgcolor" (lambda () (do-switch ':bgcolor)))
 (tex-def-prim-0arg "\\bgroup" "{")
@@ -11196,6 +11203,7 @@ Try the commands
 (tex-let-prim "\\endnumberedlist" "\\endenumerate")
 (tex-let-prim "\\endorderedlist" "\\endenumerate")
 (tex-let-prim "\\newline" "\\break")
+(tex-let-prim "\\begtt" "\\begintt")
 
 ;obsoletisms
 
@@ -11270,7 +11278,7 @@ Try the commands
                 (*equation-number* #f)
                 (*equation-numbered-p* #t)
                 (*equation-position* 0)
-                (*esc-char* #\\ )
+                (*esc-chars* (list #\\))
                 (*esc-char-std* #\\ )
                 (*esc-char-verb* #\|)
                 (*eval-file-count* 0)

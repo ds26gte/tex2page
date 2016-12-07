@@ -2324,9 +2324,9 @@
            (nonum? (or starred? too-deep?))
            (header (fluid-let ((*tabular-stack* (list ':header)))
                      (tex-string->html-string (get-group)))))
-      (do-heading-aux-1 seclvl starred? nonum? #f #f header))))
+      (do-heading-help seclvl starred? nonum? #f #f header))))
 
-(define do-heading-aux-1
+(define do-heading-help
   (lambda (seclvl starred? nonum? notoc? lbl-val header)
     (write-aux `(!default-title ,header))
     (when (<= seclvl 0)
@@ -2523,7 +2523,7 @@
     (ignorespaces)
     (let ((header (let ((*tabular-stack* (list ':header)))
                     (tex-string->html-string (get-till-par)))))
-      (do-heading-aux-1 1 #f #t #t #f header))))
+      (do-heading-help 1 #f #t #t #f header))))
 
 (define do-beginchapter
   (lambda ()
@@ -2534,8 +2534,9 @@
                           (let ((*tabular-stack* (list ':header)))
                             (tex-string->html-string
                              (get-till-par))))))
+      (when (string=? chapno "") (set! chapno #f))
       (tex-def-count "\\footnotenumber" 0 #t)
-      (do-heading-aux-1 0 #f #t #f chapno header))))
+      (do-heading-help 0 #f #t #f chapno header))))
 
 (define do-opmac-heading
   (lambda (seclvl)
@@ -2546,7 +2547,7 @@
             (notoc? *opmac-notoc-p*))
         (set! *opmac-nonum-p* #f)
         (set! *opmac-notoc-p* #f)
-        (do-heading-aux-1 seclvl #f nonum? notoc? #f header)))))
+        (do-heading-help seclvl #f nonum? notoc? #f header)))))
 
 (define do-opmac-sec
   (lambda ()
@@ -8400,6 +8401,7 @@
 
 (define do-scm-slatex-lines
   (lambda (env display? result?)
+    (fluid-let ((*esc-chars* *esc-chars*))
     (let ((endenv (string-append "\\end" env))
           (in-table? (and (not (null? *tabular-stack*))
                           (memv (car *tabular-stack*) '(:block :figure :table)))))
@@ -8407,6 +8409,9 @@
             (in-table? (emit "</td><td>")))
       (munched-a-newline?)
       (bgroup)
+      (when (string=? env "tt")
+        (do-tex-ctl-seq-completely "\\tthook")
+        (set! *esc-chars* (ldelete *esc-char-std* *esc-chars* char=?)))
       (emit "<div align=left><pre class=scheme")
       (when result? (emit "response"))
       (emit ">")
@@ -8427,8 +8432,10 @@
                               (toss-back-char #\;)
                               (scm-output-slatex-comment))))
                    (loop))
-                  ((esc-char-p c)
-                   (let ((x (get-ctl-seq)))
+                  ((char=? c #\\)
+                   (let ((x (fluid-let ((*esc-chars* (list *esc-char-std*))
+                                        (*not-processing-p* #f))
+                              (get-ctl-seq))))
                      (cond ((string=? x endenv) #t)
                            ((string=? x "\\end")
                             (let ((g (get-grouped-environment-name-if-any)))
@@ -8442,12 +8449,17 @@
                                      (scm-output-token "}"))
                                    (loop)))))
                            (else (scm-output-token x) (loop)))))
+                  ((esc-char-p c) (let ((cs (fluid-let ((*not-processing-p* #t))
+                                              (get-ctl-seq))))
+                                    (fluid-let ((*esc-chars* (list *esc-char-std*)))
+                                      (do-tex-ctl-seq-completely cs)))
+                                  (loop))
                   (else (scm-output-next-chunk)
                         (loop))))))
       (emit "</pre></div>")
       (egroup)
       (cond (display? (do-para))
-            (in-table? (emit "</td><td>"))))))
+            (in-table? (emit "</td><td>")))))))
 
 (define string-is-all-dots?
   (lambda (s)
@@ -10431,6 +10443,7 @@ Try the commands
 (tex-def-prim "\\beginchapter" do-beginchapter)
 (tex-def-prim "\\beginsection" do-beginsection)
 (tex-def-prim "\\begintt" do-begintt)
+(tex-def-prim "\\begintts" (lambda() (do-scm-slatex-lines "tt" #t #f)))
 (tex-def-prim "\\begitems" do-opmac-begitems)
 (tex-def-prim "\\bf" (lambda () (do-switch ':bf)))
 (tex-def-prim "\\bgcolor" (lambda () (do-switch ':bgcolor)))

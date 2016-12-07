@@ -116,8 +116,9 @@ or \LaTeX.\f{Hereafter, we will use {\em \TeX} to mean
 any format of \TeX, and {\em plain \TeX} when we
 specifically mean the “plain” format.}
 For instance, given a plain-\TeX\ document file
-with the relative or full pathname
-\p{|meta[wherever-it-is/jobname].|meta[ext]}, where
+\p{|meta[wherever-it-is/jobname].|meta[ext]}, which can
+be either a full pathname or a pathname relative to either the
+working directory or some directory in `TEXINPUTS`, where
 \p{|meta[jobname]} is the {\em basename} of the file
 and \p{.|meta[ext]} is its extension, you type
 
@@ -161,9 +162,10 @@ tex2page story
 \index{log file}
 %
 \TeX2page will get cracking\f{\TeX2page, like \TeX, will find the
-file from your distribution as it is in the path `TEXINPUTS`.
-If this is too confusing, copy the file manually to your working
-directory.} on `story.tex`, providing
+file `story.tex` from your distribution as it is in your default `TEXINPUTS`.
+If it's too confusing operating on a file that you don't see in
+your immediate space, copy the file manually to your working
+directory. You can find its location with `kpsewhich story`.} on `story.tex`, providing
 the following commentary, or {\em log}, on your console:
 
 
@@ -339,8 +341,8 @@ as argument:
 (tex2page filename)
 \endtt
 \fi
-
-\n You can call the procedure
+%
+You can call the procedure
 \q{tex2page} several times from the same Scheme
 session, on the same file or on different files.
 
@@ -349,7 +351,7 @@ session, on the same file or on different files.
 Lisp function)}
 If using the Common Lisp version of \TeX2page, the same method applies,
 but note that the Common Lisp \TeX2page is provided as a Lisp package
-\q{texp2age} whose one exported symbol is \q{tex2page}.  Thus, the
+\q{tex2page} whose one exported symbol is \q{tex2page}.  Thus, the
 function to call has the qualified name \q{tex2page:tex2page}.
 
 \begintts
@@ -517,9 +519,9 @@ $$\sin^2 x + \cos^2 x = 1$$
 This becomes
 
 $$\sin^2 x + \cos^2 x = 1$$
-
+%
 \let\TZPmathtext=0
-\n which is clear enough.
+which is clear enough.
 
 If in non-math mode, \TeX2page simply ignores commands
 it doesn’t understand.  This is also usually a good
@@ -587,10 +589,10 @@ such as `\shipout`:
   ... |meta[for DVI only] ...
 \fi
 \endtt
-
+%
 \index{htmlonly@`\htmlonly`}
 \index{endhtmlonly@`\endhtmlonly`}
-\n For ordinary text, this is good enough, but
+For ordinary text, this is good enough, but
 if the HTML portion contains calls to raw HTML (see
 below) or raw
 Scheme (see p.~\ref{eval}), it is advisable to wrap it inside
@@ -1484,7 +1486,7 @@ second line identifying \TeX2page and linking to its website.
 \begintt
 \let\TZPcolophonlastpage=1
 \endtt
-
+%
 \iffalse
 \n If this request is to have meaning, it should be made in the document
 before the text for the second HTML page starts.  Otherwise, the default
@@ -2279,12 +2281,12 @@ sheet (p.~\ref{css}).  The default settings are:
 .scheme  .variable  {color: #000066}
 .scheme  .comment   {color: #006666; font-style: oblique}
 \endtt
-
+%
 \index{scmkeyword@`\scmkeyword`}
 \index{scmbuiltin@`\scmbuiltin`}
 \index{scmvariable@`\scmvariable`}
-
-\n \TeX2page initially only recognizes some well-known
+%
+\TeX2page initially only recognizes some well-known
 syntactic keywords, global variables, and
 self-evaluators.  It does not recognize builtins as
 apart from the general run of variables.  Users who
@@ -2512,11 +2514,11 @@ like
 \epsfbox{|meta[eps-file]}
 \includegraphics{|meta[eps-file]}
 \endtt
-
+%
 \index{epsf.tex@`epsf.tex`}
 \index{epsfig.sty@`epsfig.sty`}
-
-\n These are commands defined external to plain \TeX\ or \LaTeX.
+%
+These are commands defined external to plain \TeX\ or \LaTeX.
 Plain \TeX\
 documents using `\epsfbox` must load the standard
 macro file called `epsf.tex`.
@@ -2558,11 +2560,11 @@ files with `\let\color\@ldc@l@r`.}
 \input graphicx.sty
 \resetatcatcode
 \endtt
-
+%
 \index{epsfxsize@`\epsfxsize`}
 \index{epsfysize@`\epsfysize`}
-
-\n For `\epsfbox`, you can specify the desired image
+%
+For `\epsfbox`, you can specify the desired image
 width and height by assigning to the dimen
 registers `\epsfxsize` and `\epsfysize`
 (specifying only one of them will cause the other to
@@ -3319,12 +3321,12 @@ tex2page story
 \else
 call
 
-\scm{
+\begintts
 (tex2page "story")
-}
+\endtt
 \fi
-
-\n typically produces at least one
+%
+typically produces at least one
 output HTML file `story.html`, and possibly some
 additional HTML files, which are named
 `story-Z-H-1.html`, `story-Z-H-2.html`, and
@@ -3569,8 +3571,8 @@ Possible insertions are:
 
 (define *ghostscript* "pathname-of-your-ghostscript-program")
 \endtt
-
-\n The first produces a compiled version of
+%
+The first produces a compiled version of
 `tex2page`.   The second lets you supply the
 correct pathname for the Ghostscript executable.
 (\TeX2page will guess the Ghostscript pathname,
@@ -3586,8 +3588,8 @@ or full pathname of `scmxlate.scm`.  For example,
 \begintts
 (load "/home/dorai/share/scmxlate/scmxlate.scm")
 \endtt
-
-\n (assuming you unpacked Scmxlate in
+%
+(assuming you unpacked Scmxlate in
 `/home/dorai/share`).  You will be asked a couple
 of questions about your setup.  A choice of answers
 will be provided, so you don’t need to be too creative.

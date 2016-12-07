@@ -2,6 +2,8 @@ Last change 2016-12-07
 
 2016 Dec 7
 
+\proclaim.
+
 \char`\  as visible space only works in cmtt. Define alternate visible space in
 tgtermes.tex which uses a Unicode mononspace font.
 

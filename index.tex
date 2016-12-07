@@ -327,17 +327,17 @@ library `tex2page.ss` into Scheme
 as argument:
 
 \ifx\inpltdist\Undefined
-\q{
+\begintts
 (load "tex2page") ;use appropriate pathname
 
 (tex2page |meta[filename])
-}
+\endtt
 \else
-\q{
+\begintts
 (require (lib "tex2page.ss" "tex2page"))
 
 (tex2page filename)
-}
+\endtt
 \fi
 
 \n You can call the procedure
@@ -352,9 +352,9 @@ but note that the Common Lisp \TeX2page is provided as a Lisp package
 \q{texp2age} whose one exported symbol is \q{tex2page}.  Thus, the
 function to call has the qualified name \q{tex2page:tex2page}.
 
-\q{
+\begintts
 (tex2page:tex2page |meta[filename])
-}
+\endtt
 
 \beginsection Specifying a target directory
 %\label{hdir}
@@ -483,7 +483,7 @@ It
 uses this understanding to convert a \TeX\ document to
 its HTML version, much the same way that \TeX\ converts
 the same  document into its DVI version.
-In addition to usual smörgåsbord of sectioning, itemization and
+In addition to the usual smörgåsbord of sectioning, itemization and
 enumeration macros,
 \TeX2page also recognizes some commonly used commands
 that are not part of the formats but
@@ -2233,14 +2233,14 @@ code in the HTML file.  E.g.,
 \ifx\shipout\UnDeFiNeD % since the colors won’t show on the DVI
 produces
 
-\q{
+\begintts
 (define factorial
   (lambda (n)
     (when *debug?*
       (printf "Calling factorial ~a~%" n))
     (if (= n 0) 1 ;the base case
         (* n (fact (- n 1))))))
-}
+\endtt
 (Your browser needs to support style sheets for the
 syntax-highlighting to show.)
 \fi
@@ -2930,9 +2930,9 @@ following complete document, `root2.tex`:
 The square root of 2 is
 \eval{
 \endtt
-\q{
+\begintts
 (display (sqrt 2))
-}
+\endtt
 \begintt
 }.
 
@@ -3095,7 +3095,7 @@ of Scheme:
 
 \eval{
 \endtt
-\q{
+\begintts
 (define all-blanks?
   (lambda (s)
     (let loop ((L (string->list s)))
@@ -3103,19 +3103,19 @@ of Scheme:
           (let ((c (car L)))
             (if (char-whitespace? c) (loop (cdr L))
                 #f))))))
-}
+\endtt
 \begintt
 }
 
 \def\spaceifnotempty{\eval{
 \endtt
-\q{
+\begintts
 (let ((x (ungroup (get-token))))
   (if (not (all-blanks? x))
       (begin (display (integer->char 92))
              (display "space"))
       0))
-}
+\endtt
 \begintt
 }}
 
@@ -3564,11 +3564,11 @@ Optionally, edit the file `scmxlate-tex2page` in the
 (Leaving it as is is just fine.)
 Possible insertions are:
 
-\q{
+\begintts
 (scmxlate-compile #t)
 
 (define *ghostscript* "pathname-of-your-ghostscript-program")
-}
+\endtt
 
 \n The first produces a compiled version of
 `tex2page`.   The second lets you supply the
@@ -3583,9 +3583,9 @@ Start your Scheme (or Common Lisp) in the
 `scmxlate` distribution, using the correct relative
 or full pathname of `scmxlate.scm`.  For example,
 
-\q{
+\begintts
 (load "/home/dorai/share/scmxlate/scmxlate.scm")
-}
+\endtt
 
 \n (assuming you unpacked Scmxlate in
 `/home/dorai/share`).  You will be asked a couple
@@ -3621,10 +3621,10 @@ directly into
 your Scheme, and then call the Scheme
 procedure \q{tex2page} on your source document.  E.g.,
 
-\q{
+\begintts
 (load "tex2page")
 (tex2page "filename.tex")
-}
+\endtt
 Once loaded, the procedure \q{tex2page} can be called several times from
 the same Scheme session, on the same file (to resolve cross-references)
 or on different files.
@@ -3634,9 +3634,9 @@ the Common Lisp version of \TeX2page encloses all \TeX2page-related code
 inside a Lisp package named \q{tex2page}.  Thus, you should call the
 function \q{tex2page} by its package-qualified name, \q{tex2page:tex2page}:
 
-\q{
+\begintts
 (tex2page:tex2page "tex2page-doc")
-}
+\endtt
 
 %\section{Editor-friendly hypertext}
 %\label{hisfir}

@@ -3473,6 +3473,23 @@
     (emit-nbsp 2)
     (emit "</span></span>")))
 
+(defun do-proclaim ()
+  (let* ((head (tex-string-to-html-string (get-till-char #\.)))
+         (body (progn (get-actual-char) (ignorespaces)
+                      (tex-string-to-html-string (get-till-par)))))
+    (do-end-para)
+    (emit "<div class=\"proclaim medskip\"><b>")
+    (do-noindent)
+    (emit head)
+    (emit ".</b>")
+    (emit-nbsp 2)
+    (emit "<i>")
+    (emit body)
+    (emit "</i>")
+    (do-end-para)
+    (emit "</div>")
+    (do-para)))
+
 (defun do-item ()
   (case (car *tabular-stack*)
     (:description (do-description-item))
@@ -8410,7 +8427,7 @@ Try the commands
                        (emit (cond ((char= c #\<) "&#x226e;")
                                    ((char= c #\>) "&#x226f;")
                                    ((char= c #\=) "&#x2260;"))))
-        (t (emit "/")))))) ;#enddefun
+        (t (emit "/"))))))
 
 (tex-def-math-prim "\\not" #'do-not)
 (tex-defsym-math-prim "\\notin" "&#x2209;")
@@ -8545,7 +8562,7 @@ Try the commands
 (defun do-math-font (f)
   (lambda ()
     (let ((*math-font* f))
-      (tex2page-string (get-token))))) ;#enddefun
+      (tex2page-string (get-token)))))
 
 (tex-def-math-prim "\\mathbf" (do-math-font :bf))
 (tex-def-math-prim "\\mathrm" (do-math-font :rm))
@@ -8565,7 +8582,7 @@ Try the commands
   (concatenate 'string "<span style=\"margin-left: "
     ;in following, tried &#x200c; (= zwnj) instead of space,
     ;but it causes table-row fault
-    len "\"> </span>")) ;#enddefun
+    len "\"> </span>"))
 
 (tex-def-prim "\\enspace" (lambda () (emit (kern ".5em"))))
 (tex-def-prim "\\thinspace" (lambda () (emit (kern ".16667em"))))
@@ -8939,6 +8956,7 @@ Try the commands
 (tex-def-prim "\\plainfootnote" #'do-plain-footnote)
 (tex-defsym-prim "\\pounds" "&#xa3;")
 (tex-def-prim "\\printindex" (lambda () (do-inputindex t)))
+(tex-def-prim "\\proclaim" #'do-proclaim)
 (tex-def-prim "\\providecommand" (lambda () (do-newcommand nil)))
 
 (tex-def-prim "\\quote"

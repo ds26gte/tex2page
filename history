@@ -1,4 +1,15 @@
-Last change 2016-12-05
+Last change 2016-12-07
+
+2016 Dec 7
+
+\char`\  as visible space only works in cmtt. Define alternate visible space in
+tgtermes.tex which uses a Unicode mononspace font.
+
+Improve catcode manipulation, esp. the setting of catcode to 0. Allow multiple
+simultaneous 0-catcode chars.
+
+\begintt...\endtt like manmac. (Set \tthook if you want to make it really
+manmac-like.)
 
 2016 Dec 5
 

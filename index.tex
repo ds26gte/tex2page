@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-06} %last change
+\c{2016-12-07} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -121,51 +121,51 @@ with the relative or full pathname
 \p{|meta[jobname]} is the {\em basename} of the file
 and \p{.|meta[ext]} is its extension, you type
 
-\p{
+\begintt
 tex |meta[wherever-it-is/jobname].|meta[ext]
-}
-
-\n at the operating-system command line.\f{The executable \p{tex} expects
+\endtt
+%
+at the operating-system command line.\f{The executable `tex` expects
 its input file to be marked up in plain \TeX.  For a \LaTeX\ document, the
-executable to use is \p{latex}.}  You do not need to mention the extension
-\p{.|meta[ext]} if it is \p{.tex}.  This creates the output DVI file,
+executable to use is `latex`.}  You do not need to mention the extension
+\p{.|meta[ext]} if it is `.tex`.  This creates the output DVI file,
 \p{|meta[jobname].dvi}, in the working directory.\f{Modern \TeX\ engines
 such as pdf\TeX, \XeTeX~\cite{xetex}, and
 lua\TeX~\cite{luatex} produce PDF rather than DVI.  In the rest of this manual,
 whenever we refer to the output DVI file, the reader using the PDF versions
 of \TeX\ should read PDF for DVI.}
 
-\index{tex2page (c@\p{tex2page} (command)}
+\index{tex2page (c@`tex2page` (command)}
 
 \TeX2page is called analogously.  To create the HTML
 version of the same file
 \p{|meta[wherever-it-is/jobname].|meta[ext]}, type
 
-\p{
+\begintt
 tex2page |meta[wherever-it-is/jobname].|meta[ext]
-}
-
-\n Again, the \p{.|meta[ext]} is optional if it is \p{.tex}.  This
+\endtt
+%
+Again, the \p{.|meta[ext]} is optional if it is `.tex`.  This
 creates \p{|meta[jobname].html} in the working directory.
 
-\index{story.tex@\p{story.tex}}
+\index{story.tex@`story.tex`}
 
 To try this out, call \TeX2page on the example file
-\urlh{texample.html}{\p{story.tex}}
+\urlh{texample.html}{`story.tex`}
 provided in all \TeX\ distributions:
 
-\p{
+\begintt
 tex2page story
-}
-
-\n
+\endtt
+%
 \index{log file}
 %
 \TeX2page will get cracking\f{\TeX2page, like \TeX, will find the
-file from your distribution as it is in the path \p{TEXINPUTS}.
+file from your distribution as it is in the path `TEXINPUTS`.
 If this is too confusing, copy the file manually to your working
-directory.} on \p{story.tex}, providing
+directory.} on `story.tex`, providing
 the following commentary, or {\em log}, on your console:
+
 
 \medbreak
 \verbatiminput story.hlog
@@ -173,59 +173,59 @@ the following commentary, or {\em log}, on your console:
 
 \n \TeX2page is now done, and the result of its labors
 is the HTML file
-\urlh{story.html}{\p{story.html}}\ifx\shipout\UnDeFiNeD\ (click
+\urlh{story.html}{`story.html`}\ifx\shipout\UnDeFiNeD\ (click
 to see)\fi.
 
-\index{bye@\p{\bye}}
-\index{end@\p{\end}}
-\index{hlog@\p{.hlog}|see{log file}}
+\index{bye@`\bye`}
+\index{end@`\end`}
+\index{hlog@`.hlog`|see{log file}}
 \index{log file}
 
-The {\em log file} \p{story.hlog}
+The {\em log file} `story.hlog`
 contains a copy of the above log, and is useful
 if you didn’t or couldn’t keep track of the console
 (perhaps because the log was too long).
-The log says that \p{story.tex} lacked a
-document-ending command such as \p{\end} (or \p{\bye})
+The log says that `story.tex` lacked a
+document-ending command such as `\end` (or `\bye`)
 and that \TeX2page assumed one anyway.  Also, only
 {\em one} HTML page was created, and its name is
-\p{story.html}.  \TeX2page could in some cases produce
+`story.html`.  \TeX2page could in some cases produce
 auxiliary HTML pages in addition to
 the main HTML page \p{|meta[jobname].html} (especially
 for larger documents).  The auxiliary HTML pages
 are reachable from \p{|meta[jobname].html}
 by navigation links (p.~\ref{eject}).  As  each
 auxiliary HTML page is completed, the log will show the
-bracketed numbers \p{[1]}, \p{[2]}, etc.  The \p{[0]}
+bracketed numbers `[1]`, `[2]`, etc.  The `[0]`
 in this log refers to the only HTML file created, viz.,
-\p{story.html}.
+`story.html`.
 
 All this is of course almost exactly analogous to the
-way you type \p{tex story} (or \p{xetex story} or \p{pdftex story}) to get
-\p{story.dvi} (or \p{story.pdf})
-from \p{story.tex}, with the log going into
-\p{story.log}.
+way you type `tex story` (or `xetex story` or `pdftex story`) to get
+`story.dvi` (or `story.pdf`)
+from `story.tex`, with the log going into
+`story.log`.
 
 \medbreak
 \verbatiminput story.log
 \medbreak
 
 \n The only real difference is
-that \TeX\ will not add the missing \p{\end} on its
+that \TeX\ will not add the missing `\end` on its
 own, but instead waits for the user to supply it
-explicitly from the console.\f{The file \p{story.tex}
-lacks an \p{\end} only to demonstrate some interactive
+explicitly from the console.\f{The file `story.tex`
+lacks an `\end` only to demonstrate some interactive
 capabilities of \TeX, which are not relevant for
 \TeX2page.}  Note that the bracketed numbers now refer
 to the pages as numbered in the printed document.
 
-Thus, from one \TeX\ source file, you can get both a printable \p{.dvi} and a
-browsable \p{.html} document, using the same calling
+Thus, from one \TeX\ source file, you can get both a printable `.dvi` and a
+browsable `.html` document, using the same calling
 conventions.\iffalse ifx\inpltdist\undefined\f{Quite a few documents profit from
 being available additionally as plain text, either as a man page, or as
 tagged text on a general-purpose text editor, instead of requiring an HTML
-browser.  The scripts \p{t2p2man},
-\p{t2p2txt}, and \p{t2p2info}, included in the \TeX2page distribution,
+browser.  The scripts `t2p2man`,
+`t2p2txt`, and `t2p2info`, included in the \TeX2page distribution,
 help accomplish this.
 Each of these scripts takes as argument the main HTML
 file \p{|meta[jobname].html} created by \TeX2page, and generate the
@@ -241,48 +241,48 @@ pagebreaks.}\fi
 %easy-access hypertext that is readable on any
 %tags-capable text editor.
 
-\index{kpathsea@\p{kpathsea}}
-\index{TEXINPUTS@\p{TEXINPUTS} (environment variable)}
-\index{TEX2PAGEINPUTS@\p{TEX2PAGEINPUTS} (environment variable)}
+\index{kpathsea@`kpathsea`}
+\index{TEXINPUTS@`TEXINPUTS` (environment variable)}
+\index{TEX2PAGEINPUTS@`TEX2PAGEINPUTS` (environment variable)}
 
 When \TeX\ encounters a filename \p{|meta[f]}, it
 searches for it
 in a standard list of
 directories, which can be modified by the user via the
-environment variable \p{TEXINPUTS}.
+environment variable `TEXINPUTS`.
 The filename \p{|meta[f].tex} is tried before
 \p{|meta[f]} itself is tried.  In most modern \TeX s, the
-search is performed using the \p{kpathsea} library.
+search is performed using the `kpathsea` library.
 
-By default, \TeX2page will look for files using the same \p{kpathsea}
+By default, \TeX2page will look for files using the same `kpathsea`
 mechanism as \TeX.  However, it is possible to supply a
 different list of search directories via the environment
-variable \p{TEX2PAGEINPUTS}.
+variable `TEX2PAGEINPUTS`.
 It may be useful to have
-files in \p{TEX2PAGEINPUTS} shadow files from
-\p{TEXINPUTS}, because the latter are not really
+files in `TEX2PAGEINPUTS` shadow files from
+`TEXINPUTS`, because the latter are not really
 HTML-specific, and can thus be unsuitable for
 HTML-minded parsing by \TeX2page.
 
-In \TeX s without the \p{kpathsea} library,
-\p{TEX2PAGEINPUTS} is the only way to get \TeX2page to
+In \TeX s without the `kpathsea` library,
+`TEX2PAGEINPUTS` is the only way to get \TeX2page to
 automatically access files outside the working
-directory.  Note that \p{TEX2PAGEINPUTS} should be a
+directory.  Note that `TEX2PAGEINPUTS` should be a
 simple list of directory names, colon-separated in Unix
 and semicolon-separated in Windows.  It cannot use the
-enhanced syntax (viz., \p{*} and \p{//}) that is
-typically permitted for \p{TEXINPUTS}.
+enhanced syntax (viz., `*` and `//`) that is
+typically permitted for `TEXINPUTS`.
 
 %This is analogous to TeX
-%looking for files in \p{TEXINPUTS}.\f{The \p{TEXINPUTS}
+%looking for files in `TEXINPUTS`.\f{The `TEXINPUTS`
 %value can use a quite complicated syntax, which is why
 %\TeX2page uses its own environment variable instead of
-%simply reusing TeX’s \p{TEXINPUTS}.  However, to make a
+%simply reusing TeX’s `TEXINPUTS`.  However, to make a
 %virtue out of a necessity, it is quite unnecessary for
 %\TeX2page to attempt parsing most of the TeX files that
-%are accessible via \p{TEXINPUTS}.  Furthermore, you can
-%have files in \p{TEX2PAGEINPUTS} usefully shadow
-%files from \p{TEXINPUTS}.}
+%are accessible via `TEXINPUTS`.  Furthermore, you can
+%have files in `TEX2PAGEINPUTS` usefully shadow
+%files from `TEXINPUTS`.}
 %
 Error recovery in \TeX2page is also exactly analogous to
 \TeX, but we will postpone that discussion to
@@ -290,15 +290,15 @@ p.~\ref{recovery}.
 
 \beginsection Non-file arguments
 
-\index{help@\p{--help} (command-line option)}
+\index{help@`--help` (command-line option)}
 %
-\index{version@\p{--version} (command-line option)}
+\index{version@`--version` (command-line option)}
 %
 Like most recent versions of \TeX, \TeX2page also
 supports the standard self-identification
-arguments \p{--help} and \p{--version}.  These
+arguments `--help` and `--version`.  These
 arguments elicit help only if there isn’t an input file
-(e.g., \p{--help.tex}) that could match them.
+(e.g., `--help.tex`) that could match them.
 
 \TeX2page called without an argument displays a help
 message and exits.  Unlike \TeX, \TeX2page will not try
@@ -307,21 +307,21 @@ chitchat with an increasingly befuddled user.
 
 In all these cases, the help displayed on the console
 is also saved in the specially named log file
-\p{texput.hlog}.
+`texput.hlog`.
 
 \beginsection Calling \TeX2page from Scheme or Common Lisp
 
 \index{running \TeX2page!from Scheme}
 \index{tex2page (Scheme p)@\q{tex2page} (Scheme procedure)}
-\index{tex2page (Scheme f)@\p{tex2page} (Scheme file)}
+\index{tex2page (Scheme f)@`tex2page` (Scheme file)}
 %
 \ifx\inpltdist\Undefined
-If, for any reason, it is not possible to call \p{tex2page}
+If, for any reason, it is not possible to call `tex2page`
 from your operating-system command line, you may load the
-file \p{tex2page} into your Scheme
+file `tex2page` into your Scheme
 \else
 You may load the
-library \p{tex2page.ss} into Scheme
+library `tex2page.ss` into Scheme
 \fi and call the
 {\em procedure} \q{tex2page} with the name of the \TeX\ file
 as argument:
@@ -359,8 +359,8 @@ function to call has the qualified name \q{tex2page:tex2page}.
 \beginsection Specifying a target directory
 %\label{hdir}
 
-\index{hdir file@\p{.hdir} file}
-\index{tex2page.hdir@\p{.tex2page.hdir} file}
+\index{hdir file@`.hdir` file}
+\index{tex2page.hdir@`.tex2page.hdir` file}
 %
 By default, \TeX2page generates the output HTML files
 and other auxiliary files (p.~\ref{auxfile}) in the
@@ -371,26 +371,26 @@ directory.
 
 The files used for specifying the target directory are:
 \p{|meta[jobname].hdir} in the working directory,
-\p{.tex2page.hdir} in the working directory, and
-\p{.tex2page.hdir} in the user’s \p{HOME} directory.
+`.tex2page.hdir` in the working directory, and
+`.tex2page.hdir` in the user’s `HOME` directory.
 The first line of the first of these files that exists
 is taken to be the name of the target directory.
 If none of the files exists, the current working
 directory is the target directory.
 
-For example, if \p{story.hdir} contains the filename
-\p{story} as its first line, the HTML and aux files are
-created in a subdirectory \p{story} of the
+For example, if `story.hdir` contains the filename
+`story` as its first line, the HTML and aux files are
+created in a subdirectory `story` of the
 current directory.
 
-\index{jobname@\p{\jobname}}
+\index{jobname@`\jobname`}
 
 The filename may contain the \TeX\ control sequence
-\p{\jobname}, which expands to the basename of
+`\jobname`, which expands to the basename of
 the \TeX\ document.  To always use an auxiliary
 subdirectory with the same name as the basename of the
-\TeX\ document, have \p{~/.tex2page.hdir} contain the
-line “\p{\jobname}” (without quotes).
+\TeX\ document, have `~/.tex2page.hdir` contain the
+line “`\jobname`” (without quotes).
 
 \iffalse
 beginsection Info files
@@ -403,15 +403,15 @@ allow convenient regex search across the entire document; and can
 be read as plain text as they have much less markup than the
 corresponding HTML.
 
-The \TeX2page distribution includes a script \p{t2p2info} for converting
-\TeX2page-generated HTML into Info.  \p{t2p2info} takes as argument the
+The \TeX2page distribution includes a script `t2p2info` for converting
+\TeX2page-generated HTML into Info.  `t2p2info` takes as argument the
 filename of the main HTML file generated by \TeX2page, e.g.,
 
-\p{
+\begintt
 t2p2info jobname.html
-}
+\endtt
 The result is one or more Info files, the first of them named
-\p{jobname.info}.
+`jobname.info`.
 \fi
 
 \iffalse
@@ -455,13 +455,14 @@ preloaded set of definitions of some additional
 commands.  The two most popular formats
 are plain \TeX~\cite{texbook} and \LaTeX~\cite{latex}.
 
-%\index{texi2p.tex@\p{texi2p.tex} (\TeX2page macro file)}
+%\index{texi2p.tex@`texi2p.tex` (\TeX2page macro file)}
 
 \TeX2page understands many of the commands of
-plain \TeX\ and
-\LaTeX.\f{%
+plain \TeX,
+\LaTeX, Eplain~\cite{eplain}, OPmac~\cite{opmac}, and
+`manmac`~\cite[app.~E]{texbook}.\f{%
 %
-\index{footnote@\p{\footnote}}
+\index{footnote@`\footnote`}
 \TeX2page processes both plain \TeX\
 and \LaTeX\ commands, without the need for a format file
 parameter.  It can even process documents written in a
@@ -470,7 +471,7 @@ scenario, with \LaTeX\ users frequently using plain \TeX\
 commands, and plain \TeX\ users frequently implementing
 their own version of sectioning and other commands
 using the \LaTeX\ names. In the few cases where the same
-command name (e.g., \p{\footnote}) is used in both
+command name (e.g., `\footnote`) is used in both
 formats but with differing behavior, \TeX2page will
 choose the correct behavior based on which format it
 thinks the overall document is in.  The plain \TeX\ and
@@ -482,17 +483,19 @@ It
 uses this understanding to convert a \TeX\ document to
 its HTML version, much the same way that \TeX\ converts
 the same  document into its DVI version.
+In addition to usual smörgåsbord of sectioning, itemization and
+enumeration macros,
 \TeX2page also recognizes some commonly used commands
 that are not part of the formats but
 are loaded from \LaTeX\ packages (e.g.,
-\p{color.sty}, \p{epsfig.sty}, \p{graphicx.sty},
-\p{path.sty},
-\p{verbatim.sty})
-or from external macro
-files (e.g., \p{btxmac.tex}, \p{eplain.tex}~\cite{eplain}, \p{opmac.tex}~\cite{opmac},
-\p{epsf.tex}).
+`color.sty`, `epsfig.sty`, `graphicx.sty`,
+`path.sty`,
+`verbatim.sty`)
+or other external macro
+files (e.g., `btxmac.tex`, `eplain.tex`, `opmac.tex`,
+`epsf.tex`).
 
-%With the aid of a macro file \p{texi2p.tex}, \TeX2page
+%With the aid of a macro file `texi2p.tex`, \TeX2page
 %can also process Texinfo documents~\cite{texinfo}.
 
 While \TeX2page recognizes many commonly used commands,
@@ -503,15 +506,15 @@ math is translated as text and not image
 (p.~\ref{mathflag})), \TeX2page
 simply types the command’s name without the leading
 escape character.  This is sometimes a good choice, as
-in the following text (where \p{\sin} and \p{\cos} are not
+in the following text (where `\sin` and `\cos` are not
 explicitly recognized by \TeX2page):
 \let\TZPmathtext=1
 
-\p{
+\begintt
 $$\sin^2 x + \cos^2 x = 1$$
-}
-
-\n This becomes
+\endtt
+%
+This becomes
 
 $$\sin^2 x + \cos^2 x = 1$$
 
@@ -520,12 +523,12 @@ $$\sin^2 x + \cos^2 x = 1$$
 
 If in non-math mode, \TeX2page simply ignores commands
 it doesn’t understand.  This is also usually a good
-thing, as commands like \p{\leavevmode}, \p{\/}, and
-\p{\-} are best translated into HTML as nothing at all.
+thing, as commands like `\leavevmode`, `\/`, and
+`\-` are best translated into HTML as nothing at all.
 
 \TeX2page ignores calls to include external \LaTeX\
-packages: These are files with extension \p{.sty} and
-are loaded with \p{\usepackage} or \p{\input}.  If the
+packages: These are files with extension `.sty` and
+are loaded with `\usepackage` or `\input`.  If the
 commands offered by these packages are not already
 recognized by \TeX2page, they will be ignored too, and
 often this is not a problem.  E.g., you can use a
@@ -545,12 +548,12 @@ thereby permitting a vast cornucopia of characters
 to be entered verbatim (i.e.,
 without the aid of \TeX\ commands) in the source document.  \TeX2page
 follows modern practice in typesetting Unicode characters as themselves
-(provided of course they haven’t been deliberately \p{\catcode}’d to
+(provided of course they haven’t been deliberately `\catcode`’d to
 mean something special).
 
-\index{char@\p{\char}}
+\index{char@`\char`}
 In particular, \TeX2page, like \TeX,
-recognizes the \p{\char} command, followed by a \TeX\ number $n$, as a
+recognizes the `\char` command, followed by a \TeX\ number $n$, as a
 directive to output the character $n$ in the current font — but
 \TeX2page assumes a Unicode font is meant.
 You may need to use conditionals
@@ -562,7 +565,7 @@ DVI, if your \TeX\ does not use a Unicode font.
 \xrdef{htmlonly}
 \TeX2page will attempt gamely to process any \TeX\
 definitions that you use in your document or in
-external macro files without the extension \p{.sty},
+external macro files without the extension `.sty`,
 but it may be a good idea to have them explicitly
 ignored, if these
 macros that are print-specific, or if
@@ -571,30 +574,30 @@ to have \TeX2page ignore such fragments in your document
 is  to use
 \TeX\ conditionals, and indeed to exploit the
 fact that \TeX2page does not know certain \TeX\ commands
-such as \p{\shipout}:
+such as `\shipout`:
 
-\index{ifx@\p{\ifx}}
-\index{shipout@\p{\shipout}}
-\index{else@\p{\else}}
-\index{fi@\p{\fi}}
-\p{
+\index{ifx@`\ifx`}
+\index{shipout@`\shipout`}
+\index{else@`\else`}
+\index{fi@`\fi`}
+\begintt
 \ifx\shipout\UnDeFiNeD
   ... |meta[for HTML only] ...
 \else
   ... |meta[for DVI only] ...
 \fi
-}
+\endtt
 
-\index{htmlonly@\p{\htmlonly}}
-\index{endhtmlonly@\p{\endhtmlonly}}
+\index{htmlonly@`\htmlonly`}
+\index{endhtmlonly@`\endhtmlonly`}
 \n For ordinary text, this is good enough, but
 if the HTML portion contains calls to raw HTML (see
 below) or raw
 Scheme (see p.~\ref{eval}), it is advisable to wrap it inside
 an environment called
-\p{\htmlonly}:
+`\htmlonly`:
 
-\p{
+\begintt
 \ifx\shipout\UnDeFiNeD
   \htmlonly
     ... |meta[for HTML only] ...
@@ -602,66 +605,66 @@ an environment called
 \else
   ... |meta[for DVI only] ...
 \fi
-}
-
-\n Failing to use \p{\htmlonly} does not affect
+\endtt
+%
+Failing to use `\htmlonly` does not affect
 \TeX2page’s operation, but may cause problems when \TeX\
 is called on the same document.
-Incidentally, the fact that \p{\htmlonly} and \p{\endhtmlonly}
+Incidentally, the fact that `\htmlonly` and `\endhtmlonly`
 have no definition in \TeX\ is quite all right, as \TeX\
-will only see the else branch of the \p{\ifx}.
+will only see the else branch of the `\ifx`.
 
 Now, let’s say you want to have  your document load the macro file
-\p{manmac.tex}, but in a way that \TeX2page will ignore
+`manmac.tex`, but in a way that \TeX2page will ignore
 it.  Use:
 
-\index{input@\p{\input}}
-\p{
+\index{input@`\input`}
+\begintt
 \ifx\shipout\UnDeFiNeD
 \else
   \input manmac
 \fi
-}
-
-\n However, there will also be many  commands that
+\endtt
+%
+However, there will also be many  commands that
 you do not want ignored in the HTML.  In such
 cases, while you may not be able to use the print-specific
 definition, you should nevertheless furnish a definition that \TeX2page
 can handle.  For instance, although it may be acceptable
-to ignore the print-specific macros of \p{manmac}, the
-\p{\bull} macro defined in \p{manmac} should be
+to ignore the print-specific macros of `manmac`, the
+`\bull` macro defined in `manmac` should be
 translated by \TeX2page.  The following is a possible
 definition for \TeX2page:
 
-\index{def@\p{\def}}
-\p{
+\index{def@`\def`}
+\begintt
 \def\bull{{\bf *}}
-}
-
-\n Of course, we want this definition to be seen only
+\endtt
+%
+Of course, we want this definition to be seen only
 by \TeX2page, as we don’t want to override the
-original, more sophisticated \p{\vrule}-based definition as seen
+original, more sophisticated `\vrule`-based definition as seen
 by \TeX.
 We therefore make our
 definition HTML-only
 using a conditional:
 
-\p{
+\begintt
 \ifx\shipout\UnDeFiNeD % HTML only
   \def\bull{{\bf *}}
 \fi
-}
+\endtt
 
-\index{rawhtml@\p{\rawhtml}}
-\index{endrawhtml@\p{\endrawhtml}}
+\index{rawhtml@`\rawhtml`}
+\index{endrawhtml@`\endrawhtml`}
 Note that the HTML-only text continues to use \TeX\ syntax.
 To specify some of this text as {\em raw} HTML, enclose it
-in \p{\rawhtml} \p{...} \p{\endrawhtml}.   With
-\p{\rawhtml}, we can
+in `\rawhtml` `...` `\endrawhtml`.   With
+`\rawhtml`, we can
 spruce up the
-HTML-only definition of \p{\bull}:
+HTML-only definition of `\bull`:
 
-\p{
+\begintt
 \ifx\shipout\UnDeFiNeD % HTML only
   \htmlonly
   \def\bull{{\bf
@@ -669,20 +672,20 @@ HTML-only definition of \p{\bull}:
   }}
   \endhtmlonly
 \fi
-}
+\endtt
 
-\index{texi2p.tex@\p{texi2p.tex}}
+\index{texi2p.tex@`texi2p.tex`}
 \index{Texinfo}
 One can put HTML-only definitions in separate files
 that are loaded just like regular \TeX\ macro files.
-Indeed, one such external file, \p{texi2p.tex}, is used
+Indeed, one such external file, `texi2p.tex`, is used
 by \TeX2page to process Texinfo
 documents.  Texinfo~\cite{texinfo} is another \TeX\
-format, and files using this format \p{\input texinfo}
+format, and files using this format `\input texinfo`
 as the first thing they do.  \TeX2page takes that as a
 cue to
-load \p{texi2p.tex}, which provides \TeX2page-suitable
-definitions for the Texinfo commands.  \p{texi2p.tex}
+load `texi2p.tex`, which provides \TeX2page-suitable
+definitions for the Texinfo commands.  `texi2p.tex`
 is included in the \TeX2page distribution.
 
 \beginsection Paper and screen
@@ -690,7 +693,7 @@ is included in the \TeX2page distribution.
 One could use HTML-only and DVI-only regions to cordon off
 any text at all, not just macro definitions.  E.g.,
 
-\p{
+\begintt
 The paper book is
 \ifx\shipout\UnDeFiNeD % HTML only
 an antiquated
@@ -698,14 +701,13 @@ an antiquated
 a time-tested
 \fi
 technology.
-}
-
-Use of these directives regions may seem to miss the point of
-\TeX2page.  \p{\ifx\shipout\UnDeFiNeD} violates the
+\endtt
+Use of these directives may seem to miss the point of
+\TeX2page.  `\ifx\shipout\UnDeFiNeD` violates the
 principle of avoiding  writing {\em two} texts, one
-for HTML, the other for DVI.  \p{\rawhtml} violates the
+for HTML, the other for DVI.  `\rawhtml` violates the
 principle of avoiding writing raw HTML at all.
-\p{\rawhtml} in particular is dangerous because it voids
+`\rawhtml` in particular is dangerous because it voids
 the guarantee that the output pages will be valid HTML.
 Nevertheless, these directives are often useful, especially when the
 text will profit from exploiting the presentational differences between
@@ -714,48 +716,48 @@ HTML and DVI.
 \beginsection The {.t2p} file
 
 \xrdef{t2p-file}
-\index{t2p file@\p{.t2p} file}
+\index{t2p file@`.t2p` file}
 %
 Before processing a \TeX\ document, \TeX2page will
 automatically load a file
 with the same basename as the \TeX\ main file but with
-extension \p{.t2p}, {\em if} this file exists.  This
+extension `.t2p`, {\em if} this file exists.  This
 is a good place to put HTML-specific definitions for
 the document without making  changes in the document
 itself.
 
-\p{.t2p} files are especially valuable when HTMLizing
+`.t2p` files are especially valuable when HTMLizing
 legacy or third-party documents without compromising
 their authenticity, integrity, and timestamp.
 
-Note that the definitions in the \p{.t2p} file
+Note that the definitions in the `.t2p` file
 are processed {\em before} the main file.  But it often
 makes sense to activate these definitions sometime
-later.  E.g., activating the \p{.t2p} definitions {\em
+later.  E.g., activating the `.t2p` definitions {\em
 after} the preamble in a \LaTeX\ document allows you to
 redefine the preamble macros in a manner that is
 appropriate for HTML.  Here is a technique for
 accomplishing this:
 
-\index{let@\p{\let}}
-\index{document@\p{\document}}
+\index{let@`\let`}
+\index{document@`\document`}
 %
-\p{
+\begintt
 \let\PRIMdocument\document
 
 \def\document{
   ... |meta[HTML-specific definitions] ...
   \PRIMdocument}
-}
-
-\n This code, which goes in the \p{.t2p} file,
-redefines the \p{\document} command to include a
+\endtt
+%
+This code, which goes in the `.t2p` file,
+redefines the `\document` command to include a
 hook that loads some {\em HTML-specific definitions}.
-Since the \p{\document} command is called right after
+Since the `\document` command is called right after
 the preamble, the definitions introduced by  the hook
 will shadow the preamble macros, as intended.
 
-Sample \p{.t2p} files may be found in the \TeX2page
+Sample `.t2p` files may be found in the \TeX2page
 distribution.
 
 \beginchapter  3  \TeX2page commands
@@ -790,23 +792,23 @@ without actually loading said files.  \TeX2page will be
 indulgent, but plain \TeX\ and \LaTeX\ won’t.
 In this case,
 simply loading the macro files should be
-enough.    Thus, a plain \TeX\ document using the \p{\cite}
-command should load \p{btxmac.tex}, and   a \LaTeX\ document that uses
-the \p{\color} and \p{\definecolor} commands should load the package
-\p{color.sty}.
+enough.    Thus, a plain \TeX\ document using the `\cite`
+command should load `btxmac.tex`, and   a \LaTeX\ document that uses
+the `\color` and `\definecolor` commands should load the package
+`color.sty`.
 
 \xrdef{miniltx}
-\index{miniltx.tex@\p{miniltx.tex}}
+\index{miniltx.tex@`miniltx.tex`}
 %
 A plain \TeX\ document using macros  provided by a \LaTeX\
 package may also be able to load the package in some cases, with
-the aid of the \p{miniltx.tex} macro file.  To load
-\p{color.sty}, for instance:
+the aid of the `miniltx.tex` macro file.  To load
+`color.sty`, for instance:
 
-\index{expandafter@\p{\expandafter}}
-\index{csname@\p{\csname}}
-\index{endcsname@\p{\endcsname}}
-\p{
+\index{expandafter@`\expandafter`}
+\index{csname@`\csname`}
+\index{endcsname@`\endcsname`}
+\begintt
 \expandafter\def\csname Gin@driver\endcsname{pdftex.def}
 % The above may not be needed in newer \TeX\ distributions,
 % which will load the appropriate driver automatically.
@@ -816,29 +818,29 @@ the aid of the \p{miniltx.tex} macro file.  To load
 \input miniltx
 \input color.sty
 \resetatcatcode
-}
+\endtt
 
 Although the above is only meant for \TeX,
 it is not necessary (but not incorrect either) to wrap it inside
-\p{\ifx\shipout\UnDeFiNeD\else} \p{...} \p{\fi}, as
+`\ifx\shipout\UnDeFiNeD\else` `...` `\fi`, as
 \TeX2page knows enough to skip such loads.
 
 Other useful \LaTeX\ packages that can be loaded into plain
-\TeX\ using \p{miniltx} are \p{graphicx.sty} and
-\p{url.sty}.  (Unfortunately, one has to say
-\p{\expandafter\def\expandafter\+\expandafter{\+}}
-before \p{\input}ting \p{url.sty}.)
+\TeX\ using `miniltx` are `graphicx.sty` and
+`url.sty`.  (Unfortunately, one has to say
+`\expandafter\def\expandafter\+\expandafter{\+}`
+before `\input`ting `url.sty`.)
 
-It is possible to \p{\input}
-several \p{.sty} files between the calls to \p{\input} \p{miniltx} and
-\p{\resetatcatcode}.  However, \p{miniltx} is a bit of a compromise, and it
-causes each \p{.sty} file to re-evaluate the supposedly per-document commands
+It is possible to `\input`
+several `.sty` files between the calls to `\input` `miniltx` and
+`\resetatcatcode`.  However, `miniltx` is a bit of a compromise, and it
+causes each `.sty` file to re-evaluate the supposedly per-document commands
 in the driver file
-(e.g., \p{pdftex.def}), which can cause infinite loops.  This is avoided by
-preceding the loading of the second and subsequent \p{.sty}
-files with \p{\let\color\@ldc@l@r}.  E.g.,
+(e.g., `pdftex.def`), which can cause infinite loops.  This is avoided by
+preceding the loading of the second and subsequent `.sty`
+files with `\let\color\@ldc@l@r`.  E.g.,
 
-\p{
+\begintt
 \input miniltx
 \input color.sty
   \let\color\@ldc@l@r
@@ -847,50 +849,50 @@ files with \p{\let\color\@ldc@l@r}.  E.g.,
   \expandafter\def\expandafter\+\expandafter{\+}
 \input url.sty
 \resetatcatcode
-}
+\endtt
 
-The \LaTeX\ package \p{path.sty} can be
-loaded into plain \TeX\ directly, without \p{miniltx}.
+The \LaTeX\ package `path.sty` can be
+loaded into plain \TeX\ directly, without `miniltx`.
 
 \beginsection tex2page.tex and tex2page.sty
 
-\index{tex2page.tex@\p{tex2page.tex}}
-\index{tex2page.sty@\p{tex2page.sty}}
+\index{tex2page.tex@`tex2page.tex`}
+\index{tex2page.sty@`tex2page.sty`}
 %
 A collection of workable \TeX\ definitions for \TeX2page commands is
-provided in the macro file \p{tex2page.tex} in the
+provided in the macro file `tex2page.tex` in the
 \TeX2page distribution.  These allow your document to be
 processed by \TeX, even if they do not (and sometimes
 should not) have the same effect in the DVI output as
 they do in the HTML output.  It
 can be included in your \TeX\ document as
 
-\p{
+\begintt
 \input tex2page
-}
-
-\n The file is also available
-under the \LaTeX-friendlier name \p{tex2page.sty}, and can be
+\endtt
+%
+The file is also available
+under the \LaTeX-friendlier name `tex2page.sty`, and can be
 loaded into \LaTeX\ with:
 
-\p{
+\begintt
 \usepackage{tex2page} % if document is in |LaTeX
-}
+\endtt
 
-The macros in \p{tex2page.tex} are just sample
+The macros in `tex2page.tex` are just sample
 definitions of the \TeX2page commands missing in \TeX.
-You can either  choose not to use these commands or to
+You can either choose not to use these commands or to
 override their definitions with your own, better,
 definitions.
 
-\index{tex2page.tex@\p{tex2page.tex}!not using}
+\index{tex2page.tex@`tex2page.tex`!not using}
 
 Note that \TeX2page itself does not {\em need} the file
-\p{tex2page.tex}.  Rather, plain \TeX\ and \LaTeX\ need the
-\p{tex2page.tex} macros in order to process files
+`tex2page.tex`.  Rather, plain \TeX\ and \LaTeX\ need the
+`tex2page.tex` macros in order to process files
 written using the extra commands supported by \TeX2page.
 If your document does not use these extra
-commands, then you can do without \p{tex2page.tex}.
+commands, then you can do without `tex2page.tex`.
 
 \beginchapter   4 \TeX\ commands with a difference
 
@@ -905,21 +907,21 @@ specially.  We now turn to these commands.
 
 \xrdef{eject}
 \index{page breaks, forcing good}
-\index{eject@\p{\eject}}
-\index{vfill@\p{\vfill}}
-\index{chapter@\p{\chapter}}
+\index{eject@`\eject`}
+\index{vfill@`\vfill`}
+\index{chapter@`\chapter`}
 %
 Unlike \TeX, \TeX2page does not automatically split the document into
 pages at regular vertical lengths.
-\TeX2page will start a new HTML page only at \p{\chapter}
+\TeX2page will start a new HTML page only at `\chapter`
 commands and at explicit page break commands such as
-\p{\eject} or \LaTeX’s \p{\clearpage}. It is possible to disable
-pagebreaks entirely with the \p{\TZPsinglepage} flag
+`\eject` or \LaTeX’s `\clearpage`. It is possible to disable
+pagebreaks entirely with the `\TZPsinglepage` flag
 (p.~\ref{singlepage}).
 
-(It is advisable to place a \p{\vfill} before
-\p{\eject} so the DVI document doesn’t cause the
-pre-\p{\eject} text  to increase its
+(It is advisable to place a `\vfill` before
+`\eject` so the DVI document doesn’t cause the
+pre-`\eject` text  to increase its
 interparagraph space unsightlily in order to fill
 the physical page.)
 
@@ -935,49 +937,49 @@ If the document has a table of contents or
 an index, links to the pages containing these elements are
 also included in the
 navigation bar.  The nav bar is customizable if you set the
-\p{\TZPtexlayout} flag (p.~\ref{texlayout}).
+`\TZPtexlayout` flag (p.~\ref{texlayout}).
 
 \beginsection Table of contents
 
 \index{table of contents}
-\index{tableofcontents@\p{\tableofcontents}}
-\index{readtocfile@\p{\readtocfile}}
-\index{tocdepth@\p{\tocdepth}}
+\index{tableofcontents@`\tableofcontents`}
+\index{readtocfile@`\readtocfile`}
+\index{tocdepth@`\tocdepth`}
 %
-\TeX2page recognizes \LaTeX’s \p{\tableofcontents} and
-Eplain’s \p{\readtocfile}, both of which list the table
+\TeX2page recognizes \LaTeX’s `\tableofcontents` and
+Eplain’s `\readtocfile`, both of which list the table
 of contents (ToC). Each section name in the ToC links to the
 page on which the section occurs.  In \LaTeX, the ToC
 lists the numbered section names in the document, upto
-the depth specified by the count \p{\tocdepth}.
+the depth specified by the count `\tocdepth`.
 
-\index{writenumberedtocline@\p{\writenumberedtocline}}
-\index{addcontentsline@\p{\addcontentsline}}
+\index{writenumberedtocline@`\writenumberedtocline`}
+\index{addcontentsline@`\addcontentsline`}
 %
 In formats other than \LaTeX, the user would have to
 define section commands that explicitly wrote to the
 ToC.  A helper macro for this is
-\p{\writenumberedtocline}, whose three arguments are
+`\writenumberedtocline`, whose three arguments are
 the section’s depth, number, and heading, all of which
-can be empty (\p{{}}).  Your \TeX\ format may have its
+can be empty (`{}`).  Your \TeX\ format may have its
 own macro for writing lines into the ToC
-(\p{\writenumberedtocline} is the Eplain name for this
+(`\writenumberedtocline` is the Eplain name for this
 macro).  \TeX2page also understands \LaTeX’s
-\p{\addcontentsline}.  For other formats, if you intend
+`\addcontentsline`.  For other formats, if you intend
 to use their explicit ToC addition macro, you will need
 to furnish an HTML-only definition for it in terms of
-\p{\writenumberedtocline}.
+`\writenumberedtocline`.
 
 \beginsection Footnotes
 
 \index{footnotes}
-\index{footnote@\p{\footnote}}
-\index{vfootnote@\p{\vfootnote}}
-\index{numberedfootnote@\p{\numberedfootnote}}
+\index{footnote@`\footnote`}
+\index{vfootnote@`\vfootnote`}
+\index{numberedfootnote@`\numberedfootnote`}
 Both unnumbered and numbered footnotes — plain \TeX’s
-\p{\footnote} and \p{\vfootnote},
-LaTeX’s \p{\footnote}, Eplain’s
-\p{\numberedfootnote} — are recognized.
+`\footnote` and `\vfootnote`,
+LaTeX’s `\footnote`, Eplain’s
+`\numberedfootnote` — are recognized.
 They are translated as in DVI (modulo what constitutes
 a page), but additionally, the footnote mark in the text body
 is a link to the footnote mark in the footnote text,
@@ -989,37 +991,37 @@ Since Plain \TeX\ does not provide an automatically
 numbering footnote macro, users can define their own as
 follows:
 
-\p{
+\begintt
 \newcount\footnotenumber
 
 \def\numberedfootnote{%
   \global\advance\footnotenumber by 1
   \footnote{$^{\the\footnotenumber}$}}
-}
-
-\n This definition could be made \TeX-only, since
-\TeX2page already recognizes \p{\numberedfootnote}.
+\endtt
+%
+This definition could be made \TeX-only, since
+\TeX2page already recognizes `\numberedfootnote`.
 However, the \TeX\ programming in this definition is
 recognized by \TeX2page, so it does not matter if it
 overrides \TeX2page’s internal definition.
 
 Indeed, one could define a
 more complicated macro such as the following
-\p{\sfootnote}, which
+`\sfootnote`, which
 produces symbolic rather than
 numeric footnote marks, cycling through a set of
 nine symbols:
 
-\index{newcount@\p{\newcount}}
-\index{def@\p{\def}}
-\index{ifcase@\p{\ifcase}}
-\index{or@\p{\or}}
-\index{fi@\p{\fi}}
-\index{global@\p{\global}}
-\index{advance@\p{\advance}}
-\index{ifnum@\p{\ifnum}}
-\index{the@\p{\the}}
-\p{
+\index{newcount@`\newcount`}
+\index{def@`\def`}
+\index{ifcase@`\ifcase`}
+\index{or@`\or`}
+\index{fi@`\fi`}
+\index{global@`\global`}
+\index{advance@`\advance`}
+\index{ifnum@`\ifnum`}
+\index{the@`\the`}
+\begintt
 \def\fnsymbol#1{%
   % #1 is between 1 and 9 inclusive
   \ifcase#1\or
@@ -1031,7 +1033,7 @@ nine symbols:
   \global\advance\footnotenumber by 1
   \ifnum\footnotenumber>9 \global\footnotenumber=1 \fi
   \footnote{\fnsymbol{\the\footnotenumber}}}
-}
+\endtt
 
 \TeX2page produces the expected output for
 all the footnote macros, including the user-defined
@@ -1039,30 +1041,30 @@ ones.
 
 \beginsection Bibliographies
 
-\index{cite@\p{\cite}}
+\index{cite@`\cite`}
 \index{BibTeX@\BibTeX}
 \index{bibliographies}
 %
 \TeX2page
 can use the external program \BibTeX~\cite{latex,bibtex} to
 generate bibliographies from bibliographic database
-(\p{.bib}) files.  The bibliography commands —
-\p{\cite} and the rest — are included in \LaTeX, but
+(`.bib`) files.  The bibliography commands —
+`\cite` and the rest — are included in \LaTeX, but
 for Plain \TeX\ must be explicitly loaded via the macro
-file \p{btxmac.tex}.  In HTML, the citation created by
-\p{\cite} is a link to the corresponding entry in the
+file `btxmac.tex`.  In HTML, the citation created by
+`\cite` is a link to the corresponding entry in the
 bibliography.
 
-\index{thebibliography@\p{thebibliography}}
+\index{thebibliography@`thebibliography`}
 Bibliographies can also be manually embedded in the
-document via the \p{thebibliography} environment,
+document via the `thebibliography` environment,
 without the need for the \BibTeX\ program.  For
-more details, see the \LaTeX\ manual~\cite[sec~4.3.2,
-p~71]{latex}.
+more details, see the \LaTeX\ manual~\cite[sec.~4.3.2,
+p.~71]{latex}.
 
 \beginsection Index generation
 
-\index{index@\p{\index}}
+\index{index@`\index`}
 \index{MakeIndex}
 \index{indices}
 %
@@ -1070,13 +1072,13 @@ p~71]{latex}.
 MakeIndex~\cite{ind,makeindex} to generate indices.
 \TeX2page’s index-generation feature follows the same
 conventions as traditionally used with \TeX\ and its
-derived packages~\cite[sec.~4.5 \& appendix~A]{latex}.
+derived packages~\cite[sec.~4.5 \& app.~A]{latex}.
 
-\index{printindex@\p{\printindex}}
-\index{inputindex@\p{\inputindex}}
+\index{printindex@`\printindex`}
+\index{inputindex@`\inputindex`}
 The sorted index is inserted in the document with a
-command such \LaTeX’s \p{\printindex} or the more
-general \p{\inputindex}.  The latter does not include a
+command such \LaTeX’s `\printindex` or the more
+general `\inputindex`.  The latter does not include a
 section header, so you can print your index your own
 way, e.g., with a different section type and title, and
 with some introductory prose.
@@ -1086,7 +1088,7 @@ of course the HTML page numbers, and are furthermore
 links to them.  Two things need be noted:
 
 \item(i) The link in the index goes directly to the spot where
-the corresponding \p{\index} command was called.  This
+the corresponding `\index` command was called.  This
 is convenient, especially as the target HTML page could
 be arbitrarily long, and it may not be as easy to hunt
 for the occurrence of the indexed item as on a paper
@@ -1104,61 +1106,61 @@ subsequent occurrences to distinguish them visually.
 
 \beginsection Internal cross-references
 
-\index{label@\p{\label}}
-\index{ref@\p{\ref}}
-\index{pageref@\p{\pageref}}
+\index{label@`\label`}
+\index{ref@`\ref`}
+\index{pageref@`\pageref`}
 \index{cross-references!internal}
-\LaTeX’s \p{\label} and \p{\ref} produce internal
-cross-references in the HTML.  The \p{\label} {\em anchors}
-a location in the document, and a \p{\ref} anywhere
+\LaTeX’s `\label` and `\ref` produce internal
+cross-references in the HTML.  The `\label` {\em anchors}
+a location in the document, and a `\ref` anywhere
 else in the document links to it.  The link text used
-by \p{\ref} is the number of closest section (or footnote or other
-document fragment) that surrounds the \p{\label}.
-The \LaTeX\ \p{\pageref} takes a label and produces the
+by `\ref` is the number of closest section (or footnote or other
+document fragment) that surrounds the `\label`.
+The \LaTeX\ `\pageref` takes a label and produces the
 number of the page where the label was defined.  In
 HTML, this is the HTML page number, and it is a link.
 
-\index{xrtag@\p{\xrtag}}
+\index{xrtag@`\xrtag`}
 For formats that do not assume the presence of numbered
-sections as intensely as \LaTeX, \TeX2page also recognizes the \p{\xrtag}
-command as a generator of anchors.  Where \p{\label}
-uses the nearest section number, \p{\xrtag} requires
+sections as intensely as \LaTeX, \TeX2page also recognizes the `\xrtag`
+command as a generator of anchors.  Where `\label`
+uses the nearest section number, `\xrtag` requires
 an explicit link text as its second argument.
 
-\p{
+\begintt
 \xrtag{|meta[alabel]}{|meta[alabelvalue]}
-}
-
-\n A reference to this tag, i.e.,
+\endtt
+%
+A reference to this tag, i.e.,
 \p{\ref{|meta[alabel]}}, will typeset as
 \p{|meta[alabelvalue]}, which will link to the location
-identified by the \p{\xrtag}.\f{%
+identified by the `\xrtag`.\f{%
 %
-Eplain offers a version of \p{\xrtag} which it calls
-\p{\definexref}.  \TeX2page recognizes Eplain’s \p{\refn} and
-\p{\xrefn} as synonyms for the \p{\ref} described
-above.  Eplain also has a \p{\ref} macro, but it
-behaves differently than a \LaTeX-like \p{\ref}.}
+Eplain offers a version of `\xrtag` which it calls
+`\definexref`.  \TeX2page recognizes Eplain’s `\refn` and
+`\xrefn` as synonyms for the `\ref` described
+above.  Eplain also has a `\ref` macro, but it
+behaves differently than a \LaTeX-like `\ref`.}
 
 \beginsection Color
 
 \xrdef{color}
-\index{color@\p{\color}}
-\index{definecolor@\p{\definecolor}}
-\TeX2page recognizes the macros \p{\color} and
-\p{\definecolor}~\cite{latex-graphicx}.  These are provided by the \LaTeX\
-package \p{color.sty}, which can also be loaded into
-plain \TeX\ using \p{miniltx}.  E.g.,
+\index{color@`\color`}
+\index{definecolor@`\definecolor`}
+\TeX2page recognizes the macros `\color` and
+`\definecolor`~\cite{latex-graphicx}.  These are provided by the \LaTeX\
+package `color.sty`, which can also be loaded into
+plain \TeX\ using `miniltx`.  E.g.,
 
-\p{
+\begintt
 {\color[gray]{.17} light gray},
 {\color[rgb]{.69, .19, .38} maroon},
 {\color[cmyk]{0, .89, .94, .28} brick red},
 {\color[RGB]{220, 20, 60} crimson},
 and {\color{blue} blue}.
-}
-
-\n produces:
+\endtt
+%
+produces:
 {\color[gray]{.75} light gray},
 {\color[rgb]{.69, .19, .38} maroon},
 {\color[cmyk]{0, .89, .94, .28} brick red},
@@ -1166,55 +1168,55 @@ and {\color{blue} blue}.
 %{\color[named]{magenta} magenta},
 and {\color{blue} blue}.
 
-\p{\definecolor} defines new color names, e.g.,
+`\definecolor` defines new color names, e.g.,
 
-\p{
+\begintt
 \definecolor{BrickRed}{cmyk}{0, .89, .94, .28}
-}
+\endtt
 
-\index{x11rgb.tex@\p{x11rgb.tex}}
+\index{x11rgb.tex@`x11rgb.tex`}
 Most color-capable browsers support the very large list
-of named colors in the X11 file \p{rgb.txt}.  In order
+of named colors in the X11 file `rgb.txt`.  In order
 for your printed document to have access to these same
 color names, definitions for them are provided in the
-\TeX\ macro file \p{x11rgb.tex}, included in the \TeX2page
+\TeX\ macro file `x11rgb.tex`, included in the \TeX2page
 distribution.
 
-\index{dvipsnam.def@\p{dvipsnam.def} (\LaTeX\ file)}
+\index{dvipsnam.def@`dvipsnam.def` (\LaTeX\ file)}
 
-\p{cmyk} definitions for the 68 standard DVIPS
+`cmyk` definitions for the 68 standard DVIPS
 color names are available in the standard \LaTeX\ macro
-file \p{dvipsnam.def}.  These are {\em not} predefined
-by browsers, so you will need to load \p{dvipsnam.def}
+file `dvipsnam.def`.  These are {\em not} predefined
+by browsers, so you will need to load `dvipsnam.def`
 explicitly if your HTML document is to benefit from
 them.
 
 \beginchapter 5 Referring to external documents
 
-\index{urlhd@\p{\urlhd}}
+\index{urlhd@`\urlhd`}
 \index{cross-references!external}
 \index{URLs}
 %
 The command
 
-\p{
+\begintt
 \urlhd{|meta[URL]}{|meta[HTML text]}{|meta[DVI text]}
-}
-
-\n lets
+\endtt
+%
+lets
 you link to arbitrary URLs, not just to labels within
 your document (although it can do that too).  In the
 HTML output, a hyperlink to ‘\p{|meta[URL]}’ is created, with
 the link text being ‘\p{|meta[HTML text]}’.  In the DVI
 output, the part ‘\p{|meta[DVI text]}’ is output.  Example:
 
-\p{
+\begintt
 For more details, consult
 \urlhd{http://www.ithaka.org/odyssey.html}{the Odyssey}{the
 {\it Odyssey\/} document in the Ithaka repository}.
-}
-
-\n In the DVI output, this becomes
+\endtt
+%
+In the DVI output, this becomes
 
 \quote
 
@@ -1235,68 +1237,68 @@ Ithaka repository.
 “{\em the Odyssey}” is an HTML link to the site
 \path|http://www.ithaka.org/odyssey.html|.
 
-\p{\urlhd} is named to be mnemonic for its
+`\urlhd` is named to be mnemonic for its
 argument sequence, viz., the {\em URL}, followed by
 the {\em H}tml text, followed by the {\em D}vi
 text.
 
-Note that you can use \p{\urlhd} for cross-referencing
+Note that you can use `\urlhd` for cross-referencing
 within the document also.  The URL in such cases will
-be a label as specified by a \p{\label} or a
-\p{\xrtag} command, but should add a ‘\p{#}’ prefix.  E.g.,
+be a label as specified by a `\label` or a
+`\xrtag` command, but should add a ‘`#`’ prefix.  E.g.,
 
-\p{
+\begintt
 See \urlhd{#hairy}{below}{section~\ref{hairy}}
 for further details.
-}
-
-\n where the further details are described in a section
-annotated with \p{\label{hairy}}.  Assume this
+\endtt
+%
+where the further details are described in a section
+annotated with `\label{hairy}`.  Assume this
 section is numbered 21.  Then, the reference typesets
 as “See section 21 \dots” in the DVI output and “See
 {\em below} \dots” in the HTML output (with {\em below}
 being a link).  In contrast, if we had written
 
-\p{
+\begintt
 See section~\ref{hairy} for further details.
-}
-
-\n we would have had “See section 21 \dots” in both
-DVI and HTML.   \p{\urlhd} is thus more flexible
-than \p{\ref}.
+\endtt
+%
+we would have had “See section 21 \dots” in both
+DVI and HTML.   `\urlhd` is thus more flexible
+than `\ref`.
 
 Because of page breaks in the HTML output
 (p.~\ref{eject}), it is possible that a label’s
 definition and the references to it do not ultimately
 sit on the same {\em physical} HTML page.
-Nevertheless, your \TeX\ source can use \p{#tag}-style
+Nevertheless, your \TeX\ source can use `#tag`-style
 URLs to refer to anchors anywhere within it.  \TeX2page
-will automatically convert a \p{#tag}-style URL to its
+will automatically convert a `#tag`-style URL to its
 correct fully qualified equivalent.
 
 \beginsection Common hyperlink abbreviations
 
-\index{href@\p{\href}}
-In some cases, \p{\urlhd}’s second and third arguments may be mere repetitions
+\index{href@`\href`}
+In some cases, `\urlhd`’s second and third arguments may be mere repetitions
 of a preceding argument.  For such cases, \TeX2page
 recognizes some convenient abbreviations, viz.,
-\p{\urlh}, \p{\urlp}, and \p{\url}.  (A version of
-\p{\urlh} is provided under the name \p{\href} by the \LaTeX\ package
-\p{hyperref.sty}, and \p{\url} is provided by the
-\LaTeX\ package \p{url.sty}.  \p{\url.sty} is loadable in
-plain \TeX\ with \p{miniltx}.)
+`\urlh`, `\urlp`, and `\url`.  (A version of
+`\urlh` is provided under the name `\href` by the \LaTeX\ package
+`hyperref.sty`, and `\url` is provided by the
+\LaTeX\ package `url.sty`.  `\url.sty` is loadable in
+plain \TeX\ with `miniltx`.)
 
-\index{urlh@\p{\urlh}}
-\p{\urlh} takes {\em two} arguments.  The first argument is the
+\index{urlh@`\urlh`}
+`\urlh` takes {\em two} arguments.  The first argument is the
 URL, and the second is the descriptive text that is used in
 {\em both} the HTML and the DVI outputs.  For example:
 
-\p{
+\begintt
 \TeX\ is available at
 \urlh{http://www.tug.org}{the TUG website}.
-}
-
-\n produces
+\endtt
+%
+produces
 
 \quote
 
@@ -1307,20 +1309,20 @@ URL, and the second is the descriptive text that is used in
 \n In the HTML output, “the TUG website” is a hyperlink to
 \path|http://www.tug.org|.
 
-\index{\\@\p{\\}!in \p{\urlh}}
-An optional \p{\\} may be used inside \p{\urlh}’s second argument.  The
-text before the \p{\\} is used in both the HTML and the DVI
-outputs.  The text after the \p{\\} is used only in
+\index{\\@`\\`!in `\urlh`}
+An optional `\\` may be used inside `\urlh`’s second argument.  The
+text before the `\\` is used in both the HTML and the DVI
+outputs.  The text after the `\\` is used only in
 the DVI output.  This helps you to specify extra information
 for the DVI output, which may be necessary because the DVI
 output lacks the information implicit in the hyperlink.  For example:
 
-\p{
+\begintt
 \TeX\ is available at
 \urlh{http://www.tug.org}{TUG\\ (\path!tug.org!)}.
-}
-
-\n produces, in the DVI output.
+\endtt
+%
+produces, in the DVI output.
 
 \quote
 
@@ -1331,15 +1333,15 @@ output lacks the information implicit in the hyperlink.  For example:
 \n The HTML output will not mention the parenthesized domain
 name, since the word “TUG” already hyperlinks to it.
 
-\p{\\} is useful for internal cross-references too.  For
-example (assuming the label \p{callcc} refers to section 2.3):
+`\\` is useful for internal cross-references too.  For
+example (assuming the label `callcc` refers to section 2.3):
 
-\p{
+\begintt
 More complicated forms of program control are possible
 using \urlh{#callcc}{{\tt callcc}\\ (section~\ref{callcc})}.
-}
-
-\n produces
+\endtt
+%
+produces
 
 \quote
 
@@ -1352,17 +1354,17 @@ using \urlh{#callcc}{{\tt callcc}\\ (section~\ref{callcc})}.
 section reference will be dropped as redundant, as
 the word “{\tt callcc}” hyperlinks to the relevant section.
 
-An optional \p{\1} may be used after \p{\\} to refer to
-\p{\urlh}’s first argument, i.e.,
+An optional `\1` may be used after `\\` to refer to
+`\urlh`’s first argument, i.e.,
 the URL.
 Example:
 
-\p{
+\begintt
 \TeX\ is available at
 \urlh{http://www.tug.org}{TUG\\ (\1)}.
-}
-
-\n produces
+\endtt
+%
+produces
 
 \quote
 
@@ -1374,13 +1376,13 @@ Example:
 URL is dropped as redundant, as the word “TUG”
 hyperlinks to it.
 
-Finally, the combination of \p{\xrtag} and
-\p{\urlh} is useful for inserting
+Finally, the combination of `\xrtag` and
+`\urlh` is useful for inserting
 internal cross-references in the HTML document
 without affecting the print document.  For example,
 the following text
 
-\p{
+\begintt
 \xrtag{ex1}{ignore}
 \urlh{#ans1}{\bf Exercise 1.} Statement of a problem ...
 
@@ -1388,9 +1390,9 @@ the following text
 
 \xrtag{ans1}{ignore}
 \urlh{#ex1}{\bf Answer 1.} Answer to exercise 1 ...
-}
-
-\n prints as
+\endtt
+%
+prints as
 
 \quote
 
@@ -1406,17 +1408,17 @@ the following text
 HTML, the proclamations “{\bf Exercise 1.}”\ and
 “{\bf Answer 1.}”\ are also helpful hyperlinks to each other.
 
-\index{url@\p{\url}}
-\p{\url} takes just one argument, the URL.  For the
+\index{url@`\url`}
+`\url` takes just one argument, the URL.  For the
 descriptive text, both the HTML and the DVI outputs simply
 use the URL itself.   Example:
 
-\p{
+\begintt
 \TeX\ is available at \url{http://www.tug.org}.
-}
+\endtt
 
-\index{urlp@\p{\urlp}}
-\p{\urlp} takes two arguments.  In the HTML output,
+\index{urlp@`\urlp`}
+`\urlp` takes two arguments.  In the HTML output,
 the first argument is the link text and the second is
 the URL.  In the DVI output, the first argument is
 typeset followed by a space followed by the URL in
@@ -1428,45 +1430,44 @@ parentheses.  \p{\urlp{|meta[text]}{|meta[URL]}} abbreviates
 \index{flags}
 %
 \TeX2page has a handful of flags that you can set to govern the HTML output.
-These flags are \TeX\ control sequences such as
-\p{\TZPcolophondisabletimestamp},
-etc., and are set using \p{\let} or \p{\def} or even \p{\gdef},
-\p{\edef}, or \p{\xdef}.
-(If using one of the \p{\def}s for a boolean flag, only the
-first character in the \p{\def}-body is significant.)
 
-All these \TeX2page flags are named \p{\TZP...}, and as long as
+All these \TeX2page flags are named `\TZP...`, and as long as
 you avoid using these names for other purposes, setting these
 flags should have no effect on the print output.
 
+These flags are \TeX\ control sequences 
+and are set using `\let` or `\def` or even `\gdef`,
+`\edef`, or `\xdef`.
+(If using one of the `\def`s for a boolean flag, only the
+first character in the `\def`-body is significant.)
+
 \beginsection External title
 
-\index{TZPtitle@\p{\TZPtitle}}
-\index{title@\p{\title}}
-\index{maketitle@\p{\maketitle}}
+\index{TZPtitle@`\TZPtitle`}
+\index{title@`\title`}
+\index{maketitle@`\maketitle`}
 %
 By default, the “external” title of the HTML document —
 i.e., the string that appears on the title bar of the
 browser window — is either the same as the internal title,
-as specified with the \p{\title} command, or, the first heading
+as specified with the `\title` command, or, the first heading
 (i.e., chapter or section),
 or, if none such is
 available, the basename of the document source file.  If you
 wish the external title to be something else, you can set
-the control sequence \p{\TZPtitle}, e.g.,
+the control sequence `\TZPtitle`, e.g.,
 
-\p{
+\begintt
 \def\TZPtitle{The Odyssey}
-}
-
-\n Note that in \LaTeX, \p{\title} merely
+\endtt
+Note that in \LaTeX, `\title` merely
 specifies the title; the command that actually places the
-title is \p{\maketitle}.  \TeX2page does the same for \LaTeX\
+title is `\maketitle`.  \TeX2page does the same for \LaTeX\
 documents.  For other formats, \TeX2page will assume that
-\p{\title}  should set its argument as a title immediately.
+`\title`  should set its argument as a title immediately.
 For \TeX\ to do likewise, the document must include supply an
-appropriate \TeX-only definition for \p{\title}, e.g., the
-one in \p{tex2page.tex}.
+appropriate \TeX-only definition for `\title`, e.g., the
+one in `tex2page.tex`.
 
 \beginsection Colophon flags
 
@@ -1477,12 +1478,12 @@ bottom of the first page, the first line giving
 the time of last change of the source document, and the
 second line identifying \TeX2page and linking to its website.
 
-\index{TZPcolophonlastpage@\p{\TZPcolophonlastpage}}
-To put the colophon on the last rather than the first page,
+\index{TZPcolophonlastpage@`\TZPcolophonlastpage`}
+\item(i) To put the colophon on the last rather than the first page,
 
-\p{
+\begintt
 \let\TZPcolophonlastpage=1
-}
+\endtt
 
 \iffalse
 \n If this request is to have meaning, it should be made in the document
@@ -1490,40 +1491,40 @@ before the text for the second HTML page starts.  Otherwise, the default
 first-page placement of the colophon will have already taken effect.
 \fi
 
-\index{TZPcolophondisabletimestamp@\p{\TZPcolophondisabletimestamp}}
-To avoid mentioning the timestamp of the document in the
+\index{TZPcolophondisabletimestamp@`\TZPcolophondisabletimestamp`}
+\item(ii) To avoid mentioning the timestamp of the document in the
 colophon,
 
-\p{
+\begintt
 \let\TZPcolophondisabletimestamp=1
-}
-
-\n If the underlying
+\endtt
+%
+If the underlying
 Scheme is incapable of determining a file’s write date, \TeX2page will
-not mention the timestamp, regardless of the \p{\TZPcolophondisabletimestamp} setting.
+not mention the timestamp, regardless of the `\TZPcolophondisabletimestamp` setting.
 
-\index{TZPcolophondisablecredit@\p{\TZPcolophondisablecredit}}
-To avoid crediting \TeX2page in the colophon,
+\index{TZPcolophondisablecredit@`\TZPcolophondisablecredit`}
+\item(iii) To avoid crediting \TeX2page in the colophon,
 
-\p{
+\begintt
 \let\TZPcolophondisablecredit=1
-}
+\endtt
 
-\index{TZPcolophondisableweblink@\p{\TZPcolophondisableweblink}}
-To avoid linking to the \TeX2page website in the colophon,
+\index{TZPcolophondisableweblink@`\TZPcolophondisableweblink`}
+\item(iv) To avoid linking to the \TeX2page website in the colophon,
 
-\p{
+\begintt
 \let\TZPcolophondisableweblink=1
-}
-
-\n If \p{\TZPcolophondisablecredit} is set, the colophon won’t link to the \TeX2page
-site, regardless of the \p{\TZPcolophondisableweblink} setting.
+\endtt
+%
+If `\TZPcolophondisablecredit` is set, the colophon won’t link to the \TeX2page
+site, regardless of the `\TZPcolophondisableweblink` setting.
 
 \beginsection Math image flag
 
 \xrdef{mathflag}
-\index{TZPmathtext@\p{\TZPmathtext}}
-The \p{\TZPmathtext} flag
+\index{TZPmathtext@`\TZPmathtext`}
+The `\TZPmathtext` flag
 specifies whether mathematical fragments in the
 document should be rendered as image or text.  By default, \TeX2page will
 generate images for displayed math and for “complicated”
@@ -1533,9 +1534,10 @@ economize by generating its text (UTF-8) equivalent.
 
 The assignment
 
-\p{
+\begintt
 \let\TZPmathtext=1
-}
+\endtt
+%
 forces subsequent math to be typeset as text, until the end of the document or
 until you reset to the flag to 0.
 
@@ -1552,9 +1554,9 @@ not require complicated notation.
 \index{NetPBM}
 \index{ImageMagick}
 \index{image!format}
-\index{png@\p{png} (image format)}
-\index{jpeg@\p{jpeg} (image format)}
-\index{gif@\p{gif} (image format)}
+\index{png@`png` (image format)}
+\index{jpeg@`jpeg` (image format)}
+\index{gif@`gif` (image format)}
 %
 These flags specify the conversion tactics used
 for generating HTML-suitable images from the user’s graphics
@@ -1565,33 +1567,33 @@ NetPBM library~\cite{netpbm}, or \item(ii) the ImageMagick
 library~\cite{imagemagick}, to convert the PS into the
 HTML-suitable image.
 
-\index{TZPimageconverter@\p{\TZPimageconverter}}
-\index{TZPimageformat@\p{\TZPimageformat}}
+\index{TZPimageconverter@`\TZPimageconverter`}
+\index{TZPimageformat@`\TZPimageformat`}
 The defaults are: NetPBM
 to convert, and GIF to convert to.
-You may set the flags \p{\TZPimageconverter} and \p{\TZPimageformat} to
+You may set the flags `\TZPimageconverter` and `\TZPimageformat` to
 change this, e.g,
 
-\p{
+\begintt
 \def\TZPimageconverter{imagemagick}  % use ImageMagick
 \def\TZPimageconverter{netpbm}       % use NetPBM (default)
 
 \def\TZPimageformat{png}  % for PNG images
 \def\TZPimageformat{jpeg} % for JPEG images
 \def\TZPimageformat{gif}  % for GIF images (default)
-}
+\endtt
 
 \beginsection \TeX\ executable used for image generation
 
-\index{TZPtexprogname@\p{\TZPtexprogname}}
-\TeX2page uses one of the variants of \TeX\ (typically \p{pdftex}) to
-generate images. To change this, set the flag \p{\TZPtexprogname} to
+\index{TZPtexprogname@`\TZPtexprogname`}
+\TeX2page uses one of the variants of \TeX\ (typically `pdftex`) to
+generate images. To change this, set the flag `\TZPtexprogname` to
 contain the name of your preferred \TeX\ executable, e.g.,
 
-\p{
+\begintt
 \def\TZPtexprogname{xetex}
-}
-
+\endtt
+%
 You only need to set the executable name used for the “plain” format:
 \TeX2page will deduce the appropriate name for the \LaTeX\ executable,
 which will be used to generate images if the entire document is in the
@@ -1602,28 +1604,28 @@ document’s format.)
 \beginsection Flag for Scheme code comments
 
 \xrdef{slatexlikecomments}
-\index{TZPslatexcomments@\p{\TZPslatexcomments}}
-The flag \p{\TZPslatexcomments} governs whether Scheme comments
+\index{TZPslatexcomments@`\TZPslatexcomments`}
+The flag `\TZPslatexcomments` governs whether Scheme comments
 should inside verbatim Scheme code should be rendered verbatim or as \TeX.
 By default, they are rendered verbatim.   To allow \TeX\ commands inside
 Scheme comment text, do
 
-\p{
+\begintt
 \let\TZPslatexcomments=1
-}
-
-\n This is the style favored by S\LaTeX.
+\endtt
+%
+This is the style favored by S\LaTeX.
 \ifx\shipout\UnDeFiNeD
-With \p{\TZPslatexcomments} set, the text
+With `\TZPslatexcomments` set, the text
 
-\p{
+\begintt
 \scm{
 (open-input-string ; in Scsh, use \scm{string->input-port}
   s)
 }
-}
-
-\n produces
+\endtt
+%
+produces
 \let\TZPslatexcomments 1
 
 \scm{
@@ -1633,133 +1635,135 @@ With \p{\TZPslatexcomments} set, the text
 \let\TZPslatexcomments 0
 
 \fi
-Note that \p{\TZPslatexcomments=1} is not an unmixed blessing, as it
+Note that `\TZPslatexcomments=1` is not an unmixed blessing, as it
 restricts your Scheme comments to text that is valid \TeX.
 
 \beginsection Flags for page and paragraph layout
 
-\index{TZPtexlayout@\p{\TZPtexlayout}}
+\index{TZPtexlayout@`\TZPtexlayout`}
 \xrdef{texlayout}
 %
 By default, \TeX2page produces block paragraphs with about a
 baseline’s worth of vertical space separating paragraphs, and text width
 expands to fill the browser width, allowing for some margins.
 
-To produce more \TeX-like layout, i.e., with no parskip and
+\item(i) To produce more \TeX-like layout, i.e., with no parskip and
 with some parindent,
-with the page width not exceeding \p{\hsize},
+with the page width not exceeding `\hsize`,
 with left and top margins that are an inch greater than
-\p{\hoffset} and \p{\voffset} respectively, and with a
-navigation bar that uses \p{\headline} and \p{\footline},
+`\hoffset` and `\voffset` respectively, and with a
+navigation bar that uses `\headline` and `\footline`,
 do
 
-\p{
+\begintt
 \let\TZPtexlayout=1
-}
+\endtt
 
-\index{hsize@\p{\hsize}}
-\index{hoffset@\p{\hoffset}}
-\index{voffset@\p{\voffset}}
-\index{parskip@\p{\parskip}}
-\index{parindent@\p{\parindent}}
-\index{headline@\p{\headline}}
-\index{footline@\p{\footline}}
+\index{hsize@`\hsize`}
+\index{hoffset@`\hoffset`}
+\index{voffset@`\voffset`}
+\index{parskip@`\parskip`}
+\index{parindent@`\parindent`}
+\index{headline@`\headline`}
+\index{footline@`\footline`}
 %
 The HTML page will be set according to the values of the
-lengths \p{\hsize}, \p{\hoffset}, \p{\voffset},
-\p{\parskip}, \p{\parindent}, and the tokens \p{\headline}
-and \p{\footline} as they are at the end (!) of
+lengths `\hsize`, `\hoffset`, `\voffset`,
+`\parskip`, `\parindent`, and the tokens `\headline`
+and `\footline` as they are at the end (!) of
 the document.
 
-The command \p{\folio} inside the tokens \p{\headline} and \p{\footline}
+The command `\folio` inside the tokens `\headline` and `\footline`
 — and only inside them —
 produces in HTML not the current page number but rather twin links to the
-adjacent pages. \p{\folio} thus lets you create navigation
+adjacent pages. `\folio` thus lets you create navigation
 bars.
 
 Note that the plain \TeX\ default (which
-\TeX2page reuses) is to have \p{\folio} in the
-\p{\footline} and nothing in the \p{\headline}.  If you wish
+\TeX2page reuses) is to have `\folio` in the
+`\footline` and nothing in the `\headline`.  If you wish
 to have a navigation bar in the header, you should set
-\p{\headline}.
+`\headline`.
 
 It is not necessary that these values be
 identical to what \TeX\ sees for the same document, as you can
 make HTML-only settings such as
 
-\index{folio@\p{\folio}}
+\index{folio@`\folio`}
 %
-\p{
+\begintt
 \ifx\shipout\UnDeFiNeD
   \hsize=36em
   \headline={\folio, ~~ \urlh{#ToC}{ToC}, ~~ \urlh{#Index}{Index}}
   \footline={\the\headline}  % i.e., footline same as headline
 \fi
-}
-
-\n where the tags \p{ToC} and \p{Index} are set near
+\endtt
+%
+ where the tags `ToC` and `Index` are set near
 the ToC and Index respectively.
 
-\index{noindent@\p{\noindent}}
+\index{noindent@`\noindent`}
 %
-Paragraphs preceded by \p{\noindent} will always have no initial
-indentation, even if \p{\TZPtexlayout=1} and \p{\parskip} is
+Paragraphs preceded by `\noindent` will always have no initial
+indentation, even if `\TZPtexlayout=1` and `\parskip` is
 non-zero.
 
-\index{TZPhsize@\p{\TZPhsize}}
+\index{TZPhsize@`\TZPhsize`}
 %
-If you don’t really need a full-blown \TeX-like layout, but would
+\item(ii) If you don’t really need a full-blown \TeX-like layout, but would
 still like to have the HTML page’s text width be no more than,
 say, 6.25 inches, you could have
 
-\p{
+\begintt
 \def\TZPhsize{6.25 in}
-}
-The \p{\TZPhsize} value overrides the \p{\hsize} value, whether
-or not you set \p{\TZPtexlayout}.
+\endtt
+%
+The `\TZPhsize` value overrides the `\hsize` value, whether
+or not you set `\TZPtexlayout`.
 
-\index{TZPrightjustify@\p{\TZPrightjustify}}
-Because it is too drastic a change, \p{\TZPtexlayout=1} will not cause
+\index{TZPrightjustify@`\TZPrightjustify`}
+\item(iii) Because it is too drastic a change, `\TZPtexlayout=1` will not cause
 text to be right-justified.  To make that happen,
 
-\p{
+\begintt
 \let\TZPrightjustify=1
-}
-
-\n Setting \p{\TZPrightjustify} has no effect unless \p{\TZPtexlayout} is
+\endtt
+%
+Setting `\TZPrightjustify` has no effect unless `\TZPtexlayout` is
 also set.
 
-\index{TZPtextext@\p{\TZPtextext}}
-Finally, \TeX\ uses pseudo-ligatures to convert occurrences of \p{`}, \p{'}, \p{``}, \p{''}, \p{--}, and \p{---}
+\index{TZPtextext@`\TZPtextext`}
+\item(iv) Finally, \TeX\ uses pseudo-ligatures to convert occurrences of \p{`}, `'`, \p{``}, `''`, `--`, and `---`
 in the source to left quote, right quote, left double quote, right double quote, en-dash, and em-dash respectively.
 If you use a Unicode-friendly \TeX\ such as \XeTeX\ with a Unicode font and a text editor that lets you enter these quotes and dashes directly, then you may
-not need the ligatures, and may indeed, want \p{--} to show up as two hyphens, both in the HTML and the DVI.  To disable the ligatures,
+not need the ligatures, and may indeed, want `--` to show up as two hyphens, both in the HTML and the DVI.  To disable the ligatures,
 
-\p{
+\begintt
 \let\TZPtextext=0
-}
-
-\n In this case, you also have to ensure that the fonts you use in \XeTeX\ do not have \p{mapping=tex-text}.
+\endtt
+%
+In this case, you also have to ensure that the fonts you use in \XeTeX\ do not have `mapping=tex-text`.
 
 \beginsection Making a slideshow
 
-\index{TZPslides@\p{\TZPslides}}
-\index{t2pslides.tex@\p{t2pslides.tex}}
+\index{TZPslides@`\TZPslides`}
+\index{t2pslides.tex@`t2pslides.tex`}
 \index{MozPoint}
 \index{presentations}
 %
 To cause your source to be converted into slideshow-ready HTML pages,
-set the flag \p{\TZPslides}:
-\p{
+set the flag `\TZPslides`:
+\begintt
 \let\TZPslides=1
-}
+\endtt
+%
 This causes \TeX2page to use the macro file
-\p{t2pslides.tex}, which uses the process described in
+`t2pslides.tex`, which uses the process described in
 the MozPoint~\cite{mozpoint} library
 to convert your sequence of HTML
-pages into a Web presentation.  \p{t2pslides.tex} is included in the
+pages into a Web presentation.  `t2pslides.tex` is included in the
 \TeX2page distribution, and must be placed
-somewhere in \p{TEXINPUTS} or \p{TEX2PAGEINPUTS}.  It has no
+somewhere in `TEXINPUTS` or `TEX2PAGEINPUTS`.  It has no
 effect on the DVI version of the document.
 
 HTML pages meant for presentation use larger, bolder fonts, and
@@ -1767,30 +1771,31 @@ avoid navigation bars.  The following table describes the keys used to
 control the presentation:
 
 To bring up the next slide, (left-)click the mouse
-anywhere  on the screen, or press the space bar, \p{n}, right or down
+anywhere  on the screen, or press the space bar, `n`, right or down
 arrow.  To go back to the previous slide, right-click the
-mouse, or press \p{p}, left or up arrow.
-To go immediately to the first (i.e., title) slide, press \p{t} or \p{0}.  To go
+mouse, or press `p`, left or up arrow.
+To go immediately to the first (i.e., title) slide, press `t` or `0`.  To go
 immediately to the $n$th slide after the title slide, type $n$.  If $n$ has
 two or more digits, they should be pressed fairly rapidly so that they are
-interpreted together.  To blank the screen, press \p{b}
-(black) or \p{w} (white); to unblank, press the same key again.
+interpreted together.  To blank the screen, press `b`
+(black) or `w` (white); to unblank, press the same key again.
 
 \beginsection Page redirection
 
-\index{TZPredirect@\p{\TZPredirect}}
-\index{TZPredirectseconds@\p{\TZPredirectseconds}}
-If you wish your HTML output to immediately redirect elsewhere,
-set the flag \p{\TZPredirect} to contain the target URL.
+\index{TZPredirect@`\TZPredirect`}
+\index{TZPredirectseconds@`\TZPredirectseconds`}
+\item(i) If you wish your HTML output to immediately redirect elsewhere,
+set the flag `\TZPredirect` to contain the target URL.
 
-\p{
+\begintt
 \def\TZPredirect{http://newhome.com/path/samedoc.html}
-}
+\endtt
+%
 This is useful when
 you’ve moved the location of a page but the old URL is still being used.
 
 The content of the document is obviously irrelevant.  However, you may
-put in \p{\eject}s in your \TeX\ source to create the same number of pages as
+put in `\eject`s in your \TeX\ source to create the same number of pages as
 in the original document.  If the user consults any of these pages
 directly, they will get redirected to the new location.
 
@@ -1798,52 +1803,52 @@ Not all browsers support automatic redirection. The (original)
 page therefore includes an informative sentence containing the
 link to the desired page, which the user can explicitly click.
 
-By default, the redirection takes place in 5 seconds. To change
-this, set \p{\TZPredirectseconds}, e.g.,
+\item(ii) By default, the redirection takes place in 5 seconds. To change
+this, set `\TZPredirectseconds`, e.g.,
 
-\p{
+\begintt
 \def\TZPredirectseconds{10}
-}
+\endtt
 
 \beginsection Single output file
 
-\index{TZPsinglepage@\p{\TZPsinglepage}}
+\index{TZPsinglepage@`\TZPsinglepage`}
 \xrdef{singlepage}
 %
 Sometimes it is desirable to generate just a single output HTML
 file, i.e., to not generate a page break as described on
-p.~\ref{eject}. To do this, set the \p{\TZPsinglepage} flag:
+p.~\ref{eject}. To do this, set the `\TZPsinglepage` flag:
 
-\p{
+\begintt
 \def\TZPsinglepage{1}
-}
+\endtt
 
 \beginsection OPmac
 
-The flag \p{\TZPopmac} can be set to 1 to inform \TeX2page that
+The flag `\TZPopmac` can be set to 1 to inform \TeX2page that
 you’re using OPmac macros~\cite{opmac} in your document.
 Typically this isn't necessary as \TeX2page can spot if you’ve
-\p{\input opmac}. The flag need be set only if somehow the
-loading of \p{opmac} occurs in a \TeX-only portion of your
+`\input opmac`. The flag need be set only if somehow the
+loading of `opmac` occurs in a \TeX-only portion of your
 document.
 
 This flag, whether explicitly or implicitly set, helps \TeX2page
-decide which form of the macros \p{\cite} and \p{\nocite} to use.
+decide which form of the macros `\cite` and `\nocite` to use.
 In contrast to most other styles (including \LaTeX), which use
-\p{{}} for these macros' argument, OPmac uses \p{[]}.
+`{}` for these macros' argument, OPmac uses `[]`.
 
 \beginsection Scheme or Common Lisp?
 
-\index{TZPcommonlisp@\p{\TZPcommonlisp}}
-The flag \p{\TZPcommonlisp} can be used to decide whether calls to
-\p{\eval} (p.~\ref{eval}) should contain Scheme or Common Lisp code.
-Typically, the construct \p{\ifx\TZPcommonlisp 1} is used to introduce
+\index{TZPcommonlisp@`\TZPcommonlisp`}
+The flag `\TZPcommonlisp` can be used to decide whether calls to
+`\eval` (p.~\ref{eval}) should contain Scheme or Common Lisp code.
+Typically, the construct `\ifx\TZPcommonlisp 1` is used to introduce
 the Common Lisp and Scheme versions as the two conditional clauses, so
 the document remains processable in both languages.
 
-\TeX2page pre-sets \p{\TZPcommonlisp} to 1 in Common Lisp and 0 in Scheme.
+\TeX2page pre-sets `\TZPcommonlisp` to 1 in Common Lisp and 0 in Scheme.
 
-You may set \p{\TZPcommonlisp} to specify that the document needs
+You may set `\TZPcommonlisp` to specify that the document needs
 either the Scheme or Common Lisp version of \TeX2page. If
 the incorrect version is used, \TeX2page will display a warning
 message, but will not crash for this reason alone.
@@ -1851,22 +1856,22 @@ message, but will not crash for this reason alone.
 \beginchapter  7 Style
 
 \xrdef{css}
-\index{inputcss@\p{\inputcss}}
+\index{inputcss@`\inputcss`}
 \index{cascading style sheet}
 \index{style sheet}
 %
-You can use the \TeX2page command \p{\inputcss} to have your HTML output use {\em style
+You can use the \TeX2page command `\inputcss` to have your HTML output use {\em style
 sheets}~\cite{w3c:css,lb:css,htmlhelp:css}.  E.g.,
 
-\p{
+\begintt
 \ifx\shipout\UnDeFiNeD % HTML only
   \inputcss basic.css
 \fi
-}
-
-\n in your \TeX\ source will cause the HTML output to
+\endtt
+%
+in your \TeX\ source will cause the HTML output to
 use the presentation advice contained in the
-style sheet \p{basic.css}.
+style sheet `basic.css`.
 
 In the style sheet, you can have rules for the various
 HTML elements to change the appearance of your
@@ -1875,11 +1880,11 @@ width to increase beyond a certain point (regardless of
 how the wide the reader makes their browser window),
 you could put the following in your style sheet:
 
-\p{
+\begintt
 body {
   max-width: 36em;
 }
-}
+\endtt
 
 You can get finer control on the look of your document
 by defining rules for some classes that are peculiar to
@@ -1888,20 +1893,20 @@ are discussed in this manual alongside the commands
 that they govern (p.~\ref{verb-style}).
 %also \ref{syntax-hilite}
 
-You can have as many \p{\inputcss}’s in your
+You can have as many `\inputcss`’s in your
 document as you wish.  They will be combined in
 the sequence in which they appear.  It is perhaps
 necessary to add that style sheets are completely
 optional.
 
-\index{cssblock@\p{\cssblock}}
-\index{endcssblock@\p{\endcsslblock}}
+\index{cssblock@`\cssblock`}
+\index{endcssblock@`\endcsslblock`}
 
 You can also {\em embed} style sheet information
 in the \TeX\ source between the control sequences
-\p{\cssblock} and \p{\endcssblock}.  E.g.,
+`\cssblock` and `\endcssblock`.  E.g.,
 
-\p{
+\begintt
 \ifx\shipout\UnDeFiNeD % HTML only
 \cssblock
 body {
@@ -1909,23 +1914,23 @@ body {
 }
 \endcssblock
 \fi
-}
-
-\n You can
-have multiple \p{\cssblock}s in the document; they
+\endtt
+%
+You can
+have multiple `\cssblock`s in the document; they
 are all evaluated in sequence.
 
 \TeX2page generates a very basic default style
 that
 does little beyond setting some margins.  You
 can augment or override the default style by supplying your
-own style info via \p{\cssblock} or by loading
-style sheets with \p{\inputcss}.   Some general-purpose
+own style info via `\cssblock` or by loading
+style sheets with `\inputcss`.   Some general-purpose
 style sheets available on the Web are the W3C Core
 Styles~\cite{w3ccorestyles} and Google Fonts~\cite{googlefonts}.
 E.g., to use Libre Baskerville for your body text:
 
-\p{
+\begintt
 \ifx\shipout\UnDeFiNeD % HTML only
 \inputcss https://fonts.googleapis.com/css?family=Libre+Baskerville 
 
@@ -1935,30 +1940,20 @@ body {
 }
 \endcssblock
 \fi
-}
+\endtt
 
 \beginchapter  8 Verbatim text
 %\label{verbatim}
 
-\index{verb@\p{\verb}}
+\index{verb@`\verb`}
 %
 \TeX2page recognizes a slightly enhanced version of
-\LaTeX’s \p{\verb} command.
-Recall that \LaTeX’s \p{\verb}’s argument is enclosed
+\LaTeX’s `\verb` command.
+Recall that \LaTeX’s `\verb`’s argument is enclosed
 within a pair of identical characters (not whitespace
-or \p{*}), and this argument is printed verbatim.  This
+or `*`), and this argument is printed verbatim.  This
 is useful for typesetting things like fragments of computer code.
-
-The \TeX2page version of \p{\verb} can also use matching
-braces to enclose its argument, provided the latter
-does not contain unmatched braces.
-argument in
-
-The command \p{\verb} is used for text that should be
-set verbatim, such as fragments of computer code.
-\p{\verb}’s argument is enclosed within a
-pair of identical characters (that aren’t whitespace,
-\p+{+, or \p{*}).  For example,
+E.g.,
 
 \p$
 A \verb|cons|-cell has two components: a \verb+car+ and
@@ -1972,18 +1967,21 @@ $
 \n A \verb|cons|-cell has two components: a \verb+car+ and
 a \verb&cdr&.
 \endquote
+The \TeX2page version of `\verb` adds a couple more features:
 
-\n You could also use matching braces to enclose \verb{\verb}’s
+\item(i)
+You can use
+matching braces to enclose its
 argument, provided the latter does not contain unmatched
 braces.  E.g.,
 
-\p{
+\begintt
 The command \verb{\section{Imagining a Conscious Robot}}
 typesets ‘\verb{Imagining a Conscious Robot}’ as a section
 title.
-}
-
-\n is converted to
+\endtt
+%
+is converted to
 
 \quote
 
@@ -1994,58 +1992,53 @@ title.
 
 \endquote
 
-\n If \verb{\verb}’s argument commences with a newline, it is
+\item(ii) If `\verb`’s argument commences with a newline, it is
 set as a display.  E.g.,
 
-\p{
+\begintt
 \verb{
 (define compose
   (lambda (f g)
     (lambda aa
       (f (apply g aa)))))
 }
-}
+\endtt
+%
+produces
 
-\n produces
-
-\p{
+\begintt
 (define compose
   (lambda (f g)
     (lambda aa
       (f (apply g aa)))))
-}
-
+\endtt
+%
 %stopzone
-
-\n Note that such displays faithfully typeset all the
+%
+Note that such displays faithfully typeset all the
 whitespace of the text, including linebreaks and
 indentation.
 
-\index{verb*@\p{\verb*}}
-\index{*@\p{*}!for visible verbatim space}
+\index{verb*@`\verb*`}
+\index{*@`*`!for visible verbatim space}
 
-As in \LaTeX, if a \p{*} immediately follows \p{\verb}, any spaces in
-\p{\verb}’s argument text are highlighted as something
+As in \LaTeX, if a `*` immediately follows `\verb`, any spaces in
+`\verb`’s argument text are highlighted as something
 that is visible.  This allows you to easily count
 spaces or tell if there is trailing space on a line.
 
-\p{
+\begintt
 “\verb*{three   spaces}”
-}
-
-\n produces
+\endtt
+%
+produces
 
 \quote
 
 \n “\verb*{three   spaces}”
 \endquote
 
-\index{path@\p{\path}}
 
-\TeX2page also understands \LaTeX’s \p{{verbatim}}
-environment, the \p{\path} macro from \p{path.sty},
-Eplain’s \p{\verbatim}, and OPmac’s
-\p{\activettchar}.
 
 \beginsection Commands within verbatim
 
@@ -2054,24 +2047,24 @@ Eplain’s \p{\verbatim}, and OPmac’s
 %
 Often you want to use \TeX\ commands in special spots within
 verbatim text, especially displayed verbatim material.  For
-this reason, the character ‘\p+|+’ is allowed as an escape
+this reason, the character ‘`|`’ is allowed as an escape
 character {\em if the verbatim text is enclosed within
 braces}.
 
-\index{def@\p{\def}}
+\index{def@`\def`}
 
-As an example, let’s say you’ve defined an \p{\evalsto}
+As an example, let’s say you’ve defined an `\evalsto`
 macro to use in cases where you want to say a program
 expression {\em evaluates to} a result.  A possible
 definition is:
 
-\p{
+\begintt
 \def\evalsto{::==}
-}
-
+\endtt
+%
 \def\evalstoI{::==}
-
-\n  You could use \p{\evalsto} inside a verbatim
+%
+You could use `\evalsto` inside a verbatim
 display as follows:
 
 \p+
@@ -2082,74 +2075,103 @@ display as follows:
 
 \n This will produce
 
-\p{
+\begintt
 (cons 1 2) |evalstoI (1 . 2)
-}
-
-\n Some standard commands that can be used inside braced
+\endtt
+%
+Some standard commands that can be used inside braced
 verbatim are: \p+||+ to insert the escape character itself; and
 \p+|{+ and \p+|}+ to insert the occasional non-matching brace.
 
 %fmrly subsubsec
 \beginsection Changing the verbatim escape character
 
-\index{verbatimescapechar@\p{\verbatimescapechar}}
+\index{verbatimescapechar@`\verbatimescapechar`}
 %
-You can use the Eplain and \TeX2page macro \p{\verbatimescapechar} to
+You can use the Eplain and \TeX2page macro `\verbatimescapechar` to
 postulate a character other than ‘\p+|+’ as the
 verbatim escape.  E.g.,
 
-\p{
+\begintt
 \verbatimescapechar\@
-}
+\endtt
+%
+makes ‘`@`’ the verbatim escape.
 
-\n makes ‘\p{@}’ the verbatim escape.
+\beginsection Other common verbatim macros
+
+\index{verbatim@`{verbatim}`}
+\index{path@`\path`}
+\index{activettchar@`\activettchar`}
+%
+\TeX2page also understands \LaTeX’s `{verbatim}`
+environment, the `\path` macro from `path.sty`,
+Eplain’s `\verbatim`, and  OPmac’s
+`\activettchar`.
+
+\index{begintt@`\begintt`}
+\index{tthook@`\tthook`}
+%
+It also recognizes `manmac`’s `\begintt` `...` `\endtt`, but note
+that by
+default, \TeX2page’s `\begintt` sets {\em everything} within it verbatim. If you
+want it to be truly `manmac`-like, i.e., with `|` as the escape
+character and `\]` producing visible space, you should set
+`\tthook` to something suitable: 
+
+\p+
+\def\tthook{\catcode`\|=0 
+  \def\|{char`\|}%
+  \def\ {·}}
++
+If you also set \p{\activettchar`} because you're a GitHub
+weenie, then set `\tthook` {\em before} you set `\activettchar`.
 
 \beginsection Inserting files verbatim
 
-\index{verbatim.sty@\p{verbatim.sty}}
-\index{verbatiminput@\p{\verbatiminput}}
-\index{listing@\p{\listing}}
+\index{verbatim.sty@`verbatim.sty`}
+\index{verbatiminput@`\verbatiminput`}
+\index{listing@`\listing`}
 %
 You can insert files verbatim with the command
-\p{\verbatiminput} (from \LaTeX’s \p{verbatim.sty}) or with Eplain’s
-\p{\listing}.  Usage:
+`\verbatiminput` (from \LaTeX’s `verbatim.sty`) or with Eplain’s
+`\listing`.  Usage:
 
-\p{
+\begintt
 \verbatiminput{program.scm}
-}
+\endtt
 
 \beginsection Writing to files
 
 \xrdef{verbwritefile}
-\index{verbwrite@\p{\verbwrite}}
+\index{verbwrite@`\verbwrite`}
 %
-The command \p{\verbwrite}, used like \p{\verb}, does
+The command `\verbwrite`, used like `\verb`, does
 not typeset its enclosed text but outputs it verbatim
 into a text file.  The text file has by default the
 same basename as the document, but with extension
-\p{.txt}.
+`.txt`.
 
-\index{verbwritefile@\p{\verbwritefile}}
+\index{verbwritefile@`\verbwritefile`}
 
-To specify another text file, use \p{\verbwritefile}.
+To specify another text file, use `\verbwritefile`.
 E.g.,
 
-\p{
+\begintt
 \verbwritefile notes-to-myself.txt    % or
 \verbwritefile{notes-to-myself.txt}
-}
-
-\n This will cause subsequent calls to
-\p{\verbwrite} upto the next \p{\verbwritefile} or end
+\endtt
+%
+This will cause subsequent calls to
+`\verbwrite` upto the next `\verbwritefile` or end
 of document (whichever comes first) to send text into
-the file \p{notes-to-myself.txt}.  \p{\verbwritefile}
+the file `notes-to-myself.txt`.  `\verbwritefile`
 deletes any pre-existing contents of its argument file.
 
-\index{write@\p{\write}}
+\index{write@`\write`}
 %
 \TeX2page also recognizes the \TeX\ command
-\p{\write}, which takes two arguments: an {\em output
+`\write`, which takes two arguments: an {\em output
 stream number} and a \TeX\ expression to be output.
 Recall that \TeX\ allows only the numbers 0–15 for
 output streams that can be associated with files;
@@ -2157,7 +2179,7 @@ numbers outside this range are deemed to represent
 standard output.
 
 \xrdef{write18}
-\index{write@\p{\write}!to stream 18}
+\index{write@`\write`!to stream 18}
 %
 However: \TeX2page follows modern
 \TeX\ implementation practice in treating the output
@@ -2166,39 +2188,39 @@ instead of writing \p{|meta[oscommand]} to standard
 output, will execute it as an operating-system command!
 This is not standard \TeX\ behavior, but most modern \TeX s
 enable this feature with a command-line option that is
-either \p{-shell-escape} or
-\p{--enable-write18} (use \p{--help} on your \TeX\ executable(s) to find
+either `-shell-escape` or
+`--enable-write18` (use `--help` on your \TeX\ executable(s) to find
 out).
 
 \beginsection Verbatim style
 
 \xrdef{verb-style}
-The verbatim commands (\p{\verb}, \p{\path}
-and \p{\verbatiminput}, etc.)\ introduced above use a style class
-called \p{verbatim}.  You can affect the appearance
+The verbatim commands (`\verb`, `\path`
+and `\verbatiminput`, etc.)\ introduced above use a style class
+called `verbatim`.  You can affect the appearance
 of your verbatim text by defining a style for
-\p{verbatim} in a style sheet (p.~\ref{css}).  E.g.,
+`verbatim` in a style sheet (p.~\ref{css}).  E.g.,
 
-\p{
+\begintt
 .verbatim        {color: rgb(0,49,83)}
-}
-
-\n sets {\color[RGB]{0,49,83} \p{all verbatim text
+\endtt
+%
+sets {\color[RGB]{0,49,83} \p{all verbatim text
 in Prussian blue}}.
 
 \beginsection Syntax-highlighting of program code
 
 \xrdef{syntax-hilite}
 \index{syntax highlighting}
-\index{scm@\p{\scm}}
-\index{scminput@\p{\scminput}}
+\index{scm@`\scm`}
+\index{scminput@`\scminput`}
 %
-The commands \p{\scm} and \p{\scminput} are variants
-of \p{\verb} and \p{\verbatiminput}.  They are
+The commands `\scm` and `\scminput` are variants
+of `\verb` and `\verbatiminput`.  They are
 useful for producing syntax-highlighted Scheme
 code in the HTML file.  E.g.,
 
-\p{
+\begintt
 \scm{
 (define factorial
   (lambda (n)
@@ -2207,7 +2229,7 @@ code in the HTML file.  E.g.,
     (if (= n 0) 1 ;the base case
         (* n (fact (- n 1))))))
 }
-}
+\endtt
 \ifx\shipout\UnDeFiNeD % since the colors won’t show on the DVI
 produces
 
@@ -2240,15 +2262,15 @@ Seven categories of code text are distinguished:
 \item(vii) comments.
 
 To distinguish between the categories of Scheme code
-text, \TeX2page uses a style class called \p{scheme}
-with six subclasses, viz., \p{selfeval},
-\p{keyword}, \p{builtin}, \p{global}, \p{variable}, and
-\p{comment}.  You can set the \p{color} property (and
-other properties like \p{font-weight} and
-\p{font-style}) of these classes in a style
+text, \TeX2page uses a style class called `scheme`
+with six subclasses, viz., `selfeval`,
+`keyword`, `builtin`, `global`, `variable`, and
+`comment`.  You can set the `color` property (and
+other properties like `font-weight` and
+`font-style`) of these classes in a style
 sheet (p.~\ref{css}).  The default settings are:
 
-\p{
+\begintt
 .scheme             {color: #993333} /* background punctuation */
 .scheme  .selfeval  {color: #006600}
 .scheme  .keyword   {color: #660000; font-weight: bold}
@@ -2256,58 +2278,58 @@ sheet (p.~\ref{css}).  The default settings are:
 .scheme  .global    {color: #660066}
 .scheme  .variable  {color: #000066}
 .scheme  .comment   {color: #006666; font-style: oblique}
-}
+\endtt
 
-\index{scmkeyword@\p{\scmkeyword}}
-\index{scmbuiltin@\p{\scmbuiltin}}
-\index{scmvariable@\p{\scmvariable}}
+\index{scmkeyword@`\scmkeyword`}
+\index{scmbuiltin@`\scmbuiltin`}
+\index{scmvariable@`\scmvariable`}
 
 \n \TeX2page initially only recognizes some well-known
 syntactic keywords, global variables, and
 self-evaluators.  It does not recognize builtins as
 apart from the general run of variables.  Users who
 want builtins distinguished can use
-\p{\scmbuiltin}, e.g.,
+`\scmbuiltin`, e.g.,
 
-\p{
+\begintt
 \scmbuiltin{cons car cdr}
-}
+\endtt
 
 Users who do not want to distinguish Common Lisp–style
 global (“special”) variables as a separate category from
-other variables should give the style class \p{.global} the
-same properties as \p{.variable}, e.g.,
+other variables should give the style class `.global` the
+same properties as `.variable`, e.g.,
 
-\p{
+\begintt
 .scheme .global {color: #000066}
-}
+\endtt
 
-Users can add their own keywords with \p{\scmkeyword}.
+Users can add their own keywords with `\scmkeyword`.
 E.g.,
 
-\p{
+\begintt
 \scmkeyword{define-class unwind-protect}
-}
+\endtt
 
 By default, tokens that don’t fall in any of the
 other categories are set as variables.  However,
-\p{\scmvariable} can be used to explicitly identify as
+`\scmvariable` can be used to explicitly identify as
 variables those tokens that are currently treated as
 non-variables (e.g., keywords or self-evaluators).  E.g.,
 
-\p{
+\begintt
 \scmvariable{and 42 +i}
-}
+\endtt
 
 %fmrly subsub
 \beginsection Using S\LaTeX\ commands
 
-\index{scheme@\p{\scheme}}
-\index{schemedisplay@\p{{schemedisplay}}}
+\index{scheme@`\scheme`}
+\index{schemedisplay@`{schemedisplay}`}
 %
 \TeX2page also syntax-highlights Scheme code introduced
 using the S\LaTeX\ commands, chiefly
-\p{\scheme} and \p{{schemedisplay}}.  S\LaTeX\ users know
+`\scheme` and `{schemedisplay}`.  S\LaTeX\ users know
 that these commands typeset code in the DVI output
 using fonts (rather than color) for highlighting.
 For the HTML, \TeX2page will use color.
@@ -2316,30 +2338,30 @@ A minor point is that S\LaTeX’s commands allow \TeX\
 commands inside Scheme comments.  This is useful
 if you want to highlight mentions of Scheme code inside
 Scheme comments.  To get the same effect with \TeX2page,
-use the \p{\TZPslatexcomments} flag (p.~\ref{slatexlikecomments}).
+use the `\TZPslatexcomments` flag (p.~\ref{slatexlikecomments}).
 
 \beginsection Documenting your code
 
-\index{scmdribble@\p{\scmdribble}}
+\index{scmdribble@`\scmdribble`}
 \index{literate programming}
 %
 You can use \TeX2page to do a form of {\em literate
 programming}, i.e., combining your documentation with
-your code.  The command \p{\scmdribble}, which is used
-like \p{\scm}, will not only display the enclosed code,
+your code.  The command `\scmdribble`, which is used
+like `\scm`, will not only display the enclosed code,
 but also send it to the external file named by
-the most recent \p{\verbwritefile}.
+the most recent `\verbwritefile`.
 
 To specify code that should go into the external file but
 should not be displayed, simply use
-\p{\verbwrite} instead of \p{\scmdribble}.
+`\verbwrite` instead of `\scmdribble`.
 
 \beginchapter  9 Images
 %\label{images}
 
 \index{mathematics}
 \index{pictures}
-\index{picture@\p{picture} (\LaTeX\ environment)}
+\index{picture@`picture` (\LaTeX\ environment)}
 \index{diagrams}
 \index{image}
 \index{image!file}
@@ -2349,18 +2371,18 @@ Some portions of your \TeX\ source may be explicitly
 images, or text that is particularly resistant to
 conversion to HTML.  Examples are JPEGs from digital cameras, encapsulated
 PostScript inserts, mathematics, and the \LaTeX\
-\p{{picture}} environment.   \TeX2page embeds these as images in the HTML
+`{picture}` environment.   \TeX2page embeds these as images in the HTML
 output.
 
 \beginsection Mathematics
 
 \index{$$@{\tt\$\$}} %$$
 %
-Math is typically text between \p{$...$} (in-text
-math) and \p{$$...$$} (displayed math).  Here are some
+Math is typically text between `$...$` (in-text
+math) and `$$...$$` (displayed math).  Here are some
 samples of mathematics with \TeX:
 
-\p{
+\begintt
 $$ F = G {m_1 m_2 \over r^2 } $$
 
 $$ \int_0^\infty { t - ib \over t^2 + b^2} e^{iat}\,dt =
@@ -2372,9 +2394,9 @@ $$ A =
          0           & x - \lambda & 1           \cr
          0           & 0           & x - \lambda \cr}
 \right) $$
-}
-
-\n These produce, respectively:
+\endtt
+%
+These produce, respectively:
 
 $$ F = G {m_1 m_2 \over r^2 } $$
 
@@ -2394,12 +2416,12 @@ $$
 
 In-text mathematics is also available.  E.g.,
 
-\p{
+\begintt
 The Euclidean distance between two points is given by
 $\sqrt{ (\Delta x)^2 + (\Delta y)^2 }$.
-}
-
-\n produces
+\endtt
+%
+produces
 
 \quote
 
@@ -2410,10 +2432,10 @@ $\sqrt{ (\Delta x)^2 + (\Delta y)^2 }$.
 
 You can control whether your math displays should
 be specified as image or text with the
-flag \p{\TZPmathtext}
+flag `\TZPmathtext`
 (p.~\ref{mathflag}).
 \ifx\shipout\UnDeFiNeD
-With \p{\let\TZPmathtext=1},
+With `\let\TZPmathtext=1`,
 the three examples above
 look as follows:
 
@@ -2434,17 +2456,17 @@ $$
 \fi
 
 \iffalse
-\index{romannumeral@\p{\romannumeral}}
-\index{Romannumeral@\p{\Romannumeral}}
+\index{romannumeral@`\romannumeral`}
+\index{Romannumeral@`\Romannumeral`}
 
 If you do all your mathematics in roman numbers, you
 can avoid math-related images completely.  \TeX2page
-recognizes the \TeX\ command \p{\romannumeral}, which
+recognizes the \TeX\ command `\romannumeral`, which
 produces the roman equivalent of the following arabic
-number (\p{\romannumeral 1986} = \romannumeral 1986).
-\p{\romannumeral} produces lower-case letters —
-\p{tex2page.tex} includes \p{\Romannumeral}, whose
-result is all-upper-case  (\p{\Romannumeral 1986} =
+number (`\romannumeral 1986` = \romannumeral 1986).
+`\romannumeral` produces lower-case letters —
+`tex2page.tex` includes `\Romannumeral`, whose
+result is all-upper-case  (`\Romannumeral 1986` =
 \Romannumeral 1986).
 \fi
 
@@ -2479,209 +2501,209 @@ a picture specification inside the document into
 an external \MF~\cite{mfbook} or MetaPost file.
 \fi
 
-\index{epsfbox@\p{\epsfbox}}
-\index{includegraphics@\p{\includegraphics}}
+\index{epsfbox@`\epsfbox`}
+\index{includegraphics@`\includegraphics`}
 
 However it is created, an EPS file is typically
 inserted as a \TeX\ box into a \TeX\ document with calls
 like
 
-\p{
+\begintt
 \epsfbox{|meta[eps-file]}
 \includegraphics{|meta[eps-file]}
-}
+\endtt
 
-\index{epsf.tex@\p{epsf.tex}}
-\index{epsfig.sty@\p{epsfig.sty}}
+\index{epsf.tex@`epsf.tex`}
+\index{epsfig.sty@`epsfig.sty`}
 
 \n These are commands defined external to plain \TeX\ or \LaTeX.
 Plain \TeX\
-documents using \p{\epsfbox} must load the standard
-macro file called \p{epsf.tex}.
-\LaTeX\ documents using \p{\epsfbox} can do the
-same, or they can load the \p{epsfig.sty} package.
+documents using `\epsfbox` must load the standard
+macro file called `epsf.tex`.
+\LaTeX\ documents using `\epsfbox` can do the
+same, or they can load the `epsfig.sty` package.
 
-\index{DeclareGraphicsRule@\p{\DeclareGraphicsRule}}
+\index{DeclareGraphicsRule@`\DeclareGraphicsRule`}
 
-\p{\includegraphics} is a generic graphics includer that tackles more than
+`\includegraphics` is a generic graphics includer that tackles more than
 EPS files, based on file extension.  Thus, if your file has a
 nonstandard extension, you
-will have to inform \p{\includegraphics} of this using directives like the
+will have to inform `\includegraphics` of this using directives like the
 following:
 
-\p{
+\begintt
 \DeclareGraphicsRule{.1}{mps}{*}{}
-}
-
-\n This states that files with extension \p{.1} are to be treated as EPS
+\endtt
+%
+This states that files with extension `.1` are to be treated as EPS
 files generated by MetaPost.
 
-\index{graphicx.sty@\p{graphicx.sty}}
-\index{miniltx.tex@\p{miniltx.tex}}
+\index{graphicx.sty@`graphicx.sty`}
+\index{miniltx.tex@`miniltx.tex`}
 
-\p{\includegraphics} is defined in the \LaTeX\ package \p{graphicx.sty},
+`\includegraphics` is defined in the \LaTeX\ package `graphicx.sty`,
 which can also be loaded by
-plain-\TeX\ documents with the help of \p{miniltx.tex}, as we saw
-with \p{color.sty} on p.~\ref{color}.\f{It is possible to \p{\input}
-several \p{.sty} files between the calls to \p{\input} \p{miniltx} and
-\p{\resetatcatcode}.  However, \p{miniltx} is a bit of a compromise, and it
-causes each \p{.sty} file to re-evaluate the supposedly per-document commands
+plain-\TeX\ documents with the help of `miniltx.tex`, as we saw
+with `color.sty` on p.~\ref{color}.\f{It is possible to `\input`
+several `.sty` files between the calls to `\input` `miniltx` and
+`\resetatcatcode`.  However, `miniltx` is a bit of a compromise, and it
+causes each `.sty` file to re-evaluate the supposedly per-document commands
 in the driver file
-(e.g., \p{pdftex.def}), which can cause infinite loops.  This is avoided by
-preceding the loading of the second and subsequent \p{.sty}
-files with \p{\let\color\@ldc@l@r}.}
+(e.g., `pdftex.def`), which can cause infinite loops.  This is avoided by
+preceding the loading of the second and subsequent `.sty`
+files with `\let\color\@ldc@l@r`.}
 
-\p{
+\begintt
 \input miniltx
 \input graphicx.sty
 \resetatcatcode
-}
+\endtt
 
-\index{epsfxsize@\p{\epsfxsize}}
-\index{epsfysize@\p{\epsfysize}}
+\index{epsfxsize@`\epsfxsize`}
+\index{epsfysize@`\epsfysize`}
 
-\n For \p{\epsfbox}, you can specify the desired image
+\n For `\epsfbox`, you can specify the desired image
 width and height by assigning to the dimen
-registers \p{\epsfxsize} and \p{\epsfysize}
+registers `\epsfxsize` and `\epsfysize`
 (specifying only one of them will cause the other to
 change as well, maintaining the image’s aspect ratio).
 \TeX2page will respect such sizes, equating one browser
 pixel to one point (= 1/72.27 inch).  Thus,
 
-\p{
+\begintt
 \epsfxsize=1.5in
-}
-
-\n  sets the width of an immediately following \p{\epsfbox}ed image to
+\endtt
+%
+sets the width of an immediately following `\epsfbox`ed image to
 $1.5 \times 72.27 \approx 108$
 pixels.
-\p{\epsfxsize} and
-\p{\epsfysize} are cleared after each
-\p{\epsfbox}.
+`\epsfxsize` and
+`\epsfysize` are cleared after each
+`\epsfbox`.
 
-\index{convertMPtoPDF@\p{\convertMPtoPDF}}
-\index{supp-pdf.tex@\p{supp-pdf.tex}}
+\index{convertMPtoPDF@`\convertMPtoPDF`}
+\index{supp-pdf.tex@`supp-pdf.tex`}
 
 If you use pdf\TeX\ or lua\TeX\ (which produce PDF
 instead of DVI output), you can insert
 MetaPost-created EPS files with the
-\p{\convertMPtoPDF} command:
+`\convertMPtoPDF` command:
 
-\p{
+\begintt
 \convertMPtoPDF{|meta[eps-file]}{1}{1}
-}
-
-\n \p{\convertMPtoPDF} is defined in the macro file
-\p{supp-pdf.tex} of the \ConTeXt\ package,
+\endtt
+%
+`\convertMPtoPDF` is defined in the macro file
+`supp-pdf.tex` of the \ConTeXt\ package,
 which is included in most modern distributions of \TeX.
-Caveat: \p{\convertMPtoPDF} doesn’t work for EPS files
+Caveat: `\convertMPtoPDF` doesn’t work for EPS files
 that weren’t made using MetaPost!
 
-\index{pdfximage@\p{\pdfximage}}
+\index{pdfximage@`\pdfximage`}
 
 pdf\TeX\ can import common graphics formats
-such PNG and JPEG: Either use \p{\includegraphics}, or a primitive call
+such PNG and JPEG: Either use `\includegraphics`, or a primitive call
 such as
 
-\p{
+\begintt
 \pdfximage height 1.5in {pic.png}\pdfrefximage\pdflastxmimage
-}
+\endtt
 
-\TeX2page recognizes the scaling information supplied with \p{\pdfximage}
-and \p{\includegraphics},  with one browser pixel
+\TeX2page recognizes the scaling information supplied with `\pdfximage`
+and `\includegraphics`,  with one browser pixel
 equated to one point.  Unlike EPS files, PNG and JPEG images are directly
 supported by HTML, so \TeX2page does not need to convert them.
 
-\index{XeTeXpdffile@\p{\XeTeXpdffile}}
-\index{XeTeXpicfile@\p{\XeTeXpicfile}}
-\index{epstopdf@\p{epstopdf}}
+\index{XeTeXpdffile@`\XeTeXpdffile`}
+\index{XeTeXpicfile@`\XeTeXpicfile`}
+\index{epstopdf@`epstopdf`}
 
 \XeTeX\ has its own duo of graphics-insertion commands:
-\p{\XeTeXpdffile} for PDF images, and \p{\XeTeXpicfile} for
+`\XeTeXpdffile` for PDF images, and `\XeTeXpicfile` for
 JPEG and GIF images. E.g.,
 
-\p{
+\begintt
 \centerline{\XeTeXpicfile tbdek.jpg width 3in \relax}
-}
+\endtt
 for
 
 \centerline{\hbox{\XeTeXpicfile tbdek.jpg width 3in \relax}}
 
 To load a graphic specified in MetaPost,
 you can either \item(i) have  MetaPost convert the spec into EPS and
-thence to PDF using a utility like \p{epstopdf}; or \item(ii)
+thence to PDF using a utility like `epstopdf`; or \item(ii)
 have MetaPost directly convert the spec to PNG. Let’s start with a MetaPost file
-\urlh{mpexample.html}{\p{lambda.mp}}.
+\urlh{mpexample.html}{`lambda.mp`}.
 
 \item(i) At the OS shell, type
 
-\p{
+\begintt
 mpost lambda.mp
 epstopdf lambda-1.eps
-}
+\endtt
 
 \write18{if test ! -f lambda-1.pdf -a -f lambda.mp; then mpost lambda.mp; epstopdf
 lambda-1.eps; fi}
-This creates a PDF file \p{lambda-1.pdf}, which is inserted in
+This creates a PDF file `lambda-1.pdf`, which is inserted in
 the source document via
 
-\p{
+\begintt
 \centerline{\XeTeXpdffile lambda-1.pdf }
-}
+\endtt
 to obtain\f{%
-\index{scrollmode@\p{\scrollmode}}
-\index{notstopmode@\p{\nonstopmode}}
-\index{batchmode@\p{\batchmode}}
-\index{errorstopmode@\p{\errorstopmode}}
+\index{scrollmode@`\scrollmode`}
+\index{notstopmode@`\nonstopmode`}
+\index{batchmode@`\batchmode`}
+\index{errorstopmode@`\errorstopmode`}
 %
 The file
-\p{lambda.mp} was actually written out from this document’s
-source using \p{\verbwrite} (p.~\ref{verbwritefile}),
-so the files \p{lambda-1.eps} and \p{lambda-1.pdf} aren’t immediately available
+`lambda.mp` was actually written out from this document’s
+source using `\verbwrite` (p.~\ref{verbwritefile}),
+so the files `lambda-1.eps` and `lambda-1.pdf` aren’t immediately available
 on the first run. \TeX\ will signal a file-not-found error and go
 into a debug loop, even though the MetaPost file needed to create
 the missing file can only be created if \TeX\ successfully
 finishes processing the source document! To force \TeX\ to finish
 processing the source file regardless of missing files, you need
 to run it in
-\p{\scrollmode}, or its even more reckless cousins
-\p{\nonstopmode} and \p{\batchmode}.  One way to get into
-these modes is to type \p{s}, \p{r}, or \p{q},
+`\scrollmode`, or its even more reckless cousins
+`\nonstopmode` and `\batchmode`.  One way to get into
+these modes is to type `s`, `r`, or `q`,
 respectively, at the \TeX\ debug prompt.  By default, \TeX\
-runs in \p{\errorstopmode}, which is why it stops on
+runs in `\errorstopmode`, which is why it stops on
 the missing-file error. A different approach is to use “shell
-escape” to call \p{mpost} and \p{epstopdf} from within your
+escape” to call `mpost` and `epstopdf` from within your
 source file. See p.~\ref{write18}.}
 
-\index{centerline@\p{\centerline}}
+\index{centerline@`\centerline`}
 
 \centerline{\XeTeXpdffile lambda-1.pdf }
 
-\item(ii) To generate PNG, in \p{lambda.mp} set
+\item(ii) To generate PNG, in `lambda.mp` set
 
-\p{
+\begintt
 outputformat := "png";
-}
-Metapost will directly produce the file \p{lambda-1.png}, which
+\endtt
+Metapost will directly produce the file `lambda-1.png`, which
 can be inserted with
 
-\p{
+\begintt
 \XeTeXpicfile lambda-1.png
-}
+\endtt
 
 \beginsection Other image inserts
 
-\index{makehtmlimage@\p{\makehtmlimage}}
-%\index{endhtmlimg@\p{\endhtmlimg}}
+\index{makehtmlimage@`\makehtmlimage`}
+%\index{endhtmlimg@`\endhtmlimg`}
 %
 %Any \TeX\ fragment enclosed between the control sequences
-%\p{\htmlimg ... \endhtmlimg} is converted into an
+%`\htmlimg ... \endhtmlimg` is converted into an
 %image.  Some \TeX\ fragments are automatically converted
 %to images without the need for an explicit
-%\p{\htmlimg}.  Such fragments are mathematics, calls to
-%the LaTeX \p{picture} environment, and
+%`\htmlimg`.  Such fragments are mathematics, calls to
+%the LaTeX `picture` environment, and
 %MFpic~\cite{mfpic} diagrams.\f{MFpic diagrams are
-%enclosed between \p{\mfpic ... \endmfpic}.  The MFpic
+%enclosed between `\mfpic ... \endmfpic`.  The MFpic
 %macros translate picture specifications into
 %METAFONT~\cite{mfbook} or MetaPost~\cite{metapost}
 %programs.  Both METAFONT and MetaPost are included in
@@ -2696,7 +2718,7 @@ You may explicitly request any part at all of your \TeX\
 document — not just its math or EPS inserts —
 to be converted into images for your HTML output.  The
 fragment of the document to be converted to image is
-given as an \p{\makehtmlimage} argument.
+given as an `\makehtmlimage` argument.
 Here’s an example \TeX-based diagram from {\em
 The \TeX book}~\cite[p.~389]{texbook}:
 
@@ -2710,18 +2732,18 @@ The \TeX book}~\cite[p.~389]{texbook}:
 \smallskip
 %\endquote
 
-\n \p{\makehtmlimage}’s argument is a group containing
+\n `\makehtmlimage`’s argument is a group containing
 no unmatched braces.
 
 \beginsection Image preamble
 
 \xrdef{imgpreamble}
-\index{imgpreamble@\p{\imgpreamble}}
-\index{endimgpreamble@\p{\endimgpreamble}}
+\index{imgpreamble@`\imgpreamble`}
+\index{endimgpreamble@`\endimgpreamble`}
 \index{image!preamble}
 %
 When converting math, EPS, and other implicit or
-explicit \p{\htmlimage}s into images for HTML, \TeX2page
+explicit `\htmlimage`s into images for HTML, \TeX2page
 extracts the small fragment of the \TeX\ document
 containing the would-be image into a separate, smaller
 \TeX\ file.  The content of this auxiliary \TeX\ file is
@@ -2731,12 +2753,12 @@ all the \TeX\ code within the auxiliary \TeX\ file be
 self-sufficient.  However, it is quite possible that
 such \TeX\ fragments contain references to macros
 defined elsewhere in the larger document.
-\TeX2page therefore provides the \p{\imgpreamble}
-\p{...} \p{\endimgpreamble} environment, into which
+\TeX2page therefore provides the `\imgpreamble`
+`...` `\endimgpreamble` environment, into which
 are placed all definitions that are necessary for
 the HTML images.   For example, the “image preamble”
 
-\p{
+\begintt
 \ifx\shipout\UnDeFiNeD % HTML only
   \imgpreamble
     \input some-pic-macs
@@ -2744,21 +2766,21 @@ the HTML images.   For example, the “image preamble”
     \def\I#1#2{\int_{#1}^#2}
   \endimgpreamble
 \fi
-}
-
-\n  allows the use of the control sequences \p{\gO},
-\p{\I}, and those in \p{some-pic-macs.tex} in the
+\endtt
+%
+allows the use of the control sequences `\gO`,
+`\I`, and those in `some-pic-macs.tex` in the
 \TeX\ fragments destined for imagehood.
 
-The commands inside \p{\imgpreamble} are visible only
+The commands inside `\imgpreamble` are visible only
 to \TeX2page, so a form of them should also be
-specified outside the \p{\imgpreamble} for use by \TeX\
+specified outside the `\imgpreamble` for use by \TeX\
 when it processes the entire document for DVI.
 
 Note that if you use encapsulated PostScript inserts,
 it is not necessary (though it doesn’t hurt) to
-specify an image preamble for loading the \p{epsf.tex}
-macro file or \p{graphicx.sty} package.  \TeX2page will
+specify an image preamble for loading the `epsf.tex`
+macro file or `graphicx.sty` package.  \TeX2page will
 automatically load them when processing the EPS files.
 You still need to load these files outside the image
 preamble for your document to be processable by \TeX\
@@ -2766,8 +2788,8 @@ though.
 
 \beginsection Image magnification
 
-\index{magnification@\p{\magnification}}
-\index{image!magnification@\p{\magnification}}
+\index{magnification@`\magnification`}
+\index{image!magnification@`\magnification`}
 %
 In general, the magnification of the image
 inserts, whether math or picture, may not match that
@@ -2782,93 +2804,96 @@ too small.
 
 The solution is to adjust the magnification of  just
 the image inserts.  In plain \TeX, this can be
-done by a call to the \p{\magnification} command {\em
+done by a call to the `\magnification` command {\em
 inside} the image preamble.  E.g.,
 
-\p{
+\begintt
 \ifx\shipout\UnDeFiNeD
   \imgpreamble
     \magnification\magstep1
     ...
   \endimgpreamble
 \fi
-}
-
-\n The above will magnify the HTML math and pictures.
+\endtt
+%
+The above will magnify the HTML math and pictures.
 Note that it will {\em not} affect the magnification
 of these same items in the DVI output.  Indeed,
-you can specify an alternate \p{\magnification}
-outside \p{\imgpreamble}, and that will affect
+you can specify an alternate `\magnification`
+outside `\imgpreamble`, and that will affect
 overall size of the entire DVI output, inclusive of
 math and pictures, as advertised in {\em The \TeX book}
 \cite{texbook}.
 
-In sum: \p{\magnification}, when called {\em
-outside} the \p{\imgpreamble}, magnifies the
+In sum: `\magnification`, when called {\em
+outside} the `\imgpreamble`, magnifies the
 entire DVI document.  When called {\em inside}
-the \p{\imgpreamble}, it will magnify  just the
+the `\imgpreamble`, it will magnify  just the
 images in the HTML document.  These two uses
-of \p{\magnification} will not interfere.
+of `\magnification` will not interfere.
 
 \LaTeX\ users can use the following%
 \iffalse, but there
 must be a better way\fi:
 
-\p{
+\begintt
 \ifx\shipout\UnDeFiNeD
   \imgpreamble
     \let\LaTeXdocument\document
     \def\document{\LaTeXdocument\Large}
   \endimgpreamble
 \fi
-}
-
-This tacks a hook on to the \p{\document} command.
-(This modified \p{\document} will only operate
+\endtt
+This tacks a hook on to the `\document` command.
+(This modified `\document` will only operate
 on the image.)
 
 \beginsection Reusing image files
 
 \xrdef{imgreuse}
 \index{image!reuse}
-\index{def@\p{\def}}
-\index{imgdef@\p{\imgdef}}
+\index{def@`\def`}
+\index{imgdef@`\imgdef`}
 %
-\p{\def}initions that use math (such as the following
-one for \p{\ohm}) work as expected in the
+`\def`initions that use math (such as the following
+one for `\um`) work as expected in the
 HTML output.
 
-\p{
-\def\ohm{$\Omega$}
+\begintt
+\def\um{$\mu$m}
 
-The circuit uses two 10-\ohm\ resistors, three 50-\ohm\
-resistors and one 1-k\ohm\ resistor.
-}
-
-\n produces
+The human eye can see electromagnetic wavelengths from 0.39 \um\
+to 0.78 \um.
+\endtt
+%
+produces
 
 \quote
 
-\n The circuit uses two 10-\ohm\ resistors, three 50-\ohm\
-resistors and one 1-k\ohm\ resistor.
+\n 
+The human eye can see electromagnetic wavelengths from 0.39 \um\
+to 0.78 \um.
 
 \endquote
 
-\index{imgdef@\p{\imgdef}}
+\index{imgdef@`\imgdef`}
 
-\n However, this is very inefficient: Every occurrence
-of \p{\ohm} in the document will generate a brand new
+\n This could\f{This is a cooked-up example. In actuality, \TeX2page
+is pretty good at aggressively avoiding math images in the first
+place. But you can imagine a more complicated `\imgdef` that
+happens to be repeated throughout your document.} force every occurrence
+of `\um` in the document to generate a brand new
 image file.  To advise \TeX2page to {\em reuse}
 the same image for these multiple occurrences, use
-\p{\imgdef} for the HTML:
+`\imgdef` for the HTML:
 
-\p{
+\begintt
 \ifx\shipout\UnDeFiNeD % HTML only
-  \imgdef\ohm{$\Omega$}
+  \imgdef\um{$\mu$m}
 \else
-  \def\ohm{$\Omega$}
+  \def\ohm{$\mu$m}
 \fi
-}
+\endtt
 
 \beginsection Recycling image files
 
@@ -2884,10 +2909,10 @@ the old image files.
 \beginchapter  10 Extending \TeX\ with Scheme or Common Lisp
 
 \xrdef{eval}
-\index{eval@\p{\eval}}
+\index{eval@`\eval`}
 \index{dirty tricks}
 %
-The command \p{\eval} allows you to use arbitrary
+The command `\eval` allows you to use arbitrary
 Scheme or Common Lisp expressions, as opposed to just \TeX\ macros, to
 guide the course of the typesetter.  In the following we will describe
 just
@@ -2896,25 +2921,24 @@ using the Common Lisp version of \TeX2page.
 
 The text written
 to standard output by the Scheme code is substituted
-for the \p{\eval} statement.  E.g., consider the
-following complete document, \p{root2.tex}:
+for the `\eval` statement.  E.g., consider the
+following complete document, `root2.tex`:
 
-\p+
+\begintt
 \input tex2page
 
 The square root of 2 is
 \eval{
-+
+\endtt
 \q{
 (display (sqrt 2))
 }
-\p+
+\begintt
 }.
 
 \bye
-+
-
-\n Running \TeX2page on \p{root2.tex} produces
+\endtt
+Running \TeX2page on `root2.tex` produces
 the following HTML output:
 
 \quote
@@ -2924,29 +2948,29 @@ the following HTML output:
 }.
 \endquote
 
-\n In effect, \TeX2page processes the \p{\eval} call
+\n In effect, \TeX2page processes the `\eval` call
 using Scheme, producing some output in an auxiliary
 \TeX\ file, which is then re-inserted into the document at the location of
-the \p{\eval}.
+the `\eval`.
 
-A definition for \p{\eval} that \TeX\ can use
-is provided in the macro file \p{eval4tex.tex}.
-\p{tex2page.tex} will automatically load \p{eval4tex.tex} if it finds it in
-\p{TEXINPUTS}.
+A definition for `\eval` that \TeX\ can use
+is provided in the macro file `eval4tex.tex`.
+`tex2page.tex` will automatically load `eval4tex.tex` if it finds it in
+`TEXINPUTS`.
 Thus, running \TeX\ on
-\p{root2.tex} produces a DVI file whose
+`root2.tex` produces a DVI file whose
 content matches the HTML version.
 
-% \f{Actually, getting \p{tex root2} to
-% produce the required DVI output involves a couple of extra steps.  \p{tex root2}
-% produces a Scheme file called \p{root2.eval4tex}, which must be evaluated
+% \f{Actually, getting `tex root2` to
+% produce the required DVI output involves a couple of extra steps.  `tex root2`
+% produces a Scheme file called `root2.eval4tex`, which must be evaluated
 % in Scheme to produce the auxiliary \TeX\ file that is slurped back into the
 % document.  However, this auxiliary file is identical to the one created by
 % running \TeX2page on the same document.  \TeX2page, being written in Scheme,
 % saves the user the trouble of having to call Scheme explicitly to create
 % the aux \TeX\ files.}
 
-It is clear that Scheme code via \p{\eval} can serve as
+It is clear that Scheme code via `\eval` can serve as
 a very powerful {\em second extension language} for
 \TeX, and that its benefits are available to both the
 DVI and the HTML outputs.  As we have seen, \TeX2page
@@ -2956,37 +2980,37 @@ Scheme can be used to fill the breach.  More generally,
 Scheme may be preferable to the \TeX\ macro language even
 for just DVI, where no HTML version of the document is
 contemplated.  We’ll explore both of these
-aspects of \p{\eval}.
+aspects of `\eval`.
 
-\p{\eval}’s argument is a balanced-brace
+`\eval`’s argument is a balanced-brace
 expression.  At the top-level, i.e., not within the body of a macro,
-\p{\eval}’s argument is sent verbatim to Scheme, except that the pipe character
+`\eval`’s argument is sent verbatim to Scheme, except that the pipe character
 (‘\p+|+’) functions as the \TeX\ escape.  Use \p+||+ to represent a single
 pipe in the Scheme code.  If you need to include an unmatched brace, simply
 put a bogus matching brace inside a Scheme comment.
 
-Inside a macro body, it is too late for \p{\eval} to set the catcodes
+Inside a macro body, it is too late for `\eval` to set the catcodes
 to make verbatim any character within its argument.  Either define or
 use control sequences to represent special characters, or use Scheme
 workarounds (\q{integer->char}) to construct those characters.
 
 Let us first look at a simple example where
-\p{\eval} lets you define an HTML version of an already
+`\eval` lets you define an HTML version of an already
 existing \TeX\ macro that is either impossible or at
 least prohibitively difficult  to process using
 \TeX2page’s  mimicry of \TeX.  Consider a hypothetical
-\p{\proto} macro, used to introduce the description of
+`\proto` macro, used to introduce the description of
 a Scheme operator by presenting a {\em prototypical}
 use of it.
-Typical calls to \p{\proto} are:
+Typical calls to `\proto` are:
 
-\p{
+\begintt
 \proto{cons}{a d}{procedure}
 \proto{car}{c}{procedure}
 \proto{cdr}{c}{procedure}
-}
-
-\n which typeset as follows:
+\endtt
+%
+which typeset as follows:
 
 \quote
 
@@ -2996,7 +3020,7 @@ Typical calls to \p{\proto} are:
 
 \endquote
 
-\n The macro \p{\proto} takes three arguments: the
+\n The macro `\proto` takes three arguments: the
 operator name; the metavariables for its operands;
 and the operator kind.  In particular, it typesets
 the operator and the operands in different fonts,
@@ -3006,11 +3030,11 @@ intervening space between operator and operands.
 In the case where there are no operands, the intervening
 space should not.  Thus,
 
-\p{
+\begintt
 \proto{gentemp}{}{procedure}
-}
-
-\n should not produce
+\endtt
+%
+should not produce
 
 \quote
 
@@ -3026,30 +3050,30 @@ space should not.  Thus,
 
 \endquote
 
-\n (I.e., no space between \p{gentemp} and the
+\n (I.e., no space between `gentemp` and the
 closing paren.)
 
-\index{def@\p{\def}}
+\index{def@`\def`}
 
-The \p{\proto} macro can be written
+The `\proto` macro can be written
 in \TeX\ as follows:
 
-\p{
+\begintt
 \def\proto#1#2#3{\noindent
   \hbox{{\tt(#1}\spaceifnotempty{#2}{\it#2}{\tt)}%
     \qquad ;#3}\par}
-}
-
-\n where, \p{\spaceifnotempty} is a helper macro
+\endtt
+%
+where, `\spaceifnotempty` is a helper macro
 that expands to a space only if its argument is
 not empty.  \TeX2page can expand this definition
-for \p{\proto}, provided it knows how to deal
-with the \p{\spaceifnotempty}.
+for `\proto`, provided it knows how to deal
+with the `\spaceifnotempty`.
 
-One way to write \p{\spaceifnotempty} in \TeX\
+One way to write `\spaceifnotempty` in \TeX\
 is:
 
-\p{
+\begintt
 \newdimen\templen
 \newbox\tempbox
 
@@ -3057,20 +3081,21 @@ is:
   \setbox\tempbox\hbox{#1}%
   \templen\wd\tempbox
   \ifdim\templen>0pt{\ }\fi}
-}
-
-\n This piece of box-measuring contortion is
+\endtt
+%
+This piece of box-measuring contortion is
 too much for \TeX2page’s mimicry of the \TeX\ macro
 system.  However, it’s easy enough to  achieve the
 same effect using the string-processing capabilities
 of Scheme:
 
-\p+
+\begintt
 \ifx\shipout\UnDeFiNeD
 \htmlonly
 
 \eval{
-+\q{
+\endtt
+\q{
 (define all-blanks?
   (lambda (s)
     (let loop ((L (string->list s)))
@@ -3078,34 +3103,36 @@ of Scheme:
           (let ((c (car L)))
             (if (char-whitespace? c) (loop (cdr L))
                 #f))))))
-}\p+
+}
+\begintt
 }
 
 \def\spaceifnotempty{\eval{
-+\q{
+\endtt
+\q{
 (let ((x (ungroup (get-token))))
   (if (not (all-blanks? x))
       (begin (display (integer->char 92))
              (display "space"))
       0))
-}\p+
+}
+\begintt
 }}
 
 \endhtmlonly
 \fi
-+
-
-\n Note that we had to use \q{(integer->char 92)} to refer to the
-backslash character, as the \p{\eval} is inside a macro body and ‘\p{\}’
+\endtt
+Note that we had to use \q{(integer->char 92)} to refer to the
+backslash character, as the `\eval` is inside a macro body and ‘`\`’
 is not and cannot be made a letter.
 (Otherwise we could have simply written \q{(display "\\space")}.)
 
-Later \p{\eval}s can
-use definitions introduced in previous \p{\eval}s,
+Later `\eval`s can
+use definitions introduced in previous `\eval`s,
 as with \q{all-blanks?} in our example.
 
 If being processed by \TeX2page only (as in our example),
-the code inside \p{\eval} is allowed to use not just general Scheme
+the code inside `\eval` is allowed to use not just general Scheme
 but also procedures like
 \q{ungroup} and \q{get-token}, which are defined by
 \TeX2page.
@@ -3115,46 +3142,46 @@ but also procedures like
 \xrdef{eval-for-just-tex}
 %
 The key thing to remember is that
-an \p{\eval}-call is replaced by whatever text the
-Scheme code in that \p{\eval}-call writes to its
+an `\eval`-call is replaced by whatever text the
+Scheme code in that `\eval`-call writes to its
 standard output.  This approach will work whether the
 document is being processed by \TeX2page to produce HTML
 or by \TeX\ to produce DVI.
 
 For those \TeX\ documents that are not intended for HTML conversion, but
-nevertheless use \p{\eval}, this macro is available in the macro file
-\p{eval4tex.tex}.  Run \TeX\ (or \LaTeX) on such a document, say
+nevertheless use `\eval`, this macro is available in the macro file
+`eval4tex.tex`.  Run \TeX\ (or \LaTeX) on such a document, say
 \p{|meta[jobname].tex}, and then evaluate
 the resultant \p{|meta[jobname].eval4tex} in Scheme, to create the
 necessary aux \TeX\ files.  Running \TeX\ on the master document a {\em second}
 time will
-insert these aux \TeX\ files at the location of the corresponding \p{\eval}
+insert these aux \TeX\ files at the location of the corresponding `\eval`
 calls.  This is quite analogous to how \TeX2page would have processed the
-\p{\eval}s, except that \TeX\ requires you to explicitly call Scheme to
+`\eval`s, except that \TeX\ requires you to explicitly call Scheme to
 create the aux files which it can use on its second run, whereas
 \TeX2page, being written in Scheme, creates and loads the aux files
 immediately.
 
-For complete details on using \p{\eval} with
+For complete details on using `\eval` with
 \TeX, please consult the companion manual,
-{\em An \p{\eval} for
+{\em An `\eval` for
 \TeX}~\cite{eval4tex}.
 
-% There are however some concerns with the use of \p{\eval} as a
+% There are however some concerns with the use of `\eval` as a
 % mainstream \TeX\ command.  The way we have described it,
-% \p{\eval} inserts text generated by the Scheme code
-% of \TeX2page, so a document containing \p{\eval}
-% must not only \p{\input tex2page.tex} but also be
+% `\eval` inserts text generated by the Scheme code
+% of \TeX2page, so a document containing `\eval`
+% must not only `\input tex2page.tex` but also be
 % processable by \TeX2page.  This would be too stringent a
-% requirement if \p{\eval} is to be usable in \TeX\
+% requirement if `\eval` is to be usable in \TeX\
 % documents that are not intended for HTML at all, and
 % that may fail to be processable by \TeX2page for reasons
-% unrelated to \p{\eval}.  Fortunately, this requirement
+% unrelated to `\eval`.  Fortunately, this requirement
 % isn’t necessary: Generic \TeX\ documents that cannot be
 % converted by \TeX2page can still make use of the
-% \p{\eval} feature.  For the use of \p{\eval} in its
+% `\eval` feature.  For the use of `\eval` in its
 % full generality, please see the companion manual,
-% \urlh{eval4tex-doc.html}{\em An \p{\eval} for
+% \urlh{eval4tex-doc.html}{\em An `\eval` for
 % TeX}.
 
 \beginchapter  11 Recovery from errors
@@ -3175,61 +3202,61 @@ exactly analogous to \TeX\ generating diagnostic
 information on standard output and keeping a copy
 thereof in the file \p{|meta[jobname].log}.
 
-\index{errorcontextlines@\p{\errorcontextlines}}
+\index{errorcontextlines@`\errorcontextlines`}
 
 The  error message typically displays an {\em error
 context}, viz., a few consecutive lines from the source
 document that contain the likely cause of the error.
 The number of context lines so displayed is governed by
-the count register \p{\errorcontextlines}, which has a default
-value of 5.  Thus, setting \p{\errorcontextlines=7} will display
+the count register `\errorcontextlines`, which has a default
+value of 5.  Thus, setting `\errorcontextlines=7` will display
 seven lines.  Note that error contexts are often
 only approximate — be prepared to look a little above
 or below the reported context.
 
-\index{TEXEDIT@\p{TEXEDIT} (environment variable)}
-\index{EDITOR@\p{EDITOR} (environment variable)}
+\index{TEXEDIT@`TEXEDIT` (environment variable)}
+\index{EDITOR@`EDITOR` (environment variable)}
 
 Like \TeX, \TeX2page also gives you the option of immediately
 editing the file containing the error,
 {\em at} the location of the error.  It does so with the
 following prompt:
 
-\p{
+\begintt
 Type e to edit file at point of error; x to quit.
 ?
-}
-
-When you type \p{e} at this prompt, a text editor
+\endtt
+%
+When you type `e` at this prompt, a text editor
 is fired up.  What the editor is depends on the
-environment variables \p{TEXEDIT} (which is also used
-by \TeX) and \p{EDITOR}.
+environment variables `TEXEDIT` (which is also used
+by \TeX) and `EDITOR`.
 
-If \p{TEXEDIT} is set, its string value (e.g.,
-“\p{vim +%d %s}”)
+If `TEXEDIT` is set, its string value (e.g.,
+“`vim +%d %s`”)
 is chosen as
-the entire editor call, with \p{%s} replaced by the offending
-file’s name, and \p{%d} replaced by the number of the line
+the entire editor call, with `%s` replaced by the offending
+file’s name, and `%d` replaced by the number of the line
 containing the error.
-If \p{TEXEDIT} is not set, or if
-it is mis-set, i.e., without \p{%s} or \p{%d}, then the
-editor specified in the environment variable \p{EDITOR}
-is chosen.  If \p{EDITOR} is also not set, then
-the editor name is assumed to be \p{vi}.
-When using \p{EDITOR} or \p{vi}, the file and line number are
+If `TEXEDIT` is not set, or if
+it is mis-set, i.e., without `%s` or `%d`, then the
+editor specified in the environment variable `EDITOR`
+is chosen.  If `EDITOR` is also not set, then
+the editor name is assumed to be `vi`.
+When using `EDITOR` or `vi`, the file and line number are
 tacked on as arguments to the editor,
-with a \p{+} preceding the
-line number.  This argument style works for all \p{vi}
-and \p{emacs} clones.\f{\TeX\ itself uses just \p{TEXEDIT}.
-It does not fall back to \p{EDITOR} or \p{vi} if
-\p{TEXEDIT} is not set.  But most Unix programs that
-reach for an editor do tend to use \p{EDITOR}, and failing that,
-\p{vi}, so \TeX2page does the same.}
+with a `+` preceding the
+line number.  This argument style works for all `vi`
+and `emacs` clones.\f{\TeX\ itself uses just `TEXEDIT`.
+It does not fall back to `EDITOR` or `vi` if
+`TEXEDIT` is not set.  But most Unix programs that
+reach for an editor do tend to use `EDITOR`, and failing that,
+`vi`, so \TeX2page does the same.}
 
 \beginsection Tracing more information
 
-\index{tracingcommands@\p{\tracingcommands}}
-\index{tracingmacros@\p{\tracingmacros}}
+\index{tracingcommands@`\tracingcommands`}
+\index{tracingmacros@`\tracingmacros`}
 %
 Sometimes, the diagnostic information in an error
 message may not be enough to track
@@ -3238,38 +3265,38 @@ down the error.
 \TeX2page recognizes the same commands to provide its own diagnostics.
 For instance,
 setting the count registers
-\p{\tracingcommands} and \p{\tracingmacros} to a positive integer causes
+`\tracingcommands` and `\tracingmacros` to a positive integer causes
 more log information.
 
-\item(i) Setting  \p{\tracingcommands=1} tells \TeX2page to log all calls
+\item(i) Setting  `\tracingcommands=1` tells \TeX2page to log all calls
 to atomic commands.
 
-\item(ii) Setting  \p{\tracingmacros=1} tells
+\item(ii) Setting  `\tracingmacros=1` tells
 \TeX2page to log all macro expansions.
 
 You may turn on
 these traces at any point in your document.  You may
-subsequently turn them off by setting \p{\tracingcommands=0}
-and \p{\tracingmacros=0} respectively.
+subsequently turn them off by setting `\tracingcommands=0`
+and `\tracingmacros=0` respectively.
 
-\index{tracingall@\p{\tracingall}}
+\index{tracingall@`\tracingall`}
 
-\item(iii) The command \p{\tracingall} turns {\em on} both
-\p{\tracingcommands} and \p{\tracingmacros}.
+\item(iii) The command `\tracingall` turns {\em on} both
+`\tracingcommands` and `\tracingmacros`.
 
-\index{errmessage@\p{\errmessage}}
+\index{errmessage@`\errmessage`}
 
-\item(iv) The command \p{\errmessage} can be used to generate
+\item(iv) The command `\errmessage` can be used to generate
 meaningful error messages.  \TeX2page, like \TeX, ceases
 processing the document on encountering
-\p{\errmessage}.
+`\errmessage`.
 
-\index{message@\p{\message}}
+\index{message@`\message`}
 
-\item(v) The command \p{\message}
+\item(v) The command `\message`
 can be used to print helpful information at selected
 points in the document.   \LaTeX\ users may
-prefer \p{\typeout}, which does the same thing.
+prefer `\typeout`, which does the same thing.
 
 All of these commands display their information
 on both standard output and in the log file.
@@ -3282,13 +3309,13 @@ should help pinpoint any error.
 \index{auxiliary files}
 %
 Given an input \TeX\ document whose main file is
-\p{story.tex}, the
+`story.tex`, the
 \ifx\inpltdist\Undefined
 command
 
-\p{
+\begintt
 tex2page story
-}
+\endtt
 \else
 call
 
@@ -3298,9 +3325,9 @@ call
 \fi
 
 \n typically produces at least one
-output HTML file \p{story.html}, and possibly some
+output HTML file `story.html`, and possibly some
 additional HTML files, which are named
-\p{story-Z-H-1.html}, \p{story-Z-H-2.html}, and
+`story-Z-H-1.html`, `story-Z-H-2.html`, and
 so on.  Additional HTML files are created whenever the
 input document has commands requesting page
 breaks in the HTML output.
@@ -3315,65 +3342,65 @@ closely, either out of curiosity or for debugging your
 document.
 
 \TeX2page displays on standard output the log of
-its progress with \p{story.tex}.  A copy of this
+its progress with `story.tex`.  A copy of this
 log is kept in the log
-file \p{story.hlog}.
+file `story.hlog`.
 
 \TeX2page generates a style sheet in
-\p{story-Z-S.css}.  This contains some default style
+`story-Z-S.css`.  This contains some default style
 information that \TeX2page generates for every document,
 plus any style info supplied by the user via
-\p{\cssblock} statements in the document.
+`\cssblock` statements in the document.
 
 \index{BibTeX@\BibTeX}
 
-If \p{story.tex} uses the external program \BibTeX\ for
+If `story.tex` uses the external program \BibTeX\ for
 its bibliography, \TeX2page sends information to \BibTeX\
-in the file \p{story-Z-B.aux} and receives information
-from \BibTeX\ in the file \p{story-Z-B.bbl}.
+in the file `story-Z-B.aux` and receives information
+from \BibTeX\ in the file `story-Z-B.bbl`.
 
 \index{MakeIndex}
 
-If \p{story.tex} contains \p{\index} commands, \TeX2page
-will dump the unsorted index into \p{story-Z-I.idx} and
-get from MakeIndex the sorted index \p{story-Z-I.ind}.
+If `story.tex` contains `\index` commands, \TeX2page
+will dump the unsorted index into `story-Z-I.idx` and
+get from MakeIndex the sorted index `story-Z-I.ind`.
 
-\TeX2page uses the auxiliary files \p{story-Z-L.scm} and
-\p{story-Z-A.scm} to keep track of labels and other
+\TeX2page uses the auxiliary files `story-Z-L.scm` and
+`story-Z-A.scm` to keep track of labels and other
 internal cross-references.  Each run of \TeX2page loads
-the \p{story-Z-L.scm} and \p{story-Z-A.scm}
-created by the previous run.  If \p{story.tex} contains
+the `story-Z-L.scm` and `story-Z-A.scm`
+created by the previous run.  If `story.tex` contains
 {\em forward} cross-references, \TeX2page must be rerun
 at least once.
 
-For the image portions of \p{story.tex}, \TeX2page creates the auxiliary \TeX\
-files \p{story-Z-G-1.tex}, etc, and uses external programs (as described on
+For the image portions of `story.tex`, \TeX2page creates the auxiliary \TeX\
+files `story-Z-G-1.tex`, etc, and uses external programs (as described on
 p.~\ref{imageconv}) to convert them to the corresponding image files
-\p{story-Z-G-1.gif}, etc.  (This assumes you are using the GIF format for
+`story-Z-G-1.gif`, etc.  (This assumes you are using the GIF format for
 images.  If you had requested the PNG or JPEG format for images, the
 extensions of these aux files would be correspondingly different.)
 
 The above are “single-use” images.
-\p{story.tex} may reuse some image files within itself.
+`story.tex` may reuse some image files within itself.
 Such image files have slightly different names and are
-numbered separately: \p{story-Z-G-D-1.gif}, etc.
+numbered separately: `story-Z-G-D-1.gif`, etc.
 
-\index{eval@\p{\eval}}
+\index{eval@`\eval`}
 
-Occurrences of \p{\eval} in \p{story.tex} typically
-create the auxiliary Scheme files \p{story-Z-E-1.scm},
+Occurrences of `\eval` in `story.tex` typically
+create the auxiliary Scheme files `story-Z-E-1.scm`,
 etc.  These are converted (by Scheme) into the
-corresponding auxiliary \TeX\ files \p{story-Z-E-1.tex},
-etc, which are loaded back into \p{story.tex} on a
-subsequent run.  Only the \p{\eval}s that will be
+corresponding auxiliary \TeX\ files `story-Z-E-1.tex`,
+etc, which are loaded back into `story.tex` on a
+subsequent run.  Only the `\eval`s that will be
 processed by \TeX\ (i.e., those that are not in
 HTML-only regions, p.~\ref{htmlonly})
 produce such numbered auxiliary files,
 since the numbering allows successive runs of \TeX\ to
-access the correct file.  Such \p{\eval}s and their
+access the correct file.  Such `\eval`s and their
 files can also be shared by \TeX2page and \TeX, without
-the \p{\eval}s that occur in the HTML-only portions
-throwing the numbering off.  \p{\eval}s in
+the `\eval`s that occur in the HTML-only portions
+throwing the numbering off.  `\eval`s in
 HTML-only
 regions of the document are processed
 without any memorable aux files, because \TeX\ won’t use
@@ -3381,7 +3408,7 @@ them, and \TeX2page (which, unlike \TeX, can call Scheme
 immediately in the
 current run) doesn’t need them.
 
-\index{hdir file@\p{.hdir} file}
+\index{hdir file@`.hdir` file}
 
 By default, all these files are created in the working
 directory.  To avoid cluttering up
@@ -3390,20 +3417,20 @@ using one of the following three files:
 
 \item(i) \p{|meta[jobname].hdir} in the working directory, i.e.,
 a file with the same basename as the input document but with
-extension \p{.hdir}.  For \p{story.tex}, this would
-be \p{story.hdir}.
+extension `.hdir`.  For `story.tex`, this would
+be `story.hdir`.
 
-\item(ii) \p{.tex2page.hdir} in the working directory.
+\item(ii) `.tex2page.hdir` in the working directory.
 
-\item(iii) \p{.tex2page.hdir} in the user’s \p{HOME} directory.
+\item(iii) `.tex2page.hdir` in the user’s `HOME` directory.
 
 \n The first line of the first of these files that exists
 is taken to be the name of the target directory.  If none of
 these files exist, the current working directory is the target
 directory.
 
-The \p{.hdir} file may contain the \TeX\ control
-sequence \p{\jobname}, which expands to the basename of
+The `.hdir` file may contain the \TeX\ control
+sequence `\jobname`, which expands to the basename of
 the input \TeX\ document.
 
 \beginchapter  B Bibliography
@@ -3423,19 +3450,19 @@ the input \TeX\ document.
 \TeX2page is available on
 \urlp{GitHub}{https://github.com/ds26gte/tex2page}.
 
-\p{
+\begintt
 git clone https://github.com/ds26gte/tex2page
-}
-
-\n produces a directory
-called \p{tex2page}, which contains, among other files:
-the Scheme file \p{tex2page}, the Common Lisp file \p{tex2page.lisp}, the plain \TeX\ file
-\p{tex2page.tex}, and the \LaTeX\ package
-\p{tex2page.sty}.
+\endtt
+%
+produces a directory
+called `tex2page`, which contains, among other files:
+the Scheme file `tex2page`, the Common Lisp file `tex2page.lisp`, the plain \TeX\ file
+`tex2page.tex`, and the \LaTeX\ package
+`tex2page.sty`.
 
 Put copies of (or links to) the files
-\p{tex2page.tex} and \p{tex2page.sty}  in a directory
-that is mentioned in your \p{TEXINPUTS} environment
+`tex2page.tex` and `tex2page.sty`  in a directory
+that is mentioned in your `TEXINPUTS` environment
 variable.
 
 \beginsection \TeX2page out of the box (Racket)
@@ -3444,35 +3471,35 @@ variable.
 %
 If you run Racket~\cite{racket} on a Unix (including Mac OS X and
 Cygwin~\cite{cygwin}), setup is minimal.  Simply put a copy of (or link to) the Scheme
-file \p{tex2page} in a directory in your \p{PATH} environment variable.
+file `tex2page` in a directory in your `PATH` environment variable.
 
 If you run Racket on Windows,
-copy the supplied batchfile \p{tex2page.bat}
-to your \p{PATH}, and edit its contents so it contains
+copy the supplied batchfile `tex2page.bat`
+to your `PATH`, and edit its contents so it contains
 the correct pathnames to your Racket executable and
-\p{tex2page} file.
+`tex2page` file.
 
 %Note also that the Racket distribution (as also its
 %superset DrScheme) already bundle a
-%pre-configured \p{tex2page} script.
+%pre-configured `tex2page` script.
 
 \beginsection \TeX2page out of the box (Common Lisp)
 
 If you run a Common Lisp on a Unix, you can use the supplied script
-\p{tex2page.lisp} after setting the environment variable \p{LISP} to the
-name of your Lisp implementation.  You may rename \p{tex2page.lisp} to
-\p{tex2page}.
+`tex2page.lisp` after setting the environment variable `LISP` to the
+name of your Lisp implementation.  You may rename `tex2page.lisp` to
+`tex2page`.
 
-Set \p{LISP} to
-\p{abcl} for ABCL~\cite{abcl},
-\p{allegro} for Allegro~\cite{allegro},
-\p{clisp} for CLISP~\cite{clisp},
-\p{clozure} for Clozure~\cite{clozure},
-\p{cmucl} for CMUCL~\cite{cmucl},
-\p{ecl} for ECL~\cite{ecl},
-and \p{sbcl} for SBCL~\cite{sbcl}.
+Set `LISP` to
+`abcl` for ABCL~\cite{abcl},
+`allegro` for Allegro~\cite{allegro},
+`clisp` for CLISP~\cite{clisp},
+`clozure` for Clozure~\cite{clozure},
+`cmucl` for CMUCL~\cite{cmucl},
+`ecl` for ECL~\cite{ecl},
+and `sbcl` for SBCL~\cite{sbcl}.
 
-The top few lines in \p{tex2page.lisp} contain the lines
+The top few lines in `tex2page.lisp` contain the lines
 that invoke Lisp —  if they don’t already address your
 particular Lisp
 implementation, you may need to add a line based on your
@@ -3487,7 +3514,7 @@ configure}
 script runs “out of the box” for your setup, it may still be a good
 idea to do an explicit configuration.  In particular, for SBCL,
 configuration produces a compiled executable that is substantially
-faster than the script \p{tex2page.lisp}.
+faster than the script `tex2page.lisp`.
 
 %fmrly subsub
 %\subsection{Using \p{./configure --dialect=|meta[D]}}
@@ -3497,14 +3524,14 @@ This method may not always work but is so easy that
 it’s worth a try.  It should work for most
 dialects on Unix.
 
-\item(i) Type \p{./configure --help} at your OS command line
+\item(i) Type `./configure --help` at your OS command line
 to get the list of dialects supported.
 If your dialect \p{|meta[D]} is one of them,
 
 \item(ii) Type  \p{./configure --dialect=|meta[D]}
 
 \n If all goes well, this will create
-\p{my-tex2page}, a version of \p{tex2page} for your
+`my-tex2page`, a version of `tex2page` for your
 system.
 
 \TeX2page is known to configure for the Scheme dialects
@@ -3529,11 +3556,11 @@ tedious.
 First ensure that
 \urlp{Scmxlate}{https::/github.com/ds26gte/scmxlate}
 is installed on your system.  Note down the pathname of
-the file \p{scmxlate.scm} in the unpacked \p{scmxlate}
+the file `scmxlate.scm` in the unpacked `scmxlate`
 directory.
 
-Optionally, edit the file \p{scmxlate-tex2page} in the
-\p{tex2page} directory.
+Optionally, edit the file `scmxlate-tex2page` in the
+`tex2page` directory.
 (Leaving it as is is just fine.)
 Possible insertions are:
 
@@ -3544,40 +3571,40 @@ Possible insertions are:
 }
 
 \n The first produces a compiled version of
-\p{tex2page}.   The second lets you supply the
+`tex2page`.   The second lets you supply the
 correct pathname for the Ghostscript executable.
 (\TeX2page will guess the Ghostscript pathname,
 but there is a possibility it guesses wrong on
 Windows.)
 
 Start your Scheme (or Common Lisp) in the
-\p{tex2page} directory.   Load the file
-\p{scmxlate.scm} from the
-\p{scmxlate} distribution, using the correct relative
-or full pathname of \p{scmxlate.scm}.  For example,
+`tex2page` directory.   Load the file
+`scmxlate.scm` from the
+`scmxlate` distribution, using the correct relative
+or full pathname of `scmxlate.scm`.  For example,
 
 \q{
 (load "/home/dorai/share/scmxlate/scmxlate.scm")
 }
 
 \n (assuming you unpacked Scmxlate in
-\p{/home/dorai/share}).  You will be asked a couple
+`/home/dorai/share`).  You will be asked a couple
 of questions about your setup.  A choice of answers
 will be provided, so you don’t need to be too creative.
 When Scmxlate finishes, you will be left with a
-version of \p{tex2page} called \p{my-tex2page},
+version of `tex2page` called `my-tex2page`,
 tailormade for your system.
 
 %fmrly subsub
 \beginsection Installation in {PATH}
 
-On Unix, put a copy of (or link to) \p{my-tex2page}
-in a directory in your \p{PATH}.  You may wish to
-rename it to \p{tex2page}.
+On Unix, put a copy of (or link to) `my-tex2page`
+in a directory in your `PATH`.  You may wish to
+rename it to `tex2page`.
 
-On Windows, a batch file called \p{tex2page.bat}
+On Windows, a batch file called `tex2page.bat`
 is also created.  Move it to a directory in your
-\p{PATH}.  Edit the contents of \p{tex2page.bat} so
+`PATH`.  Edit the contents of `tex2page.bat` so
 that the pathnames it refers to are correct.
 
 \beginsection Can’t create or don’t want a {tex2page
@@ -3585,10 +3612,10 @@ script?}
 
 If the configuration process cannot create an
 appropriate script file for you to put in your
-\p{PATH}, or if you prefer working within Scheme
+`PATH`, or if you prefer working within Scheme
 anyway instead of at the OS command-line,
 you can still use \TeX2page.  Simply load
-your \p{tex2page} Scheme file
+your `tex2page` Scheme file
 (whether the given script or your configured version)
 directly into
 your Scheme, and then call the Scheme

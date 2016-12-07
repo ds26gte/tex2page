@@ -7993,7 +7993,7 @@
                         (loop))))))
       (emit "</pre>")
       (egroup))
-    (do-para)))
+    (do-noindent)))
 
 ;
 
@@ -9530,6 +9530,10 @@
       width: 40%;
       }
       */
+
+      .footnote {
+      font-size: 90%;
+      }
 
       .footnoterule {
       text-align: left;

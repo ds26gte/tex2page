@@ -1,7 +1,7 @@
 % texi2p.tex
 % Dorai Sitaram
 
-% last changed 2016-11-07
+% last changed 2016-12-06
 
 % This macro file is loaded by TeX2page when processing Texinfo files.  If
 % the input document, say jobname.texi, needs additional TeX2page-specific
@@ -376,7 +376,7 @@
          (call-with-output-file fo
            (lambda (o)
              (fluid-let ((*not-processing-p* #t)
-                         (*esc-char* #\@))
+                         (*esc-chars* (list #\@)))
                (let loop ()
                  (let ((c (snoop-actual-char)))
                    (unless (eof-object? c)

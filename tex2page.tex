@@ -793,20 +793,20 @@
 \let\chapterfont\bf
 
 \def\beginchapter#1 #2 \par{%
-  \edef\beginchapterQnr{#1}%
+  \edef\chapno{#1}%
+  \footnotenumber=0
   % space before \par ensures trailing space not picked
   % up.
   % (We don’t worry about verbatim text in header.)
   % Some vert space in print
   \vskip 2.5\bigskipamount
   \goodbreak
+  \writenumberedtocline{1}{\chapno}{#2}%
   \noindent
-  \global\footnotenumber=0
-  \writenumberedtocline{1}{\beginchapterQnr}{#2}%
-  \noindent\bgroup\chapterfont
-  \ifx\beginchapterQnr\empty\else
-  \beginchapterQnr\enspace\fi
-  #2%
+  \bgroup\chapterfont
+    \ifx\chapno\empty\else
+      \chapno\enspace\fi
+    #2%
   \egroup\medskip\nobreak\noindent}
 
 % some OPmac stuff, unless OPmac already loaded

@@ -6525,7 +6525,7 @@
                 (t (emit-html-char (get-actual-char)))))))
     (emit "</pre>")
     (egroup))
-  (do-para))
+  (do-noindent))
 
 (defun do-alltt ()
   (do-end-para)
@@ -7828,6 +7828,10 @@
       width: 40%;
       }
       */
+
+      .footnote {
+      font-size: 90%;
+      }
 
       .footnoterule {
       text-align: left;

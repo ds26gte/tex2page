@@ -1,4 +1,4 @@
-% last change 2016-12-06
+% last change 2016-12-08
 
 \let\maybeendinput\relax
 \ifx\shipout\UnDeFiNeD
@@ -89,6 +89,14 @@
 \def\enddefun{\hfil\defuntype\egroup\smallskip}
 
 %
+
+\def\emph{\bgroup\it
+  \ifmmode\else\aftergroup\italiccorrection\fi
+  \let\dummy=}
+
+\def\begin#1{\begingroup
+  \def\end##1{\csname end#1\endcsname\endgroup}%
+  \csname #1\endcsname}
 
 %\def\hr{\smallskip\line{\leaders\hbox{~.~}\hfill}\smallskip}
 

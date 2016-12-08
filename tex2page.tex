@@ -575,10 +575,10 @@
 % directly in (plain-TeX) source document without
 % generating it via BibTeX
 
-\def\beginbibliography#1{\vskip-\lastskip
+\def\beginthebibliography#1{\vskip-\lastskip
   \begingroup
   \let\begin\relax
-  \let\endbibliography\endgroup
+  \def\endthebibliography{\endgroup\endgroup}%
   \def\input##1 ##2{\relax}%
   \setbox0=\hbox{\biblabelcontents{#1}}%
   \biblabelwidth=\wd0
@@ -596,19 +596,11 @@
 
 \def\em{\it\ifmmode\else\aftergroup\italiccorrection\fi}
 
-\def\emph{\bgroup\it
-  \ifmmode\else\aftergroup\italiccorrection\fi
-  \let\dummy=}
-
 \def\raggedleft{%
   \leftskip 0pt plus 1fil
   \parfillskip 0pt
   \parskip 0pt
 }
-
-\def\begin#1{\begingroup
-  \def\end##1{\csname end#1\endcsname\endgroup}%
-  \csname #1\endcsname}
 
 % STOP LOADING HERE FOR EPLAIN
 
@@ -813,7 +805,6 @@
     #2%
   \egroup\medskip\nobreak\noindent}
 
-
 \def\subsection{\vskip-\lastskip
   \futurelet\subsectionQfirstc\subsectionQcheckfirstc}
 
@@ -843,7 +834,6 @@
   \egroup
   \par
   \nobreak\noindent}
-
 
 % some OPmac stuff, unless OPmac already loaded
 

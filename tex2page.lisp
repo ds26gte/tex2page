@@ -3267,6 +3267,7 @@
     (do-bibliography-help bibfile)))
 
 (defun do-thebibliography ()
+  (do-end-para)
   (get-group)
   (when (eq *tex-format* :latex)
     (tex2page-string
@@ -3275,13 +3276,12 @@
   (setq *bibitem-num* 0)
   (tex2page-string "\\let\\em\\it")
   (tex2page-string "\\def\\newblock{ }")
-  (do-end-para)
   (emit "<table>")
   (emit-newline))
 
 (defun do-bibitem ()
+  (do-end-para)
   (let ((bibmark (get-bracketed-text-if-any)))
-    (do-end-para)
     (unless (= *bibitem-num* 0)
       (emit "</td></tr>") (emit-newline))
     (incf *bibitem-num*)
@@ -8703,6 +8703,7 @@ Try the commands
 (tex-def-prim "\\begin" #'do-begin)
 (tex-def-prim "\\beginchapter" #'do-beginchapter)
 (tex-def-prim "\\beginsection" #'do-beginsection)
+(tex-def-prim "\\beginthebibliography" #'do-thebibliography)
 (tex-def-prim "\\begintt" #'do-begintt)
 (tex-def-prim "\\begintts" (lambda() (do-scm-slatex-lines "tt" t nil)))
 (tex-def-prim "\\begitems" #'do-opmac-begitems)

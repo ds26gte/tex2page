@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161207" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161208" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -264,6 +264,7 @@
 (defvar *not-processing-p* nil)
 
 (defvar *opmac-active-tt-char* nil)
+(defvar *opmac-index-sub-table* nil)
 (defvar *opmac-list-style* #\o)
 (defvar *opmac-nonum-p* nil)
 (defvar *opmac-notoc-p* nil)
@@ -882,7 +883,6 @@
                               ((or (char-whitespace-p c)
                                    (and *comment-char* (char= c *comment-char*))
                                    (esc-char-p c))
-                               (unless *not-processing-p* (ignorespaces))
                                (return s))
                               (t (get-actual-char)
                                  (push c s)))))))))
@@ -1913,10 +1913,40 @@
          (header (progn (ignorespaces)
                         (let ((*tabular-stack* (list :header)))
                           (tex-string-to-html-string (get-till-par))))))
+    (tex-gdef-0arg "\\chapno" chapno)
+    (tex-gdef-count "\\subsecno" 0)
+    (tex-gdef-count "\\footnotenumber" 0)
     (when (string= chapno "") (setq chapno nil))
-    (tex-def-count "\\footnotenumber" 0 t)
     (do-heading-help 0 nil t nil chapno header)))
 
+(defun do-manmac-subsection ()
+  (ignorespaces)
+  (let* ((explicit-subsecno (get-bracketed-text-if-any))
+         (subsecno nil)
+         (header (progn (ignorespaces)
+                        (let ((*tabular-stack* (list :header)))
+                          (tex-string-to-html-string (get-till-char #\.))))))
+    (get-actual-char)
+    (setq subsecno
+          (cond (explicit-subsecno
+                  (if (string= explicit-subsecno "") nil
+                      (tex-string-to-html-string explicit-subsecno)))
+                (t (tex-gdef-count "\\subsecno" (+ (get-gcount "\\subsecno") 1))
+                   (let ((chapno (ctl-seq-no-arg-expand-once "\\chapno")))
+                     (when (string= chapno "") (setq chapno nil))
+                     (concatenate 'string
+                       (if chapno (concatenate 'string chapno ".") "")
+                       (write-to-string (get-gcount "\\subsecno")))))))
+    (do-heading-help 1 nil t nil subsecno header)))
+
+(defun do-section ()
+  (tex-gdef-0arg "\\TIIPlatexsectionused" "1")
+  (do-heading 1))
+
+(defun do-subsection ()
+  (if (tex2page-flag-boolean "\\TIIPlatexsectionused")
+      (do-heading 2)
+      (do-manmac-subsection)))
 
 (defun do-opmac-heading (seclvl)
   (ignorespaces)
@@ -3332,15 +3362,35 @@
     (unless (search "|)" idx-entry)
       (do-index-help idx-entry))))
 
-(defun do-opmac-ii ()
-  (let* ((word (get-word))
-         (subwords (path-to-list word #\/))
-         (newword (pop subwords)))
-    (ignorespaces)
+(defun do-opmac-ii (retainp)
+  (let* ((lhs (get-word))
+         (sub (and *opmac-index-sub-table* (gethash lhs *opmac-index-sub-table*))))
+    (if retainp (toss-back-string lhs)
+        (ignorespaces))
+    (do-index-help
+      (cond (sub sub)
+            (t (string=join (string=split lhs #\/) #\!))))))
+
+(defun do-opmac-iis ()
+  (let* ((lhs (get-word))
+         (rhs (get-peeled-group))
+         (lhs-list (string=split lhs #\/))
+         (rhs-list (string=split rhs #\/))
+         (sub ""))
+    (unless (= (length lhs-list) (length rhs-list))
+      (terror 'do-opmac-iis "Malformed \\iis."))
     (loop
-      (unless subwords (return))
-      (setq newword (concatenate 'string newword "!" (pop subwords))))
-    (do-index-help newword)))
+      (when (null lhs-list) (return t))
+      (let ((additive (concatenate 'string (pop lhs-list) "@" (pop rhs-list))))
+        (setq sub
+              (cond ((string= sub "") additive)
+                    (t (concatenate 'string sub "!" additive))))))
+    ;warning: may still need to do some transliteration as OPmac's special index
+    ;chars are different from MakeIndex's.
+    (unless *opmac-index-sub-table*
+      (flag-missing-piece :fresh-index))
+    (!opmac-iis lhs sub)
+    (write-aux `(!opmac-iis ,lhs ,sub))))
 
 (defun do-inputindex (&optional insert-heading-p)
   (setq *using-index-p* t)
@@ -5194,7 +5244,7 @@
   (when (munched-a-newline-p)
     (toss-back-char #\Newline) (toss-back-char #\Newline)))
 
-(defun path-to-list (p sepc)
+(defun string=split (p sepc)
   ;convert a Unix path into a Lisp list
   (if (not p) '()
     (let ((p p) (r '()))
@@ -5203,6 +5253,15 @@
           (unless i (push p r) (return (nreverse r)))
           (push (subseq p 0 i) r)
           (setq p (subseq p (1+ i))))))))
+
+(defun string=join (ss sepc)
+  (let ((res ""))
+    (loop
+      (when (null ss) (return res))
+      (let ((s (pop ss)))
+        (setq res
+              (cond ((string= res "") s)
+                    (t (concatenate 'string res (list sepc) s))))))))
 
 (defun kpsewhich (f)
   (let ((tmpf (concatenate 'string *aux-dir/* *jobname* "-Z-Z.temp")))
@@ -5630,7 +5689,7 @@
   (ignorespaces))
 
 (defun get-gcount (ctlseq)
-  (gethash ctlseq (texframe*-counts *global-texframe*)))
+  (gethash ctlseq (texframe*-counts *global-texframe*) 0))
 
 (defun tex-gdef-count (ctlseq v)
   (tex-def-count ctlseq v t))
@@ -6859,7 +6918,7 @@
     (cond (display-p (do-end-para)) (in-table-p (emit "</td><td>")))
     (munched-a-newline-p)
     (bgroup)
-    (when (string= env "tt") 
+    (when (string= env "tt")
       (do-tex-ctl-seq-completely "\\tthook")
       (setq *esc-chars* (delete *esc-char-std* *esc-chars* :test #'char=)))
     (emit "<div align=left><pre class=scheme")
@@ -7285,8 +7344,6 @@
         ((find-dimen z) (do-dimen= z nil))
         (t (do-tex-prim z))))
 
-;(trace do-tex-ctl-seq)
-
 (defun generate-html ()
   (let ((*outer-p* t))
     (loop
@@ -7486,6 +7543,9 @@
                ((not (probe-file
                   (concatenate 'string *aux-dir/* *jobname* *index-file-suffix*
                                ".idx")))
+                nil)
+               ((member :fresh-index *missing-pieces*)
+                ;wait to run makeindex
                 nil)
                ((member :index *missing-pieces*) t)
                (*source-changed-since-last-run-p*
@@ -7983,7 +8043,8 @@
 
 (defun !definitely-latex ()
   (setq *tex-format* :latex)
-  (when (< (get-gcount "\\secnumdepth") -1) (tex-gdef-count "\\secnumdepth" 3)))
+  (when (< (get-gcount "\\secnumdepth") -1)
+    (tex-gdef-count "\\secnumdepth" 3)))
 
 (defun !using-external-program (x)
   ;obsolete
@@ -8014,6 +8075,11 @@
 (defun !tex-text (n)
   (when (= n 0)
     (setq *ligatures-p* nil)))
+
+(defun !opmac-iis (lhs sub)
+  (unless *opmac-index-sub-table*
+    (setq *opmac-index-sub-table* (make-hash-table :test #'equal)))
+  (setf (gethash lhs *opmac-index-sub-table*) sub))
 
 (defun fully-qualified-url-p (u) (or (search "//" u) (char= (char u 0) #\/)))
 
@@ -8087,6 +8153,7 @@
                  !label
                  !last-modification-time
                  !last-page-number
+                 !opmac-iis
                  !preferred-title
                  !single-page
                  !stylesheet
@@ -8847,7 +8914,9 @@ Try the commands
   (lambda ()
     (unless *inputting-boilerplate-p* (setq *inputting-boilerplate-p* 0))))
 (tex-def-prim "\\ignorespaces" #'ignorespaces)
-(tex-def-prim "\\ii" #'do-opmac-ii)
+(tex-def-prim "\\ii" (lambda () (do-opmac-ii nil)))
+(tex-def-prim "\\iid" (lambda () (do-opmac-ii t)))
+(tex-def-prim "\\iis" #'do-opmac-iis)
 (tex-def-prim "\\imgdef" (lambda () (make-reusable-img (globally-p))))
 (tex-def-prim "\\imgpreamble" #'do-img-preamble)
 (tex-def-prim "\\IMGtabbing"
@@ -9015,7 +9084,7 @@ Try the commands
 (tex-def-prim "\\scriptsize" (lambda () (do-switch :scriptsize)))
 (tex-def-prim "\\sec" #'do-opmac-sec)
 (tex-def-prim "\\secc" (lambda () (do-opmac-heading 2)))
-(tex-def-prim "\\section" (lambda () (do-heading 1)))
+(tex-def-prim "\\section" #'do-section)
 (tex-def-prim "\\seealso" #'do-see-also)
 (tex-def-prim "\\setbox" #'do-setbox)
 (tex-def-prim "\\setcmykcolor" (lambda () (do-switch :cmyk)))
@@ -9037,7 +9106,7 @@ Try the commands
 (tex-def-prim "\\style" #'do-opmac-list-style)
 (tex-def-prim "\\subject" #'do-subject)
 (tex-def-prim "\\subparagraph" (lambda () (do-heading 5)))
-(tex-def-prim "\\subsection" (lambda () (do-heading 2)))
+(tex-def-prim "\\subsection" #'do-subsection)
 (tex-def-prim "\\subsubsection" (lambda () (do-heading 3)))
 (tex-def-prim "\\symfootnote" #'do-symfootnote)
 
@@ -9575,6 +9644,7 @@ Try the commands
         (*not-processing-p* nil)
         ;
         (*opmac-active-tt-char* nil)
+        (*opmac-index-sub-table* nil)
         (*opmac-list-style* #\o)
         (*opmac-nonum-p* nil)
         (*opmac-notoc-p* nil)
@@ -9614,7 +9684,7 @@ Try the commands
         (*tex-like-layout-p* *tex-like-layout-p*)
         (*tex-output-format* nil)
         (*tex-prog-name* *tex-prog-name*)
-        (*tex2page-inputs* (path-to-list (retrieve-env "TEX2PAGEINPUTS") *path-separator*))
+        (*tex2page-inputs* (string=split (retrieve-env "TEX2PAGEINPUTS") *path-separator*))
         (*title* nil)
         (*toc-list* '())
         (*toc-page* nil)

@@ -1,6 +1,12 @@
-Last change 2016-12-07
+Last change 2016-12-08
+
+2016 Dec 8
+
+Added OPmac's \iid, manmac's \subsection.
 
 2016 Dec 7
+
+Added OPmac's \iis.
 
 Added \begintts: like \begintt but SLaTeXes enclosed Scheme/Lisp code.
 

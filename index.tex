@@ -1106,6 +1106,15 @@ index therefore repeats the page number with different
 links, and adds a roman number to the second and
 subsequent occurrences to distinguish them visually.
 
+\index{ii@`\ii`}
+\index{iis@`\iis`}
+\index{makeindex@`\makeindex`}
+%
+\TeX2page also supports OPmac’s index generation macros `\ii`,
+`\iis`, and `\makeindex`. However, unlike OPmac, which rolls its
+own index-sorting routine within \TeX, \TeX2page relies 
+on MakeIndex.
+
 \beginsection Internal cross-references
 
 \index{label@`\label`}
@@ -2112,6 +2121,7 @@ Eplain’s `\verbatim`, and  OPmac’s
 `\activettchar`.
 
 \index{begintt@`\begintt`}
+\index{endtt@`\endtt`}
 \index{tthook@`\tthook`}
 %
 It also recognizes `manmac`’s `\begintt` `...` `\endtt`, but note

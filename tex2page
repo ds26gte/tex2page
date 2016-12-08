@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161207") ;last change
+(define *tex2page-version* "20161208") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -279,6 +279,7 @@
 (define *not-processing-p* #f)
 
 (define *opmac-active-tt-char* #f)
+(define *opmac-index-sub-table* #f)
 (define *opmac-list-style* #\o)
 (define *opmac-nonum-p* #f)
 (define *opmac-notoc-p* #f)
@@ -1254,20 +1255,18 @@
       (get-filename
        (and (char? c) (char=? c #\{))))))
 
-(define get-word
-  (lambda ()
-    (ignorespaces)
-    (list->string
-      (nreverse (let loop ((s '()))
-                  (let ((c (snoop-actual-char)))
-                    (cond ((eof-object? c) s)
-                          ((or (char-whitespace? c)
-                               (and *comment-char* (char=? c *comment-char*))
-                               (esc-char-p c))
-                           (unless *not-processing-p* (ignorespaces))
-                           s)
-                          (else (get-actual-char)
-                                (loop (cons c s))))))))))
+(define (get-word)
+  (ignorespaces)
+  (list->string
+    (nreverse (let loop ((s '()))
+                (let ((c (snoop-actual-char)))
+                  (cond ((eof-object? c) s)
+                        ((or (char-whitespace? c)
+                             (and *comment-char* (char=? c *comment-char*))
+                             (esc-char-p c))
+                         s)
+                        (else (get-actual-char)
+                              (loop (cons c s)))))))))
 
 (define get-integer
   (lambda (base)
@@ -2332,7 +2331,7 @@
     (when (<= seclvl 0)
       (!using-chapters)
       (when (and (eqv? *tex-format* ':latex) (< (get-gcount "\\secnumdepth") -1))
-        (tex-gdef-count "\\secnumdepth" 2))
+        (set-gcount! "\\secnumdepth" 2))
       (cond ((or (> *html-page-count* 0) (tex2page-flag-boolean "\\TIIPtitleused"))
              (do-eject))
             (else (tex-gdef-0arg "\\TIIPtitleused" "1")
@@ -2525,8 +2524,7 @@
                     (tex-string->html-string (get-till-par)))))
       (do-heading-help 1 #f #t #t #f header))))
 
-(define do-beginchapter
-  (lambda ()
+(define (do-beginchapter)
     (ignorespaces)
     (let* ((chapno (tex-string->html-string
                      (get-till-char #\space)))
@@ -2534,9 +2532,41 @@
                           (let ((*tabular-stack* (list ':header)))
                             (tex-string->html-string
                              (get-till-par))))))
+      (tex-gdef-0arg "\\chapno" chapno)
+      (set-gcount! "\\subsecno" 0)
+      (set-gcount! "\\footnotenumber" 0)
       (when (string=? chapno "") (set! chapno #f))
-      (tex-def-count "\\footnotenumber" 0 #t)
-      (do-heading-help 0 #f #t #f chapno header))))
+      (do-heading-help 0 #f #t #f chapno header)))
+
+(define (do-manmac-subsection)
+  (ignorespaces)
+  (let* ((explicit-subsecno (get-bracketed-text-if-any))
+         (subsecno #f)
+         (header (begin (ignorespaces)
+                        (let ((*tabular-stack* (list ':header)))
+                          (tex-string->html-string (get-till-char #\.))))))
+    (get-actual-char)
+    (set! subsecno
+      (cond (explicit-subsecno
+              (if (string=? explicit-subsecno "") #f
+                  (tex-string->html-string explicit-subsecno)))
+            (else 
+              (set-gcount! "\\subsecno" (+ (get-gcount "\\subsecno") 1))
+              (let ((chapno (ctl-seq-no-arg-expand-once "\\chapno")))
+                (when (string=? chapno "") (set! chapno #f))
+                (string-append 
+                  (if chapno (string-append chapno ".") "")
+                  (number->string (get-gcount "\\subsecno")))))))
+    (do-heading-help 1 #f #t #f subsecno header)))
+
+(define (do-section)
+  (tex-gdef-0arg "\\TIIPlatexsectionused" "1")
+  (do-heading 1))
+
+(define (do-subsection)
+  (if (tex2page-flag-boolean "\\TIIPlatexsectionused")
+      (do-heading 2)
+      (do-manmac-subsection)))
 
 (define do-opmac-heading
   (lambda (seclvl)
@@ -4271,21 +4301,35 @@
       (unless (substring? "|)" idx-entry)
         (do-index-help idx-entry)))))
 
+(define (do-opmac-ii retainp)
+  (let* ((lhs (get-word))
+         (sub (and *opmac-index-sub-table* (table-get *opmac-index-sub-table* lhs))))
+    (if retainp (toss-back-string lhs)
+        (ignorespaces))
+    (do-index-help
+      (cond (sub sub)
+            (else (string=join (string=split lhs #\/) #\!))))))
 
-(define do-opmac-ii 
+(define do-opmac-iis
   (lambda ()
-    (let* ((word (get-word))
-           (subwords (path-to-list word #\/))
-           (newword (let ((word0 (car subwords)))
-                      (set! subwords (cdr subwords)) word0)))
-      (ignorespaces)
-      (let loop ()
-        (cond ((null? subwords) newword)
-              (else (set! newword (string-append newword "!" (car subwords)))
-                    (set! subwords (cdr subwords))
-                    (loop))))
-      (do-index-help newword))))
-
+    (let* ((lhs (get-word))
+           (rhs (get-peeled-group))
+           (lhs-list (string=split lhs #\/))
+           (rhs-list (string=split rhs #\/))
+           (sub ""))
+      (unless (= (length lhs-list) (length rhs-list))
+        (terror 'do-opmac-iis "Malformed \\iis."))
+      (let loop ((lhs-list lhs-list) (rhs-list rhs-list))
+        (cond ((null? lhs-list) #f)
+              (else (let ((additive (string-append (car lhs-list) "@" (car rhs-list))))
+                      (set! sub
+                        (cond ((string=? sub "") additive)
+                              (else (string-append sub "!" additive))))
+                      (loop (cdr lhs-list) (cdr rhs-list))))))
+      (unless *opmac-index-sub-table*
+        (flag-missing-piece ':fresh-index))
+      (!opmac-iis lhs sub)
+      (write-aux `(!opmac-iis ,lhs ,sub)))))
 
 (define do-inputindex
   (lambda (insert-heading?)
@@ -4471,7 +4515,6 @@
         ((:description) (do-description-item))
         ((:itemize :enumerate) (do-regular-item))
         (else (do-plain-item-1))))))
-
 
 (define do-itemize
   (lambda ()
@@ -6455,7 +6498,7 @@
     ;(emit-newline)
     ))
 
-(define path-to-list
+(define string=split
   (lambda (p sepc)
     ;convert an OS path into a Scheme list
     (if (not p) '()
@@ -6465,6 +6508,17 @@
                 (loop (substring p (+ i 1) (string-length p))
                   (cons (substring p 0 i) r))
                 (nreverse (cons p r))))))))
+
+(define string=join
+  (lambda (ss sepc)
+    (let ((res ""))
+      (let loop ((ss ss))
+        (cond ((null? ss) res)
+              (else (let ((s (car ss)))
+                      (set! res
+                        (cond ((string=? res "") s)
+                              (else (string-append res (string sepc) s))))
+                      (loop (cdr ss)))))))))
 
 (define kpsewhich
   (lambda (f)
@@ -6938,9 +6992,8 @@
     (tex-def-dimen z (get-scaled-points) g?)
     (ignorespaces)))
 
-(define get-gcount
-  (lambda (ctlseq)
-    (table-get (texframe.counts *global-texframe*) ctlseq)))
+(define (get-gcount ctlseq)
+  (or (table-get (texframe.counts *global-texframe*) ctlseq) 0))
 
 (define set-gcount!
   (lambda (ctlseq v)
@@ -9174,6 +9227,7 @@
                         (string-append *aux-dir/* *jobname*
                                        *index-file-suffix* ".idx")))
                   #f)
+                 ((memv ':fresh-index *missing-pieces*) #f)
                  ((memv ':index *missing-pieces*) #t)
                  (*source-changed-since-last-run-p*
                   (flag-missing-piece ':fresh-index) #t)
@@ -9762,6 +9816,12 @@
     (when (= n 0)
       (set! *ligatures-p* #f))))
 
+(define !opmac-iis
+  (lambda (lhs sub)
+    (unless *opmac-index-sub-table*
+      (set! *opmac-index-sub-table* (make-table 'equ string=?)))
+    (table-put! *opmac-index-sub-table* lhs sub)))
+
 ;;
 
 (define fully-qualified-url?
@@ -9862,6 +9922,7 @@
                         ((!label) !label)
                         ((!last-modification-time) !last-modification-time)
                         ((!last-page-number) !last-page-number)
+                        ((!opmac-iis) !opmac-iis)
                         ((!preferred-title) !preferred-title)
                         ((!single-page) !single-page)
                         ((!stylesheet) !stylesheet)
@@ -10653,7 +10714,9 @@ Try the commands
   (lambda ()
     (unless *inputting-boilerplate-p* (set! *inputting-boilerplate-p* 0))))
 (tex-def-prim "\\ignorespaces" ignorespaces)
-(tex-def-prim "\\ii" do-opmac-ii)
+(tex-def-prim "\\ii" (lambda () (do-opmac-ii #f)))
+(tex-def-prim "\\iid" (lambda () (do-opmac-ii #t)))
+(tex-def-prim "\\iis" do-opmac-iis)
 (tex-def-prim "\\imgdef" (lambda () (make-reusable-img (globally-p))))
 (tex-def-prim "\\imgpreamble" do-img-preamble)
 (tex-def-prim "\\IMGtabbing"
@@ -10821,7 +10884,7 @@ Try the commands
 (tex-def-prim "\\scriptsize" (lambda () (do-switch ':scriptsize)))
 (tex-def-prim "\\sec" do-opmac-sec)
 (tex-def-prim "\\secc" (lambda () (do-opmac-heading 2)))
-(tex-def-prim "\\section" (lambda () (do-heading 1)))
+(tex-def-prim "\\section" do-section)
 (tex-def-prim "\\seealso" do-see-also)
 (tex-def-prim "\\setbox" do-setbox)
 (tex-def-prim "\\setcmykcolor" (lambda () (do-switch ':cmyk)))
@@ -10843,7 +10906,7 @@ Try the commands
 (tex-def-prim "\\style" do-opmac-list-style)
 (tex-def-prim "\\subject" do-subject)
 (tex-def-prim "\\subparagraph" (lambda () (do-heading 5)))
-(tex-def-prim "\\subsection" (lambda () (do-heading 2)))
+(tex-def-prim "\\subsection" do-subsection)
 (tex-def-prim "\\subsubsection" (lambda () (do-heading 3)))
 (tex-def-prim "\\symfootnote" do-symfootnote)
 
@@ -11380,6 +11443,7 @@ Try the commands
                 (*not-processing-p* #f)
                 ;
                 (*opmac-active-tt-char* #f)
+                (*opmac-index-sub-table* #f)
                 (*opmac-list-style* #\o)
                 (*opmac-nonum-p* #f)
                 (*opmac-notoc-p* #f)
@@ -11414,7 +11478,7 @@ Try the commands
                 (*tabular-stack* '())
                 (*temp-string-count* 0)
                 (*temporarily-use-utf8-for-math-p* #f)
-                (*tex2page-inputs* (path-to-list (or (getenv "TEX2PAGEINPUTS")
+                (*tex2page-inputs* (string=split (or (getenv "TEX2PAGEINPUTS")
                                                      (getenv "TIIPINPUTS")) *path-separator*))
                 (*tex-env* '())
                 (*tex-format* ':plain)

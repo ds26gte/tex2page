@@ -66,7 +66,6 @@
     ((:windows) "mp")
     (else "mpost")))
 
-(define *tex-prog-name* "pdftex")
 
 ;change these navbar wordings to suit the natural language of your
 ;document
@@ -5892,18 +5891,17 @@
     ;run tex on f and return f.ps or f.pdf if successful
     (unless tex-prog-name
       (let ((d (find-def "\\TZPtexprogname")))
-        (when d (set! *tex-prog-name* (tdef.expansion d))))
-      (unless *tex-prog-name* (set! *tex-prog-name* "pdftex"))
-      (set! tex-prog-name *tex-prog-name*)
+        (when d (set! tex-prog-name (tdef.expansion d))))
+      (unless tex-prog-name (set! tex-prog-name "pdftex"))
       (set! tex-output-format
-        (if (or (eqv? (substring? "pdf" *tex-prog-name*) 0)
-                (eqv? (substring? "xe" *tex-prog-name*) 0)
-                (eqv? (substring? "lua" *tex-prog-name*) 0))
+        (if (or (eqv? (substring? "pdf" tex-prog-name) 0)
+                (eqv? (substring? "xe" tex-prog-name) 0)
+                (eqv? (substring? "lua" tex-prog-name) 0))
           ':pdf ':dvi))
       (when (eq? *tex-format* ':latex)
         (set! tex-prog-name
-          (string-append (substring *tex-prog-name*
-                                    0 (- (string-length *tex-prog-name*) 3))
+          (string-append (substring tex-prog-name
+                                    0 (- (string-length tex-prog-name) 3))
                          "latex"))))
     (let* ((dvi-file (string-append
                       f (if (eq? tex-output-format ':pdf)
@@ -11483,7 +11481,6 @@ Try the commands
                 (*tex-format* ':plain)
                 (*tex-if-stack* '())
                 (*tex-like-layout-p* *tex-like-layout-p*)
-                (*tex-prog-name* *tex-prog-name*)
                 (*title* #f)
                 (*toc-list* '())
                 (*toc-page* #f)

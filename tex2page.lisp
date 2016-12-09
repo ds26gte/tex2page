@@ -94,7 +94,6 @@
 
 (defparameter *metapost* #-windows "mpost" #+windows "mp")
 
-(defparameter *tex-prog-name* "pdftex")
 
 (defparameter *navigation-sentence-begin* "Go to ")
 (defparameter *navigation-first-name* "first")
@@ -4738,18 +4737,17 @@
     ;run tex on f and return f.ps or f.pdf if successful
     (unless tex-prog-name
       (let ((d (find-def "\\TZPtexprogname")))
-        (when d (setq *tex-prog-name* (tdef*-expansion d))))
-      (unless *tex-prog-name* (setq *tex-prog-name* "pdftex"))
-      (setq tex-prog-name *tex-prog-name*)
+        (when d (setq tex-prog-name (tdef*-expansion d))))
+      (unless tex-prog-name (setq tex-prog-name "xetex"))
       (setq tex-output-format
-            (if (or (eql (search "pdf" *tex-prog-name*) 0)
-                    (eql (search "xe" *tex-prog-name*) 0)
-                    (eql (search "lua" *tex-prog-name*) 0))
+            (if (or (eql (search "pdf" tex-prog-name) 0)
+                    (eql (search "xe" tex-prog-name) 0)
+                    (eql (search "lua" tex-prog-name) 0))
               :pdf :dvi))
       (when (eq *tex-format* :latex)
         (setq tex-prog-name
-              (concatenate 'string (subseq *tex-prog-name* 0
-                                           (- (length *tex-prog-name*) 3))
+              (concatenate 'string (subseq tex-prog-name 0
+                                           (- (length tex-prog-name) 3))
                            "latex"))))
       (let* ((dvi-file (concatenate 'string f
                                    (if (eq tex-output-format :pdf)
@@ -9684,7 +9682,6 @@ Try the commands
         (*tex-if-stack* '())
         (*tex-like-layout-p* *tex-like-layout-p*)
         (*tex-output-format* nil)
-        (*tex-prog-name* *tex-prog-name*)
         (*tex2page-inputs* (string=split (retrieve-env "TEX2PAGEINPUTS") *path-separator*))
         (*title* nil)
         (*toc-list* '())

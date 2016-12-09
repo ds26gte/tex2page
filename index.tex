@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-07} %last change
+\c{2016-12-08} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1597,12 +1597,12 @@ change this, e.g,
 \beginsection \TeX\ executable used for image generation
 
 \index{TZPtexprogname@`\TZPtexprogname`}
-\TeX2page uses one of the variants of \TeX\ (typically `pdftex`) to
+By default, \TeX2page uses `xetex` to
 generate images. To change this, set the flag `\TZPtexprogname` to
 contain the name of your preferred \TeX\ executable, e.g.,
 
 \begintt
-\def\TZPtexprogname{xetex}
+\def\TZPtexprogname{pdftex}
 \endtt
 %
 You only need to set the executable name used for the “plain” format:

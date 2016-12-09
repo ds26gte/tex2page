@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161208") ;last change
+(define *tex2page-version* "20161209") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -4435,27 +4435,26 @@
         (emit "</b>")
         (emit-nbsp 2)))))
 
-(define do-plain-item
-  (lambda (n)
-    (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
-      (do-end-para)
-      (emit "<table><tr>")
-      (let loop ((i n))
-        (unless (<= i 0)
-          (unless (= i n) (emit "</td>"))
-          (emit "<td width=")
-          (emit parindent)
-          (emit " valign=top align=right")
-          (when (= i 1) (emit " class=item"))
-          (emit ">")
-          (loop (- i 1))))
-      (tex2page-string (get-group))
-      (emit-nbsp 2)
-      (emit "</td><td>")
-      (do-noindent)
-      (add-afterpar (lambda () (emit "</td></tr></table>"))))))
+(define (do-plain-item n)
+  (do-end-para)
+  (emit-newline)
+  (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
+    (emit "<p style=\"margin-left: ")
+    (emit (* n parindent))
+    (emit "pt; text-indent: 0pt\">")
+    (emit "<span style=\"margin-left: ")
+    (emit parindent)
+    (emit "pt\"></span>")
+    (emit "<span style=\"position: relative\">")
+    (emit "<span class=item style=\"position: absolute; left: -")
+    (emit parindent)
+    (emit "pt\">")
+    (tex2page-string (get-group))
+    (ignorespaces)
+    (emit-nbsp 2)
+    (emit "</span></span>")))
 
-(define do-plain-item-1
+(define do-plain-single-item
   (lambda ()
     (ignorespaces)
     (case (snoop-actual-char)
@@ -4470,21 +4469,20 @@
     (get-actual-char)
     (emit "</span>)")))
 
-(define do-textindent
-  (lambda ()
-    (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
-      (do-noindent)
-      (emit "<span style=\"margin-left: ")
-      (emit parindent)
-      (emit "pt\">&#x200c;</span>")
-      (emit "<span style=\"position: relative\">&#x200c;")
-      (emit "<span style=\"position: absolute; left: -")
-      (emit parindent)
-      (emit "pt\">")
-      (tex2page-string (get-group))
-      (ignorespaces)
-      (emit-nbsp 2)
-      (emit "</span></span>"))))
+(define (do-textindent)
+  (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
+    (do-noindent)
+    (emit "<span style=\"margin-left: ")
+    (emit parindent)
+    (emit "pt\"></span>")
+    (emit "<span style=\"position: relative\">")
+    (emit "<span class=item style=\"position: absolute; left: -")
+    (emit parindent)
+    (emit "pt\">")
+    (tex2page-string (get-group))
+    (ignorespaces)
+    (emit-nbsp 2)
+    (emit "</span></span>")))
 
 (define (do-proclaim)
   (let* ((head (tex-string->html-string (get-till-char #\.)))
@@ -4511,7 +4509,7 @@
       (case a
         ((:description) (do-description-item))
         ((:itemize :enumerate) (do-regular-item))
-        (else (do-plain-item-1))))))
+        (else (do-plain-single-item))))))
 
 (define do-itemize
   (lambda ()

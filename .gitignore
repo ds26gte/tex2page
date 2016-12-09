@@ -1,10 +1,12 @@
 *.aux
 *.eps
 *.html
+*.JPG
 *.mp
 *.mpx
 *.pdf
 *.toc
+*.xcf
 *.xrf
 *Z-*
 *~

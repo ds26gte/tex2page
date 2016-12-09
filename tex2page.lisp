@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161208" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161209" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -3479,24 +3479,25 @@
       (emit-nbsp 2))))
 
 (defun do-plain-item (n)
+  (do-end-para)
+  (emit-newline)
   (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
-    (do-end-para)
-    (emit "<table><tr>")
-    (let ((n-1 (- n 1)))
-      (dotimes (i n)
-        (unless (= i 0) (emit "</td>"))
-        (emit "<td width=")
-        (emit parindent)
-        (emit " valign=top align=right")
-        (when (= i n-1) (emit " class=item"))
-        (emit ">")))
+    (emit "<p style=\"margin-left: ")
+    (emit (* n parindent))
+    (emit "pt; text-indent: 0pt\">")
+    (emit "<span style=\"margin-left: ")
+    (emit parindent)
+    (emit "pt\"></span>")
+    (emit "<span style=\"position: relative\">")
+    (emit "<span class=item style=\"position: absolute; left: -")
+    (emit parindent)
+    (emit "pt\">")
     (tex2page-string (get-group))
+    (ignorespaces)
     (emit-nbsp 2)
-    (emit "</td><td>")
-    (do-noindent)
-    (add-afterpar (lambda () (emit "</td></tr></table>")))))
+    (emit "</span></span>")))
 
-(defun do-plain-item-1 ()
+(defun do-plain-single-item ()
   (ignorespaces)
   (case (snoop-actual-char)
     (#\( (do-simple-item))
@@ -3514,9 +3515,9 @@
     (do-noindent)
     (emit "<span style=\"margin-left: ")
     (emit parindent)
-    (emit "pt\">&#x200c;</span>")
-    (emit "<span style=\"position: relative\">&#x200c;")
-    (emit "<span style=\"position: absolute; left: -")
+    (emit "pt\"></span>")
+    (emit "<span style=\"position: relative\">")
+    (emit "<span class=item style=\"position: absolute; left: -")
     (emit parindent)
     (emit "pt\">")
     (tex2page-string (get-group))
@@ -3545,7 +3546,7 @@
   (case (car *tabular-stack*)
     (:description (do-description-item))
     ((:itemize :enumerate) (do-regular-item))
-    (t (do-plain-item-1))))
+    (t (do-plain-single-item))))
 
 (defun do-itemize ()
   (do-end-para)

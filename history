@@ -1,4 +1,9 @@
-Last change 2016-12-08
+Last change 2016-12-09
+
+2016 Dec 9
+
+\item, \itemitem: Use relative positioning instead of tables, which looks
+'orrible on lynx.
 
 2016 Dec 8
 

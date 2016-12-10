@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161209") ;last change
+(define *tex2page-version* "20161211") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -2157,6 +2157,12 @@
     (emit "<p class=noindent>")
     (set! *in-para-p* #t)))
 
+(define (do-indent)
+  (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
+    (emit "<span style=\"margin-left: ")
+    (emit parindent)
+    (emit "pt\"></span>")))
+
 (define do-para-nopadding
   (lambda ()
     (do-end-para)
@@ -3260,6 +3266,9 @@
           (lambda ()
             (do-end-para)
             (emit "</div>") (do-para)))
+         ((:oldstyle)
+          (emit "<span class=oldstyle>")
+          (lambda () (emit "</span>")))
          (else
            (emit "<span class=")
            (emit sw)
@@ -4395,6 +4404,28 @@
         (get-to)
         (eat-dimen)
         (get-token-or-peeled-group)))))
+
+(define (html-length s)
+  (let ((n (string-length s)))
+    (let loop ((i 0) (skip-tag #f) (skip-entity #f) (res 0))
+      (if (>= i n) res
+          (let ((c (string-ref s i)))
+            (cond (skip-tag (loop (+ i 1) (if (char=? c #\>) #f #t) #f res))
+                  (skip-entity (loop (+ i 1) #f (if (char=? c #\;) #f #t) res))
+                  ((char=? c #\<) (loop (+ i 1) #t #f res))
+                  ((char=? c #\&) (loop (+ i 1) #f #t (+ res 1)))
+                  (else (loop (+ i 1) #f #f (+ res 1)))))))))
+
+(define (do-llap)
+  (let* ((txt (tex-string->html-string (get-group)))
+         (html-len (html-length txt))
+         (txt-len (sp-to-pixels (tex-length html-len ':ex))))
+    (emit "<span style=\"position: relative\">")
+    (emit "<span style=\"position: absolute; left: -")
+    (emit txt-len)
+    (emit "pt\">")
+    (emit txt)
+    (emit "</span></span>")))
 
 (define do-indexitem
   (lambda (indent)
@@ -5862,12 +5893,11 @@
       ;(emit "</center><p>")
       )))
 
-(define find-img-file-extn
-  (lambda ()
-    (case (tex2page-flag-value "\\TZPimageformat")
-      ((#\p #\P) ".png")
-      ((#\j #\J) ".jpeg")
-      (else ".gif"))))
+(define (find-img-file-extn)
+  (case (tex2page-flag-value "\\TZPimageformat")
+    ((#\g #\G) ".gif")
+    ((#\j #\J) ".jpeg")
+    (else ".png")))
 
 (define do-htmlimageformat
   (lambda ()
@@ -9462,7 +9492,7 @@
       }
 
       blockquote {
-      background-color: #f0e0e0;
+      /* background-color: #f0e0e0; */
       margin-top: 2pt;
       margin-bottom: 2pt;
       margin-left: 2em;
@@ -10722,6 +10752,7 @@ Try the commands
 (tex-def-prim "\\includeexternallabels" do-includeexternallabels)
 (tex-def-prim "\\includeonly" do-includeonly)
 (tex-def-prim "\\includegraphics" do-includegraphics)
+(tex-def-prim "\\indent" do-indent)
 (tex-def-prim "\\index" do-index)
 (tex-def-prim "\\indexitem" (lambda () (do-indexitem 0)))
 (tex-def-prim "\\indexsubitem" (lambda () (do-indexitem 1)))
@@ -10759,6 +10790,7 @@ Try the commands
 (tex-def-prim "\\linebreak"
  (lambda () (get-bracketed-text-if-any) (emit "<br>")))
 (tex-def-prim "\\listing" do-verbatiminput)
+(tex-def-prim "\\llap" do-llap)
 (tex-def-prim "\\lstlisting" (lambda () (do-verbatim-latex "lstlisting")))
 (tex-def-prim "\\lowercase" (lambda () (do-flipcase ':lccode)))
 
@@ -10817,6 +10849,7 @@ Try the commands
 (tex-def-prim "\\obeywhitespace" do-obeywhitespace)
 (tex-defsym-prim "\\OE" "&#x152;")
 (tex-defsym-prim "\\oe" "&#x153;")
+(tex-def-prim "\\oldstyle" (lambda () (do-switch ':oldstyle)))
 (tex-def-prim "\\opengraphsfile" do-mfpic-opengraphsfile)
 (tex-def-prim "\\openin" (lambda () (do-open-stream ':in)))
 (tex-def-prim "\\openout" (lambda () (do-open-stream ':out)))
@@ -11144,7 +11177,6 @@ Try the commands
 (tex-let-prim "\\textstyle" "\\TIIPrelax")
 (tex-let-prim "\\endsloppypar" "\\TIIPrelax")
 (tex-let-prim "\\frenchspacing" "\\TIIPrelax")
-(tex-let-prim "\\oldstyle" "\\TIIPrelax")
 (tex-let-prim "\\protect" "\\TIIPrelax")
 (tex-let-prim "\\raggedbottom" "\\TIIPrelax")
 (tex-let-prim "\\raggedright" "\\TIIPrelax")

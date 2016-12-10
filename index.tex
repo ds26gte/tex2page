@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-09} %last change
+\c{2016-12-10} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1235,16 +1235,14 @@ In the DVI output, this becomes
 Ithaka repository.
 
 \endquote
-
-\n In the HTML output, it would be
+In the HTML output, it would be
 
 \quote
 
 \n For more details, consult {\em the Odyssey}.
 
 \endquote
-
-\n where
+where
 “{\em the Odyssey}” is an HTML link to the site
 \path|http://www.ithaka.org/odyssey.html|.
 
@@ -1316,8 +1314,7 @@ produces
 \n \TeX\ is available at the TUG website.
 
 \endquote
-
-\n In the HTML output, “the TUG website” is a hyperlink to
+In the HTML output, “the TUG website” is a hyperlink to
 \path|http://www.tug.org|.
 
 \index{\\@`\\`!in `\urlh`}
@@ -1340,8 +1337,7 @@ produces, in the DVI output.
 \n \TeX\ is available at TUG (\path!tug.org!).
 
 \endquote
-
-\n The HTML output will not mention the parenthesized domain
+The HTML output will not mention the parenthesized domain
 name, since the word “TUG” already hyperlinks to it.
 
 `\\` is useful for internal cross-references too.  For
@@ -1360,8 +1356,7 @@ produces
 {\tt callcc} (section~2.3).
 
 \endquote
-
-\n in the DVI output.  In the HTML output, the parenthesized
+in the DVI output.  In the HTML output, the parenthesized
 section reference will be dropped as redundant, as
 the word “{\tt callcc}” hyperlinks to the relevant section.
 
@@ -1382,8 +1377,7 @@ produces
 \n \TeX\ is available at TUG (\path|http://www.tug.org|).
 
 \endquote
-
-\n in the DVI output.  In the HTML output, the parenthesized
+in the DVI output.  In the HTML output, the parenthesized
 URL is dropped as redundant, as the word “TUG”
 hyperlinks to it.
 
@@ -1414,8 +1408,7 @@ prints as
 \n {\bf Answer 1.} Answer to exercise 1 \dots
 
 \endquote
-
-\n in both the DVI and the HTML.  However, in the
+in both the DVI and the HTML.  However, in the
 HTML, the proclamations “{\bf Exercise 1.}”\ and
 “{\bf Answer 1.}”\ are also helpful hyperlinks to each other.
 
@@ -1956,7 +1949,9 @@ own style info via `\cssblock` or by loading
 style sheets with `\inputcss`.   Some general-purpose
 style sheets available on the Web are the W3C Core
 Styles~\cite{w3ccorestyles} and Google Fonts~\cite{googlefonts}.
-E.g., to use Libre Baskerville for your body text:
+Here are two examples of using the latter:
+
+\item(i) To use Libre Baskerville for your body text:
 
 \begintt
 \ifx\shipout\UnDeFiNeD % HTML only
@@ -1965,6 +1960,31 @@ E.g., to use Libre Baskerville for your body text:
 \cssblock
 body {
   font-family: 'libre baskerville', serif;
+}
+\endcssblock
+\fi
+\endtt
+
+\index{oldstyle@`\oldstyle`}
+\item(ii) \TeX2page has a CSS class `.oldstyle` in place for translating
+\TeX's `\oldstyle` macro. However, for this to actually show up
+as something meaningful in your HTML, e.g.,
+
+\quote
+\n `{\oldstyle2{\rm.}718281828}` as {\oldstyle 2{\rm.}718281828}
+\endquote
+you need to add a suitable CSS definition for `.oldstyle`.
+One way is to go trawling through Google Fonts for
+a font that has oldstyle numerals:
+
+\begintt
+\ifx\shipout\UnDeFiNeD % HTML only
+\input https://fonts.googleapis.com/css?family=EB+Garamond
+
+\cssblock
+.oldstyle {
+  font-family: 'eb garamond';
+  font-size: 120%;
 }
 \endcssblock
 \fi
@@ -2135,7 +2155,14 @@ makes ‘`@`’ the verbatim escape.
 \TeX2page also understands \LaTeX’s `{verbatim}`
 environment, the `\path` macro from `path.sty`,
 Eplain’s `\verbatim`, and  OPmac’s
-`\activettchar`.
+`\activettchar`\f{\verb{\activettchar`} lets you write
+\verb+\verb`\c@de_fr&gm%#t$`+
+as simply
+\verb+`\c@de_fr&gm%#t$`+,
+as in AsciiDoc; and
+\verb+\activettchar|+ lets you write
+\verb+|\c@de_fr&gm%#t$|+,
+as in `manmac`.}.
 
 \index{begintt@`\begintt`}
 \index{endtt@`\endtt`}
@@ -2153,8 +2180,7 @@ character and `\]` producing visible space, you should set
   \def\|{char`\|}%
   \def\ {·}}
 +
-If you also set \p{\activettchar`} because you're a GitHub
-weenie, then set `\tthook` {\em before} you set `\activettchar`.
+If you also have \p{\activettchar`}, then set `\tthook` {\em before} you set `\activettchar`.
 
 \beginsection Inserting files verbatim
 
@@ -2976,8 +3002,7 @@ the following HTML output:
 (display (sqrt 2))
 }.
 \endquote
-
-\n In effect, \TeX2page processes the `\eval` call
+In effect, \TeX2page processes the `\eval` call
 using Scheme, producing some output in an auxiliary
 \TeX\ file, which is then re-inserted into the document at the location of
 the `\eval`.
@@ -3048,8 +3073,7 @@ which typeset as follows:
 \proto{cdr}{c}{procedure}
 
 \endquote
-
-\n The macro `\proto` takes three arguments: the
+The macro `\proto` takes three arguments: the
 operator name; the metavariables for its operands;
 and the operator kind.  In particular, it typesets
 the operator and the operands in different fonts,
@@ -3070,16 +3094,14 @@ should not produce
 \proto{gentemp}{\ }{procedure}
 
 \endquote
-
-\n but rather
+but rather
 
 \quote
 
 \proto{gentemp}{}{procedure}
 
 \endquote
-
-\n (I.e., no space between `gentemp` and the
+(I.e., no space between `gentemp` and the
 closing paren.)
 
 \index{def@`\def`}

@@ -1,0 +1,57 @@
+% last modified 2016-12-11
+% Dorai Sitaram
+
+\input tgtermes
+\input tex2page
+\input tex2pagerc
+\input li
+
+\let\oldtentt\tentt
+\font\tentt "Ubuntu Mono" at 10pt
+\ifx\tentt\nullfont
+\let\tentt\oldtentt
+\font\eighttt "TeX Gyre Cursor:-liga:embolden=1" at 8pt
+\font\fourteenrm "TeX Gyre Termes" at 14pt
+%\font\fourteenrm "TeX Gyre Schola" at 14pt
+%\font\fourteenrm "Latin Modern Roman/B" at 14pt
+\font\twelvebf "TeX Gyre Termes/B" at 12pt
+\font\tensansbf "TeX Gyre Heros/B" at 12pt
+\else
+\font\tenbf "Ubuntu/B" at 10pt
+%\font\tenbf "Ubuntu/M" at 10pt
+\font\eighttt "Ubuntu Mono" at 8pt
+\font\fourteenrm "Ubuntu" at 14pt
+\font\twelvebf "Ubuntu/B" at 12pt
+\font\tensansbf "Ubuntu/B" at 10pt
+\fi
+
+\font\eightrm "TeX Gyre Termes" at 8pt
+\font\eightit "TeX Gyre Termes/I" at 8pt
+
+\def\titlefont{\fourteenrm \baselineskip=16.8pt \relax}
+
+\def\chapterfont{\twelvebf
+  \baselineskip 14.4pt \relax}
+
+\def\sectionfont{\tensansbf}
+
+\def\eightfont{\eightrm
+  \let\it\eightit
+  \let\tt\eighttt
+  \baselineskip 9.6pt \relax}
+
+\def\footnotehook{\eightfont}
+
+\def\sectionQbreak#1\par{$\dashv$\bigbreak\noindent}
+
+\defcsactive\⊣ {\sectionQbreak}
+
+\def\begindocumenthook{\activettchar`\let\begindocument\relax}
+
+\let\ORIGtitle\title
+\let\ORIGbeginchapter\beginchapter
+\let\ORIGbeginsection\beginsection
+
+\def\title{\begindocumenthook\ORIGtitle}
+\def\beginchapter{\begindocumenthook\ORIGbeginchapter}
+\def\beginsection{\begindocumenthook\ORIGbeginsection} 

@@ -1,0 +1,21 @@
+% last modified 2016-12-10
+% Dorai Sitaram
+
+\newcount\liQcount
+
+\def\li{\advance\liQcount by 1
+\ifx\shipout\UnDeFiNeD\par
+\else\medbreak\fi
+\indent
+%\llap{({\it\romannumeral\the\liQcount\/})\enspace}%
+%\llap{(\romannumeral\the\liQcount)\enspace}%
+%\llap{\it\the\liQcount.\enspace}%
+\llap{{\oldstyle\the\liQcount}.\enspace}%
+\csname liQhook\endcsname
+}
+
+\def\lastli{\def\liQhook{\liQcount=0 \let\liQhook\relax}%
+\li
+\ifx\shipout\UnDeFiNeD\else
+\begingroup
+\def\par{\endgroup\medbreak\noindent}\fi}

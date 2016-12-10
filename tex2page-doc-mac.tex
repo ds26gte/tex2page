@@ -1,12 +1,14 @@
-% last change: 2016-12-07
+% last change: 2016-12-11
+% Dorai Sitaram
+%
+%
 
-\input tgtermes
+\input texrc
 
 %\magnification\magstephalf
 \input miniltx
 \input color.sty
 \resetatcatcode
-\input tex2page
 \input btxmac
 
 \input eval4tex
@@ -14,9 +16,7 @@
 \input path.sty
 \input texnames.sty
 
-\def\TZPhsize{40em}
 \let\TZPtexlayout=1
-\def\TZPimageformat{png}
 
 \advance\hoffset .5truein
 \advance\hsize -1truein
@@ -28,36 +28,7 @@
   \suppressfontnotfounderror=1
 \fi
 
-\let\oldtentt\tentt
-\font\tentt "Ubuntu Mono" at 10pt
-\ifx\tentt\nullfont
-\let\tentt\oldtentt
-\font\eighttt "TeX Gyre Cursor:-liga:embolden=1" at 8pt
-\font\fourteenrm "TeX Gyre Termes" at 14pt
-\font\twelvebf "TeX Gyre Termes/B" at 12pt
-\font\tensansbf "TeX Gyre Heros/B" at 12pt
-\else
-\font\eighttt "Ubuntu Mono" at 8pt
-%\font\fourteenrm "TeX Gyre Schola" at 14pt
-\font\fourteenrm "Ubuntu" at 14pt
-%\font\fourteenrm "Latin Modern Roman/B" at 14pt
-\font\twelvebf "Ubuntu/B" at 12pt
-\font\tensansbf "Ubuntu/B" at 10pt
-\fi
-
-\font\eightrm "TeX Gyre Termes" at 8pt
-\font\eightit "TeX Gyre Termes/I" at 8pt
-
-\def\titlefont{\fourteenrm \baselineskip=16.8pt \relax}
-\def\chapterfont{\twelvebf \baselineskip=14.4pt \relax}
-\def\sectionfont{\tensansbf}
-\def\eightfont{\eightrm\let\it\eightit\let\tt\eighttt\baselineskip 9.6pt \relax}
-
-\def\footnotehook{\eightfont}
-
 \def\tthook{\catcode`\|=0 \def\|{\char`\|}\def\ {·}}
-
-\activettchar`
 
 \ifx\shipout\UnDeFiNeD\else
 \def\XeTeX{Xe\TeX}
@@ -117,8 +88,6 @@
 
 % symbol footnotes
 
-\newcount\footnotenumber
-
 \def\fnsymbol#1{%
 % #1 is between 1 and 9 inclusive
 \ifcase#1\or
@@ -156,7 +125,7 @@ $\Vert$\or
 %
 
 \def\quote{\bgroup\narrower\smallbreak}
-\def\endquote{\smallbreak\egroup}
+\def\endquote{\smallbreak\egroup\noindent}
 
 % \xrdef, as in Eplain
 
@@ -183,10 +152,6 @@ $\Vert$\or
 %\parskip=.5em
 \parskip=5pt
 
-\inputcss https://fonts.googleapis.com/css?family=Proza+Libre
-
-\inputcss https://fonts.googleapis.com/css?family=Miltonian
-
 %\inputcss https://fonts.googleapis.com/css?family=Special+Elite
 
 % Some readymade stylesheets are
@@ -196,42 +161,9 @@ $\Vert$\or
 
 %\inputcss http://www.w3.org/StyleSheets/Core/Oldstyle
 
-\cssblock
-.title {
-font-family: 'proza libre', serif;
-}
-
-.chapter,.section {
-font-family: 'proza libre', sans-serif;
-}
-
-.title,.item {
-color: #9b3d3d;
-}
-
-.chapter {
-margin-top: 1.8em;
-font-size: 150%;
-}
-
-.section {
-margin-top: 1.5em;
-font-size: 110%;
-}
-
-.chapter a {
-text-decoration: none;
-}
-
-.item {
-font-family: 'miltonian', sans-serif;
-}
-\endcssblock
-
 \slatexlikecomments
 
 % We want images to be a bit bigger
-
 
 \ifx\TZPcommonlisp 1
 \evalq{

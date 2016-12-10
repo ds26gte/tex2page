@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161209" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161211" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1593,6 +1593,12 @@
   (emit "<p class=noindent>")
   (setq *in-para-p* t))
 
+(defun do-indent ()
+  (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
+    (emit "<span style=\"margin-left: ")
+    (emit parindent)
+    (emit "pt\"></span>")))
+
 (defun do-para-nopadding ()
   (do-end-para)
   (emit-newline)
@@ -2536,6 +2542,9 @@
         (do-end-para)
         (emit "<div align=right>")
         (lambda () (do-end-para) (emit "</div>") (do-para)))
+       (:oldstyle
+         (emit "<span class=oldstyle>")
+         (lambda () (emit "</span>")))
        (t
         (emit "<span class=")
         (emit sw)
@@ -3444,6 +3453,36 @@
       (get-to)
       (eat-dimen)
       (get-token-or-peeled-group))))
+
+(defun html-length (s)
+  (let ((n (length s)) 
+        (res 0)
+        (i 0)
+        (skip-tag nil)
+        (skip-entity nil))
+    (loop
+      (when (>= i n) (return res))
+      (let ((c (char s i)))
+        (incf i)
+        (cond (skip-tag (when (char= c #\>) (setq skip-tag nil)))
+              (skip-entity (when (char= c #\;) (setq skip-entity nil)))
+              ((char= c #\<) (setq skip-tag t))
+              ((char= c #\&) (incf res) (setq skip-entity t))
+              (t (incf res)))))))
+
+(defun do-llap ()
+  (let* ((txt (tex-string-to-html-string (get-group)))
+         (html-len (html-length txt))
+         (txt-len (sp-to-pixels (tex-length html-len :ex))))
+    ;(format t "txt = ~s~%" txt)
+    ;(format t "htmllen = ~s~%" html-len)
+    ;(format t "txtlen = ~s~%" txt-len)
+    (emit "<span style=\"position: relative\">")
+    (emit "<span style=\"position: absolute; left: -")
+    (emit txt-len)
+    (emit "pt\">")
+    (emit txt)
+    (emit "</span></span>")))
 
 (defun do-indexitem (indent)
   (setq *index-page-mention-alist* (make-hash-table))
@@ -4720,9 +4759,9 @@
 
 (defun find-img-file-extn ()
   (case (tex2page-flag-value "\\TZPimageformat")
-    ((#\p #\P) ".png")
+    ((#\g #\G) ".gif")
     ((#\j #\J) ".jpeg")
-    (t ".gif")))
+    (t ".png")))
 
 (defun do-htmlimageformat ()
   (tex-def-0arg "\\TZPimageformat" (get-peeled-group)))
@@ -7771,7 +7810,7 @@
       }
 
       blockquote {
-      background-color: #f0e0e0;
+      /* background-color: #f0e0e0; */
       margin-top: 2pt;
       margin-bottom: 2pt;
       margin-left: 2em;
@@ -8927,6 +8966,7 @@ Try the commands
 (tex-def-prim "\\includeexternallabels" #'do-includeexternallabels)
 (tex-def-prim "\\includeonly" #'do-includeonly)
 (tex-def-prim "\\includegraphics" #'do-includegraphics)
+(tex-def-prim "\\indent" #'do-indent)
 (tex-def-prim "\\index" #'do-index)
 (tex-def-prim "\\indexitem" (lambda () (do-indexitem 0)))
 (tex-def-prim "\\indexsubitem" (lambda () (do-indexitem 1)))
@@ -8964,6 +9004,7 @@ Try the commands
 (tex-def-prim "\\linebreak"
  (lambda () (get-bracketed-text-if-any) (emit "<br>")))
 (tex-def-prim "\\listing" #'do-verbatiminput)
+(tex-def-prim "\\llap" #'do-llap)
 (tex-def-prim "\\lstlisting" (lambda () (do-verbatim-latex "lstlisting")))
 (tex-def-prim "\\lowercase" (lambda () (do-flipcase :lccode)))
 
@@ -9022,6 +9063,7 @@ Try the commands
 (tex-def-prim "\\obeywhitespace" #'do-obeywhitespace)
 (tex-defsym-prim "\\OE" "&#x152;")
 (tex-defsym-prim "\\oe" "&#x153;")
+(tex-def-prim "\\oldstyle" (lambda () (do-switch :oldstyle)))
 (tex-def-prim "\\opengraphsfile" #'do-mfpic-opengraphsfile)
 (tex-def-prim "\\openin" (lambda () (do-open-stream :in)))
 (tex-def-prim "\\openout" (lambda () (do-open-stream :out)))
@@ -9349,7 +9391,6 @@ Try the commands
 (tex-let-prim "\\textstyle" "\\TIIPrelax")
 (tex-let-prim "\\endsloppypar" "\\TIIPrelax")
 (tex-let-prim "\\frenchspacing" "\\TIIPrelax")
-(tex-let-prim "\\oldstyle" "\\TIIPrelax")
 (tex-let-prim "\\protect" "\\TIIPrelax")
 (tex-let-prim "\\raggedbottom" "\\TIIPrelax")
 (tex-let-prim "\\raggedright" "\\TIIPrelax")

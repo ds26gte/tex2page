@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-08} %last change
+\c{2016-12-09} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1896,6 +1896,19 @@ body {
   max-width: 36em;
 }
 \endtt
+As another example, here’s a way to convert itemized lists (aka
+“bulleted” or unordered or unnumbered lists) to
+enumerations\f{It’s easier for people to discuss an item
+explicitly marked ‘vii’ (or ‘7’, or ‘g’, or ‘$\eta$’) rather than
+having all of them count up to seventh bullet. If you're using
+more than three bullets per list, you're shooting yourself in the
+foot.}:
+
+\begintt
+ul {
+  list-style-type: lower-roman;
+}
+\endtt
 
 You can get finer control on the look of your document
 by defining rules for some classes that are peculiar to
@@ -1922,6 +1935,10 @@ in the \TeX\ source between the control sequences
 \cssblock
 body {
   max-width: 36em;
+}
+
+ul {
+  list-style-type: lower-roman;
 }
 \endcssblock
 \fi

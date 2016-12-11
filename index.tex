@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-10} %last change
+\c{2016-12-11} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -163,11 +163,10 @@ tex2page story
 %
 \TeX2page will get cracking\f{\TeX2page, like \TeX, will find the
 file `story.tex` from your distribution as it is in your default `TEXINPUTS`.
-If it's too confusing operating on a file that you don't see in
+If it’s too confusing operating on a file that you don’t see in
 your immediate space, copy the file manually to your working
 directory. You can find its location with `kpsewhich story`.} on `story.tex`, providing
 the following commentary, or {\em log}, on your console:
-
 
 \medbreak
 \verbatiminput story.hlog
@@ -1107,12 +1106,13 @@ links, and adds a roman number to the second and
 subsequent occurrences to distinguish them visually.
 
 \index{ii@`\ii`}
+\index{iid@`\iid`}
 \index{iis@`\iis`}
 \index{makeindex@`\makeindex`}
 %
 \TeX2page also supports OPmac’s index generation macros `\ii`,
-`\iis`, and `\makeindex`. However, unlike OPmac, which rolls its
-own index-sorting routine within \TeX, \TeX2page relies 
+`\iid`, `\iis`, and `\makeindex`. However, unlike OPmac, which rolls its
+own index-sorting routine within \TeX, \TeX2page relies
 on MakeIndex.
 
 \beginsection Internal cross-references
@@ -1161,7 +1161,7 @@ behaves differently than a \LaTeX-like `\ref`.}
 \TeX2page recognizes the macros `\color` and
 `\definecolor`~\cite{latex-graphicx}.  These are provided by the \LaTeX\
 package `color.sty`, which can also be loaded into
-plain \TeX\ using `miniltx`.  E.g.,
+plain \TeX\ (after loading `miniltx`).  E.g.,
 
 \begintt
 {\color[gray]{.17} light gray},
@@ -1230,17 +1230,13 @@ For more details, consult
 In the DVI output, this becomes
 
 \quote
-
-\n For more details, consult the {\it Odyssey\/} document in the
+For more details, consult the {\it Odyssey\/} document in the
 Ithaka repository.
-
 \endquote
 In the HTML output, it would be
 
 \quote
-
-\n For more details, consult {\em the Odyssey}.
-
+For more details, consult {\em the Odyssey}.
 \endquote
 where
 “{\em the Odyssey}” is an HTML link to the site
@@ -1310,9 +1306,7 @@ URL, and the second is the descriptive text that is used in
 produces
 
 \quote
-
-\n \TeX\ is available at the TUG website.
-
+\TeX\ is available at the TUG website.
 \endquote
 In the HTML output, “the TUG website” is a hyperlink to
 \path|http://www.tug.org|.
@@ -1333,9 +1327,7 @@ output lacks the information implicit in the hyperlink.  For example:
 produces, in the DVI output.
 
 \quote
-
-\n \TeX\ is available at TUG (\path!tug.org!).
-
+\TeX\ is available at TUG (\path!tug.org!).
 \endquote
 The HTML output will not mention the parenthesized domain
 name, since the word “TUG” already hyperlinks to it.
@@ -1351,10 +1343,8 @@ using \urlh{#callcc}{{\tt callcc}\\ (section~\ref{callcc})}.
 produces
 
 \quote
-
-\n More complicated forms of program control are possible using
+More complicated forms of program control are possible using
 {\tt callcc} (section~2.3).
-
 \endquote
 in the DVI output.  In the HTML output, the parenthesized
 section reference will be dropped as redundant, as
@@ -1373,9 +1363,7 @@ Example:
 produces
 
 \quote
-
-\n \TeX\ is available at TUG (\path|http://www.tug.org|).
-
+\TeX\ is available at TUG (\path|http://www.tug.org|).
 \endquote
 in the DVI output.  In the HTML output, the parenthesized
 URL is dropped as redundant, as the word “TUG”
@@ -1400,13 +1388,11 @@ the following text
 prints as
 
 \quote
+{\bf Exercise 1.} Statement of a problem \dots
 
-\n {\bf Exercise 1.} Statement of a problem \dots
-
-\n \dots\ lots of intervening stuff \dots
+\dots\ lots of intervening stuff \dots
 
 \n {\bf Answer 1.} Answer to exercise 1 \dots
-
 \endquote
 in both the DVI and the HTML.  However, in the
 HTML, the proclamations “{\bf Exercise 1.}”\ and
@@ -1439,7 +1425,7 @@ All these \TeX2page flags are named `\TZP...`, and as long as
 you avoid using these names for other purposes, setting these
 flags should have no effect on the print output.
 
-These flags are \TeX\ control sequences 
+These flags are \TeX\ control sequences
 and are set using `\let` or `\def` or even `\gdef`,
 `\edef`, or `\xdef`.
 (If using one of the `\def`s for a boolean flag, only the
@@ -1831,7 +1817,7 @@ p.~\ref{eject}. To do this, set the `\TZPsinglepage` flag:
 
 The flag `\TZPopmac` can be set to 1 to inform \TeX2page that
 you’re using OPmac macros~\cite{opmac} in your document.
-Typically this isn't necessary as \TeX2page can spot if you’ve
+Typically this isn’t necessary as \TeX2page can spot if you’ve
 `\input opmac`. The flag need be set only if somehow the
 loading of `opmac` occurs in a \TeX-only portion of your
 document.
@@ -1839,7 +1825,7 @@ document.
 This flag, whether explicitly or implicitly set, helps \TeX2page
 decide which form of the macros `\cite` and `\nocite` to use.
 In contrast to most other styles (including \LaTeX), which use
-`{}` for these macros' argument, OPmac uses `[]`.
+`{}` for these macros’ argument, OPmac uses `[]`.
 
 \beginsection Scheme or Common Lisp?
 
@@ -1893,8 +1879,8 @@ As another example, here’s a way to convert itemized lists (aka
 “bulleted” or unordered or unnumbered lists) to
 enumerations\f{It’s easier for people to discuss an item
 explicitly marked ‘vii’ (or ‘7’, or ‘g’, or ‘$\eta$’) rather than
-having all of them count up to seventh bullet. If you're using
-more than three bullets per list, you're shooting yourself in the
+having all of them count up to seventh bullet. If you’re using
+more than three bullets per list, you’re shooting yourself in the
 foot.}:
 
 \begintt
@@ -1955,7 +1941,7 @@ Here are two examples of using the latter:
 
 \begintt
 \ifx\shipout\UnDeFiNeD % HTML only
-\inputcss https://fonts.googleapis.com/css?family=Libre+Baskerville 
+\inputcss https://fonts.googleapis.com/css?family=Libre+Baskerville
 
 \cssblock
 body {
@@ -1967,11 +1953,11 @@ body {
 
 \index{oldstyle@`\oldstyle`}
 \item(ii) \TeX2page has a CSS class `.oldstyle` in place for translating
-\TeX's `\oldstyle` macro. However, for this to actually show up
+\TeX’s `\oldstyle` macro. However, for this to actually show up
 as something meaningful in your HTML, e.g.,
 
 \quote
-\n `{\oldstyle2{\rm.}718281828}` as {\oldstyle 2{\rm.}718281828}
+`{\oldstyle 2{\rm.}718281828}` as {\oldstyle 2{\rm.}718281828}
 \endquote
 you need to add a suitable CSS definition for `.oldstyle`.
 One way is to go trawling through Google Fonts for
@@ -2011,8 +1997,7 @@ $
 \n is converted to
 
 \quote
-
-\n A \verb|cons|-cell has two components: a \verb+car+ and
+A \verb|cons|-cell has two components: a \verb+car+ and
 a \verb&cdr&.
 \endquote
 The \TeX2page version of `\verb` adds a couple more features:
@@ -2032,12 +2017,9 @@ title.
 is converted to
 
 \quote
-
-\n
 The command \verb{\section{Imagining a Conscious Robot}}
 typesets ‘\verb{Imagining a Conscious Robot}’ as a section
 title.
-
 \endquote
 
 \item(ii) If `\verb`’s argument commences with a newline, it is
@@ -2082,11 +2064,8 @@ spaces or tell if there is trailing space on a line.
 produces
 
 \quote
-
-\n “\verb*{three   spaces}”
+“\verb*{three   spaces}”
 \endquote
-
-
 
 \beginsection Commands within verbatim
 
@@ -2173,10 +2152,10 @@ that by
 default, \TeX2page’s `\begintt` sets {\em everything} within it verbatim. If you
 want it to be truly `manmac`-like, i.e., with `|` as the escape
 character and `\]` producing visible space, you should set
-`\tthook` to something suitable: 
+`\tthook` to something suitable:
 
 \p+
-\def\tthook{\catcode`\|=0 
+\def\tthook{\catcode`\|=0
   \def\|{char`\|}%
   \def\ {·}}
 +
@@ -2479,10 +2458,8 @@ $\sqrt{ (\Delta x)^2 + (\Delta y)^2 }$.
 produces
 
 \quote
-
-\n The Euclidean distance between two points is given by
+The Euclidean distance between two points is given by
 $\sqrt{ (\Delta x)^2 + (\Delta y)^2 }$.
-
 \endquote
 
 You can control whether your math displays should
@@ -2684,13 +2661,12 @@ for
 
 \centerline{\hbox{\XeTeXpicfile tbdek.jpg width 3in \relax}}
 
-To load a graphic specified in MetaPost,
-you can either \item(i) have  MetaPost convert the spec into EPS and
-thence to PDF using a utility like `epstopdf`; or \item(ii)
-have MetaPost directly convert the spec to PNG. Let’s start with a MetaPost file
-\urlh{mpexample.html}{`lambda.mp`}.
+There are two ways to load a graphic specified in MetaPost:
 
-\item(i) At the OS shell, type
+\item(i) You can have MetaPost convert the spec to EPS, and
+then use a utility like `epstopdf` to convert the EPS to PDF.
+Let’s start with a MetaPost file
+\urlh{mpexample.html}{`lambda.mp`}. At the OS shell, type:
 
 \begintt
 mpost lambda.mp
@@ -2734,7 +2710,10 @@ source file. See p.~\ref{write18}.}
 
 \centerline{\XeTeXpdffile lambda-1.pdf }
 
-\item(ii) To generate PNG, in `lambda.mp` set
+\item(ii) Alternatively, you can have MetaPost directly convert
+the spec to
+PNG. In `lambda.mp`, change the `outputformat` setting to `png`,
+i.e.,
 
 \begintt
 outputformat := "png";
@@ -2924,11 +2903,8 @@ to 0.78 \um.
 produces
 
 \quote
-
-\n 
 The human eye can see electromagnetic wavelengths from 0.39 \um\
 to 0.78 \um.
-
 \endquote
 
 \index{imgdef@`\imgdef`}
@@ -2997,7 +2973,7 @@ Running \TeX2page on `root2.tex` produces
 the following HTML output:
 
 \quote
-\n The square root of 2 is
+The square root of 2 is
 \eval{
 (display (sqrt 2))
 }.
@@ -3067,11 +3043,9 @@ Typical calls to `\proto` are:
 which typeset as follows:
 
 \quote
-
 \proto{cons}{a d}{procedure}
 \proto{car}{c}{procedure}
 \proto{cdr}{c}{procedure}
-
 \endquote
 The macro `\proto` takes three arguments: the
 operator name; the metavariables for its operands;
@@ -3090,16 +3064,12 @@ space should not.  Thus,
 should not produce
 
 \quote
-
 \proto{gentemp}{\ }{procedure}
-
 \endquote
 but rather
 
 \quote
-
 \proto{gentemp}{}{procedure}
-
 \endquote
 (I.e., no space between `gentemp` and the
 closing paren.)

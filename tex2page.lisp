@@ -2363,6 +2363,7 @@
            ((string= model "RGB") :rgb255)
            ((string= model "cmyk") :cmyk)
            ((string= model "gray") :gray)
+           ((string= model "HTML") :html)
            (t :colornamed)))))
 
 (defun do-definecolor ()
@@ -2399,6 +2400,10 @@
                              (rgb-dec-to-hex r g b)))
                           ((string= model "gray")
                            (cmyk-to-rgb 0 0 0 (read i nil :eof-object)))
+                          ((string= model "HTML")
+                           (format nil "~6,'0x"
+                                   (let ((*read-base* 16))
+                                     (read i nil :eof-object))))
                           (t
                            (terror 'do-definecolor
                                    "Unknown color model"))))))
@@ -2520,6 +2525,16 @@
             (emit (cmyk-to-rgb 0 0 0 (- 1 g)))
             (emit "\">")))
         (lambda () (emit "</span>")))
+       (:html
+         (with-input-from-string (i (tex-string-to-html-string (get-token)))
+           (let ((rrggbb (format nil "~6,'0x"
+                                 (let ((*read-base* 16))
+                                   (read i nil :eof-object)))))
+             (ignorespaces)
+             (emit "<span style=\"color: #")
+             (emit rrggbb)
+             (emit "\">")))
+         (lambda () (emit "</span>")))
        (:colornamed
         (let* ((name (get-peeled-group))
                (c (assoc name *color-names* :test #'string=)))

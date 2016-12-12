@@ -1,6 +1,6 @@
 % eval4tex.tex
 % Dorai Sitaram
-% Last change 2016-11-26 
+% Last change 2016-12-12 
 
 \let\maybeendinput\relax
 \ifx\shipout\UnDeFiNeD
@@ -31,17 +31,15 @@
   }\else \immediate\write\evalfortexQport{
   (define *eval4tex-current-output-port* (current-output-port))
 
-  (define eval4tex-preamble
-    (lambda (f)
-      (if (file-exists? f) (delete-file f) 0)
-      (current-output-port (open-output-file f))))
+  (define (eval4tex-preamble f)
+    (if (file-exists? f) (delete-file f) 0)
+    (current-output-port (open-output-file f)))
 
-  (define eval4tex-postamble
-    (lambda ()
-      (display (integer->char 92))
-      (display "relax") (newline)
-      (close-output-port (current-output-port))
-      (current-output-port *eval4tex-current-output-port*)))
+  (define (eval4tex-postamble)
+    (display (integer->char 92))
+    (display "relax") (newline)
+    (close-output-port (current-output-port))
+    (current-output-port *eval4tex-current-output-port*))
   }\fi%
 }%
 }

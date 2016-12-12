@@ -4331,6 +4331,19 @@
       (unless (substring? "|)" idx-entry)
         (do-index-help idx-entry)))))
 
+(define (escape-opmac-index-entry x)
+  (let ((n (string-length x)))
+    (let loop ((i (- (string-length x) 1)) (y '()))
+      (if (< i 0) (list->string y)
+          (let ((c (string-ref x i)))
+            (loop (- i 1)
+                  (case c
+                    ((#\") (cons c (cons c y)))
+                    ((#\! #\@) (cons #\" (cons c y)))
+                    (else (cons c y)))))))))
+
+
+
 (define (do-opmac-ii retainp)
   (let* ((lhs (get-word))
          (sub (and *opmac-index-sub-table* (table-get *opmac-index-sub-table* lhs))))
@@ -4338,14 +4351,15 @@
         (ignorespaces))
     (do-index-help
       (cond (sub sub)
-            (else (string=join (string=split lhs #\/) #\!))))))
+            (else (string=join (map escape-opmac-index-entry (string=split lhs #\/))
+                               #\!))))))
 
 (define do-opmac-iis
   (lambda ()
     (let* ((lhs (get-word))
            (rhs (get-peeled-group))
-           (lhs-list (string=split lhs #\/))
-           (rhs-list (string=split rhs #\/))
+           (lhs-list (map escape-opmac-index-entry (string=split lhs #\/)))
+           (rhs-list (map escape-opmac-index-entry (string=split rhs #\/)))
            (sub ""))
       (unless (= (length lhs-list) (length rhs-list))
         (terror 'do-opmac-iis "Malformed \\iis."))

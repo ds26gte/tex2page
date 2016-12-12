@@ -3385,6 +3385,16 @@
     (unless (search "|)" idx-entry)
       (do-index-help idx-entry))))
 
+(defun escape-opmac-index-entry (x)
+  (let ((y '()))
+    (dotimes (i (length x))
+      (let ((c (char x i)))
+        (case c
+          ((#\") (push c y) (push c y))
+          ((#\! #\@) (push #\" y) (push c y))
+          (t (push c y)))))
+    (concatenate 'string (nreverse y))))
+
 (defun do-opmac-ii (retainp)
   (let* ((lhs (get-word))
          (sub (and *opmac-index-sub-table* (gethash lhs *opmac-index-sub-table*))))
@@ -3392,13 +3402,14 @@
         (ignorespaces))
     (do-index-help
       (cond (sub sub)
-            (t (string=join (string=split lhs #\/) #\!))))))
+            (t (string=join (mapcar #'escape-opmac-index-entry (string=split lhs #\/))
+                            #\!))))))
 
 (defun do-opmac-iis ()
   (let* ((lhs (get-word))
          (rhs (get-peeled-group))
-         (lhs-list (string=split lhs #\/))
-         (rhs-list (string=split rhs #\/))
+         (lhs-list (mapcar #'escape-opmac-index-entry (string=split lhs #\/)))
+         (rhs-list (mapcar #'escape-opmac-index-entry (string=split rhs #\/)))
          (sub ""))
     (unless (= (length lhs-list) (length rhs-list))
       (terror 'do-opmac-iis "Malformed \\iis."))
@@ -3408,8 +3419,6 @@
         (setq sub
               (cond ((string= sub "") additive)
                     (t (concatenate 'string sub "!" additive))))))
-    ;warning: may still need to do some transliteration as OPmac's special index
-    ;chars are different from MakeIndex's.
     (unless *opmac-index-sub-table*
       (flag-missing-piece :fresh-index))
     (!opmac-iis lhs sub)

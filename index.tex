@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-11} %last change
+\c{2016-12-12} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -592,8 +592,7 @@ such as `\shipout`:
 \index{htmlonly@`\htmlonly`}
 \index{endhtmlonly@`\endhtmlonly`}
 For ordinary text, this is good enough, but
-if the HTML portion contains calls to raw HTML (see
-below) or raw
+if the HTML portion contains calls to raw 
 Scheme (see p.~\ref{eval}), it is advisable to wrap it inside
 an environment called
 `\htmlonly`:
@@ -611,9 +610,6 @@ an environment called
 Failing to use `\htmlonly` does not affect
 \TeX2page’s operation, but may cause problems when \TeX\
 is called on the same document.
-Incidentally, the fact that `\htmlonly` and `\endhtmlonly`
-have no definition in \TeX\ is quite all right, as \TeX\
-will only see the else branch of the `\ifx`.
 
 Now, let’s say you want to have  your document load the macro file
 `manmac.tex`, but in a way that \TeX2page will ignore
@@ -667,11 +663,9 @@ HTML-only definition of `\bull`:
 
 \begintt
 \ifx\shipout\UnDeFiNeD % HTML only
-  \htmlonly
   \def\bull{{\bf
   \rawhtml<span style="color: #990000">&spades;</span>\endrawhtml
   }}
-  \endhtmlonly
 \fi
 \endtt
 

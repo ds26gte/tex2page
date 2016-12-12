@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161211" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161212" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -123,7 +123,6 @@
 (defparameter *aux-file-suffix* "-Z-A")
 (defparameter *bib-aux-file-suffix* "-Z-B")
 (defparameter *css-file-suffix* "-Z-S.css")
-(defparameter *eval-file-suffix* "-Z-E-")
 ;(defparameter *html-node-prefix* "node_")
 (defparameter *html-node-prefix* "TAG:__tex2page_")
 (defparameter *html-page-suffix* "-Z-H-")
@@ -189,7 +188,6 @@
 (defvar *esc-chars* '(#\\))
 (defvar *esc-char-std* #\\)
 (defvar *esc-char-verb* #\|)
-(defvar *eval-file-count* 0)
 (defvar *eval-for-tex-only-p* nil)
 (defvar *expand-escape-p* nil)
 (defvar *external-label-tables* nil)
@@ -7531,6 +7529,31 @@
         (tex2page-file
          (actual-tex-filename f (check-input-file-timestamp-p f)))))))
 
+;just enough Scheme to process eval4tex aux file
+
+(defmacro define (lhs &rest body)
+  (if (consp lhs)
+      `(defun ,(car lhs) ,(cdr lhs) ,@body)
+      `(defvar ,lhs ,@body)))
+
+(defun current-output-port (&optional p)
+  (if p (setq *standard-output* p) *standard-output*))
+
+(defun file-exists? (f) (probe-file f))
+
+(defun open-output-file (f)
+  (open f :direction :output :if-exists :supersede))
+
+(defun close-output-port (p) (close p))
+
+(defun display (x) (princ x))
+
+(defun newline () (terpri))
+
+(defun integer->char (n) (code-char n))
+
+;
+
 (defun do-eval-string (s)
   (with-input-from-string (i s)
     (loop
@@ -7545,30 +7568,15 @@
                     (*expand-escape-p* t))
                 (get-group)))
              (tex-write-output-string
-               (ungroup (get-group)))
-             )))
+               (ungroup (get-group))))))
     (unless (inside-false-world-p)
       (when (> *html-only* 0) (setq kind :html))
       (case kind
-        (:html
-         (let ((o (make-string-output-stream)))
-           (let ((*standard-output* o))
-             (do-eval-string s))
-           (tex2page-string (get-output-stream-string o))))
         (:quiet (do-eval-string s))
-        (t (incf *eval-file-count*)
-           (let ((eval4tex-file
-                  (concatenate 'string *jobname* *eval-file-suffix*
-                    (write-to-string *eval-file-count*) ".tex")))
-             (with-open-file (o eval4tex-file :direction :output
-                                :if-exists :supersede)
-               (let ((*standard-output* o))
-                 (do-eval-string s)
-                 ;following eats the whitespace that creeps in after
-                 ;\input file
-                 (princ "\\relax")))
-             (let ((*ignore-timestamp-p* t))
-               (tex2page-file eval4tex-file))))))))
+        (t (let ((o (make-string-output-stream)))
+             (let ((*standard-output* o))
+               (do-eval-string s))
+             (tex2page-string (get-output-stream-string o))))))))
 
 (defun eval-for-tex-only ()
   (setq *eval-for-tex-only-p* t)
@@ -7644,6 +7652,9 @@
                         ".ind"))
         (write-log " ... failed; try manually"))
       (write-log :separation-newline))
+    (let ((eval4tex-aux-file (concatenate 'string *jobname* ".eval4tex")))
+      (when (probe-file eval4tex-aux-file)
+        (load eval4tex-aux-file)))
     (mapc
      (lambda (f)
          (when (probe-file f)
@@ -9644,7 +9655,6 @@ Try the commands
         (*esc-chars* (list #\\))
         (*esc-char-std* #\\)
         (*esc-char-verb* #\|)
-        (*eval-file-count* 0)
         (*eval-for-tex-only-p* nil)
         (*external-label-tables* (make-hash-table :test #'equal))
         ;

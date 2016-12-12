@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161211") ;last change
+(define *tex2page-version* "20161212") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -115,7 +115,6 @@
 (define *aux-file-suffix* "-Z-A")
 (define *bib-aux-file-suffix* "-Z-B")
 (define *css-file-suffix* "-Z-S.css")
-(define *eval-file-suffix* "-Z-E-")
 ;(define *html-node-prefix* "node_")
 (define *html-node-prefix* "TAG:__tex2page_")
 (define *html-page-suffix* "-Z-H-")
@@ -204,7 +203,6 @@
 (define *esc-chars* '(#\\))
 (define *esc-char-std* #\\)
 (define *esc-char-verb* #\|)
-(define *eval-file-count* 0)
 (define *eval-for-tex-only-p* #f)
 (define *expand-escape-p* #f)
 (define *external-label-tables* #f)
@@ -9201,47 +9199,28 @@
     (parameterize ((current-output-port o))
       (th))))
 
-(define do-eval
-  (lambda (fmts)
-    (let ((s (if *outer-p*
+(define (do-eval kind)
+  (let ((s (if *outer-p*
                ;Careful: This could break existing docs that rely on
                ;this!
                (ungroup
-               (fluid-let ((*esc-chars* (list *esc-char-verb*))
-                           (*expand-escape-p* #t))
-                 (get-group)))
-              (tex-write-output-string
-                (ungroup (get-group))))))
-      (unless (inside-false-world?)
-        (when (> *html-only* 0) (set! fmts ':html))
-        (case fmts
-          ((:html)
-           (let ((o (open-output-string)))
-             (with-output-to-port o
-               (lambda ()
-                 (do-eval-string s)
-                 ;(display "\\relax")
-                 ))
-             (tex2page-string (get-output-string o))))
-          ((:quiet) (do-eval-string s))
-          (else
-           (set! *eval-file-count* (+ *eval-file-count* 1))
-           (let ((eval4tex-file
-                  (string-append *jobname* *eval-file-suffix*
-                                 (number->string *eval-file-count*)
-                                 ".tex")))
-             (ensure-file-deleted eval4tex-file)
-             (with-output-to-file eval4tex-file
-               (lambda ()
-                 (do-eval-string s)
-                 ;following eats whitespace
-                 ;that creeps after
-                 ;\input file
-                 (display "\\relax")))
-             (fluid-let ((*ignore-timestamp-p* #t))
-               (tex2page-file eval4tex-file))
-             ;(ensure-file-deleted eval4tex-file)
-             )))))))
+                 (fluid-let ((*esc-chars* (list *esc-char-verb*))
+                             (*expand-escape-p* #t))
+                   (get-group)))
+               (tex-write-output-string
+                 (ungroup (get-group))))))
+    (unless (inside-false-world?)
+      (when (> *html-only* 0) (set! kind ':html))
+      (case kind
+        ((:quiet) (do-eval-string s))
+        (else
+          (let ((o (open-output-string)))
+            (with-output-to-port o
+              (lambda ()
+                (do-eval-string s)
+                ;(display "\\relax")
+                ))
+            (tex2page-string (get-output-string o))))))))
 
 (define eval-for-tex-only
   (lambda ()
@@ -9294,7 +9273,6 @@
                  (*source-changed-since-last-run-p*
                   (flag-missing-piece ':fresh-index) #t)
                  (else #f))))
-
       ;bibtex
       (when run-bibtex?
         (write-log ':separation-newline)
@@ -9326,6 +9304,10 @@
                                  *index-file-suffix* ".ind"))
           (write-log " ... failed; try manually"))
         (write-log ':separation-newline))
+      ;eval4tex
+      (let ((eval4tex-aux-file (string-append *jobname* ".eval4tex")))
+        (when (file-exists? eval4tex-aux-file)
+          (load eval4tex-aux-file)))
       ;metapost
       (for-each
         (lambda (f)
@@ -11444,7 +11426,6 @@ Try the commands
                 (*esc-chars* (list #\\))
                 (*esc-char-std* #\\ )
                 (*esc-char-verb* #\|)
-                (*eval-file-count* 0)
                 (*eval-for-tex-only-p* #f)
                 (*external-label-tables* (make-table 'equ string=?))
                 ;

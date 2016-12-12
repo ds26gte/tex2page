@@ -4,8 +4,12 @@
 *.JPG
 *.mp
 *.mpx
+*.new
+*.old
 *.pdf
+*.sav
 *.toc
+*.txt
 *.xcf
 *.xrf
 *Z-*
@@ -13,10 +17,12 @@
 .scmport/*.lisp
 .scmport/*.scm
 .scmport/t*
+?
 ?.*
 ??.*
 [^s]*log
 index.[^t]*
+jpg/*
 lambda*
 my-tex2page*
 ossuary/*

@@ -10,7 +10,7 @@
   \let\maybeendinput\endinput\fi
 \maybeendinput
 
-\message{version 20161209} % last change
+\message{version 20161214} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -785,11 +785,8 @@
 
 \let\chapterfont\bf
 
-\newcount\subsecno
-
 \def\beginchapter#1 #2 \par{%
   \footnotenumber=0
-  \subsecno=0
   \edef\chapno{#1}%
   % space before \par ensures trailing space not picked
   % up.
@@ -804,36 +801,6 @@
       \chapno\enspace\fi
     #2%
   \egroup\medskip\nobreak\noindent}
-
-\def\subsection{\vskip-\lastskip
-  \futurelet\subsectionQfirstc\subsectionQcheckfirstc}
-
-\def\subsectionQcheckfirstc{\ifx\subsectionQfirstc[\let\subsectionQnext\subsectionQexplictno
-  \else\let\subsectionQnext\subsectionQimplicitno\fi
-  \subsectionQnext}
-
-\def\subsectionQexplictno[#1] {\edef\subsectionQnr{#1}%
-  \subsectionQdispatch}
-
-\def\subsectionQimplicitno{\advance\subsecno by 1
-  \edef\subsectionQnr{\the\subsecno}%
-  \ifx\chapno\UnDeFiNeD
-  \else\ifx\chapno\empty
-  \else
-    \edef\subsectionQnr{\chapno.\subsectionQnr}\fi\fi
-  \subsectionQdispatch}
-
-\def\subsectionQdispatch#1. {%
-  \vskip 1.5\bigskipamount
-  \goodbreak
-  \writenumberedtocline{2}{\subsectionQnr}{#1}%
-  \noindent\bgroup\sectionfont
-    \ifx\subsectionQnr\empty\else
-      \subsectionQnr\enspace\fi
-    #1%
-  \egroup
-  \par
-  \nobreak\noindent}
 
 % some OPmac stuff, unless OPmac already loaded
 
@@ -871,21 +838,6 @@
 %
 \def\rightline{\line\bgroup\hss\let\dummy=}%
 }
-
-\let\itemfont\it
-
-\ifx\itemQplain\UnDeFiNeD
-\let\itemQplain\item
-
-\def\itemQsimple(#1){({\itemfont #1\/})}
-
-\def\item{\futurelet\itemQnext\itemQii}
-
-\def\itemQii{\ifx\itemQnext\bgroup
-\let\itemQnext\itemQplain
-\else\let\itemQnext\itemQsimple\fi
-\itemQnext}
-\fi
 
 \ifx\frac\UnDeFiNeD
 % from manmac

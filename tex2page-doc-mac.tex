@@ -1,4 +1,4 @@
-% last change: 2016-12-11
+% last change: 2016-12-14
 % Dorai Sitaram
 %
 %
@@ -126,6 +126,10 @@ $\Vert$\or
 
 \def\quote{\bgroup\narrower\smallbreak\noindent}
 \def\endquote{\smallbreak\egroup\noindent}
+
+\def\item(#1){\ifx\shipout\UnDeFiNeD
+\rawhtml<span class=item>\endrawhtml (#1)\rawhtml</span>\endrawhtml
+\else ({\it #1\/})\fi}
 
 % \xrdef, as in Eplain
 

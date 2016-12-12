@@ -588,30 +588,7 @@ such as `\shipout`:
   ... |meta[for DVI only] ...
 \fi
 \endtt
-%
-\index{htmlonly@`\htmlonly`}
-\index{endhtmlonly@`\endhtmlonly`}
-For ordinary text, this is good enough, but
-if the HTML portion contains calls to raw 
-Scheme (see p.~\ref{eval}), it is advisable to wrap it inside
-an environment called
-`\htmlonly`:
-
-\begintt
-\ifx\shipout\UnDeFiNeD
-  \htmlonly
-    ... |meta[for HTML only] ...
-  \endhtmlonly
-\else
-  ... |meta[for DVI only] ...
-\fi
-\endtt
-%
-Failing to use `\htmlonly` does not affect
-\TeX2page’s operation, but may cause problems when \TeX\
-is called on the same document.
-
-Now, let’s say you want to have  your document load the macro file
+For example, let’s say you want to have  your document load the macro file
 `manmac.tex`, but in a way that \TeX2page will ignore
 it.  Use:
 
@@ -622,7 +599,6 @@ it.  Use:
   \input manmac
 \fi
 \endtt
-%
 However, there will also be many  commands that
 you do not want ignored in the HTML.  In such
 cases, while you may not be able to use the print-specific
@@ -637,7 +613,6 @@ definition for \TeX2page:
 \begintt
 \def\bull{{\bf *}}
 \endtt
-%
 Of course, we want this definition to be seen only
 by \TeX2page, as we don’t want to override the
 original, more sophisticated `\vrule`-based definition as seen
@@ -3106,8 +3081,6 @@ of Scheme:
 
 \begintt
 \ifx\shipout\UnDeFiNeD
-\htmlonly
-
 \eval{
 \endtt
 \begintts
@@ -3133,8 +3106,6 @@ of Scheme:
 \endtt
 \begintt
 }}
-
-\endhtmlonly
 \fi
 \endtt
 Note that we had to use \q{(integer->char 92)} to refer to the

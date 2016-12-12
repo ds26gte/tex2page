@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161212") ;last change
+(define *tex2page-version* "20161214") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -65,7 +65,6 @@
   (case *operating-system*
     ((:windows) "mp")
     (else "mpost")))
-
 
 ;change these navbar wordings to suit the natural language of your
 ;document
@@ -155,7 +154,7 @@
     "\">e</span>" "X"))
 
 (define *tex-files-to-ignore*
-  '("btxmac" "eplain" "epsf" "lmfonts" "supp-pdf"))
+  '("btxmac" "eplain" "epsf" "lmfonts" "mfpic" "supp-pdf"))
 
 (define *filename-delims* '())
 
@@ -2541,36 +2540,6 @@
       (when (string=? chapno "") (set! chapno #f))
       (do-heading-help 0 #f #t #f chapno header)))
 
-(define (do-manmac-subsection)
-  (ignorespaces)
-  (let* ((explicit-subsecno (get-bracketed-text-if-any))
-         (subsecno #f)
-         (header (begin (ignorespaces)
-                        (let ((*tabular-stack* (list ':header)))
-                          (tex-string->html-string (get-till-char #\.))))))
-    (get-actual-char)
-    (set! subsecno
-      (cond (explicit-subsecno
-              (if (string=? explicit-subsecno "") #f
-                  (tex-string->html-string explicit-subsecno)))
-            (else 
-              (set-gcount! "\\subsecno" (+ (get-gcount "\\subsecno") 1))
-              (let ((chapno (ctl-seq-no-arg-expand-once "\\chapno")))
-                (when (string=? chapno "") (set! chapno #f))
-                (string-append 
-                  (if chapno (string-append chapno ".") "")
-                  (number->string (get-gcount "\\subsecno")))))))
-    (do-heading-help 1 #f #t #f subsecno header)))
-
-(define (do-section)
-  (tex-gdef-0arg "\\TIIPlatexsectionused" "1")
-  (do-heading 1))
-
-(define (do-subsection)
-  (if (tex2page-flag-boolean "\\TIIPlatexsectionused")
-      (do-heading 2)
-      (do-manmac-subsection)))
-
 (define do-opmac-heading
   (lambda (seclvl)
     (ignorespaces)
@@ -3077,7 +3046,6 @@
                      ((4) "00")
                      ((5) "0")
                      (else "")) htmlcolor)))
-
 
 (define (do-definecolor)
     (let* ((name (get-peeled-group))
@@ -4340,8 +4308,6 @@
                     ((#\! #\@) (cons #\" (cons c y)))
                     (else (cons c y)))))))))
 
-
-
 (define (do-opmac-ii retainp)
   (let* ((lhs (get-word))
          (sub (and *opmac-index-sub-table* (table-get *opmac-index-sub-table* lhs))))
@@ -4521,21 +4487,6 @@
     (emit-nbsp 2)
     (emit "</span></span>")))
 
-(define do-plain-single-item
-  (lambda ()
-    (ignorespaces)
-    (case (snoop-actual-char)
-      ((#\() (do-simple-item))
-      (else (do-plain-item 1)))))
-
-(define do-simple-item
-  (lambda ()
-    (emit "(<span class=item>")
-    (get-actual-char)
-    (tex2page-string (get-till-char #\)))
-    (get-actual-char)
-    (emit "</span>)")))
-
 (define (do-textindent)
   (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
     (do-noindent)
@@ -4576,7 +4527,7 @@
       (case a
         ((:description) (do-description-item))
         ((:itemize :enumerate) (do-regular-item))
-        (else (do-plain-single-item))))))
+        (else (do-plain-item 1))))))
 
 (define do-itemize
   (lambda ()
@@ -10932,7 +10883,7 @@ Try the commands
 (tex-def-prim "\\scriptsize" (lambda () (do-switch ':scriptsize)))
 (tex-def-prim "\\sec" do-opmac-sec)
 (tex-def-prim "\\secc" (lambda () (do-opmac-heading 2)))
-(tex-def-prim "\\section" do-section)
+(tex-def-prim "\\section" (lambda () (do-heading 1)))
 (tex-def-prim "\\seealso" do-see-also)
 (tex-def-prim "\\setbox" do-setbox)
 (tex-def-prim "\\setcmykcolor" (lambda () (do-switch ':cmyk)))
@@ -10954,7 +10905,7 @@ Try the commands
 (tex-def-prim "\\style" do-opmac-list-style)
 (tex-def-prim "\\subject" do-subject)
 (tex-def-prim "\\subparagraph" (lambda () (do-heading 5)))
-(tex-def-prim "\\subsection" do-subsection)
+(tex-def-prim "\\subsection" (lambda () (do-heading 2)))
 (tex-def-prim "\\subsubsection" (lambda () (do-heading 3)))
 (tex-def-prim "\\symfootnote" do-symfootnote)
 

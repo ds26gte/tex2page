@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161212" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161214" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -94,7 +94,6 @@
 
 (defparameter *metapost* #-windows "mpost" #+windows "mp")
 
-
 (defparameter *navigation-sentence-begin* "Go to ")
 (defparameter *navigation-first-name* "first")
 (defparameter *navigation-previous-name* "previous")
@@ -157,7 +156,7 @@
     "\">e</span>" "X"))
 
 (defparameter *tex-files-to-ignore*
-  '("btxmac" "eplain" "epsf" "lmfonts" "supp-pdf"))
+  '("btxmac" "eplain" "epsf" "lmfonts" "mfpic" "supp-pdf"))
 
 ;above are true globals.  Following are
 ;per-document globals
@@ -1922,35 +1921,6 @@
     (when (string= chapno "") (setq chapno nil))
     (do-heading-help 0 nil t nil chapno header)))
 
-(defun do-manmac-subsection ()
-  (ignorespaces)
-  (let* ((explicit-subsecno (get-bracketed-text-if-any))
-         (subsecno nil)
-         (header (progn (ignorespaces)
-                        (let ((*tabular-stack* (list :header)))
-                          (tex-string-to-html-string (get-till-char #\.))))))
-    (get-actual-char)
-    (setq subsecno
-          (cond (explicit-subsecno
-                  (if (string= explicit-subsecno "") nil
-                      (tex-string-to-html-string explicit-subsecno)))
-                (t (tex-gdef-count "\\subsecno" (+ (get-gcount "\\subsecno") 1))
-                   (let ((chapno (ctl-seq-no-arg-expand-once "\\chapno")))
-                     (when (string= chapno "") (setq chapno nil))
-                     (concatenate 'string
-                       (if chapno (concatenate 'string chapno ".") "")
-                       (write-to-string (get-gcount "\\subsecno")))))))
-    (do-heading-help 1 nil t nil subsecno header)))
-
-(defun do-section ()
-  (tex-gdef-0arg "\\TIIPlatexsectionused" "1")
-  (do-heading 1))
-
-(defun do-subsection ()
-  (if (tex2page-flag-boolean "\\TIIPlatexsectionused")
-      (do-heading 2)
-      (do-manmac-subsection)))
-
 (defun do-opmac-heading (seclvl)
   (ignorespaces)
   (let ((header (let ((*tabular-stack* (list :header)))
@@ -3477,7 +3447,7 @@
       (get-token-or-peeled-group))))
 
 (defun html-length (s)
-  (let ((n (length s)) 
+  (let ((n (length s))
         (res 0)
         (i 0)
         (skip-tag nil)
@@ -3558,19 +3528,6 @@
     (emit-nbsp 2)
     (emit "</span></span>")))
 
-(defun do-plain-single-item ()
-  (ignorespaces)
-  (case (snoop-actual-char)
-    (#\( (do-simple-item))
-    (t (do-plain-item 1))))
-
-(defun do-simple-item ()
-  (emit "(<span class=item>")
-  (get-actual-char)
-  (tex2page-string (get-till-char #\)))
-  (get-actual-char)
-  (emit "</span>)"))
-
 (defun do-textindent ()
   (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
     (do-noindent)
@@ -3607,7 +3564,7 @@
   (case (car *tabular-stack*)
     (:description (do-description-item))
     ((:itemize :enumerate) (do-regular-item))
-    (t (do-plain-single-item))))
+    (t (do-plain-item 1))))
 
 (defun do-itemize ()
   (do-end-para)
@@ -9161,7 +9118,7 @@ Try the commands
 (tex-def-prim "\\scriptsize" (lambda () (do-switch :scriptsize)))
 (tex-def-prim "\\sec" #'do-opmac-sec)
 (tex-def-prim "\\secc" (lambda () (do-opmac-heading 2)))
-(tex-def-prim "\\section" #'do-section)
+(tex-def-prim "\\section" (lambda () (do-heading 1)))
 (tex-def-prim "\\seealso" #'do-see-also)
 (tex-def-prim "\\setbox" #'do-setbox)
 (tex-def-prim "\\setcmykcolor" (lambda () (do-switch :cmyk)))
@@ -9183,7 +9140,7 @@ Try the commands
 (tex-def-prim "\\style" #'do-opmac-list-style)
 (tex-def-prim "\\subject" #'do-subject)
 (tex-def-prim "\\subparagraph" (lambda () (do-heading 5)))
-(tex-def-prim "\\subsection" #'do-subsection)
+(tex-def-prim "\\subsection" (lambda () (do-heading 2)))
 (tex-def-prim "\\subsubsection" (lambda () (do-heading 3)))
 (tex-def-prim "\\symfootnote" #'do-symfootnote)
 

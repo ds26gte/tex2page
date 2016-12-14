@@ -1,4 +1,4 @@
-; last change: 2016-04-28
+; last change: 2016-12-14
 
 (scmxlate-eval
  (define *chez-name*
@@ -86,7 +86,7 @@
       (close-input-port i)
       v)))
 
-;(define seconds->human-time
+;(define seconds-to-human-time
 ;  (lambda (secs)
 ;    ""))
 

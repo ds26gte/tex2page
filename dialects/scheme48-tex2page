@@ -1,4 +1,4 @@
-; last change: 2003-06-21
+; last change: 2016-12-14
 
 (scmxlate-insert
  ";The structures
@@ -160,7 +160,7 @@
     ;(file-info:mtime (file-info f))
     ))
 
-'(define seconds->human-time
+'(define seconds-to-human-time
   (lambda (secs)
     (time->string
      (make-time secs))))

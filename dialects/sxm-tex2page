@@ -1,4 +1,4 @@
-; last change: 2003-06-21
+; last change: 2016-12-14
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -84,7 +84,7 @@
                   (list->string (reverse! r))
                   (loop (cons c r)))))))))
 
-;(define seconds->human-time
+;(define seconds-to-human-time
 ;  (lambda (secs)
 ;    ""))
 

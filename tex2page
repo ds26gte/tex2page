@@ -372,7 +372,7 @@
                       (if (> tz 0) "+" "-")
                       (abs tz))))))
 
-(define seconds->human-time
+(define seconds-to-human-time
   (lambda (s)
     (strftime-like
      "%a, %b %e, %Y, %l:%M %p %Z"
@@ -381,11 +381,11 @@
 (define nreverse reverse)
 (define nconc append)
 
-(define number->roman
+(define number-to-roman
   ;adapted from CLISP's format impl
   (lambda (n upcase?)
     (unless (and (integer? n) (>= n 0))
-      (terror 'number->roman "Missing number"))
+      (terror 'number-to-roman "Missing number"))
     ;
     (let ((roman-digits
             ; decimal_value, roman_char, lower_decimal_value_used_to_modify
@@ -823,7 +823,7 @@
     (write-log ':separation-newline)
     (write-log "! ")
     (write-log
-      (tex-string->html-string (get-group)))
+      (tex-string-to-html-string (get-group)))
     (write-log ':separation-newline)
     (terror "\\errmessage")))
 
@@ -1112,7 +1112,7 @@
                                                      '("\\ " "\\{" "\\}"))
                                               (string (string-ref x 1)))
                                              (else
-                                                 (tex-string->html-string x)))))))
+                                                 (tex-string-to-html-string x)))))))
                         (loop (nconc (nreverse (string->list s1)) s)
                               nesting #f))
                       (loop (cons c s) nesting #t)))
@@ -2014,7 +2014,7 @@
   (lambda ()
     (write-aux
       `(!preferred-title
-         ,(tex-string->html-string (get-group))))))
+         ,(tex-string-to-html-string (get-group))))))
 
 (define tex2page-string
   (lambda (s)
@@ -2026,7 +2026,7 @@
   (lambda (title)
     (fluid-let ((*outputting-external-title-p* #t))
       (bgroup)
-      (let ((s (tex-string->html-string
+      (let ((s (tex-string-to-html-string
 		 (string-append
 		   ;"\\def\\\\{}"
 		   "\\let\\\\\\ignorespaces"
@@ -2272,7 +2272,7 @@
 (define section-counter-value
   (lambda (seclvl)
     (if (= seclvl -1)
-        (number->roman (table-get *section-counters* -1) #t)
+        (number-to-roman (table-get *section-counters* -1) #t)
         (let ((i (if *using-chapters-p* 0 1)))
           (let ((outermost-secnum
                   (let ((n (table-get *section-counters* i 0)))
@@ -2324,7 +2324,7 @@
                               (else #f))))
            (nonum? (or starred? too-deep?))
            (header (fluid-let ((*tabular-stack* (list ':header)))
-                     (tex-string->html-string (get-group)))))
+                     (tex-string-to-html-string (get-group)))))
       (do-heading-help seclvl starred? nonum? #f #f header))))
 
 (define do-heading-help
@@ -2476,8 +2476,8 @@
 (define do-writenumberedtocline
   (lambda ()
     (let* ((seclvl (section-type-to-depth (get-peeled-group)))
-           (secnum (tex-string->html-string (get-group)))
-           (sectitle (tex-string->html-string (get-group))))
+           (secnum (tex-string-to-html-string (get-group)))
+           (sectitle (tex-string-to-html-string (get-group))))
       (do-write-to-toc-aux seclvl secnum sectitle))))
 
 (define do-addcontentsline
@@ -2486,7 +2486,7 @@
       (unless (string=? toc "toc")
         (terror 'do-addcontentsline "only #1=toc supported"))
       (let* ((seclvl (section-type-to-depth (get-peeled-group)))
-             (sectitle (tex-string->html-string (get-group))))
+             (sectitle (tex-string-to-html-string (get-group))))
         (write-aux
           `(!toc-entry
              ,(if (= seclvl -1) -1
@@ -2523,16 +2523,16 @@
   (lambda ()
     (ignorespaces)
     (let ((header (let ((*tabular-stack* (list ':header)))
-                    (tex-string->html-string (get-till-par)))))
+                    (tex-string-to-html-string (get-till-par)))))
       (do-heading-help 1 #f #t #t #f header))))
 
 (define (do-beginchapter)
     (ignorespaces)
-    (let* ((chapno (tex-string->html-string
+    (let* ((chapno (tex-string-to-html-string
                      (get-till-char #\space)))
            (header (begin (ignorespaces)
                           (let ((*tabular-stack* (list ':header)))
-                            (tex-string->html-string
+                            (tex-string-to-html-string
                              (get-till-par))))))
       (tex-gdef-0arg "\\chapno" chapno)
       (set-gcount! "\\subsecno" 0)
@@ -2544,7 +2544,7 @@
   (lambda (seclvl)
     (ignorespaces)
     (let ((header (fluid-let ((*tabular-stack* (list ':header)))
-                    (tex-string->html-string (get-till-par)))))
+                    (tex-string-to-html-string (get-till-par)))))
       (let ((nonum? *opmac-nonum-p*)
             (notoc? *opmac-notoc-p*))
         (set! *opmac-nonum-p* #f)
@@ -2884,7 +2884,7 @@
       (number->footnote-symbol *footnote-sym*)
       )))
 
-(define tex-string->html-string
+(define tex-string-to-html-string
   (lambda (ts)
     (let ((tmp-port (open-output-string)))
       (fluid-let ((*html* tmp-port))
@@ -2897,7 +2897,7 @@
       (unless symlist
         (set! symlist
           (fluid-let ((*temporarily-use-utf8-for-math-p* #t ))
-            (map tex-string->html-string
+            (map tex-string-to-html-string
                  '("*" "\\dag" "\\ddag" "\\S" "\\P"
                    "$\\Vert$" "**" "\\dag\\dag" "\\ddag\\ddag")))))
       (list-ref symlist
@@ -2907,7 +2907,7 @@
   (lambda ()
     (do-footnote-aux
       (fluid-let ((*temporarily-use-utf8-for-math-p* #t))
-        (tex-string->html-string
+        (tex-string-to-html-string
           (get-token))))))
 
 (define do-footnote
@@ -2942,7 +2942,7 @@
   (lambda ()
     (do-vfootnote-aux
       (fluid-let ((*temporarily-use-utf8-for-math-p* #t))
-        (tex-string->html-string (get-token)))
+        (tex-string-to-html-string (get-token)))
       #f ;no footnote call tag
       #f ;no footnote tag
       )))
@@ -3004,7 +3004,7 @@
 
 ;
 
-(define rgb.dec->hex
+(define rgb-dec-to-rrggbb
   (let ((f (lambda (x)
              (let* ((n (inexact->exact (round (* 1.0 x))))
                     (s (number->string n 16)))
@@ -3012,16 +3012,50 @@
     (lambda (r g b)
       (string-append (f r) (f g) (f b)))))
 
-(define rgb.frac->hex
-  (lambda (r g b)
-    (rgb.dec->hex (* r 255) (* g 255) (* b 255))))
+(define (rgb-frac-to-rrggbb r g b)
+  (rgb-dec-to-rrggbb (* r 255) (* g 255) (* b 255)))
 
-(define cmyk->rgb
+(define cmyk-to-rrggbb
   ;from Dan Luecking's mfpic/metapost/grafbase.mp
   (let ((f (lambda (x k)
               (- 1 (min (max (+ x k) 0) 1)))))
     (lambda (c m y k)
-      (rgb.frac->hex (f c k) (f m k) (f y k)))))
+      (rgb-frac-to-rrggbb (f c k) (f m k) (f y k)))))
+
+(define (hsb-to-rrggbb hue saturation brightness)
+  (let* ((red 0) (green 0) (blue 0)
+                 (hue6 (* 6 hue))
+                 (i (inexact->exact (floor hue6)))
+                 (f (- hue6 i)))
+    (case i
+      ((0) (set! red 0) (set! green (- 1 f)) (set! blue 1))
+      ((1) (set! red f) (set! green 0) (set! blue 1))
+      ((2) (set! red 1) (set! green 0) (set! blue (- 1 f)))
+      ((3) (set! red 1) (set! green f) (set! blue 0))
+      ((4) (set! red (- 1 f)) (set! green 1) (set! blue 0))
+      ((5) (set! red 0) (set! green 1) (set! blue f))
+      ((6) (set! red 0) (set! green 1) (set! blue 1))
+      (else (terror 'hsb-to-rrggbb "Can't happen.")))
+    (let ((fu (lambda (x) (* brightness
+                             (- 1 (* saturation x))))))
+      (rgb-frac-to-rrggbb (fu red) (fu green) (fu blue)))))
+
+(define (wavelength-to-rrggbb w)
+  (let ((hue (* 1/6
+                (cond ((<= w 362.857) 5/6)
+                      ((< w 440) (+ 4 (/ (- w 440) -60)))
+                      ((< w 490) (- 4 (/ (- w 440) 50)))
+                      ((< w 510) (+ 2 (/ (- w 510) -20)))
+                      ((< w 580) (- 2 (/ (- w 510) 70)))
+                      ((< w 645) (/ (- w 645) -65))
+                      (else 0))))
+        (brightness
+          (cond ((<= w 362.857) 0)
+                ((< w 420) (+ 0.3 (* 0.7 (/ (- w 380) 40))))
+                ((<= w 700) 1)
+                ((< w 814.285) (+ 0.3 (* 0.7 (/ (- w 780) -80))))
+                (else 0))))
+    (hsb-to-rrggbb hue 1 brightness)))
 
 (define (do-color)
   (let ((model (get-bracketed-text-if-any)))
@@ -3030,8 +3064,14 @@
             ((string=? model "rgb") ':rgb)
             ((string=? model "RGB") ':rgb255)
             ((string=? model "cmyk") ':cmyk)
+            ((string=? model "cmy") ':cmy)
             ((string=? model "gray") ':gray)
+            ((string=? model "Gray") ':gray15)
             ((string=? model "HTML") ':html)
+            ((string=? model "hsb") ':hsb)
+            ((string=? model "Hsb") ':hsb360)
+            ((string=? model "HSB") ':hsb240)
+            ((string=? model "wave") ':wave)
             (else ':colornamed)))))
 
 (define (atom-to-6hex x)
@@ -3061,23 +3101,23 @@
                                       "Color name " name " not defined")))
                         (let ((rgb #f))
                           (call-with-input-string
-                            (tex-string->html-string
+                            (tex-string-to-html-string
                               (string-append "\\defcsactive\\,{ }" spec))
                             (lambda (i)
                               (cond ((string=? model "cmyk")
                                      (let* ((c (read i)) (m (read i))
                                                          (y (read i)) (k (read i)))
-                                       (cmyk->rgb c m y k)))
+                                       (cmyk-to-rrggbb c m y k)))
                                     ((string=? model "rgb")
                                      (let* ((r (read i)) (g (read i))
                                                          (b (read i)))
-                                       (rgb.frac->hex r g b)))
+                                       (rgb-frac-to-rrggbb r g b)))
                                     ((string=? model "RGB")
                                      (let* ((r (read i)) (g (read i))
                                                          (b (read i)))
-                                       (rgb.dec->hex r g b)))
+                                       (rgb-dec-to-rrggbb r g b)))
                                     ((string=? model "gray")
-                                     (cmyk->rgb 0 0 0 (read i)))
+                                     (cmyk-to-rrggbb 0 0 0 (read i)))
                                     ((string=? model "HTML")
                                      (atom-to-6hex (read i)))
                                     (else
@@ -3172,60 +3212,131 @@
         ((:cmyk)
          (bgroup)
          (call-with-input-string
-           (tex-string->html-string
+           (tex-string-to-html-string
              (string-append "\\defcsactive\\,{ }" (get-token)))
            (lambda (i)
              (let* ((c (read i)) (m (read i)) (y (read i)) (k (read i)))
                (ignorespaces)
                (emit "<span style=\"color: #")
-               (emit (cmyk->rgb c m y k))
+               (emit (cmyk-to-rrggbb c m y k))
+               (emit "\">"))))
+         (egroup)
+         (lambda () (emit "</span>")))
+        ((:cmy)
+         (bgroup)
+         (call-with-input-string
+           (tex-string-to-html-string
+             (string-append "\\defcsactive\\,{ }" (get-token)))
+           (lambda (i)
+             (let* ((c (read i)) (m (read i)) (y (read i)))
+               (ignorespaces)
+               (emit "<span style=\"color: #")
+               (emit (rgb-frac-to-rrggbb (- 1 c) (- 1 m) (- 1 y)))
                (emit "\">"))))
          (egroup)
          (lambda () (emit "</span>")))
         ((:rgb)
          (bgroup)
          (call-with-input-string
-           (tex-string->html-string
+           (tex-string-to-html-string
              (string-append "\\defcsactive\\,{ }" (get-token)))
            (lambda (i)
              (let* ((r (read i)) (g (read i)) (b (read i)))
                (ignorespaces)
                (emit "<span style=\"color: #")
-               (emit (rgb.frac->hex r g b))
+               (emit (rgb-frac-to-rrggbb r g b))
                (emit "\">"))))
          (egroup)
          (lambda () (emit "</span>")))
         ((:rgb255)
          (bgroup)
          (call-with-input-string
-           (tex-string->html-string
+           (tex-string-to-html-string
              (string-append "\\defcsactive\\,{ }" (get-token)))
            (lambda (i)
              (let* ((r (read i)) (g (read i)) (b (read i)))
                (ignorespaces)
                (emit "<span style=\"color: #")
-               (emit (rgb.dec->hex r g b))
+               (emit (rgb-dec-to-rrggbb r g b))
                (emit "\">"))))
          (egroup)
          (lambda () (emit "</span>")))
         ((:gray)
          (call-with-input-string
-           (tex-string->html-string (get-token))
+           (tex-string-to-html-string (get-token))
            (lambda (i)
              (let ((g (read i)))
                (ignorespaces)
                (emit "<span style=\"color: #")
-               (emit (cmyk->rgb 0 0 0 (- 1 g)))
+               (emit (cmyk-to-rrggbb 0 0 0 (- 1 g)))
+               (emit "\">"))))
+         (lambda () (emit "</span>")))
+        ((:gray15)
+         (call-with-input-string
+           (tex-string-to-html-string (get-token))
+           (lambda (i)
+             (let ((g (read i)))
+               (ignorespaces)
+               (emit "<span style=\"color: #")
+               (emit (cmyk-to-rrggbb 0 0 0 (- 1 (/ g 15))))
                (emit "\">"))))
          (lambda () (emit "</span>")))
         ((:html)
          (call-with-input-string
-           (tex-string->html-string (get-token))
+           (tex-string-to-html-string (get-token))
            (lambda (i)
              (let ((rrggbb (atom-to-6hex (read i))))
                (ignorespaces)
                (emit "<span style=\"color: #")
                (emit rrggbb)
+               (emit "\">"))))
+         (lambda () (emit "</span>")))
+        ((:hsb)
+         (bgroup)
+         (call-with-input-string
+           (tex-string-to-html-string
+             (string-append "\\defcsactive\\,{ }" (get-token)))
+           (lambda (i)
+             (let* ((h (read i)) (s (read i)) (b (read i)))
+               (ignorespaces)
+               (emit "<span style=\"color: #")
+               (emit (hsb-to-rrggbb h s b))
+               (emit "\">"))))
+         (egroup)
+         (lambda () (emit "</span>")))
+        ((:hsb360)
+         (bgroup)
+         (call-with-input-string
+           (tex-string-to-html-string
+             (string-append "\\defcsactive\\,{ }" (get-token)))
+           (lambda (i)
+             (let* ((h (read i)) (s (read i)) (b (read i)))
+               (ignorespaces)
+               (emit "<span style=\"color: #")
+               (emit (hsb-to-rrggbb (/ h 360) s b))
+               (emit "\">"))))
+         (egroup)
+         (lambda () (emit "</span>")))
+        ((:hsb240)
+         (bgroup)
+         (call-with-input-string
+           (tex-string-to-html-string
+             (string-append "\\defcsactive\\,{ }" (get-token)))
+           (lambda (i)
+             (let* ((h (read i)) (s (read i)) (b (read i)))
+               (ignorespaces)
+               (emit "<span style=\"color: #")
+               (emit (hsb-to-rrggbb (/ h 240) (/ s 240) (/ b 240)))
+               (emit "\">"))))
+         (egroup)
+         (lambda () (emit "</span>")))((:wave)
+         (call-with-input-string
+           (tex-string-to-html-string (get-token))
+           (lambda (i)
+             (let ((w (read i)))
+               (ignorespaces)
+               (emit "<span style=\"color: #")
+               (emit (wavelength-to-rrggbb w))
                (emit "\">"))))
          (lambda () (emit "</span>")))
         ((:colornamed)
@@ -3677,7 +3788,7 @@
   (lambda (label)
     (let ((name (ctl-seq-no-arg-expand-once "\\TIIPcurrentnodename"))
           (value (ctl-seq-no-arg-expand-once "\\@currentlabel")))
-      (set! value (tex-string->html-string value))
+      (set! value (tex-string-to-html-string value))
       (!label label *html-page-count* name value)
       (write-label
         `(!label ,label ,*html-page-count*
@@ -3759,7 +3870,7 @@
   (lambda (label ext-file link-text)
     (let* ((label-ref (label-bound? label ext-file))
            (label-text
-            (cond (link-text (tex-string->html-string link-text))
+            (cond (link-text (tex-string-to-html-string link-text))
                   (label-ref (label.value label-ref))
                   (else #f))))
       (cond (label-ref (emit-ext-page-node-link-start
@@ -4384,7 +4495,7 @@
       (cond ((table-get *index-page-mention-alist* pageno)
              => (lambda (c)
                   (let ((n (+ 1 c)))
-                    (emit (number->roman n #f))
+                    (emit (number-to-roman n #f))
                     (table-put! *index-page-mention-alist* pageno n))))
             (else
               (table-put! *index-page-mention-alist* pageno 1)))
@@ -4419,7 +4530,7 @@
                   (else (loop (+ i 1) #f #f (+ res 1)))))))))
 
 (define (do-llap)
-  (let* ((txt (tex-string->html-string (get-group)))
+  (let* ((txt (tex-string-to-html-string (get-group)))
          (html-len (html-length txt))
          (txt-len (sp-to-pixels (tex-length html-len ':ex))))
     (emit "<span style=\"position: relative\">")
@@ -4503,9 +4614,9 @@
     (emit "</span></span>")))
 
 (define (do-proclaim)
-  (let* ((head (tex-string->html-string (get-till-char #\.)))
+  (let* ((head (tex-string-to-html-string (get-till-char #\.)))
          (body (begin (get-actual-char) (ignorespaces)
-                      (tex-string->html-string (get-till-par)))))
+                      (tex-string-to-html-string (get-till-par)))))
     (do-end-para)
     (emit "<div class=\"proclaim medskip\"><b>")
     (do-noindent)
@@ -4685,7 +4796,7 @@
                    *last-modification-time*
                    (> *last-modification-time* 0))
           (tex2page-string *last-modified*) (emit ": ")
-          (emit (seconds->human-time *last-modification-time*))
+          (emit (seconds-to-human-time *last-modification-time*))
           (emit "<br>") ;(emit-newline)
           )
         (when colophon-mentions-tex2page?
@@ -5059,7 +5170,7 @@
            => (lambda (d)
                 (write-aux
                  `(!preferred-title
-                   ,(tex-string->html-string (tdef.expansion d)))))))
+                   ,(tex-string-to-html-string (tdef.expansion d)))))))
     (when (tex2page-flag-boolean "\\TZPcolophonlastpage")
       (write-aux `(!colophon :last-page)))
     (when (or (tex2page-flag-boolean "\\TZPcolophondisabletimestamp")
@@ -5666,7 +5777,7 @@
     (let ((ctlseq (get-bracketed-text-if-any))
           (p (make-bport 'port (current-input-port))))
       (write-log ':separation-newline)
-      (write-log (tex-string->html-string (get-group)))
+      (write-log (tex-string-to-html-string (get-group)))
       (write-log ':separation-newline)
       (write-log (or ctlseq "\\@typein"))
       (write-log #\=)
@@ -6010,6 +6121,7 @@
 
 (define ps-to-img
   (lambda (ps-file img-file)
+    (printf "doing ps-to-img ~s ~s~%" ps-file img-file)
     (case (tex2page-flag-value "\\TZPimageconverter")
       ((#\i #\I)
        (system
@@ -6020,6 +6132,7 @@
            ((#\p #\P) ps-to-img/png/netpbm)
            ((#\j #\J) ps-to-img/jpeg/netpbm)
            (else ps-to-img/gif/netpbm)) ps-file img-file)))))
+
 
 (define tex-to-img
   (lambda (f)
@@ -6036,7 +6149,7 @@
         (write-log ':separation-space)
         (cond ((call-tex f)
                => (lambda (ps-file)
-               (ps-to-img ps-file f)
+               (ps-to-img ps-file img-file)
                (write-log img-file)
                '(for-each
                   (lambda (e)
@@ -7172,7 +7285,7 @@
                    (else 0)))
            (rhs (ungroup (get-token)))
            (ok-to-def? (or renew? (not (find-def lhs)))))
-      (tex-def lhs (latex-arg-num->plain-argpat argc)
+      (tex-def lhs (latex-argnum-to-plain-argpat argc)
                rhs optarg #f #f #f #f)
       (unless ok-to-def?
         (trace-if (> (find-count "\\tracingcommands") 0)
@@ -7202,7 +7315,7 @@
            (ending (string-append (ungroup (get-token)) "\\endgroup"))
            (ok-to-def? (or renew? (not (find-def bs-envname)))))
       (tex-def bs-envname
-               (latex-arg-num->plain-argpat argc) beginning optarg
+               (latex-argnum-to-plain-argpat argc) beginning optarg
                #f #f #f #f)
       (tex-def (string-append "\\end" envname) '() ending #f
                #f #f #f #f)
@@ -7289,7 +7402,7 @@
             (toss-back-char *invisible-space*)
             (toss-back-string "\\TIIPbye")))))
 
-(define latex-arg-num->plain-argpat
+(define latex-argnum-to-plain-argpat
   (lambda (n)
     (let loop ((n n) (s '()))
       (if (<= n 0) s
@@ -7398,7 +7511,7 @@
                    s)
                   (else (loop (cons (get-actual-char) s) nesting #f)))))))))
 
-(define digit->int
+(define digit-to-int
   (lambda (d)
     (- (char->integer d) *int-corresp-to-0*)))
 
@@ -7631,11 +7744,11 @@
                              (cond ((char=? n #\#)
                                     (cons #\# (aux (+ k 2)))) ;really?
                                    ((and (char-numeric? n)
-                                         (<= (digit->int n) (length args)))
+                                         (<= (digit-to-int n) (length args)))
                                     ;not really such a good test :-<
                                     (append (string->list
                                               (list-ref args
-                                                (- (digit->int n) 1)))
+                                                (- (digit-to-int n) 1)))
                                       (aux (+ k 2))))
                                    (else (cons #\# (aux (+ k 1))))))))
                       (else (cons c (aux (+ k 1))))))))))))
@@ -8710,7 +8823,7 @@
     (cond ((get-number-or-false)
            => (lambda (n)
                 (emit
-                  (number->roman n upcase?)))))))
+                  (number-to-roman n upcase?)))))))
 
 (define do-tex-case-code
   (lambda (kase)
@@ -11509,7 +11622,7 @@ Try the commands
       (write-log *operating-system*)
       (write-log #\))
       (write-log #\space)
-      (write-log (seconds->human-time (current-seconds)))
+      (write-log (seconds-to-human-time (current-seconds)))
       (write-log ':separation-newline)
       (cond (*main-tex-file*
              (set! *subjobname* *jobname*)

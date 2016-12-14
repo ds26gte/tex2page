@@ -1,4 +1,4 @@
-; last change: 2009-04-10
+; last change: 2016-12-14
 
 ;works with CLISP, Clozure CL, CMU CL, ECL, SBCL; but scmxlate
 ;translation to CL is mostly for verification (of scmxlate?) these days.
@@ -152,7 +152,7 @@
 ;  (multiple-value-list
 ;    (decode-universal-time s)))
 
-(defun seconds->human-time (s)
+(defun seconds-to-human-time (s)
   (multiple-value-bind (sec m h d mo y dow dst tz)
       (decode-universal-time s)
       (declare (ignore sec))
@@ -250,7 +250,7 @@
 (scmxlate-rename-define
  (*scheme-version* *common-lisp-version*))
 
-(defun number->roman (n upcase?)
+(defun number-to-roman (n upcase?)
   (format nil
     (if upcase? "~@r" "~(~@r~)") n))
 

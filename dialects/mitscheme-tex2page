@@ -1,4 +1,4 @@
-;last change: 2003-06-21
+;last change: 2016-12-14
 
 (scmxlate-cond 
 ((eqv? *operating-system* 'unix)
@@ -47,7 +47,7 @@
  )
 
 (scmxlate-rename-define
- (seconds->human-time file-time->local-time-string)
+ (seconds-to-human-time file-time->local-time-string)
  (string-index string-find-next-char)
  (string-reverse-index string-find-previous-char)
  (*january-number* 1)

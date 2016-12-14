@@ -1,4 +1,8 @@
-Last change 2016-12-12
+Last change 2016-12-14
+
+2016 Dec 14
+
+Recognize color models "cmy", "Gray", "hsb", "Hsb", "HSB", "wave" (xcolor.sty).
 
 2016 Dec 12
 
@@ -29,7 +33,7 @@ circuitous way, e.g., if it's in a string, use string-append.
 Escape occurrences of {",@,!} in OPmac's \ii{,d,s} when translating to
 MakeIndex.
 
-Recognize color model HTML (xcolor.sty).
+Recognize color model "HTML" (xcolor.sty).
 
 2016 Dec 10
 

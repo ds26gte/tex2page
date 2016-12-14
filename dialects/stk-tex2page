@@ -44,7 +44,7 @@
       (if (null? s) #f
         (or (f (car s)) (loop (cdr s)))))))
 
-(define seconds->human-time
+(define seconds-to-human-time
   (lambda (secs) ""))
 
 ; ex:ft=scheme

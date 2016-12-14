@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-12} %last change
+\c{2016-12-15} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1127,32 +1127,50 @@ behaves differently than a \LaTeX-like `\ref`.}
 \xrdef{color}
 \index{color@`\color`}
 \index{definecolor@`\definecolor`}
+\index{color.sty@`color.sty`}
 \TeX2page recognizes the macros `\color` and
 `\definecolor`~\cite{latex-graphicx}.  These are provided by the \LaTeX\
 package `color.sty`, which can also be loaded into
 plain \TeX\ (after loading `miniltx`).  E.g.,
 
 \begintt
-{\color[gray]{.17} light gray},
-{\color[rgb]{.69, .19, .38} maroon},
 {\color[cmyk]{0, .89, .94, .28} brick red},
+{\color[gray]{.17} light gray},
+{\color[hsb]{.75, .6667, .6} rebecca purple},
+{\color[rgb]{.69, .19, .38} maroon},
 {\color[RGB]{220, 20, 60} crimson},
 and {\color{blue} blue}.
 \endtt
 %
-produces:
-{\color[gray]{.75} light gray},
-{\color[rgb]{.69, .19, .38} maroon},
+produces
+\quote
 {\color[cmyk]{0, .89, .94, .28} brick red},
+{\color[gray]{.75} light gray},
+{\color[hsb]{.75, .6667, .6} rebecca purple},
+{\color[rgb]{.69, .19, .38} maroon},
 {\color[RGB]{220, 20, 60} crimson},
 %{\color[named]{magenta} magenta},
 and {\color{blue} blue}.
+\endquote
+\index{xcolor.sty@`xcolor.sty`}
+In addition to the {\em color models} `cmyk`, `gray`, `hsb`, `rgb`,
+and `RGB`, \TeX2page also supports `cmy`, `Gray`, `Hsb`,
+`HSB`, `HTML`, and `wave`, which are defined in `xcolor.sty` (a
+\LaTeX\ package that supersets `color.sty`). Unfortunately,
+`xcolor.sty` is currently not loadable in plain \TeX.
 
 `\definecolor` defines new color names, e.g.,
 
 \begintt
-\definecolor{BrickRed}{cmyk}{0, .89, .94, .28}
+\definecolor{Thistle}{cmyk}{.12,.59,0,0}
+The gentleman with the {\color{Thistle}thistle-down hair}.
 \endtt
+produces
+
+\quote
+\definecolor{Thistle}{cmyk}{.12,.59,0,0}
+The gentleman with the {\color{Thistle}thistle-down hair}.
+\endquote
 
 \index{x11rgb.tex@`x11rgb.tex`}
 Most color-capable browsers support the very large list

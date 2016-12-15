@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161214") ;last change
+(define *tex2page-version* "20161215") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -3086,6 +3086,15 @@
                      ((4) "00")
                      ((5) "0")
                      (else "")) htmlcolor)))
+
+(define (do-colorbox)
+  (let* ((color (get-group))
+         (text (get-peeled-group)))
+    (toss-back-char #\})
+    (toss-back-string text)
+    (toss-back-string color)
+    (toss-back-string "\\bgcolor")
+    (toss-back-char #\{)))
 
 (define (do-definecolor)
     (let* ((name (get-peeled-group))
@@ -10643,6 +10652,7 @@ Try the commands
 (tex-def-prim "\\closein" (lambda () (do-close-stream ':in)))
 (tex-def-prim "\\closeout" (lambda () (do-close-stream ':out)))
 (tex-def-prim "\\color" do-color)
+(tex-def-prim "\\colorbox" do-colorbox)
 (tex-def-prim "\\convertMPtoPDF" do-convertmptopdf)
 (tex-defsym-prim "\\copyright" "&#xa9;")
 (tex-def-prim "\\countdef" (lambda () (do-newcount #t) (eat-integer)))

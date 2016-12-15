@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161214" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161215" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -2374,6 +2374,15 @@
            ((string= model "HSB") :hsb240)
            ((string= model "wave") :wave)
            (t :colornamed)))))
+
+(defun do-colorbox ()
+  (let* ((color (get-group))
+         (text (get-peeled-group)))
+    (toss-back-char #\})
+    (toss-back-string text)
+    (toss-back-string color)
+    (toss-back-string "\\bgcolor")
+    (toss-back-char #\{)))
 
 (defun do-definecolor ()
   (let* ((name (get-peeled-group))
@@ -8878,6 +8887,7 @@ Try the commands
 (tex-def-prim "\\closein" (lambda () (do-close-stream :in)))
 (tex-def-prim "\\closeout" (lambda () (do-close-stream :out)))
 (tex-def-prim "\\color" #'do-color)
+(tex-def-prim "\\colorbox" #'do-colorbox)
 (tex-def-prim "\\convertMPtoPDF" #'do-convertmptopdf)
 (tex-defsym-prim "\\copyright" "&#xa9;")
 (tex-def-prim "\\countdef" (lambda () (do-newcount t) (eat-integer)))

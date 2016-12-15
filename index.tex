@@ -1126,9 +1126,10 @@ behaves differently than a \LaTeX-like `\ref`.}
 
 \xrdef{color}
 \index{color@`\color`}
+\index{colorbox@`\colorbox`}
 \index{definecolor@`\definecolor`}
 \index{color.sty@`color.sty`}
-\TeX2page recognizes the macros `\color` and
+\TeX2page recognizes the macros `\color`, `\colorbox`, and
 `\definecolor`~\cite{latex-graphicx}.  These are provided by the \LaTeX\
 package `color.sty`, which can also be loaded into
 plain \TeX\ (after loading `miniltx`).  E.g.,
@@ -1162,14 +1163,24 @@ and `RGB`, \TeX2page also supports `cmy`, `Gray`, `Hsb`,
 `\definecolor` defines new color names, e.g.,
 
 \begintt
-\definecolor{Thistle}{cmyk}{.12,.59,0,0}
-The gentleman with the {\color{Thistle}thistle-down hair}.
+\definecolor{dodgerblue}{rgb}{.116,.565,1}
+\definecolor{orangered}{rgb}{1,.27,0}
+\definecolor{thistle}{cmyk}{.12,.59,0,0}
+Poor Mr Norrell could only watch on helplessly as the gentleman
+with the {\color{thistle}thistle-down hair} seized his only
+copies of \colorbox{dodgerblue}{\color{white}The \TeX book} and
+\colorbox{orangered}{\color{white} The METAFONTbook}.
 \endtt
 produces
 
+\definecolor{dodgerblue}{rgb}{.116,.565,1}
+\definecolor{orangered}{rgb}{1,.27,0}
+\definecolor{thistle}{cmyk}{.12,.59,0,0}
 \quote
-\definecolor{Thistle}{cmyk}{.12,.59,0,0}
-The gentleman with the {\color{Thistle}thistle-down hair}.
+Poor Mr Norrell could only watch on helplessly as the gentleman
+with the {\color{thistle}thistle-down hair} seized his only
+copies of \colorbox{dodgerblue}{\color{white}The \TeX book} and
+\colorbox{orangered}{\color{white} The METAFONTbook}.
 \endquote
 
 \index{x11rgb.tex@`x11rgb.tex`}

@@ -5,6 +5,7 @@
 ":"; elif test "$LISP" = clozure; then exec ccl -l $0 -e '(ccl:quit)'
 ":"; elif test "$LISP" = cmucl; then exec lisp -quiet -load $0 -eval '(ext::quit)'
 ":"; elif test "$LISP" = ecl; then exec ecl -shell $0
+":"; elif test "$LISP" = mkcl; then exec mkcl -shell $0
 ":"; else exec sbcl --script $0 "$@"
 ":"; fi
 
@@ -28,7 +29,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161217" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161218" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -46,6 +47,7 @@
   #+cmucl (cdr (assoc (intern s :keyword)
                       ext:*environment-list* :test #'string=))
   #+ecl (si:getenv s)
+  #+mkcl (mkcl:getenv s)
   #+sbcl (sb-ext:posix-getenv s))
 
 (defparameter *tex2page-file-arg*
@@ -336,7 +338,8 @@
   #+clisp (ext:shell cmd)
   #+clozure (ccl::os-command cmd)
   #+cmucl (ext:run-program "sh" (list "-c" cmd) :output t)
-  #+ecl (si:system cmd))
+  #+ecl (si:system cmd)
+  #+mkcl (mkcl:system cmd))
 
 (defun char-tex-alphabetic-p (c)
   (or (alpha-char-p c)
@@ -2461,7 +2464,6 @@
          (ignorespaces)
          (if c (cdr c) name)))))
 
-
 (defun color-model-to-keyword (model)
   (cond ((not model) :colornamed)
         ((string= model "rgb") :rgb)
@@ -2477,20 +2479,18 @@
         ((string= model "wave") :wave)
         (t :colornamed)))
 
-
 (defun do-color ()
   (let ((model (color-model-to-keyword (get-bracketed-text-if-any))))
     (do-switch model)))
 
 (defun do-pagecolor ()
+  ; Does it for *all* pages instead of just subsequent pages though.
   (let* ((model (color-model-to-keyword (get-bracketed-text-if-any)))
          (color (read-color-as-rrggbb model)))
     (princ "body { background-color: " *css-port*)
     (princ color *css-port*)
     (princ "; }" *css-port*)
     (terpri *css-port*)))
-
-
 
 (defun do-colorbox ()
   (let* ((color (get-group))
@@ -2506,7 +2506,6 @@
          (model (color-model-to-keyword (get-peeled-group))))
     (push (cons name (read-color-as-rrggbb model))
           *color-names*)))
-
 
 (defun do-switch (sw)
   (unless *outputting-external-title-p*
@@ -2594,7 +2593,6 @@
         (emit sw)
         (emit ">")
         (lambda () (emit "</span>")))))))
-
 
 (defun do-obeylines ()
   (when (eql (snoop-actual-char) #\Newline) (get-actual-char))
@@ -3976,11 +3974,15 @@
       (emit-link-stop)))
 
 (defun check-tex2page-lisp ()
-  (when (not (tex2page-flag-boolean "\\TZPcommonlisp"))
-    (write-log :separation-newline)
-    (write-log "! Document ")
-    (write-log *main-tex-file*)
-    (write-log " appears to require Scheme version of TeX2page.")))
+  (let ((cl-p (not 'nil))
+        (doc-expects-cl-p (tex2page-flag-boolean "\\TZPcommonlisp")))
+    (unless (eql cl-p doc-expects-cl-p)
+      (write-log :separation-newline)
+      (write-log "! Document ")
+      (write-log *main-tex-file*)
+      (write-log " appears to require ")
+      (write-log (if doc-expects-cl-p "Common Lisp" "Scheme"))
+      (write-log " version of TeX2page."))))
 
 (defun do-start ()
   (check-tex2page-lisp)
@@ -4903,7 +4905,6 @@
          ((#\p #\P) (ps-to-img/png/netpbm ps-file img-file))
          ((#\j #\J) (ps-to-img/jpeg/netpbm ps-file img-file))
          (t (ps-to-img/gif/netpbm ps-file img-file))))))
-
 
 (defun tex-to-img (f)
   (incf *img-file-tally*)
@@ -7675,7 +7676,11 @@
       (write-log :separation-newline))
     (let ((eval4tex-aux-file (concatenate 'string *jobname* ".eval4tex")))
       (when (probe-file eval4tex-aux-file)
-        (load eval4tex-aux-file)))
+        (let ((load-it (with-open-file (i eval4tex-aux-file)
+                         (let ((x (read i nil nil)))
+                           (and x (eq (car x) 'defun))))))
+          (when load-it
+            (load eval4tex-aux-file)))))
     (mapc
      (lambda (f)
          (when (probe-file f)

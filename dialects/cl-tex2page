@@ -1,4 +1,4 @@
-; last change: 2016-12-14
+; last change: 2016-12-18
 
 ;works with CLISP, Clozure CL, CMU CL, ECL, SBCL; but scmxlate
 ;translation to CL is mostly for verification (of scmxlate?) these days.
@@ -28,6 +28,16 @@
 #+ecl
 (scmxlate-insert
   "\":\";exec ecl "
+  "-eval '(defvar arg-one \"'$1'\")' "
+  "-load $0 "
+  "-eval '(tex2page:tex2page arg-one)' "
+  "-eval '(quit)'"
+  "
+  ")
+
+#+mkcl
+(scmxlate-insert
+  "\":\";exec mkcl "
   "-eval '(defvar arg-one \"'$1'\")' "
   "-load $0 "
   "-eval '(tex2page:tex2page arg-one)' "
@@ -100,6 +110,7 @@
    #+clozure :ccl
    #+cmu :ext
    #+ecl :si
+   #+mkcl :mkcl
    #+sbcl :sb-ext
    )
   (:export :tex2page))

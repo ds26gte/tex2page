@@ -1,26 +1,27 @@
-; last change 2015-07-01
-abcl ;v 1.4.0; WORKS!
+; last change 2016-12-17
+abcl ;v 1.5; WORKS!
 allegro ;v 9.0; WORKS!
 bigloo
 chez ;works for petite, so...
 chicken ;v 4.8.2; WORKS!
 clisp ;v 2.49; WORKS!
-clozure ;v 1.10; WORKS!
+clozure ;v 1.11; WORKS!
 cmucl ;v 20d; WORKS!
-ecl ;v 13.5.1; WORKS!
+ecl ;v 16.1.2; WORKS!
 gambit ;v 4.4.2; WORKS!
-gauche ;v 0.9.1; WORKS!
+gauche ;v 0.9.4; WORKS!
 guile ;v 2.0.11; WORKS!
 ;ikarus
 kawa ;not much success, but no recent tries: stack seems to blow fairly easily
 ;larceny
 mitscheme
+mkcl ;v 1.1.10; WORKS!
 petite ;v 8.4; WORKS!
 plt ;lib version for PLT: not quite yet
 pscheme
-racket ;v 6.2.0.5; WORKS!
+racket ;v 6.6; WORKS!
 ;rscheme
-sbcl ;v 1.2.13; WORKS!
+sbcl ;v 1.3.12; WORKS!
 scheme48
 scm ;v 5e5; WORKS!
 scsh

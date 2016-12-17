@@ -1,4 +1,4 @@
-#last modified 2016-12-07
+#last modified 2016-12-18
 
 lf=$1
 
@@ -6,12 +6,15 @@ sf=${lf%.lisp}.scm
 
 cp $lf $sf
 
+sed -i -e 's/\\t"/\\VERBATIMt"/g' $sf
 sed -i -e 's/\bt\b/#t/g' $sf
 sed -i -e 's/"#t"/"t"/g' $sf
 sed -i -e 's/(#t /(else /' $sf
+sed -i -e 's/VERBATIMt/t/' $sf
 sed -i -e "s/:\b/':/g" $sf
-sed -i -e "s/'nil\b/#t/g" $sf
+sed -i -e "s/'nil/VERBATIMquotenil/g" $sf
 sed -i -e 's/\bnil\b/#f/g' $sf
+sed -i -e "s/VERBATIMquotenil/'nil/g" $sf
 sed -i -e "s/#'//g" $sf
 sed -i -e 's/\beql\b/eqv?/g' $sf
 sed -i -e 's/\bnull\b/null?/g' $sf

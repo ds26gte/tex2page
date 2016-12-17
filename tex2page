@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161217") ;last change
+(define *tex2page-version* "20161218") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -4985,13 +4985,16 @@
       (emit *redirect-url*)
       (emit-link-stop))))
 
-(define check-tex2page-lisp
-  (lambda ()
-    (when (tex2page-flag-boolean "\\TZPcommonlisp")
-      (write-log ':separation-newline)
+(define (check-tex2page-lisp)
+  (let ((cl-p (not 'nil))
+        (doc-expects-cl-p (tex2page-flag-boolean "\\TZPcommonlisp")))
+    (unless (eqv? cl-p doc-expects-cl-p)
+      (write-log :separation-newline)
       (write-log "! Document ")
       (write-log *main-tex-file*)
-      (write-log " appears to require Common Lisp version of TeX2page."))))
+      (write-log " appears to require ")
+      (write-log (if doc-expects-cl-p "Common Lisp" "Scheme"))
+      (write-log " version of TeX2page."))))
 
 (define do-start
   (lambda ()
@@ -7001,7 +7004,7 @@
   (tex-gdef-0arg "\\TZPredirectseconds" "0")
   (tex-gdef-0arg "\\TZPtextext" "1")
   (tex-gdef-0arg "\\TZPraggedright" "1")
-  (tex-gdef-0arg "\\TZPcommonlisp" (if #t "0" "1"))
+  (tex-gdef-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))
     ;#endinclude globdefs.scm
 
     (initialize-scm-words)
@@ -9340,7 +9343,14 @@
       ;eval4tex
       (let ((eval4tex-aux-file (string-append *jobname* ".eval4tex")))
         (when (file-exists? eval4tex-aux-file)
-          (load eval4tex-aux-file)))
+          (let ((load-it (call-with-input-file eval4tex-aux-file
+                           (lambda (i)
+                             (let ((x (read i)))
+                               (and (not (eof-object? x))
+                                    (pair? x)
+                                    (eq? (car x) (if 'nil 'define 'defun))))))))
+            (when load-it
+              (load eval4tex-aux-file)))))
       ;metapost
       (for-each
         (lambda (f)
@@ -10993,7 +11003,7 @@ Try the commands
 (tex-def-prim "\\subsubsection" (lambda () (do-heading 3)))
 (tex-def-prim "\\symfootnote" do-symfootnote)
 
-(tex-def-prim "\\#t" (lambda () (do-diacritic ':tieafter)))
+(tex-def-prim "\\t" (lambda () (do-diacritic ':tieafter)))
 (tex-def-prim "\\tabbing" do-tabbing)
 (tex-def-prim "\\table" (lambda () (do-table/figure ':table)))
 (tex-def-prim "\\tableplain" do-table-plain)

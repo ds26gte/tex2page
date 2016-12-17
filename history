@@ -1,6 +1,8 @@
-Last change 2016-12-17
+Last change 2016-12-18
 
 2016 Dec 17
+
+Added support for ManKai Common Lisp.
 
 Added \pagecolor. Cleaned up color code.
 
@@ -19,11 +21,7 @@ altogether. TeX continues to generate subfiles via jobname.eval4tex, and these
 can continue to be processed by loading jobname.eval4tex in Scheme or Common
 Lisp.
 
-As a convenience, have TeX2page process jobname.eval4tex if it finds it. As a
-further convenience, add just enough Scheme recognition to tex2page.lisp so
-that it can process jobname.eval4tex even when TeX creates a Scheme version of
-it. Of course, this assumes that the \eval content is written in a
-dialect-agnostic way (which is fairly easy to do).
+As a convenience, have TeX2page process jobname.eval4tex if it finds it. 
 
 This should make the confusing extra machinery of \htmlonly (on top of things
 like \ifx\shipout) obsolete. \htmlonly was really only being used to avoid

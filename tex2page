@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161215") ;last change
+(define *tex2page-version* "20161217") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -6130,7 +6130,6 @@
 
 (define ps-to-img
   (lambda (ps-file img-file)
-    (printf "doing ps-to-img ~s ~s~%" ps-file img-file)
     (case (tex2page-flag-value "\\TZPimageconverter")
       ((#\i #\I)
        (system

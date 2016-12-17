@@ -1,4 +1,4 @@
-; last change: 2009-04-11
+; last change: 2016-12-17
 
 (scmxlate-cond
   ((eqv? *operating-system* 'unix)
@@ -19,6 +19,7 @@
 
 (scmxlate-rename
   (seconds->date sys-localtime)
+  (load disable-load-for-tex2page)
   )
 
 (scmxlate-rename-define
@@ -28,6 +29,8 @@
   (nreverse reverse!)
   (nconc append!)
   )
+
+(define (disable-load-for-tex2page f) #f)
 
 (define file-or-directory-modify-seconds
   (lambda (f)

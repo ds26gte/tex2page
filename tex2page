@@ -6313,8 +6313,8 @@
                         (display #\] o))
                       (display #\{ o)
                       (display f o)
-                      (display #\} o))))
-                (source-img-file img-file-stem)))))))
+                      (display #\} o)))
+                  (source-img-file img-file-stem))))))))
 
 (define do-xetexpdffile
   (lambda ()
@@ -9978,7 +9978,7 @@
 (define !stylesheet
   (lambda (css)
     (cond ((or (fully-qualified-url? css)
-               (file-exists? (ensure-url-reachable css))f)
+               (file-exists? (ensure-url-reachable css)))
            (set! *stylesheets* (cons css *stylesheets*)))
           (else (write-log "! Can't find stylesheet ")
                 (write-log css)

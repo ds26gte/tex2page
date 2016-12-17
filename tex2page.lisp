@@ -28,7 +28,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161215" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161217" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -2309,12 +2309,14 @@
       (emit "</div>")
       (emit-newline))))
 
+;color
+
 (let ((f (lambda (x)
            (let* ((n  (round (* 1.0 x)))
                   (s (write-to-string n :base 16)))
              (if (< n 16) (concatenate 'string "0" s) s)))))
   (defun rgb-dec-to-rrggbb (r g b)
-    (concatenate 'string (funcall f r) (funcall f g) (funcall f b))))
+    (concatenate 'string "#" (funcall f r) (funcall f g) (funcall f b))))
 
 (defun rgb-frac-to-rrggbb (r g b)
   (rgb-dec-to-rrggbb (* r 255) (* g 255) (* b 255)))
@@ -2358,22 +2360,137 @@
                 (t 0))))
     (hsb-to-rrggbb hue 1 brightness)))
 
+(defun read-color-as-rrggbb (model)
+  (case model
+    (:cmy (bgroup)
+          (with-input-from-string
+            (i (tex-string-to-html-string
+                 (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+            (egroup)
+            (let* ((c (read i nil :eof-object))
+                   (m (read i nil :eof-object))
+                   (y (read i nil :eof-object)))
+              (ignorespaces)
+              (rgb-frac-to-rrggbb (- 1 c) (- 1 m) (- 1 y)))))
+    (:cmyk (bgroup)
+          (with-input-from-string
+            (i (tex-string-to-html-string
+                 (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+            (egroup)
+            (let* ((c (read i nil :eof-object))
+                   (m (read i nil :eof-object))
+                   (y (read i nil :eof-object))
+                   (k (read i nil :eof-object)))
+              (ignorespaces)
+              (cmyk-to-rrggbb c m y k))))
+    (:rgb (bgroup)
+          (with-input-from-string
+            (i (tex-string-to-html-string
+                 (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+            (egroup)
+            (let* ((r (read i nil :eof-object))
+                   (g (read i nil :eof-object))
+                   (b (read i nil :eof-object)))
+              (ignorespaces)
+              (rgb-frac-to-rrggbb r g b))))
+    (:rgb255
+      (bgroup)
+      (with-input-from-string
+        (i (tex-string-to-html-string
+             (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+        (egroup)
+        (let* ((r (read i nil :eof-object))
+               (g (read i nil :eof-object))
+               (b (read i nil :eof-object)))
+          (ignorespaces)
+          (rgb-dec-to-rrggbb r g b))))
+    (:gray
+      (with-input-from-string (i (tex-string-to-html-string (get-token)))
+        (let ((g (read i nil :eof-object)))
+          (ignorespaces)
+          (cmyk-to-rrggbb 0 0 0 (- 1 g)))))
+    (:gray15
+      (with-input-from-string (i (tex-string-to-html-string (get-token)))
+        (let ((g (read i nil :eof-object)))
+          (ignorespaces)
+          (cmyk-to-rrggbb 0 0 0 (- 1 (/ g 15))))))
+    (:html
+      (with-input-from-string (i (tex-string-to-html-string (get-token)))
+        (let ((rrggbb (format nil "~6,'0x"
+                              (let ((*read-base* 16))
+                                (read i nil :eof-object)))))
+          (ignorespaces)
+          rrggbb)))
+    (:hsb
+      (bgroup)
+      (with-input-from-string (i (tex-string-to-html-string
+                                   (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+        (egroup)
+        (let* ((h (read i nil :eof-object))
+               (s (read i nil :eof-object))
+               (b (read i nil :eof-object)))
+          (ignorespaces)
+          (hsb-to-rrggbb h s b))))
+    (:hsb360
+      (bgroup)
+      (with-input-from-string (i (tex-string-to-html-string
+                                   (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+        (egroup)
+        (let* ((h (read i nil :eof-object))
+               (s (read i nil :eof-object))
+               (b (read i nil :eof-object)))
+          (ignorespaces)
+          (hsb-to-rrggbb (/ h 360) s b))))
+    (:hsb240
+      (bgroup)
+      (with-input-from-string (i (tex-string-to-html-string
+                                   (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+        (egroup)
+        (let* ((h (read i nil :eof-object))
+               (s (read i nil :eof-object))
+               (b (read i nil :eof-object)))
+          (ignorespaces)
+          (hsb-to-rrggbb (/ h 240) (/ s 240) (/ b 240)))))
+    (:wave
+      (with-input-from-string (i (tex-string-to-html-string (get-token)))
+        (let ((w (read i nil :eof-object)))
+          (ignorespaces)
+          (emit (wavelength-to-rrggbb w)))))
+    (t (let* ((name (get-peeled-group))
+              (c (assoc name *color-names* :test #'string=)))
+         (ignorespaces)
+         (if c (cdr c) name)))))
+
+
+(defun color-model-to-keyword (model)
+  (cond ((not model) :colornamed)
+        ((string= model "rgb") :rgb)
+        ((string= model "RGB") :rgb255)
+        ((string= model "cmyk") :cmyk)
+        ((string= model "cmy") :cmy)
+        ((string= model "gray") :gray)
+        ((string= model "Gray") :gray15)
+        ((string= model "HTML") :html)
+        ((string= model "hsb") :hsb)
+        ((string= model "Hsb") :hsb360)
+        ((string= model "HSB") :hsb240)
+        ((string= model "wave") :wave)
+        (t :colornamed)))
+
+
 (defun do-color ()
-  (let ((model (get-bracketed-text-if-any)))
-    (do-switch
-     (cond ((not model) :colornamed)
-           ((string= model "rgb") :rgb)
-           ((string= model "RGB") :rgb255)
-           ((string= model "cmyk") :cmyk)
-           ((string= model "cmy") :cmy)
-           ((string= model "gray") :gray)
-           ((string= model "Gray") :gray15)
-           ((string= model "HTML") :html)
-           ((string= model "hsb") :hsb)
-           ((string= model "Hsb") :hsb360)
-           ((string= model "HSB") :hsb240)
-           ((string= model "wave") :wave)
-           (t :colornamed)))))
+  (let ((model (color-model-to-keyword (get-bracketed-text-if-any))))
+    (do-switch model)))
+
+(defun do-pagecolor ()
+  (let* ((model (color-model-to-keyword (get-bracketed-text-if-any)))
+         (color (read-color-as-rrggbb model)))
+    (princ "body { background-color: " *css-port*)
+    (princ color *css-port*)
+    (princ "; }" *css-port*)
+    (terpri *css-port*)))
+
+
 
 (defun do-colorbox ()
   (let* ((color (get-group))
@@ -2386,47 +2503,10 @@
 
 (defun do-definecolor ()
   (let* ((name (get-peeled-group))
-         (model (get-peeled-group))
-         (spec (get-peeled-group)))
-    (bgroup)
-    (push (cons name
-                (if (string= model "named")
-                    (let ((c (assoc name *color-names* :test #'string=)))
-                      (if c (cdr c)
-                        (terror 'do-definecolor "Color name " name
-                                " not defined")))
-                  (with-input-from-string
-                      (i
-                       (tex-string-to-html-string
-                        (concatenate 'string "\\defcsactive\\,{ }"
-                          spec)))
-                    (cond ((string= model "cmyk")
-                           (let* ((c (read i nil :eof-object))
-                                  (m (read i nil :eof-object))
-                                  (y (read i nil :eof-object))
-                                  (k (read i nil :eof-object)))
-                             (cmyk-to-rrggbb c m y k)))
-                          ((string= model "rgb")
-                           (let* ((r (read i nil :eof-object))
-                                  (g (read i nil :eof-object))
-                                  (b (read i nil :eof-object)))
-                             (rgb-frac-to-rrggbb r g b)))
-                          ((string= model "RGB")
-                           (let* ((r (read i nil :eof-object))
-                                  (g (read i nil :eof-object))
-                                  (b (read i nil :eof-object)))
-                             (rgb-dec-to-rrggbb r g b)))
-                          ((string= model "gray")
-                           (cmyk-to-rrggbb 0 0 0 (read i nil :eof-object)))
-                          ((string= model "HTML")
-                           (format nil "~6,'0x"
-                                   (let ((*read-base* 16))
-                                     (read i nil :eof-object))))
-                          (t
-                           (terror 'do-definecolor
-                                   "Unknown color model"))))))
-          *color-names*)
-    (egroup)))
+         (model (color-model-to-keyword (get-peeled-group))))
+    (push (cons name (read-color-as-rrggbb model))
+          *color-names*)))
+
 
 (defun do-switch (sw)
   (unless *outputting-external-title-p*
@@ -2489,155 +2569,17 @@
        (:huge-cap
         (emit "<span class=hugecap>")
         (lambda () (emit "</span>")))
-       (:cmyk
-        (bgroup)
-        (with-input-from-string
-            (i
-             (tex-string-to-html-string
-              (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
-          (let* ((c (read i nil :eof-object))
-                 (m (read i nil :eof-object))
-                 (y (read i nil :eof-object))
-                 (k (read i nil :eof-object)))
-            (ignorespaces)
-            (emit "<span style=\"color: #")
-            (emit (cmyk-to-rrggbb c m y k))
-            (emit "\">")))
-        (egroup)
-        (lambda () (emit "</span>")))
-       (:cmy
-         (bgroup)
-         (with-input-from-string
-           (i
-             (tex-string-to-html-string
-               (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
-           (let* ((c (read i nil :eof-object))
-                  (m (read i nil :eof-object))
-                  (y (read i nil :eof-object)))
-             (ignorespaces)
-             (emit "<span style=\"color: #")
-             (emit (rgb-frac-to-rrggbb (- 1 c) (- 1 m) (- 1 y)))
-             (emit "\">")))
-         (egroup)
+       ((:cmy :cmyk :rgb :rgb255 :gray :gray15 :html :hsb :hsb360 :hsb240 :wave :colornamed)
+         (emit "<span style=\"color: ")
+         (emit (read-color-as-rrggbb sw))
+         (emit "\">")
          (lambda () (emit "</span>")))
-       (:rgb
-        (bgroup)
-        (with-input-from-string
-            (i
-             (tex-string-to-html-string
-              (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
-          (let* ((r (read i nil :eof-object))
-                 (g (read i nil :eof-object))
-                 (b (read i nil :eof-object)))
-            (ignorespaces)
-            (emit "<span style=\"color: #")
-            (emit (rgb-frac-to-rrggbb r g b))
-            (emit "\">")))
-        (egroup)
-        (lambda () (emit "</span>")))
-       (:rgb255
-        (bgroup)
-        (with-input-from-string
-            (i
-             (tex-string-to-html-string
-              (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
-          (let* ((r (read i nil :eof-object))
-                 (g (read i nil :eof-object))
-                 (b (read i nil :eof-object)))
-            (ignorespaces)
-            (emit "<span style=\"color: #")
-            (emit (rgb-dec-to-rrggbb r g b))
-            (emit "\">")))
-        (egroup)
-        (lambda () (emit "</span>")))
-       (:gray
-        (with-input-from-string (i (tex-string-to-html-string (get-token)))
-          (let ((g (read i nil :eof-object)))
-            (ignorespaces)
-            (emit "<span style=\"color: #")
-            (emit (cmyk-to-rrggbb 0 0 0 (- 1 g)))
-            (emit "\">")))
-        (lambda () (emit "</span>")))
-       (:gray15
-         (with-input-from-string (i (tex-string-to-html-string (get-token)))
-           (let ((g (read i nil :eof-object)))
-             (ignorespaces)
-             (emit "<span style=\"color: #")
-             (emit (cmyk-to-rrggbb 0 0 0 (- 1 (/ g 15))))
-             (emit "\">"))))
-       (:html
-         (with-input-from-string (i (tex-string-to-html-string (get-token)))
-           (let ((rrggbb (format nil "~6,'0x"
-                                 (let ((*read-base* 16))
-                                   (read i nil :eof-object)))))
-             (ignorespaces)
-             (emit "<span style=\"color: #")
-             (emit rrggbb)
-             (emit "\">")))
-         (lambda () (emit "</span>")))
-       (:hsb
-         (bgroup)
-         (with-input-from-string (i (tex-string-to-html-string
-                                      (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
-           (let* ((h (read i nil :eof-object))
-                  (s (read i nil :eof-object))
-                  (b (read i nil :eof-object)))
-             (ignorespaces)
-             (emit "<span style=\"color: #")
-             (emit (hsb-to-rrggbb h s b))
-             (emit "\">")))
-         (egroup)
-         (lambda () (emit "</span>")))
-       (:hsb360
-         (bgroup)
-         (with-input-from-string (i (tex-string-to-html-string
-                                      (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
-           (let* ((h (read i nil :eof-object))
-                  (s (read i nil :eof-object))
-                  (b (read i nil :eof-object)))
-             (ignorespaces)
-             (emit "<span style=\"color: #")
-             (emit (hsb-to-rrggbb (/ h 360) s b))
-             (emit "\">")))
-         (egroup)
-         (lambda () (emit "</span>")))
-       (:hsb240
-         (bgroup)
-         (with-input-from-string (i (tex-string-to-html-string
-                                      (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
-           (let* ((h (read i nil :eof-object))
-                  (s (read i nil :eof-object))
-                  (b (read i nil :eof-object)))
-             (ignorespaces)
-             (emit "<span style=\"color: #")
-             (emit (hsb-to-rrggbb (/ h 240) (/ s 240) (/ b 240)))
-             (emit "\">")))
-         (egroup)
-         (lambda () (emit "</span>")))
-       (:wave
-         (with-input-from-string (i (tex-string-to-html-string (get-token)))
-           (let ((w (read i nil :eof-object)))
-             (ignorespaces)
-             (emit "<span style=\"color: #")
-             (emit (wavelength-to-rrggbb w))
-             (emit "\">")))
-         (lambda () (emit "</span>")))
-       (:colornamed
-        (let* ((name (get-peeled-group))
-               (c (assoc name *color-names* :test #'string=)))
-          (ignorespaces)
-          (emit "<span style=\"color: ")
-          (emit (if c (progn (emit #\#) (cdr c)) name))
-          (emit "\">")
-          (lambda () (emit "</span>"))))
        (:bgcolor
-        (emit "<span style=\"background-color: ")
-        (let ((color (ungroup (get-group))))
-          (when (string-to-number color 16)
-            (emit "#"))
-          (emit color)
-          (emit "\">")
-          (lambda () (emit "</span>"))))
+         (emit "<span style=\"background-color: ")
+         (let ((model (color-model-to-keyword (get-bracketed-text-if-any))))
+           (emit (read-color-as-rrggbb model)))
+         (emit "<\">")
+         (lambda () (emit "</span>")))
        (:strike (emit "<strike>") (lambda () (emit "</strike>")))
        (:narrower (emit "<blockquote>") (lambda () (emit "</blockquote>")))
        (:raggedleft
@@ -2652,6 +2594,7 @@
         (emit sw)
         (emit ">")
         (lambda () (emit "</span>")))))))
+
 
 (defun do-obeylines ()
   (when (eql (snoop-actual-char) #\Newline) (get-actual-char))
@@ -4961,7 +4904,6 @@
          ((#\j #\J) (ps-to-img/jpeg/netpbm ps-file img-file))
          (t (ps-to-img/gif/netpbm ps-file img-file))))))
 
-(trace ps-to-img)
 
 (defun tex-to-img (f)
   (incf *img-file-tally*)
@@ -9185,6 +9127,7 @@ Try the commands
 
 (tex-def-prim "\\pagebreak"
  (lambda () (get-bracketed-text-if-any) (do-eject)))
+(tex-def-prim "\\pagecolor" #'do-pagecolor)
 (tex-def-prim "\\pageno" (lambda () (emit *html-page-count*)))
 (tex-def-prim "\\pageref" #'do-pageref)
 (tex-def-prim "\\paragraph" (lambda () (do-heading 4)))

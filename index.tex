@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-17} %last change
+\c{2016-12-18} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1130,7 +1130,7 @@ behaves differently than a \LaTeX-like `\ref`.}
 \index{definecolor@`\definecolor`}
 \index{color.sty@`color.sty`}
 \TeX2page recognizes the macros `\color`, `\colorbox`, and
-`\definecolor`~\cite{latex-graphicx}.  These are provided by the \LaTeX\
+`\definecolor`~\cite{grfguide}.  These are provided by the \LaTeX\
 package `color.sty`, which can also be loaded into
 plain \TeX\ (after loading `miniltx`).  E.g.,
 
@@ -1739,34 +1739,36 @@ In this case, you also have to ensure that the fonts you use in \XeTeX\ do not h
 \index{MozPoint}
 \index{presentations}
 %
-To cause your source to be converted into slideshow-ready HTML pages,
+To produce a Web presentation,
 set the flag `\TZPslides`:
 \begintt
 \let\TZPslides=1
 \endtt
 %
-This causes \TeX2page to use the macro file
-`t2pslides.tex`, which uses the process described in
-the MozPoint~\cite{mozpoint} library
-to convert your sequence of HTML
-pages into a Web presentation.  `t2pslides.tex` is included in the
-\TeX2page distribution, and must be placed
-somewhere in `TEXINPUTS` or `TEX2PAGEINPUTS`.  It has no
-effect on the DVI version of the document.
+This causes \TeX2page to use the style sheet `slidy.css` and JavaScript file
+`slidy.js`
+from Slidy~\cite{slidy} to convert your document into a single
+HTML page containing slides.  \TeX2page looks for these files in
+the working directory, and if they’re not found there, it links
+them from the W3C website. It may be prudent to get these files
+beforehand and place them in your working directory, so the
+presentation doesn’t need WiFi.
 
-HTML pages meant for presentation use larger, bolder fonts, and
-avoid navigation bars.  The following table describes the keys used to
-control the presentation:
+A new slide is started for each
+“chapter” and “section”, i.e., `\beginchapter`, `\chapter`,
+`\beginsection` and `\section`. (Note of course
+that it doesn't make sense to convert generic \TeX\ documents
+into presentations. The sections have got to be pretty short!)
 
-To bring up the next slide, (left-)click the mouse
-anywhere  on the screen, or press the space bar, `n`, right or down
-arrow.  To go back to the previous slide, right-click the
-mouse, or press `p`, left or up arrow.
-To go immediately to the first (i.e., title) slide, press `t` or `0`.  To go
-immediately to the $n$th slide after the title slide, type $n$.  If $n$ has
-two or more digits, they should be pressed fairly rapidly so that they are
-interpreted together.  To blank the screen, press `b`
-(black) or `w` (white); to unblank, press the same key again.
+An HTML page meant for presentation uses larger, bolder fonts by
+default (but you can add your own CSS). There are no navigation
+bars between slides.
+Furthermore, enumerated and itemized lists (`\enumerate`
+and `\itemize`) display their items incrementally.
+
+Consult the Slidy documentation for the keys and clicks you can use
+to progress through or dynamically alter the look of your
+presentation.
 
 \beginsection Page redirection
 
@@ -3512,6 +3514,7 @@ Set `LISP` to
 `clozure` for Clozure~\cite{clozure},
 `cmucl` for CMUCL~\cite{cmucl},
 `ecl` for ECL~\cite{ecl},
+`mkcl` for MKCL~\cite{mkcl},
 and `sbcl` for SBCL~\cite{sbcl}.
 
 The top few lines in `tex2page.lisp` contain the lines

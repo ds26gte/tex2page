@@ -120,7 +120,7 @@ at the TeX prompt to force TeX to continue.
 The multiple runs of TeX are needed to resolve cross-references.
 
 If the MetaPost executable is named `mp` on your system (e.g.,
-MiKTeX), change `mpost` to `mp`.
+MiKTeX), use `mp` instead of `mpost`.
 
 To get an HTML version of the document, run
 

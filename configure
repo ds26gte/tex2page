@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Last modified: 2016-04-26
+# Last modified: 2016-12-18
 
 # Set scmxlate to the pathname of scmxlate/scmxlate.scm
 # on your system, if you know it.  Otherwise let
@@ -51,7 +51,7 @@ adieu() {
 
 makeit() {
   case "$dialect" in
-    abcl|allegro|clisp|clozure|cmucl|ecl|sbcl)
+    abcl|allegro|clisp|clozure|cmucl|ecl|mkcl|sbcl)
     :;;
     *)
     findscmxlate;;
@@ -67,7 +67,7 @@ makeit() {
     echo Resulting file is \'my-tex2page\'.
     echo You may want to rename it.;;
 
-    abcl|allegro|clisp|clozure|cmucl|ecl)
+    abcl|allegro|clisp|clozure|cmucl|ecl|mkcl)
     echo \":\"\; export LISP=$dialect > my-tex2page
     cat tex2page.lisp >> my-tex2page
     chmod +x my-tex2page
@@ -130,6 +130,8 @@ echodialectsuggestions() {
   eclpresent=yes
   test "`which guile 2>/dev/null|grep -v ' '`"  &&\
   guilepresent=yes
+  test "`which mkcl 2>/dev/null|grep -v ' '`" &&\
+  mkclpresent=yes
   test "`which sbcl 2>/dev/null|grep -v ' '`"  &&\
   sbclpresent=yes
   if test "$clisppresent" -o "$eclpresent" -o "$guilepresent"
@@ -141,6 +143,8 @@ echodialectsuggestions() {
     echo \ \ ./configure --dialect=guile
     test "$eclpresent" &&\
     echo \ \ ./configure --dialect=ecl
+    test "$mkclpresent" &&\
+    echo \ \ ./configure --dialect=mkcl
     test "$clisppresent" &&\
     echo \ \ ./configure --dialect=clisp
     test "$sbclpresent" &&\

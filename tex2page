@@ -302,6 +302,7 @@
 (define *scm-keywords* #f)
 
 (define *scm-variables* #f)
+(define *scripts* #f)
 (define *section-counters* #f)
 (define *section-counter-dependencies* #f)
 ;(define *slatex-like-comments-p* #f)
@@ -2241,6 +2242,15 @@
       (for-each link-it *stylesheets*)
       (link-it (string-append *jobname* *css-file-suffix*)))))
 
+(define (link-scripts)
+  (let ((link-it (lambda (jsf)
+                   (emit "<script src=\"")
+                   (emit jsf)
+                   (emit "\"></script>")
+                   (emit-newline))))
+    (for-each link-it *scripts*)))
+
+
 ;sections
 
 (define increment-section-counter
@@ -2338,6 +2348,8 @@
              (do-eject))
             (else (tex-gdef-0arg "\\TIIPtitleused" "1")
                   (do-para))))
+    (when (and (= seclvl 1) (tex2page-flag-boolean "\\TZPslides"))
+      (do-eject))
     (increment-section-counter seclvl nonum?)
     (when lbl-val (set! nonum? #f))
     (unless lbl-val
@@ -3964,6 +3976,9 @@
       (when (memv ':stylesheets *missing-pieces*)
         (write-log "Style sheets not determined")
         (write-log ':separation-newline))
+      (when (member ':scripts *missing-pieces*)
+        (write-log "Scripts not determined")
+        (write-log ':separation-newline))
       (when (memv ':html-head *missing-pieces*)
         (write-log "HTML header info not determined")
         (write-log ':separation-newline))
@@ -4040,7 +4055,7 @@
                      "#"
                      (label.name label-ref))
                     url)))
-            ((fully-qualified-url? url) url)
+            ((fully-qualified-url-p url) url)
             (else (ensure-url-reachable url)
               url)))))
 
@@ -4610,18 +4625,33 @@
         ((:itemize :enumerate) (do-regular-item))
         (else (do-plain-item 1))))))
 
-(define do-itemize
-  (lambda ()
-    (do-end-para)
-    (set! *tabular-stack* (cons ':itemize *tabular-stack*))
-    (emit "<ul>")))
+(define (do-itemize)
+  (do-end-para)
+  (set! *tabular-stack* (cons ':itemize *tabular-stack*))
+  (emit "<ul")
+  (when (tex2page-flag-boolean "\\TZPslides")
+    (emit " class=incremental"))
+  (emit ">"))
 
-(define do-enditemize
-  (lambda ()
+(define (do-enditemize)
     (do-end-para)
     (pop-tabular-stack ':itemize)
     (emit "</ul>")
-    (do-noindent)))
+    (do-noindent))
+
+(define (do-enumerate)
+  (do-end-para)
+  (set! *tabular-stack* (cons ':enumerate *tabular-stack*))
+  (emit "<ol")
+  (when (tex2page-flag-boolean "\\TZPslides")
+    (emit " class=incremental"))
+  (emit ">"))
+
+(define (do-endenumerate)
+  (pop-tabular-stack ':enumerate)
+  (do-end-para)
+  (emit "</ol>")
+  (do-noindent))
 
 (define do-opmac-list-style
   (lambda ()
@@ -4907,66 +4937,71 @@
         (emit *navigation-sentence-end*)
         (emit "]")))))
 
-(define do-eject
-  (lambda ()
-    (unless (tex2page-flag-boolean "\\TZPsinglepage")
-      (unless (and (eof-object? (snoop-actual-char))
-                   (eqv? *current-source-file* *main-tex-file*))
-        ;kludge: don't start a new page if \eject is the
-        ;last thing in the main file.  This is mostly
-        ;to placate story.tex, which although horrid as an
-        ;example file, happens to be viewed as canonical by
-        ;everyone looking at TeX
-        ;
-        (unless (> *last-page-number* 0) ;???
-          (flag-missing-piece ':last-modification-time))
-        (do-end-page)
-        ;
-        (set! *html-page-count* (+ *html-page-count* 1))
-        (set! *html-page*
-          (string-append *aux-dir/*
-                         *jobname* *html-page-suffix*
-                         (number->string *html-page-count*)
-                         *output-extension*))
-        (ensure-file-deleted *html-page*)
-        (set! *html* (open-output-file *html-page*))
-        (do-start)))))
+(define (do-eject)
+  (cond ((tex2page-flag-boolean "\\TZPslides")
+         (do-end-para) 
+         (emit "</div>")
+         (emit-newline)
+         (emit "<div class=slide>")
+         (do-para))
+        ((tex2page-flag-boolean "\\TZPsinglepage") #t)
+        (else
+          (unless (and (eof-object? (snoop-actual-char))
+                       (eqv? *current-source-file* *main-tex-file*))
+            ;kludge: don't start a new page if \eject is the
+            ;last thing in the main file.  This is mostly
+            ;to placate story.tex, which although horrid as an
+            ;example file, happens to be viewed as canonical by
+            ;everyone looking at TeX
+            ;
+            (unless (> *last-page-number* 0) ;???
+              (flag-missing-piece ':last-modification-time))
+            (do-end-page)
+            ;
+            (set! *html-page-count* (+ *html-page-count* 1))
+            (set! *html-page*
+              (string-append *aux-dir/*
+                             *jobname* *html-page-suffix*
+                             (number->string *html-page-count*)
+                             *output-extension*))
+            (ensure-file-deleted *html-page*)
+            (set! *html* (open-output-file *html-page*))
+            (do-start)))))
 
-(define output-html-preamble
-  (lambda ()
-    (when (string? *doctype*)
-      (emit "<!DOCTYPE ")
-      (emit *doctype*)
-      (emit ">")
-      (emit-newline))
-    (emit "<html>") (emit-newline)
-    (emit "<!--") (emit-newline)
-    (emit "Generated from ")
-    (emit *main-tex-file*)
-    (emit " by tex2page, ")
-    (emit "v ") (emit *tex2page-version*) (emit-newline)
-    (emit "(running on ")
-    (emit *scheme-version*) (emit ", ")
-    (emit *operating-system*) (emit "), ") (emit-newline)
-    (emit "(c) Dorai Sitaram, ") (emit-newline)
-    (emit *tex2page-website*) (emit-newline)
-    (emit "-->") (emit-newline)
-    (emit "<head>") (emit-newline)
-    (emit "<meta charset=\"utf-8\">")
-    (emit-newline)
-    (output-external-title)
-    (link-stylesheets)
-    (emit "<meta name=robots content=\"index,follow\">")
-    (emit-newline)
-    (for-each emit *html-head*)
-    (emit "</head>") (emit-newline)
-    (emit "<body>") (emit-newline)
-    (emit "<div id=")
-    (emit (if (and (= *html-page-count* 0) *title*)
-              "slidetitle"
-              "slidecontent"))
-    (emit ">") (emit-newline)
-    ))
+(define (output-html-preamble)
+  (when (string? *doctype*)
+    (emit "<!DOCTYPE ")
+    (emit *doctype*)
+    (emit ">")
+    (emit-newline))
+  (emit "<html>") (emit-newline)
+  (emit "<!--") (emit-newline)
+  (emit "Generated from ")
+  (emit *main-tex-file*)
+  (emit " by tex2page, ")
+  (emit "v ") (emit *tex2page-version*) (emit-newline)
+  (emit "(running on ")
+  (emit *scheme-version*) (emit ", ")
+  (emit *operating-system*) (emit "), ") (emit-newline)
+  (emit "(c) Dorai Sitaram, ") (emit-newline)
+  (emit *tex2page-website*) (emit-newline)
+  (emit "-->") (emit-newline)
+  (emit "<head>") (emit-newline)
+  (emit "<meta charset=\"utf-8\">")
+  (emit-newline)
+  (output-external-title)
+  (link-stylesheets)
+  (link-scripts)
+  (emit "<meta name=robots content=\"index,follow\">")
+  (emit-newline)
+  (for-each emit *html-head*)
+  (emit "</head>") (emit-newline)
+  (emit "<body>") (emit-newline)
+  (emit "<div")
+  (when (tex2page-flag-boolean "\\TZPslides")
+    (emit " class=slide"))
+  (emit ">")
+  (emit-newline))
 
 (define output-html-postamble
   (lambda ()
@@ -5163,7 +5198,18 @@
                   (write-aux
                     `(!html-redirect ,url ,seconds))))))
     (when (tex2page-flag-boolean "\\TZPslides")
-      (tex2page-file (actual-tex-filename "t2pslides" #f)))
+      (write-aux '(!slides))
+      (write-aux '(!single-page))
+      (let ((slidy-css-file "slidy.css"))
+        (unless (file-exists? slidy-css-file)
+          (set! slidy-css-file "http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css"))
+        (when (null? *stylesheets*) (flag-missing-piece ':stylesheets))
+        (write-aux `(!stylesheet ,slidy-css-file)))
+      (let ((slidy-js-file "slidy.js"))
+        (unless (file-exists? slidy-js-file)
+          (set! slidy-js-file "http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"))
+        (when (null? *scripts*) (flag-missing-piece ':scripts))
+        (write-aux `(!script ,slidy-js-file))))
     (when (tex2page-flag-boolean "\\TZPsinglepage")
       (write-aux '(!single-page)))
     (when (tex2page-flag-boolean "\\TZPtexlayout")
@@ -5983,6 +6029,23 @@
     #t ; obsolete
     ))
 
+(define call-mp 
+  (let ((tex-prog-name #f))
+    (lambda (f)
+      (unless tex-prog-name
+        (set! tex-prog-name "tex")
+        #|
+        (let ((d (find-def "\\TZPtexprogname")))
+          (when d (set! tex-prog-name (tdef*-expansion d))))
+        (unless tex-prog-name (set! tex-prog-name "xetex"))
+        (when (eq? *tex-format* ':latex)
+          (set! tex-prog-name
+            (string-append (substring tex-prog-name 0
+                                      (- (string-length tex-prog-name) 3))
+                           "latex")))
+        |#)
+      (system (string-append *metapost* " -tex=" tex-prog-name " " f)))))
+
 (define call-tex
   (let ((tex-prog-name #f)
         (tex-output-format #f))
@@ -6391,7 +6454,7 @@
         (fluid-let ((*tex-format* ':plain))
           (call-tex tex-f)))
       (when (file-exists? mp-f)
-        (system (string-append *metapost* " " *mfpic-file-stem*))))))
+        (call-mp mp-f)))))
 
 (define do-mfpic
   (lambda ()
@@ -9359,8 +9422,7 @@
             (write-log "Running: metapost ")
             (write-log f)
             (write-log ':separation-newline)
-            (system
-              (string-append *metapost* " " f))))
+            (call-mp f)))
         *mp-files*)
       ;eps files
       (for-each
@@ -9859,6 +9921,17 @@
   (lambda ()
     (tex-def-0arg "\\TZPsinglepage" "1")))
 
+(define (!slides)
+  (tex-def-0arg "\\TZPslides" "1"))
+
+(define (!script jsf)
+  (cond ((or (fully-qualified-url-p jsf)
+             (file-exists? (ensure-url-reachable jsf)))
+         (set! *scripts* (cons jsf *scripts*)))
+        (else (write-log "! Can't find script ")
+              (write-log jsf)
+              (write-log ':separation-newline))))
+
 (define !using-chapters
   (lambda ()
     (set! *using-chapters-p* #t)))
@@ -9911,7 +9984,7 @@
 
 ;;
 
-(define fully-qualified-url?
+(define fully-qualified-url-p
   (lambda (u)
     (or (substring? "//" u) ;URL
         (char=? (string-ref u 0) #\/) ;website-dependent pathname
@@ -9931,7 +10004,7 @@
 
 (define ensure-url-reachable
   (lambda (f)
-    (if (and *aux-dir* (not (fully-qualified-url? f))
+    (if (and *aux-dir* (not (fully-qualified-url-p f))
                      ;but we don't want to try too hard here, so
              (not (substring? "/" f)))
         (let ((real-f (string-append *aux-dir/* f)))
@@ -9948,7 +10021,7 @@
 
 (define !stylesheet
   (lambda (css)
-    (cond ((or (fully-qualified-url? css)
+    (cond ((or (fully-qualified-url-p css)
                (file-exists? (ensure-url-reachable css)))
            (set! *stylesheets* (cons css *stylesheets*)))
           (else (write-log "! Can't find stylesheet ")
@@ -10011,7 +10084,9 @@
                         ((!last-page-number) !last-page-number)
                         ((!opmac-iis) !opmac-iis)
                         ((!preferred-title) !preferred-title)
+                        ((!script) !script)
                         ((!single-page) !single-page)
+                        ((!slides) !slides)
                         ((!stylesheet) !stylesheet)
                         ((!tex-like-layout) !tex-like-layout)
                         ((!tex-text) !tex-text)
@@ -10685,12 +10760,7 @@ Try the commands
      (do-noindent)))
 (tex-def-prim "\\endeqnarray" do-end-equation)
 (tex-def-prim "\\endequation" do-end-equation)
-(tex-def-prim "\\endenumerate"
- (lambda ()
-     (pop-tabular-stack ':enumerate)
-     (do-end-para)
-     (emit "</ol>")
-     (do-noindent)))
+(tex-def-prim "\\endenumerate" do-endenumerate)
 (tex-def-prim "\\endfigure" (lambda () (do-end-table/figure ':figure)))
 (tex-def-prim "\\endflushleft" do-end-block)
 (tex-def-prim "\\endflushright" do-end-block)
@@ -10714,11 +10784,7 @@ Try the commands
  (lambda () (emit "</table>") (egroup) (do-para)))
 (tex-def-prim "\\endverbatim" do-endverbatim-eplain)
 (tex-def-prim "\\enquote" do-enquote)
-(tex-def-prim "\\enumerate"
-  (lambda ()
-    (do-end-para)
-    (set! *tabular-stack* (cons ':enumerate *tabular-stack*))
-    (emit "<ol>")))
+(tex-def-prim "\\enumerate" do-enumerate)
 (tex-def-prim "\\epsfbox" do-epsfbox)
 (tex-def-prim "\\epsfig" do-epsfig)
 (tex-def-prim "\\eqnarray" (lambda () (do-equation ':eqnarray)))
@@ -11558,6 +11624,7 @@ Try the commands
                 (*scm-keywords* #f)
                 (*scm-special-symbols* #f)
                 (*scm-variables* #f)
+                (*scripts* '())
                 (*section-counter-dependencies* #f)
                 (*section-counters* (make-table))
                 ;(*slatex-like-comments-p* #f)

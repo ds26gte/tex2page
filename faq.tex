@@ -1,4 +1,4 @@
-\input tex2page
+\input texrc
 \input btxmac
 \input texnames.sty
 \let\TZPtexlayout=1
@@ -8,7 +8,7 @@
 \def\question{\medbreak
   \global\advance\qno by 1
 \noindent
-  {\bf \the\qno.}\enspace 
+  {\bf \the\qno.}\enspace
 \bgroup
 \aftergroup\egroup
 \aftergroup\smallskip
@@ -20,65 +20,65 @@
 
 \medskip
 
-{\question Do I need to know Scheme in order to be able
+{\question Do I need to know Scheme or Common Lisp in order to be able
 to use \TeX2page?}
 
-No.  Even for those occasions where you need to 
-modify \TeX2page's behavior, basic \TeX\ macros are
+No.  Even for those occasions where you need to
+modify \TeX2page’s behavior, basic \TeX\ macros are
 usually sufficient.  However, if you wish to extend
-\TeX2page in peculiar and/or idiosyncratic ways, 
-familiarity with Scheme will help.
+\TeX2page in peculiar and/or idiosyncratic ways,
+familiarity with Scheme or Common Lisp will help.
 
-{\question But I do need Scheme to run \TeX2page?}
+{\question But I do need Scheme or Common Lisp to run \TeX2page?}
 
 You need either a Scheme dialect or Common Lisp.
 
 {\question This sounds like too much work!  Look, I am on Linux or Cygwin.
-Shouldn't I be able to install \TeX2page like other GNU software and have it
-``just work'',
+Shouldn’t I be able to install \TeX2page like other GNU software and have it
+“just work”,
 instead of worrying about Scheme, Common Lisp and their myriad
 dialects?}
 
 Well, you do need to have a Scheme or Common Lisp installed on your system.
-Type \p{./configure --help} for guidance.
+Type `./configure --help` for guidance.
 
-{\question I need a converter for my \LaTeX\ documents. 
-Doesn't \TeX2page convert only plain \TeX?}
+{\question I need a converter for my \LaTeX\ documents.
+Doesn’t \TeX2page convert only plain \TeX?}
 
-\TeX2page converts \LaTeX\ as well as plain \TeX\ documents. 
+\TeX2page converts \LaTeX\ as well as plain \TeX\ documents.
 
 {\question Do I need to make changes to my document to make it
 suitable for \TeX2page?}
 
-Typically, this isn't necessary.  If \TeX2page
+Typically, this isn’t necessary.  If \TeX2page
 fails to convert your legacy document, you can put
-\TeX2page-specific information in a \p{.t2p} file, without
+\TeX2page-specific information in a `.t2p` file, without
 modifying the legacy document.  See the
 \urlh{index.html}{manual}.
 
-{\question Why does my document have broken images?} 
+{\question Why does my document have broken images?}
 
 \TeX2page makes images using a combination of \TeX,
 Dvips, Ghostscript and the NetPBM library.  Make sure
 you have running versions of these programs on your
 system.  They are all freely available from the
-'Net.
+Web.
 
-{\question Couldn't the images be a bit larger?}
+{\question Couldn’t the images be a bit larger?}
 
-Use the \p{\imgpreamble} command to specify a higher
+Use the `\imgpreamble` command to specify a higher
 magnification for your images.
 
 {\question How do I make my HTML file be a little
 less drab?}
 
-You need stylesheets.  The \TeX2page manual tells you
+You need style sheets.  The \TeX2page manual tells you
 how to incorporate them.
 
 {\question Is there a way to avoid having my converted
 document mention \TeX2page?}
 
-Read about the \p{\TZPcolophoncredit} flag in the
+Read about the `\TZPcolophoncredit` flag in the
 \TeX2page manual.
 
 {\question Do I really have to read the \TeX2page
@@ -88,37 +88,29 @@ I suppose you could consult it only when you run into
 problems, but do consider reading it.  It is a fine
 manual.
 
-{\question Why can't I just use \LaTeX2HTML~\cite{latex2html}?}
+{\question Why can’t I just use \LaTeX2HTML~\cite{latex2html}?}
 
 You certainly can.  Converting TeX source to other
 formats inevitably involves compromises, so different
 converters will have different strengths, different
 approaches to extensibility, and
 appeal to different tastes.  You should pick the one
-that best fits your needs. 
+that best fits your needs.
 
 {\question What are some of the other converters?}
 
 HeVeA~\cite{hevea}, \TeX4ht~\cite{tex4ht}, TtH~\cite{tth}.
 
-{\question I like getting both a 
+{\question I like getting both a
 printable and an online document from the same source.
-But hasn't  Texinfo~\cite{texinfo} already solved that problem?}
+But hasn’t Texinfo~\cite{texinfo} already solved that problem?}
 
 Actually the problem \TeX2page attempts to solve is getting
-high-quality online texts {\em from 
+high-quality online texts {\em from
 arbitrary \TeX\
 source} (which we  already know to produce high-quality
 printed output).  Texinfo requires its source to be in a
-restricted Texinfo format.  
-
-{\question But Texinfo gives me Info files, which I can
-browse comfortably in Emacs or Vim.  Is there a way I
-can read \TeX2page output on my text editor?}
-
-Yes.  The \TeX2page distribution includes a Vim script \p{t2p2info}
-for converting \TeX2page output
-into Info files.
+restricted Texinfo format.
 
 {\question OK.  I am ready to give \TeX2page a try.
 Where do I get it?}

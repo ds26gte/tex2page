@@ -1,4 +1,4 @@
-% last change: 2016-12-17
+% last change: 2016-12-18
 % Dorai Sitaram
 %
 %
@@ -31,7 +31,9 @@
 \def\tthook{\catcode`\|=0 \def\|{\char`\|}\def\ {·}}
 
 \ifx\shipout\UnDeFiNeD\else
-\def\XeTeX{Xe\TeX}
+\ifx\XeTeXversion\UnDeFiNeD
+  \def\XeTeX{Xe\TeX}\else
+  \def\XeTeX{X\kern-0.125em\lower.5ex\hbox{Ǝ}\kern-0.1667em\TeX}\fi
 \def\ConTeXt{Con\TeX t}
 \fi
 

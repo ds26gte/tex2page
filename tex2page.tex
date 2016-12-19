@@ -10,7 +10,7 @@
   \let\maybeendinput\endinput\fi
 \maybeendinput
 
-\message{version 20161214} % last change
+\message{version 20161219} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -844,6 +844,11 @@
 \def\frac#1/#2{\leavevmode\kern.1em
   \raise.5ex\hbox{\the\scriptfont0 #1}\kern-.1em
   /\kern-.15em\lower.25ex\hbox{\the\scriptfont0 #2}}
+\fi
+
+\ifx\bull\UnDeFiNeD
+% from manmac
+\def\bull{\vrule height .9ex width .8ex depth -.1ex } % square bullet
 \fi
 
 \def\obeywhitespace{%

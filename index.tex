@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-18} %last change
+\c{2016-12-19} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1757,7 +1757,7 @@ presentation doesn’t need WiFi.
 A new slide is started for each
 “chapter” and “section”, i.e., `\beginchapter`, `\chapter`,
 `\beginsection` and `\section`. (Note of course
-that it doesn't make sense to convert generic \TeX\ documents
+that it doesn’t make sense to convert generic \TeX\ documents
 into presentations. The sections have got to be pretty short!)
 
 An HTML page meant for presentation uses larger, bolder fonts by
@@ -3473,7 +3473,7 @@ git clone https://github.com/ds26gte/tex2page
 %
 produces a directory
 called `tex2page`, which contains, among other files:
-the Scheme file `tex2page`, the Common Lisp file `tex2page.lisp`, the plain \TeX\ file
+the Racket file `tex2page.rkt`, the Common Lisp file `tex2page.lisp`, the plain \TeX\ file
 `tex2page.tex`, and the \LaTeX\ package
 `tex2page.sty`.
 
@@ -3488,13 +3488,14 @@ variable.
 %
 If you run Racket~\cite{racket} on a Unix (including Mac OS X and
 Cygwin~\cite{cygwin}), setup is minimal.  Simply put a copy of (or link to) the Scheme
-file `tex2page` in a directory in your `PATH` environment variable.
+file `tex2page.rkt` in a directory in your `PATH` environment
+variable. You may rename it to `tex2page`.
 
 If you run Racket on Windows,
 copy the supplied batchfile `tex2page.bat`
 to your `PATH`, and edit its contents so it contains
 the correct pathnames to your Racket executable and
-`tex2page` file.
+`tex2page.rkt` file.
 
 %Note also that the Racket distribution (as also its
 %superset DrScheme) already bundle a
@@ -3504,7 +3505,8 @@ the correct pathnames to your Racket executable and
 
 If you run a Common Lisp on a Unix, you can use the supplied script
 `tex2page.lisp` after setting the environment variable `LISP` to the
-name of your Lisp implementation.  You may rename `tex2page.lisp` to
+name of your Lisp implementation.  Put `tex2page.lisp` in your
+`PATH`. You may rename it to
 `tex2page`.
 
 Set `LISP` to
@@ -3530,9 +3532,7 @@ In general, you need to {\em
 configure}
 \TeX2page so it runs on your system.  Even in cases where the supplied
 script runs “out of the box” for your setup, it may still be a good
-idea to do an explicit configuration.  In particular, for SBCL,
-configuration produces a compiled executable that is substantially
-faster than the script `tex2page.lisp`.
+idea to do an explicit configuration.
 
 %fmrly subsub
 %\subsection{Using \p{./configure --dialect=|meta[D]}}
@@ -3549,8 +3549,8 @@ If your dialect \p{|meta[D]} is one of them,
 \item(ii) Type  \p{./configure --dialect=|meta[D]}
 
 \n If all goes well, this will create
-`my-tex2page`, a version of `tex2page` for your
-system.
+`tex2page`, a version of \TeX2page that’s suited to \p{|meta[D]}.
+Put it in your `PATH`.
 
 \TeX2page is known to configure for the Scheme dialects
 Chicken~\cite{chicken}, Gambit~\cite{gambit}, Gauche~\cite{gauche},
@@ -3577,9 +3577,8 @@ is installed on your system.  Note down the pathname of
 the file `scmxlate.scm` in the unpacked `scmxlate`
 directory.
 
-Optionally, edit the file `scmxlate-tex2page` in the
-`tex2page` directory.
-(Leaving it as is is just fine.)
+Optionally, edit the file `scmxlate-tex2page.rkt` in the
+`tex2page` directory. (Leaving it as is is just fine.)
 Possible insertions are:
 
 \begintts
@@ -3589,7 +3588,7 @@ Possible insertions are:
 \endtt
 %
 The first produces a compiled version of
-`tex2page`.   The second lets you supply the
+\TeX2page.   The second lets you supply the
 correct pathname for the Ghostscript executable.
 (\TeX2page will guess the Ghostscript pathname,
 but there is a possibility it guesses wrong on
@@ -3610,15 +3609,7 @@ or full pathname of `scmxlate.scm`.  For example,
 of questions about your setup.  A choice of answers
 will be provided, so you don’t need to be too creative.
 When Scmxlate finishes, you will be left with a
-version of `tex2page` called `my-tex2page`,
-tailormade for your system.
-
-%fmrly subsub
-\beginsection Installation in {PATH}
-
-On Unix, put a copy of (or link to) `my-tex2page`
-in a directory in your `PATH`.  You may wish to
-rename it to `tex2page`.
+`tex2page` that is tailormade for your system.
 
 On Windows, a batch file called `tex2page.bat`
 is also created.  Move it to a directory in your

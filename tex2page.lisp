@@ -29,7 +29,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161218" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161219" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -7105,7 +7105,8 @@
                 (t (scm-output-next-chunk))))))
     (emit "</pre></div>")
     (egroup)
-    (cond (display-p (do-para)) (in-table-p (emit "</td><td>")))))
+    (cond (display-p (do-noindent))
+          (in-table-p (emit "</td><td>")))))
 
 (defun string-is-all-dots-p (s)
   (dotimes (i (length s) t)
@@ -7742,11 +7743,7 @@
       (write-log :separation-newline))
     (let ((eval4tex-aux-file (concatenate 'string *jobname* ".eval4tex")))
       (when (probe-file eval4tex-aux-file)
-        (let ((load-it (with-open-file (i eval4tex-aux-file)
-                         (let ((x (read i nil nil)))
-                           (and x (eq (car x) 'defun))))))
-          (when load-it
-            (load eval4tex-aux-file)))))
+        (load eval4tex-aux-file)))
     (mapc
      (lambda (f)
          (when (probe-file f)

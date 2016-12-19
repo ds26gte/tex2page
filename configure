@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Last modified: 2016-12-18
+# Last modified: 2016-12-19
 
 # Set scmxlate to the pathname of scmxlate/scmxlate.scm
 # on your system, if you know it.  Otherwise let
@@ -21,7 +21,11 @@ findscmxlate() {
   for f in $searchpathforscmxlate
   do
     scmxlate=`find $f -name scmxlate.scm -print|sed 1q`
-    test "$scmxlate" && return
+    if test "$scmxlate"
+    then echo Found $scmxlate
+    return
+    fi
+    #test "$scmxlate" && return
   done
   echo Couldn\'t find scmxlate/scmxlate.scm on your machine.
   echo Trying to get it off the Internet.
@@ -31,48 +35,46 @@ findscmxlate() {
   test "$scmxlate" && return
   echo Unable to get scmxlate off the Internet.
   echo scmxlate is available at
-  echo http://www.ccs.neu.edu/~dorai/scmxlate/index.html
+  echo https://github.com/ds26gte/scmxlate
   echo You may want to get and install scmxlate manually,
   echo then try configure again.
   exit
 }
 
 adieu() {
-  for f in `cat dialects/files-to-be-ported.scm`
-  do
-    if test -f my-$f
-    then
-      echo File my-$f created.
-      echo You may rename it to $f and
-      echo \ \ put it in your PATH.
-    fi
-  done
+  if test -f my-tex2page
+  then
+    mv my-tex2page tex2page
+    echo tex2page has been successfully configured for $dialect.
+    echo You may put it in your PATH.
+  else
+    echo configure "$@" failed!
+  fi
 }
 
 makeit() {
   case "$dialect" in
-    abcl|allegro|clisp|clozure|cmucl|ecl|mkcl|sbcl)
+    abcl|allegro|clisp|clozure|cmucl|ecl|mkcl|sbcl-compiled)
     :;;
-    *)
+    bigloo|chez|chicken|gambit|gauche|guile|mitscheme|petite|plt|scm|sxm)
     findscmxlate;;
+    *)
+    echo Dialect $dialect not supported!
+    exit;;
   esac
   #echo Ignore questions on console.
   case "$dialect" in
-    sbcl)
+    sbcl-compiled)
     sbcl --eval '(require :sb-executable)' \
     --eval '(sb-executable:make-executable "my-tex2page"
     (list (compile-file "tex2page.lisp")))' \
     --eval '(sb-ext:quit)'
-    rm tex2page.fasl
-    echo Resulting file is \'my-tex2page\'.
-    echo You may want to rename it.;;
+    rm tex2page.fasl;;
 
     abcl|allegro|clisp|clozure|cmucl|ecl|mkcl)
     echo \":\"\; export LISP=$dialect > my-tex2page
     cat tex2page.lisp >> my-tex2page
-    chmod +x my-tex2page
-    echo Resulting file is \`my-tex2page\'.
-    echo You may want to rename it.;;
+    chmod +x my-tex2page;;
 
     bigloo)
     echo bigloo|bigloo -eval '(load "'$scmxlate'")';;
@@ -113,34 +115,52 @@ makeit() {
     echo sxm|sxi $scmxlate;;
 
     *)
-    echo Dialect $dialect not supported!
+    echo This had better be 0xdeadc0de.
     exit;;
   esac
-  #adieu
 }
 
 echodialectsuggestions() {
+  cclpresent=
   clisppresent=
   eclpresent=
   guilepresent=
+  racketpresent=
   sbclpresent=
+  test "`which ccl 2>/dev/null|grep -v ' '`"  &&\
+  cclpresent=yes
   test "`which clisp 2>/dev/null|grep -v ' '`"  &&\
   clisppresent=yes
   test "`which ecl 2>/dev/null|grep -v ' '`" &&\
   eclpresent=yes
+  test "`which gosh 2>/dev/null|grep -v ' '`"  &&\
+  gauchepresent=yes
   test "`which guile 2>/dev/null|grep -v ' '`"  &&\
   guilepresent=yes
   test "`which mkcl 2>/dev/null|grep -v ' '`" &&\
   mkclpresent=yes
+  test "`which racket 2>/dev/null|grep -v ' '`" &&\
+  racketpresent=yes
   test "`which sbcl 2>/dev/null|grep -v ' '`"  &&\
   sbclpresent=yes
   if test "$clisppresent" -o "$eclpresent" -o "$guilepresent"
   then
     echo
-    echo Note: The following looks promising on your system:
+    echo Note: The following look promising on your system:
     echo
+    echo Schemes:
+    echo
+    test "$gauchepresent" &&\
+    echo \ \ ./configure --dialect=gauche
     test "$guilepresent" &&\
     echo \ \ ./configure --dialect=guile
+    test "$racketpresent" &&\
+    echo \ \ ./configure --dialect=racket
+    echo
+    echo Common Lisps:
+    echo
+    test "$cclpresent" &&\
+    echo \ \ ./configure --dialect=ccl
     test "$eclpresent" &&\
     echo \ \ ./configure --dialect=ecl
     test "$mkclpresent" &&\
@@ -149,6 +169,7 @@ echodialectsuggestions() {
     echo \ \ ./configure --dialect=clisp
     test "$sbclpresent" &&\
     echo \ \ ./configure --dialect=sbcl
+    echo \ \ ./configure --dialect=sbcl-compiled
   fi
 }
 
@@ -164,20 +185,24 @@ echohelp() {
   exit
 }
 
+rm -f tex2page
+rm -f my-tex2page
+
 if test 1 -eq `echo $1|grep "^--dialect="|sed 1q|wc -l`
 then
   dialect=`echo $1|sed 's/--dialect=//'`
   if test "$dialect" = "racket"
+  then 
+    cp -p tex2page.rkt my-tex2page
+  elif test "$dialect" = "sbcl" 
   then
-    echo Program runs out of the box on Racket!
-    echo You don\'t need to configure anything!
-    exit
-  fi
-  if test "$dialect" = "guile" -a -f ./dialects/make-guile-version
+    cp -p tex2page.lisp my-tex2page
+  elif test "$dialect" = "guile" -a -f ./dialects/make-guile-version
   then
     ./dialects/make-guile-version
   else
     makeit
   fi
+  adieu
 else echohelp
 fi

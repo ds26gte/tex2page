@@ -1,4 +1,4 @@
-; last change 2016-12-17
+; last change 2016-12-19
 abcl ;v 1.5; WORKS!
 allegro ;v 9.0; WORKS!
 bigloo
@@ -22,6 +22,7 @@ pscheme
 racket ;v 6.6; WORKS!
 ;rscheme
 sbcl ;v 1.3.12; WORKS!
+sbcl-compiled ;v 1.3.12; WORKS!
 scheme48
 scm ;v 5e5; WORKS!
 scsh

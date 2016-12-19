@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Jul 18, 2003
+# last modified 2016-12-19
 
-sed -e 's/	/ /g' tex2page |\
+sed -e 's/	/ /g' tex2page.rkt |\
 sed -e 's/^ *$/END_OF_CURR_EXP/' > my-tex2page
 
 ignoredef() {
@@ -127,7 +127,3 @@ mv .sedtmp my-tex2page
 chmod +x my-tex2page
 
 rm -f guile.preamble
-
-echo File my-tex2page created.
-echo You may rename it to tex2page and
-echo \ \ put it in your PATH.

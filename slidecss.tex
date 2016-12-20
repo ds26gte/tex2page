@@ -1,0 +1,34 @@
+% last modified 2016-12-22
+
+\let\TZPslides=1
+
+% \incremental makes the rest of the enclosing group incremental
+
+\def\incremental{\ifx\shipout\UnDeFiNeD
+\rawhtml<span class=incremental>\endrawhtml
+\aftergroup\incrementalQclose\fi}
+
+\def\incrementalQclose{\rawhtml</span>\endrawhtml}
+
+\let\maybeendinput\relax
+\ifx\shipout\UnDeFiNeD
+\else\let\maybeendinput\endinput
+\fi\maybeendinput
+
+\cssblock
+div.slide {
+  margin-top: 3%;
+  margin-left: 6%;
+  margin-right: 6%;
+  line-height: 2;
+}
+
+.slide h1,h2 {
+  color: #9b3d3d;
+  border-bottom: 2px solid silver;
+}
+
+.slide h1.title {
+  font-size: 240%;
+}
+\endcssblock

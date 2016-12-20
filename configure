@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Last modified: 2016-12-19
+# Last modified: 2016-12-20
 
 # Set scmxlate to the pathname of scmxlate/scmxlate.scm
 # on your system, if you know it.  Otherwise let
@@ -121,16 +121,12 @@ makeit() {
 }
 
 echodialectsuggestions() {
-  cclpresent=
-  clisppresent=
-  eclpresent=
-  guilepresent=
-  racketpresent=
-  sbclpresent=
-  test "`which ccl 2>/dev/null|grep -v ' '`"  &&\
-  cclpresent=yes
+  test "`which abcl 2>/dev/null|grep -v ' '`"  &&\
+  abclpresent=yes
   test "`which clisp 2>/dev/null|grep -v ' '`"  &&\
   clisppresent=yes
+  test "`which ccl 2>/dev/null|grep -v ' '`"  &&\
+  clozurepresent=yes
   test "`which ecl 2>/dev/null|grep -v ' '`" &&\
   eclpresent=yes
   test "`which gosh 2>/dev/null|grep -v ' '`"  &&\
@@ -159,16 +155,18 @@ echodialectsuggestions() {
     echo
     echo Common Lisps:
     echo
-    test "$cclpresent" &&\
-    echo \ \ ./configure --dialect=ccl
+    test "$abclpresent" &&\
+    echo \ \ ./configure --dialect=abcl
+    test "$clozurepresent" &&\
+    echo \ \ ./configure --dialect=clisp
+    test "$sbclpresent" &&\
+    echo \ \ ./configure --dialect=clozure
     test "$eclpresent" &&\
     echo \ \ ./configure --dialect=ecl
     test "$mkclpresent" &&\
     echo \ \ ./configure --dialect=mkcl
     test "$clisppresent" &&\
-    echo \ \ ./configure --dialect=clisp
-    test "$sbclpresent" &&\
-    echo \ \ ./configure --dialect=sbcl
+    echo \ \ ./configure --dialect=sbcl &&\
     echo \ \ ./configure --dialect=sbcl-compiled
   fi
 }

@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161219") ;last change
+(define *tex2page-version* "20161221") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -3053,7 +3053,7 @@
 
 (define (wavelength-to-rrggbb w)
   (let ((hue (* 1/6
-                (cond ((<= w 362.857) 5/6)
+                (cond ((<= w 362.857) 5)
                       ((< w 440) (+ 4 (/ (- w 440) -60)))
                       ((< w 490) (- 4 (/ (- w 440) 50)))
                       ((< w 510) (+ 2 (/ (- w 510) -20)))
@@ -3179,7 +3179,7 @@
        (lambda (i)
          (let ((w (read i)))
            (ignorespaces)
-           (emit (wavelength-to-rrggbb w))))))
+           (wavelength-to-rrggbb w)))))
     (else (let* ((name (get-peeled-group))
                  (c (lassoc name *color-names* string=?)))
             (ignorespaces)
@@ -4630,7 +4630,8 @@
   (emit "<ul")
   (when (tex2page-flag-boolean "\\TZPslides")
     (emit " class=incremental"))
-  (emit ">"))
+  (emit ">")
+  (emit-newline))
 
 (define (do-enditemize)
     (do-end-para)
@@ -4644,7 +4645,8 @@
   (emit "<ol")
   (when (tex2page-flag-boolean "\\TZPslides")
     (emit " class=incremental"))
-  (emit ">"))
+  (emit ">")
+  (emit-newline))
 
 (define (do-endenumerate)
   (pop-tabular-stack ':enumerate)
@@ -9793,6 +9795,15 @@
       .colophon a {
       color: gray;
       text-decoration: none;
+      }
+
+      .slide h1.title {
+      font-weight: bold;
+      text-align: left;
+      }
+
+      .slide h2.section {
+      margin-left: 0pt;
       }
       "
         ;#endinclude tex2page.css

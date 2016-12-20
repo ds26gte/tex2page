@@ -15,15 +15,16 @@ among other things, the files
 Put copies of (or link to) the files `tex2page.tex` and
 `tex2page.sty` in a directory that is in your `TEXINPUTS` path.
 
-Optional: Copy the file `man/man1/tex2page.1` to the `man1` subdirectory of a
-directory in your `MANPATH`.
+Optional: Copy the file `man/man1/tex2page.1` to the `man1`
+subdirectory of a directory in your `MANPATH`.
 
 == Configuring TeX2page for your machine
 
 Out of the box, the scripts `tex2page.rkt` and `tex2page.lisp`
 work on Racket and SBCL respectively. You may put them in your
-PATH, possibly renaming them to `tex2page`. (`tex2page` is
-softlinked to `tex2page.rkt` in the distribution.)
+PATH, possibly renaming whichever of them you prefer to
+`tex2page`. (`tex2page` is softlinked to `tex2page.rkt` in the
+distribution.)
 
 In general, type
 

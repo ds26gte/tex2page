@@ -1,6 +1,6 @@
 % plainsection.tex
 % Dorai Sitaram
-% Last change 2016-11-26
+% Last change 2016-12-21
 
 \let\maybeendinput\relax
 \ifx\shipout\UnDeFiNeD
@@ -163,6 +163,59 @@ T\or U\or V\or W\or X\or Y\or Z\else AA\fi}
 \def\appendix{\let\doingappendix=1
   \csname sectionnumber1\endcsname=0
   \relax}
+
+% enumerate
+
+\def\enumerate{\par\begingroup
+  \advance\@itemdepth by 1
+  \expandafter\csname newcount\endcsname\enumeratenumber
+  \enumeratenumber=0
+  \advance\leftskip\parindent
+  \smallbreak
+  \def\item{\smallbreak\noindent
+    \advance\enumeratenumber by 1
+    \ifnum\@itemdepth=1
+      \edef\enumeratemark{\the\enumeratenumber.}\else
+    \ifnum\@itemdepth=2
+      \count255=\the\enumeratenumber
+      \advance\count255 by -1 \advance\count255 by `a
+      \edef\enumeratemark{(\noexpand\char\the\count255 )}\else
+    \ifnum\@itemdepth=3
+      \edef\enumeratemark{\noexpand\romannumeral\the\enumeratenumber.}\else
+    \ifnum\@itemdepth=4
+      \count255=\the\enumeratenumber
+      \advance\count255 by -1 \advance\count255 by `A
+      \edef\enumeratemark{\noexpand\char\the\count255 .}\else
+    \edef\enumeratemark{\the\enumeratenumber.}\fi\fi\fi\fi
+    \edef\@currentlabel{\enumeratemark}% needed?
+    \llap{\enumeratemark\enspace}\ignorespaces}}
+
+\def\endenumerate{\smallbreak\smallbreak\endgroup\par}
+
+% itemize
+
+\newcount\@itemdepth
+
+\@itemdepth=0
+
+\def\labelitemi{$\bullet$}
+\def\labelitemii{$-$}
+\def\labelitemiii{$\star$}
+\def\labelitemiv{$\circ$}
+
+\def\itemize{\par\begingroup
+  \ifnum\@itemdepth>3
+    \message{Too deeply nested.}%
+  \fi
+  \advance\@itemdepth by 1
+  \advance\leftskip\parindent
+  \smallbreak
+  \def\item{\smallbreak\noindent
+  \llap{\csname labelitem\romannumeral
+    \the\@itemdepth\endcsname\enspace}%
+  \ignorespaces}}
+
+\def\enditemize{\smallbreak\smallbreak\endgroup\noindent}
 
 \atcatcodebeforeplainsection
 

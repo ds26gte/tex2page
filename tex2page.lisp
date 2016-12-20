@@ -29,7 +29,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161219" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161221" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -2359,7 +2359,7 @@
 
 (defun wavelength-to-rrggbb (w)
   (let ((hue (* 1/6
-                (cond ((<= w 362.857) 5/6)
+                (cond ((<= w 362.857) 5)
                       ((< w 440) (+ 4 (/ (- w 440) -60)))
                       ((< w 490) (- 4 (/ (- w 440) 50)))
                       ((< w 510) (+ 2 (/ (- w 510) -20)))
@@ -2430,7 +2430,7 @@
           (cmyk-to-rrggbb 0 0 0 (- 1 (/ g 15))))))
     (:html
       (with-input-from-string (i (tex-string-to-html-string (get-token)))
-        (let ((rrggbb (format nil "~6,'0x"
+        (let ((rrggbb (format nil "#~6,'0x"
                               (let ((*read-base* 16))
                                 (read i nil :eof-object)))))
           (ignorespaces)
@@ -2469,7 +2469,7 @@
       (with-input-from-string (i (tex-string-to-html-string (get-token)))
         (let ((w (read i nil :eof-object)))
           (ignorespaces)
-          (emit (wavelength-to-rrggbb w)))))
+          (wavelength-to-rrggbb w))))
     (t (let* ((name (get-peeled-group))
               (c (assoc name *color-names* :test #'string=)))
          (ignorespaces)
@@ -3646,7 +3646,8 @@
   (emit "<ul")
   (when (tex2page-flag-boolean "\\TZPslides")
     (emit " class=incremental"))
-  (emit ">"))
+  (emit ">")
+  (emit-newline))
 
 (defun do-enditemize ()
   (do-end-para)
@@ -3660,7 +3661,8 @@
   (emit "<ol")
   (when (tex2page-flag-boolean "\\TZPslides")
     (emit " class=incremental"))
-  (emit ">"))
+  (emit ">")
+  (emit-newline))
 
 (defun do-endenumerate ()
   (pop-tabular-stack :enumerate)
@@ -8112,6 +8114,15 @@
       .colophon a {
       color: gray;
       text-decoration: none;
+      }
+
+      .slide h1.title {
+      font-weight: bold;
+      text-align: left;
+      }
+
+      .slide h2.section {
+      margin-left: 0pt;
       }
       "
       ;#endinclude tex2page.css

@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-19} %last change
+\c{2016-12-21} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1122,43 +1122,62 @@ Eplain offers a version of `\xrtag` which it calls
 above.  Eplain also has a `\ref` macro, but it
 behaves differently than a \LaTeX-like `\ref`.}
 
-\beginsection Color
+\beginsection
+{\color[HTML]{8601AF}C}{\color{blue}o}{\color{green}l}{\color{yellow}o}{\color[HTML]{FFA500}r}{\color{red}s}
 
 \xrdef{color}
 \index{color@`\color`}
 \index{colorbox@`\colorbox`}
 \index{definecolor@`\definecolor`}
 \index{color.sty@`color.sty`}
+\index{xcolor.sty@`xcolor.sty`}
 \TeX2page recognizes the macros `\color`, `\colorbox`, and
-`\definecolor`~\cite{grfguide}.  These are provided by the \LaTeX\
-package `color.sty`, which can also be loaded into
-plain \TeX\ (after loading `miniltx`).  E.g.,
+`\definecolor`~\cite{grfguide} provided by the \LaTeX\ package
+`color.sty`. It also recognizes the {\em color models}
+`cmyk`, `gray`, `hsb`, `rgb`, and `RGB`, also provided by
+`color.sty`); and `cmy`, `Gray`, `Hsb`, `HSB`, `HTML`,
+and `wave`, provided by the \LaTeX\ package `xcolor.sty`, which
+is a superset of `color.sty`. 
 
 \begintt
+{\color[cmy]{.46, .8, .86} burnt umber},
 {\color[cmyk]{0, .89, .94, .28} brick red},
-{\color[gray]{.17} light gray},
+{\color[gray]{.4117} dim gray},
+{\color[Gray]{11.2941} silver},
 {\color[hsb]{.75, .6667, .6} rebecca purple},
+{\color[Hsb]{196, 1, .65} cerulean},
+{\color[HSB]{20, 199.2, 192} ochre},
 {\color[rgb]{.69, .19, .38} maroon},
 {\color[RGB]{220, 20, 60} crimson},
-and {\color{blue} blue}.
+{\color[wave]{455.528} cesium blue},
+and {\color{magenta} magenta}.
 \endtt
-%
 produces
+
 \quote
+{\color[cmy]{.46, .8, .86} burnt umber},
 {\color[cmyk]{0, .89, .94, .28} brick red},
-{\color[gray]{.75} light gray},
+{\color[gray]{.4117} dim gray},
+{\color[Gray]{11.2941} silver},
 {\color[hsb]{.75, .6667, .6} rebecca purple},
+{\color[Hsb]{196, 1, .65} cerulean},
+{\color[HSB]{20, 199.2, 192} ochre},
 {\color[rgb]{.69, .19, .38} maroon},
 {\color[RGB]{220, 20, 60} crimson},
-%{\color[named]{magenta} magenta},
-and {\color{blue} blue}.
+{\color[wave]{455.528} cesium blue},
+and {\color{magenta} magenta}.
 \endquote
-\index{xcolor.sty@`xcolor.sty`}
-In addition to the {\em color models} `cmyk`, `gray`, `hsb`, `rgb`,
-and `RGB`, \TeX2page also supports `cmy`, `Gray`, `Hsb`,
-`HSB`, `HTML`, and `wave`, which are defined in `xcolor.sty` (a
-\LaTeX\ package that supersets `color.sty`). Unfortunately,
-`xcolor.sty` is currently not loadable in plain \TeX.
+%
+\TeX2page doesn't need either `color.sty` or `xcolor.sty` to
+process these commands, but you need these packages if you wish
+to see the color in your PDF output. 
+Unfortunately, while `color.sty`
+can be loaded into plain \TeX (after loading `miniltx`),
+`xcolor.sty` cannot. The \TeX2page distribution does provide a
+plain-\TeX-loadable macro file
+`coloraug.tex` that provides some of the functionality of
+`xcolor.sty`.
+
 
 `\definecolor` defines new color names, e.g.,
 
@@ -1752,7 +1771,7 @@ HTML page containing slides.  \TeX2page looks for these files in
 the working directory, and if they’re not found there, it links
 them from the W3C website. It may be prudent to get these files
 beforehand and place them in your working directory, so the
-presentation doesn’t need WiFi.
+presentation doesn’t rely on WiFi.
 
 A new slide is started for each
 “chapter” and “section”, i.e., `\beginchapter`, `\chapter`,
@@ -1766,7 +1785,7 @@ bars between slides.
 Furthermore, enumerated and itemized lists (`\enumerate`
 and `\itemize`) display their items incrementally.
 
-Consult the Slidy documentation for the keys and clicks you can use
+Consult the Slidy documentation for the keypresses and clicks you can use
 to progress through or dynamically alter the look of your
 presentation.
 
@@ -1810,7 +1829,7 @@ file, i.e., to not generate a page break as described on
 p.~\ref{eject}. To do this, set the `\TZPsinglepage` flag:
 
 \begintt
-\def\TZPsinglepage{1}
+\let\TZPsinglepage=1
 \endtt
 
 \beginsection OPmac
@@ -1851,7 +1870,7 @@ message, but will not crash for this reason alone.
 \index{style sheet}
 %
 You can use the \TeX2page command `\inputcss` to have your HTML output use {\em style
-sheets}~\cite{w3c:css,lb:css,htmlhelp:css}.  E.g.,
+sheets}~\cite{w3c:css,lb:css}.  E.g.,
 
 \begintt
 \ifx\shipout\UnDeFiNeD % HTML only

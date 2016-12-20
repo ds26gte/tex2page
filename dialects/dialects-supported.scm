@@ -7,7 +7,7 @@ chicken ;v 4.8.2; WORKS!
 clisp ;v 2.49; WORKS!
 clozure ;v 1.11; WORKS!
 cmucl ;v 20d; WORKS!
-ecl ;v 16.1.2; WORKS!
+ecl ;v 16.1.3; WORKS!
 gambit ;v 4.4.2; WORKS!
 gauche ;v 0.9.4; WORKS!
 guile ;v 2.0.11; WORKS!

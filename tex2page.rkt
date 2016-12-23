@@ -1818,6 +1818,10 @@
               ;(set!tdef.defer lft-def rt)
               )))))
 
+(define (tex-let-general lhs rhs frame)
+  (if (ctl-seq? rhs) (tex-let lhs rhs frame)
+      (tex-def lhs '() rhs #f #f #f #f frame)))
+
 (define tex-let-prim
   (lambda (lft rt)
     (tex-let lft rt *primitive-texframe*)))
@@ -6957,7 +6961,7 @@
 
 (define do-futurelet-aux
   (lambda (first second third)
-    (tex-let first third #f)
+    (tex-let-general first third #f)
     (toss-back-char *invisible-space*)
     (toss-back-string third)
     (toss-back-char *invisible-space*)
@@ -7241,9 +7245,7 @@
              (rhs (begin (get-equal-sign)
                          (get-raw-token/is)))
              (frame (and g? *global-texframe*)))
-        (if (ctl-seq? rhs)
-            (tex-let lhs rhs frame)
-            (tex-def lhs '() rhs #f #f #f #f frame))))))
+        (tex-let-general lhs rhs frame)))))
 
 (define do-def
   (lambda (g? e?)

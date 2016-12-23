@@ -1344,9 +1344,16 @@
     (cond ((setq *it* (find-def rt))
            (let ((rt-def *it*))
              (kopy-tdef lft-def rt-def)))
-          (t (cleanse-tdef lft-def)
+          (t
+            (cleanse-tdef lft-def)
              ;(setf (tdef*-defer lft-def) rt)
              ))))
+
+(defun tex-let-general (lhs rhs frame)
+  (if (ctl-seq-p rhs) (tex-let lhs rhs frame)
+      (tex-def lhs '() rhs nil nil nil nil frame)))
+
+;(trace tex-let)
 
 (defun tex-let-prim (lft rt)
   (tex-let lft rt *primitive-texframe*)
@@ -4737,6 +4744,8 @@
            (do-iftrue)
          (do-iffalse))))))
 
+;(trace do-ifx)
+
 (defun do-ifdefined ()
   (let ((x (get-raw-token/is)))
     (if (or (not (ctl-seq-p x))
@@ -5681,11 +5690,13 @@
     (do-futurelet-aux first second third)))
 
 (defun do-futurelet-aux (first second third)
-  (tex-let first third nil)
+  (tex-let-general first third nil)
   (toss-back-char *invisible-space*)
   (toss-back-string third)
   (toss-back-char *invisible-space*)
   (toss-back-string second))
+
+;(trace do-futurelet-aux)
 
 (defun set-start-time ()
   (multiple-value-bind (s m h d mo y)
@@ -5798,6 +5809,8 @@
            (gethash ctlseq (texframe*-definitions *global-texframe*)))
       (gethash ctlseq (texframe*-definitions *primitive-texframe*))))
 
+;(trace find-def)
+
 (defun find-math-def (ctlseq)
   (gethash ctlseq (texframe*-definitions *math-primitive-texframe*)))
 
@@ -5908,8 +5921,7 @@
     (let* ((lhs (get-ctl-seq))
            (rhs (progn (get-equal-sign) (get-raw-token/is)))
            (frame (and globalp *global-texframe*)))
-      (if (ctl-seq-p rhs) (tex-let lhs rhs frame)
-        (tex-def lhs '() rhs nil nil nil nil frame)))))
+      (tex-let-general lhs rhs frame))))
 
 (defun do-def (globalp e-p)
   (unless (inside-false-world-p)

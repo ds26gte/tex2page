@@ -1,4 +1,13 @@
-Last change 2016-12-19
+Last change 2016-12-22
+
+2016 Dec 22
+
+Cleaned up read-macro-args: It shouldn't match space with maximal sequence of
+spaces; rather it should match undelimited parameter by ignoring spaces first.
+(TeXbook, p. 204)
+
+Added tex-let-general (internal use). More closely matches \let by allowing rhs
+to be token. In particular, this fixes bug in \futurenonspacelet.
 
 2016 Dec 19
 

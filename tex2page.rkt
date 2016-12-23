@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161221") ;last change
+(define *tex2page-version* "20161222") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -7661,14 +7661,15 @@
          (if (>= k n) r
              (let ((c (list-ref argpat k)))
                ;(resolve-expandafters)
-               (cond ((char=? c #\#)
+               (cond ((eqv? c #\#)
                       (cond ((= k (- n 1))
+                             (ignorespaces)
                              (cons (get-till-char #\{) r))
                             ((= k (- n 2))
                              (cons (ungroup (get-token)) r))
                             (else
                              (let ((c2 (list-ref argpat (+ k 2))))
-                               (if (char=? c2 #\#)
+                               (if (eqv? c2 #\#)
                                    (loop (+ k 2)
                                          (cons (ungroup (get-token)) r))
                                    (let ((x (read-till-next-sharp
@@ -7679,6 +7680,9 @@
                         (cond ((eof-object? d)
                                (terror 'read-macro-args
                                        "Eof before macro got enough args"))
+                              ((eqv? c #\space)
+                               (unless (char-whitespace? d)
+                                 (terror 'read-macro-args "Misformed macro call")))
                               ((char=? c d)
                                (loop (+ k 1) r))
                               (else

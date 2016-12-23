@@ -29,7 +29,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161221" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161222" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -6123,6 +6123,7 @@
                   (cond ((esc-char-p c)
                          (let ((x (get-ctl-seq)))
                            (if (string= x "\\par")
+                               ;save \par as :par?
                                (cons #\Newline (cons #\Newline (aux)))
                              (append (concatenate 'list x) (aux)))))
                         ((char= c #\{) '())
@@ -6136,6 +6137,8 @@
                                  (t (get-actual-char)))
                            (cons c (aux)))))))
     (aux)))
+
+;(trace get-def-arguments)
 
 (defun get-till-char (c0)
   (concatenate
@@ -6238,6 +6241,7 @@
                          (concatenate 'string ins x)))))))))
 
 (defun read-till-next-sharp (k argpat)
+  ;debug for edge cases!
   (let ((n (length argpat)) (ss '()))
     (block outer-loop
       (loop
@@ -6281,20 +6285,28 @@
                       (t (setq ss (append s ss))
                          (return)))))))))))
 
+;(trace read-till-next-sharp)
+
 (defun read-macro-args (argpat k r)
+  ;(format t "argpat = ~s~%" argpat)
   (let ((n (length argpat)))
     (nreverse
      (let ((k k) (r r))
        (loop
          (when (>= k n) (return r))
          (let ((c (elt argpat k)))
-           (cond ((char= c #\#)
-                  (cond ((= k (1- n)) (push (get-till-char #\{) r)
+           ;eql rather than char= because \par may show up as :par
+           (cond ((eql c #\#)
+                  ;should check #n are in order!
+                  (cond ((= k (1- n)) 
+                         (ignorespaces)
+                         (push (get-till-char #\{) r)
                          (return r))
-                        ((= k (- n 2)) (push (ungroup (get-token)) r)
+                        ((= k (- n 2)) 
+                         (push (ungroup (get-token)) r)
                          (return r))
                         (t (let ((c2 (elt argpat (+ k 2))))
-                             (if (char= c2 #\#)
+                             (if (eql c2 #\#)
                                  (progn (incf k 2)
                                         (push (ungroup (get-token)) r))
                                  (multiple-value-bind (k2 s)
@@ -6304,9 +6316,20 @@
                  (t (let ((d (get-actual-char)))
                       (when (eq d :eof-object)
                         (terror 'read-macro-args "Eof before macro got enough args"))
-                      (unless (char= c d)
-                        (terror 'read-macro-args "Misformed macro call"))
+                      (cond ((eql c #\space)
+                             (unless (char-whitespace-p d)
+                               (terror 'read-macro-args "Misformed macro call"))
+                             ;(toss-back-char d)
+                             ;actually ignore spaces before reading a #-arg
+                             ;here just read the one space
+                             ;(what about newlines?)
+                             ;(ignorespaces)
+                             )
+                            ((char= c d) t)
+                            (t (terror 'read-macro-args "Misformed macro call")))
                       (incf k))))))))))
+
+;(trace read-macro-args)
 
 (defun expand-edef-macro (rhs)
   (let* ((*not-processing-p* t)

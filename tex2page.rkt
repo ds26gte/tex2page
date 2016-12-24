@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161222") ;last change
+(define *tex2page-version* "20161225") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -1475,6 +1475,15 @@
             ((and *comment-char* (char=? c *comment-char*))
              (eat-till-eol) (get-token))
             (else (string (get-actual-char)))))))
+
+(define (get-token/ps)
+  (let ((c (snoop-actual-char)))
+    (cond ((eof-object? c) c)
+          ((esc-char-p c) (get-ctl-seq))
+          ((char=? c #\{) (get-group))
+          ((and *comment-char* (char=? c *comment-char*))
+           (eat-till-eol) (get-token/ps))
+          (else (string (get-actual-char))))))
 
 (define eat-word
   (lambda (word)
@@ -7570,6 +7579,7 @@
                    (terror 'do-halign "Eof inside \\halign"))
                   ((char=? c #\}) (get-actual-char)
                    (emit "</table>")
+                   (emit-newline)
                    (egroup)
                    (do-para))
                   (else
@@ -7615,6 +7625,46 @@
                                  (string-append r y))))))))
               (else (loop tmplt (string-append ins x))))))))
 
+(define (do-settabs)
+  (let loop ()
+    (let ((x (get-token)))
+      (cond ((eof-object? x)
+             (terror 'do-settabs "Eof in \\settabs"))
+            ((or (string=? x "\\columns") (string=? x "\\cr"))
+             #t)
+            (else (loop))))))
+
+(define (do-tabalign)
+  (emit-newline)
+  (emit "<table>") (emit-newline)
+  (let loop ()
+    (do-tabalign-row)
+    (let ((x (get-token/ps)))
+      (cond ((eof-object? x) #t)
+            ((or (string=? x "\\+") (string=? x "\\tabalign")) (loop))
+            (else (toss-back-string x)))))
+  (emit "</table>") (emit-newline))
+
+(define (do-tabalign-row)
+  (emit "<tr>") (emit-newline)
+  (let ((cell-contents ""))
+    (let loop ()
+      (let ((x (get-token/ps)))
+        (when (eof-object? x)
+          (terror 'do-tablign "Eof in \\tabalign"))
+        (cond ((or (string=? x "&") (string=? x "\\cr"))
+               (emit "<td>")
+               (bgroup)
+               (tex2page-string cell-contents)
+               (egroup)
+               (set! cell-contents "")
+               (emit "</td>") (emit-newline)
+               (unless (string=? x "\\cr") (loop)))
+              (else (set! cell-contents
+                      (string-append cell-contents x))
+                    (loop))))))
+  (emit "</tr>") (emit-newline))
+
 (define read-till-next-sharp
   (lambda (k argpat)
     (let ((n (length argpat)))
@@ -7655,43 +7705,41 @@
 
 ;(trace read-till-next-sharp)
 
-(define read-macro-args
-  (lambda (argpat k r)
-    (let ((n (length argpat)))
-      (nreverse
-       (let loop ((k k) (r r))
-         (if (>= k n) r
-             (let ((c (list-ref argpat k)))
-               ;(resolve-expandafters)
-               (cond ((eqv? c #\#)
-                      (cond ((= k (- n 1))
-                             (ignorespaces)
-                             (cons (get-till-char #\{) r))
-                            ((= k (- n 2))
-                             (cons (ungroup (get-token)) r))
-                            (else
+(define (read-macro-args argpat k r)
+  (let ((n (length argpat)))
+    (nreverse
+      (let loop ((k k) (r r))
+        (if (>= k n) r
+            (let ((c (list-ref argpat k)))
+              ;(resolve-expandafters)
+              (cond ((char=? c #\#)
+                     (cond ((= k (- n 1))
+                            (ignorespaces)
+                            (cons (get-till-char #\{) r))
+                           ((= k (- n 2))
+                            (cons (ungroup (get-token)) r))
+                           (else
                              (let ((c2 (list-ref argpat (+ k 2))))
-                               (if (eqv? c2 #\#)
+                               (if (char=? c2 #\#)
                                    (loop (+ k 2)
                                          (cons (ungroup (get-token)) r))
                                    (let ((x (read-till-next-sharp
-                                             (+ k 2) argpat)))
+                                              (+ k 2) argpat)))
                                      (loop (car x) (cons (cdr x) r))))))))
-                     (else
+                    (else
                       (let ((d (get-actual-char)))
                         (cond ((eof-object? d)
                                (terror 'read-macro-args
                                        "Eof before macro got enough args"))
-                              ((eqv? c #\space)
+                              ((char=? c #\space)
                                (unless (char-whitespace? d)
-                                 (terror 'read-macro-args "Misformed macro call")))
+                                 (terror 'read-macro-args
+                                         "Use of macro doesn't match its definition.")))
                               ((char=? c d)
                                (loop (+ k 1) r))
                               (else
-                               (terror 'read-macro-args
-                                       "Misformed macro call")))))))))))))
-
-;(trace read-macro-args)
+                                (terror 'read-macro-args
+                                        "Use of macro doesn't match its definition."))))))))))))
 
 (define expand-edef-macro
   (lambda (rhs)
@@ -11063,6 +11111,7 @@ Try the commands
 (tex-def-prim "\\setbox" do-setbox)
 (tex-def-prim "\\setcmykcolor" (lambda () (do-switch ':cmyk)))
 (tex-def-prim "\\setcounter" do-setcounter)
+(tex-def-prim "\\settabs" do-settabs)
 (tex-def-prim "\\sevenrm" (lambda () (do-switch ':sevenrm)))
 (tex-def-prim "\\sf" (lambda () (do-switch ':sf)))
 (tex-def-prim "\\sidx" do-index)
@@ -11085,6 +11134,7 @@ Try the commands
 (tex-def-prim "\\symfootnote" do-symfootnote)
 
 (tex-def-prim "\\t" (lambda () (do-diacritic ':tieafter)))
+(tex-def-prim "\\tabalign" do-tabalign)
 (tex-def-prim "\\tabbing" do-tabbing)
 (tex-def-prim "\\table" (lambda () (do-table/figure ':table)))
 (tex-def-prim "\\tableplain" do-table-plain)
@@ -11228,6 +11278,7 @@ Try the commands
 (tex-defsym-prim "\\}" "}")
 (tex-let-prim "\\-" "\\TIIPrelax")
 (tex-def-prim "\\'" (lambda () (do-diacritic ':acute)))
+(tex-let-prim "\\+" "\\tabalign")
 (tex-def-prim "\\="
               (lambda ()
                 (unless (and (not (null? *tabular-stack*))
@@ -11711,4 +11762,4 @@ Try the commands
   (lambda args
     (tex2page
      (and (>= (length args) 1)
-          (list-ref args 0))))) 
+          (list-ref args 0)))))

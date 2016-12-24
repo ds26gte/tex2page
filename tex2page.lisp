@@ -29,7 +29,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161222" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161225" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1060,6 +1060,15 @@
           ((char= c #\{) (get-group))
           ((and *comment-char* (char= c *comment-char*)) (eat-till-eol)
            (get-token))
+          (t (concatenate 'string (list (get-actual-char)))))))
+
+(defun get-token/ps ()
+  (let ((c (snoop-actual-char)))
+    (cond ((eq c :eof-object) c)
+          ((esc-char-p c) (get-ctl-seq))
+          ((char= c #\{) (get-group))
+          ((and *comment-char* (char= c *comment-char*))
+           (eat-till-eol) (get-token/ps))
           (t (concatenate 'string (list (get-actual-char)))))))
 
 (defun eat-word (word)
@@ -3933,7 +3942,7 @@
 
 (defun do-eject ()
   (cond ((tex2page-flag-boolean "\\TZPslides")
-         (do-end-para) 
+         (do-end-para)
          (emit "</div>")
          (emit-newline)
          (emit "<div class=slide>")
@@ -3956,7 +3965,6 @@
             (setq *html* (open *html-page* :direction :output
                                :if-exists :supersede))
             (do-start)))))
-
 
 (defun output-html-preamble ()
   (when (stringp *doctype*)
@@ -6201,6 +6209,7 @@
           (when (eq c :eof-object)
             (terror 'do-halign "Eof inside \\halign"))
           (cond ((char= c #\}) (get-actual-char) (emit "</table>")
+                               (emit-newline)
                  (egroup) (do-para) (return))
                 (t (expand-halign-line tmplt))))))))
 
@@ -6251,6 +6260,46 @@
                             (setq r (concatenate 'string r y))))))))
                 (t (setq ins
                          (concatenate 'string ins x)))))))))
+
+(defun do-settabs ()
+  (loop
+    (let ((x (get-token)))
+      (cond ((eq x :eof-object)
+             (terror 'do-settabs "Eof in \\settabs"))
+            ((or (string= x "\\columns") (string= x "\\cr"))
+             (return))
+            (t t)))))
+
+(defun do-tabalign ()
+  (emit-newline)
+  (emit "<table>") (emit-newline)
+  (loop
+    (do-tabalign-row)
+    (let ((x (get-token/ps)))
+      (cond ((eq x :eof-object) (return))
+            ((or (string= x "\\+") (string= x "\\tabalign")) t)
+            (t (toss-back-string x)
+               (return)))))
+  (emit "</table>") (emit-newline))
+
+(defun do-tabalign-row ()
+  (emit "<tr>") (emit-newline)
+  (let ((cell-contents ""))
+    (loop
+      (let ((x (get-token/ps)))
+        (when (eq x :eof-object)
+          (terror 'do-tablign "Eof in \\tabalign"))
+        (cond ((or (string= x "&") (string= x "\\cr"))
+               (emit "<td>")
+               (bgroup)
+               (tex2page-string cell-contents)
+               (egroup)
+               (setq cell-contents "")
+               (emit "</td>") (emit-newline)
+               (when (string= x "\\cr") (return)))
+              (t (setq cell-contents (concatenate 'string
+                                       cell-contents x)))))))
+  (emit "</tr>") (emit-newline))
 
 (defun read-till-next-sharp (k argpat)
   ;debug for edge cases!
@@ -6307,18 +6356,18 @@
        (loop
          (when (>= k n) (return r))
          (let ((c (elt argpat k)))
-           ;eql rather than char= because \par may show up as :par
-           (cond ((eql c #\#)
+           ;eql rather than char= because \par may show up as :par?
+           (cond ((char= c #\#)
                   ;should check #n are in order!
-                  (cond ((= k (1- n)) 
+                  (cond ((= k (1- n))
                          (ignorespaces)
                          (push (get-till-char #\{) r)
                          (return r))
-                        ((= k (- n 2)) 
+                        ((= k (- n 2))
                          (push (ungroup (get-token)) r)
                          (return r))
                         (t (let ((c2 (elt argpat (+ k 2))))
-                             (if (eql c2 #\#)
+                             (if (char= c2 #\#)
                                  (progn (incf k 2)
                                         (push (ungroup (get-token)) r))
                                  (multiple-value-bind (k2 s)
@@ -6328,20 +6377,14 @@
                  (t (let ((d (get-actual-char)))
                       (when (eq d :eof-object)
                         (terror 'read-macro-args "Eof before macro got enough args"))
-                      (cond ((eql c #\space)
+                      (cond ((char= c #\space)
                              (unless (char-whitespace-p d)
-                               (terror 'read-macro-args "Misformed macro call"))
-                             ;(toss-back-char d)
-                             ;actually ignore spaces before reading a #-arg
-                             ;here just read the one space
-                             ;(what about newlines?)
-                             ;(ignorespaces)
-                             )
+                               (terror 'read-macro-args
+                                       "Use of macro doesn't match its definition.")))
                             ((char= c d) t)
-                            (t (terror 'read-macro-args "Misformed macro call")))
+                            (t (terror 'read-macro-args
+                                       "Use of macro doesn't match its definition.")))
                       (incf k))))))))))
-
-;(trace read-macro-args)
 
 (defun expand-edef-macro (rhs)
   (let* ((*not-processing-p* t)
@@ -9307,6 +9350,7 @@ Try the commands
 (tex-def-prim "\\setbox" #'do-setbox)
 (tex-def-prim "\\setcmykcolor" (lambda () (do-switch :cmyk)))
 (tex-def-prim "\\setcounter" #'do-setcounter)
+(tex-def-prim "\\settabs" #'do-settabs)
 (tex-def-prim "\\sevenrm" (lambda () (do-switch :sevenrm)))
 (tex-def-prim "\\sf" (lambda () (do-switch :sf)))
 (tex-def-prim "\\sidx" #'do-index)
@@ -9329,6 +9373,7 @@ Try the commands
 (tex-def-prim "\\symfootnote" #'do-symfootnote)
 
 (tex-def-prim "\\t" (lambda () (do-diacritic :tieafter)))
+(tex-def-prim "\\tabalign" #'do-tabalign)
 (tex-def-prim "\\tabbing" #'do-tabbing)
 (tex-def-prim "\\table" (lambda () (do-table/figure :table)))
 (tex-def-prim "\\tableplain" #'do-table-plain)
@@ -9472,6 +9517,7 @@ Try the commands
 (tex-defsym-prim "\\}" "}")
 (tex-let-prim "\\-" "\\TIIPrelax")
 (tex-def-prim "\\'" (lambda () (do-diacritic :acute)))
+(tex-let-prim "\\+" "\\tabalign")
 (tex-def-prim "\\="
               (lambda ()
                 (unless (and (not (null *tabular-stack*))

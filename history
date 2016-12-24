@@ -1,4 +1,9 @@
-Last change 2016-12-22
+Last change 2016-12-25
+
+2016 Dec 25
+
+Added \settabs, \+ (\tabalign) (TeXbk, ch 22). (Ignore column-number
+specification and sample line for now.)
 
 2016 Dec 22
 

@@ -1,4 +1,4 @@
-; last change: 2016-12-17
+; last change: 2016-12-27
 
 (scmxlate-cond
   ((eqv? *operating-system* 'unix)
@@ -43,6 +43,9 @@
 (define date-year (lambda (tm) (slot-ref tm 'year)))
 
 (define eof (with-input-from-string "" read-char))
+
+(define (string-upcase s)
+  (list->string (map char-upcase (string->list s))))
 
 (define andmap
   (lambda (f s)

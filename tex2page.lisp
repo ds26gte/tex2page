@@ -5737,6 +5737,7 @@
   (tex-def-count "\\TIIPnestedtabularborder" 0 t)
   (tex-def-count "\\TIIPobeyspacestrictly" 0 t)
   (tex-def-count "\\TIIPobeylinestrictly" 0 t)
+  (tex-def-count "\\TIIPsettabscolumns" 0 t)
   (tex-def-count "\\errorcontextlines" 5 t)
   (tex-def-count "\\doublehyphendemerits" 10000 t)
   (tex-def-count "\\finalhyphendemerits" 5000 t)
@@ -6261,14 +6262,21 @@
                 (t (setq ins
                          (concatenate 'string ins x)))))))))
 
+
 (defun do-settabs ()
-  (loop
-    (let ((x (get-token)))
-      (cond ((eq x :eof-object)
-             (terror 'do-settabs "Eof in \\settabs"))
-            ((or (string= x "\\columns") (string= x "\\cr"))
-             (return))
-            (t t)))))
+  (let ((settabs-spec ""))
+    (loop
+      (let ((x (get-token/ps)))
+        (when (eq x :eof-object)
+          (terror 'do-settabs "Eof in \\settabs"))
+        (cond ((string= x "\\columns")
+               (tex2page-string 
+                 (concatenate 'string "\\TIIPsettabscolumns=" settabs-spec))
+               (return))
+              ((string= x "\\cr")
+               (tex-def-count "\\TIIPsettabscolumns" 0 nil)
+               (return))
+              (t (setq settabs-spec (concatenate 'string settabs-spec x))))))))
 
 (defun do-tabalign ()
   (emit-newline)
@@ -6284,13 +6292,20 @@
 
 (defun do-tabalign-row ()
   (emit "<tr>") (emit-newline)
-  (let ((cell-contents ""))
+  (let ((cell-contents "")
+        (cell-width (find-count "\\TIIPsettabscolumns")))
+    (setq cell-width
+          (cond ((= cell-width 0) "")
+                (t (concatenate 'string " width: "
+                     (write-to-string (/ 100.0 cell-width)) "%"))))
     (loop
       (let ((x (get-token/ps)))
         (when (eq x :eof-object)
           (terror 'do-tablign "Eof in \\tabalign"))
         (cond ((or (string= x "&") (string= x "\\cr"))
-               (emit "<td>")
+               (emit "<td")
+               (emit cell-width)
+               (emit ">")
                (bgroup)
                (tex2page-string cell-contents)
                (egroup)

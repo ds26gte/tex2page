@@ -6280,24 +6280,28 @@
 
 (defun do-tabalign ()
   (emit-newline)
-  (emit "<table>") (emit-newline)
-  (loop
-    (do-tabalign-row)
-    (let ((x (get-token/ps)))
-      (cond ((eq x :eof-object) (return))
-            ((or (string= x "\\+") (string= x "\\tabalign")) t)
-            (t (toss-back-string x)
-               (return)))))
+  (let ((table-width "")
+        (num-cols (find-count "\\TIIPsettabscolumns")))
+    (when (> num-cols 0)
+      (setq table-width " width=100%"))
+    (emit "<table") (emit table-width) (emit ">") (emit-newline)
+    (loop
+      (do-tabalign-row num-cols)
+      (let ((x (get-token/ps)))
+        (cond ((eq x :eof-object) (return))
+              ((or (string= x "\\+") (string= x "\\tabalign")) t)
+              (t (toss-back-string x)
+                 (return))))))
   (emit "</table>") (emit-newline))
 
-(defun do-tabalign-row ()
+(defun do-tabalign-row (num-cols)
   (emit "<tr>") (emit-newline)
   (let ((cell-contents "")
-        (cell-width (find-count "\\TIIPsettabscolumns")))
-    (setq cell-width
-          (cond ((= cell-width 0) "")
-                (t (concatenate 'string " width: "
-                     (write-to-string (/ 100.0 cell-width)) "%"))))
+        (cell-width ""))
+    (when (> num-cols 0)
+      (setq cell-width
+            (concatenate 'string " width="
+              (write-to-string (/ 100.0 num-cols)) "%")))
     (loop
       (let ((x (get-token/ps)))
         (when (eq x :eof-object)

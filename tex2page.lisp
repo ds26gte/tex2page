@@ -29,7 +29,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161225" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161228" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -2446,9 +2446,7 @@
           (cmyk-to-rrggbb 0 0 0 (- 1 (/ g 15))))))
     (:html
       (with-input-from-string (i (tex-string-to-html-string (get-token)))
-        (let ((rrggbb (format nil "#~6,'0x"
-                              (let ((*read-base* 16))
-                                (read i nil :eof-object)))))
+        (let ((rrggbb (read-6hex i)))
           (ignorespaces)
           rrggbb)))
     (:hsb
@@ -2518,6 +2516,11 @@
     (princ color *css-port*)
     (princ "; }" *css-port*)
     (terpri *css-port*)))
+
+(defun read-6hex (i)
+  (format nil "#~6,'0x"
+          (let ((*read-base* 16))
+            (read i nil :eof-object))))
 
 (defun do-colorbox ()
   (let* ((color (get-group))
@@ -3078,7 +3081,7 @@
   (unless (null *unresolved-xrefs*)
     (write-log :separation-newline)
     (write-log "Unresolved cross-reference")
-    (if (> (length *unresolved-xrefs*) 1) (write-log "s"))
+    (when (> (length *unresolved-xrefs*) 1) (write-log "s"))
     (write-log ": ")
     (setq *unresolved-xrefs* (nreverse *unresolved-xrefs*))
     (write-log (car *unresolved-xrefs*))
@@ -3743,13 +3746,13 @@
 
 (defun do-hspace ()
   (ignorespaces)
-  (if (eql (snoop-actual-char) #\*) (get-actual-char))
+  (when (eql (snoop-actual-char) #\*) (get-actual-char))
   (get-group)
   (emit-nbsp 3))
 
 (defun do-vspace ()
   (ignorespaces)
-  (if (eql (snoop-actual-char) #\*) (get-actual-char))
+  (when (eql (snoop-actual-char) #\*) (get-actual-char))
   (get-group)
   (do-bigskip :vspace))
 
@@ -7346,7 +7349,7 @@
   (emit "</td><td")
   (ignorespaces)
   (let ((c (snoop-actual-char)))
-    (if (char= c #\\)
+    (when (char= c #\\)
         (let ((x (get-ctl-seq)))
           (if (string= x "\\multispan")
               (let ((n (ungroup (get-token))))
@@ -7809,6 +7812,7 @@
                (*source-changed-since-last-run-p*
                 (flag-missing-piece :fresh-index) t)
                (t nil))))
+    ;bibtex
     (when run-bibtex-p
       (write-log :separation-newline)
       (write-log "Running: bibtex ")
@@ -7824,6 +7828,7 @@
            (concatenate 'string *jobname* *bib-aux-file-suffix* ".bbl"))
         (write-log " ... failed; try manually"))
       (write-log :separation-newline))
+    ;makeindex
     (when run-makeindex-p
       (write-log :separation-newline)
       (write-log "Running: makeindex ")
@@ -7840,9 +7845,9 @@
                         ".ind"))
         (write-log " ... failed; try manually"))
       (write-log :separation-newline))
-    (let ((eval4tex-aux-file (concatenate 'string *jobname* ".eval4tex")))
-      (when (probe-file eval4tex-aux-file)
-        (load eval4tex-aux-file)))
+    ;eval4tex
+    (load (concatenate 'string *jobname* ".eval4tex") :if-does-not-exist nil)
+    ;metapost
     (mapc
      (lambda (f)
          (when (probe-file f)
@@ -7852,6 +7857,7 @@
            (write-log :separation-newline)
            (call-mp f)))
      *mp-files*)
+    ;eps files
     (mapc
      (lambda (eps-file+img-file-stem)
          (retry-lazy-image (car eps-file+img-file-stem)
@@ -8262,7 +8268,7 @@
 (defun probably-latex ()
   (when (null *tex-env*)
     (incf *latex-probability* 1)
-    (if (>= *latex-probability* 2) (definitely-latex))))
+    (when (>= *latex-probability* 2) (definitely-latex))))
 
 (let ((already-noted-p nil))
   (defun definitely-latex ()

@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161225") ;last change
+(define *tex2page-version* "20161228") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -456,8 +456,8 @@
 ;creates
 ;the constructor make-structname
 ;the predicate structname?
-;the accessors structname.field (for each field)
-;the setters set!structname.field (for each field)
+;the accessors structname-field (for each field)
+;the setters set!structname-field (for each field)
 ;
 ;make-structname can take {field init-value} arguments,
 ;in which it case it sets field to init-value.  Otherwise,
@@ -512,12 +512,12 @@
                                           (list-ref ff (- i 1)))))
                                    (cons
                                      `(define ,(string->symbol
-                                                 (string-append s-s "." f))
+                                                 (string-append s-s "-" f))
                                         (lambda (x) (vector-ref x ,i)))
                                      (cons
                                        `(define ,(string->symbol
                                                    (string-append
-                                                "set!" s-s "." f))
+                                                "set!" s-s "-" f))
                                           (lambda (x v) (vector-set! x ,i v)))
                                        procs))))))
                    (define ,(string->symbol (string-append s-s "?"))
@@ -528,24 +528,24 @@
 
 (define table-get
   (lambda (tbl k . d)
-    (cond ((lassoc k (table.alist tbl) (table.equ tbl))
+    (cond ((lassoc k (table-alist tbl) (table-equ tbl))
            => (lambda (c) (vector-ref (cdr c) 0)))
           ((pair? d) (car d))
           (else #f))))
 
 (define table-put!
   (lambda (tbl k v)
-    (let ((al (table.alist tbl)))
-      (let ((c (lassoc k al (table.equ tbl))))
+    (let ((al (table-alist tbl)))
+      (let ((c (lassoc k al (table-equ tbl))))
         (if c (vector-set! (cdr c) 0 v)
-            (set!table.alist tbl (cons (cons k (vector v)) al)))))))
+            (set!table-alist tbl (cons (cons k (vector v)) al)))))))
 
 (define table-for-each
   (lambda (tbl p)
     (for-each
      (lambda (c)
        (p (car c) (vector-ref (cdr c) 0)))
-     (table.alist tbl))))
+     (table-alist tbl))))
 
 (define lassoc
   (lambda (k al equ?)
@@ -564,9 +564,9 @@
               (if (equ? x y) r
                   (cons x r))))))))
 
-(defstruct counter (value 0) (within #f))
+(defstruct counter* (value 0) (within #f))
 
-(defstruct tocentry level number page label header)
+(defstruct tocentry* level number page label header)
 
 (define string-trim-blanks
   (lambda (s)
@@ -835,7 +835,7 @@
 
 ;Input port buffers
 
-(defstruct bport (port #f) (buffer '()))
+(defstruct bport* (port #f) (buffer '()))
 
 (define call-with-input-file/buffered
   (lambda (f th)
@@ -844,7 +844,7 @@
         "I can't find file " f))
     (call-with-input-file f
       (lambda (i)
-        (fluid-let ((*current-tex2page-input* (make-bport 'port i))
+        (fluid-let ((*current-tex2page-input* (make-bport* 'port i))
                     (*current-source-file* f)
                     (*input-line-no* 1))
           (th))))))
@@ -852,7 +852,7 @@
 (define call-with-input-string/buffered
   (lambda (s th)
     (fluid-let ((*current-tex2page-input*
-                  (make-bport 'buffer (string->list s)))
+                  (make-bport* 'buffer (string->list s)))
                 (*input-line-no* *input-line-no*))
       (th))))
 
@@ -875,9 +875,9 @@
 
 (define get-char
   (lambda ()
-    (let ((b (bport.buffer *current-tex2page-input*)))
+    (let ((b (bport*-buffer *current-tex2page-input*)))
       (if (null? b)
-          (let ((p (bport.port *current-tex2page-input*)))
+          (let ((p (bport*-port *current-tex2page-input*)))
             (if (not p) eof
                 (let ((c (read-char p)))
                   (cond ((eof-object? c) c)
@@ -886,18 +886,18 @@
                          c)
                         (else c)))))
           (let ((c (car b)))
-            (set!bport.buffer *current-tex2page-input* (cdr b))
+            (set!bport*-buffer *current-tex2page-input* (cdr b))
             c)))))
 
 (define toss-back-string
   (lambda (s)
-    (set!bport.buffer *current-tex2page-input*
-      (nconc (string->list s) (bport.buffer *current-tex2page-input*)))))
+    (set!bport*-buffer *current-tex2page-input*
+      (nconc (string->list s) (bport*-buffer *current-tex2page-input*)))))
 
 (define toss-back-char
   (lambda (c)
-    (set!bport.buffer *current-tex2page-input*
-      (cons c (bport.buffer *current-tex2page-input*)))))
+    (set!bport*-buffer *current-tex2page-input*
+      (cons c (bport*-buffer *current-tex2page-input*)))))
 
 (define emit
   (lambda (s)
@@ -1339,7 +1339,7 @@
           ((string=? x "\\footnotenumber")
            (get-gcount "\\footnotenumber"))
           ((string=? x "\\figurenumber")
-           (counter.value (table-get *dotted-counters* "figure")))
+           (counter*-value (table-get *dotted-counters* "figure")))
           ((string=? x "\\sectiondnumber")
            (table-get *section-counters*
                       (string->number
@@ -1583,7 +1583,7 @@
 
 ;Groups
 
-(defstruct texframe
+(defstruct texframe*
   (definitions (make-table 'equ string=?))
   (chardefinitions (make-table))
   (counts (make-table 'equ string=?))
@@ -1594,12 +1594,12 @@
   (lccodes (make-table 'equ char=?))
   (aftergroups '()))
 
-(define *primitive-texframe* (make-texframe))
-(define *math-primitive-texframe* (make-texframe))
+(define *primitive-texframe* (make-texframe*))
+(define *math-primitive-texframe* (make-texframe*))
 
 (define bgroup
   (lambda ()
-    (set! *tex-env* (cons (make-texframe) *tex-env*))
+    (set! *tex-env* (cons (make-texframe*) *tex-env*))
     (when (and *in-display-math-p* (not *math-script-mode-p*))
       (bgroup-math-hook))))
 
@@ -1683,11 +1683,11 @@
   (lambda ()
     (for-each
      (lambda (p) (p))
-     (texframe.postludes (top-texframe)))))
+     (texframe*-postludes (top-texframe)))))
 
 (define perform-aftergroups
   (lambda ()
-    (let ((ags (texframe.aftergroups (top-texframe))))
+    (let ((ags (texframe*-aftergroups (top-texframe))))
       (unless (null? ags)
         (toss-back-char *invisible-space*))
       (for-each
@@ -1703,16 +1703,16 @@
 (define add-postlude-to-top-frame
   (lambda (p)
     (let ((fr (if (null? *tex-env*) *global-texframe* (car *tex-env*))))
-      (set!texframe.postludes
+      (set!texframe*-postludes
        fr
-       (cons p (texframe.postludes fr))))))
+       (cons p (texframe*-postludes fr))))))
 
 (define add-aftergroup-to-top-frame
   (lambda (ag)
     (let ((fr (if (null? *tex-env*) *global-texframe* (car *tex-env*))))
-      (set!texframe.aftergroups
+      (set!texframe*-aftergroups
        fr
-       (cons ag (texframe.aftergroups fr))))))
+       (cons ag (texframe*-aftergroups fr))))))
 
 (define top-texframe
   (lambda ()
@@ -1720,53 +1720,53 @@
 
 ;
 
-(defstruct tdef
+(defstruct tdef*
   (argpat '()) (expansion "") (optarg #f)
   (thunk #f) (prim #f) (defer #f))
 
-(defstruct cdef
+(defstruct cdef*
   (argpat #f) (expansion #f) (optarg #f) (active #f))
 
 (define kopy-tdef
   (lambda (lft rt)
-    (set!tdef.argpat lft (tdef.argpat rt))
-    (set!tdef.expansion lft (tdef.expansion rt))
-    (set!tdef.optarg lft (tdef.optarg rt))
-    (set!tdef.thunk lft (tdef.thunk rt))
-    (set!tdef.prim lft (tdef.prim rt))
-    (set!tdef.defer lft (tdef.defer rt))))
+    (set!tdef*-argpat lft (tdef*-argpat rt))
+    (set!tdef*-expansion lft (tdef*-expansion rt))
+    (set!tdef*-optarg lft (tdef*-optarg rt))
+    (set!tdef*-thunk lft (tdef*-thunk rt))
+    (set!tdef*-prim lft (tdef*-prim rt))
+    (set!tdef*-defer lft (tdef*-defer rt))))
 
 (define kopy-cdef
   (lambda (lft rt)
-    (set!cdef.argpat lft (cdef.argpat rt))
-    (set!cdef.expansion lft (cdef.expansion rt))
-    (set!cdef.optarg lft (cdef.optarg rt))
-    (set!cdef.active lft (cdef.active rt))))
+    (set!cdef*-argpat lft (cdef*-argpat rt))
+    (set!cdef*-expansion lft (cdef*-expansion rt))
+    (set!cdef*-optarg lft (cdef*-optarg rt))
+    (set!cdef*-active lft (cdef*-active rt))))
 
 (define cleanse-tdef
   (lambda (d)
-    (set!tdef.argpat d '())
-    (set!tdef.expansion d "")
-    (set!tdef.optarg d #f)
-    (set!tdef.thunk d #f)
-    (set!tdef.prim d #f)
-    (set!tdef.defer d #f)))
+    (set!tdef*-argpat d '())
+    (set!tdef*-expansion d "")
+    (set!tdef*-optarg d #f)
+    (set!tdef*-thunk d #f)
+    (set!tdef*-prim d #f)
+    (set!tdef*-defer d #f)))
 
 (define tex-def
   (lambda (name argpat expansion optarg thunk prim defer frame)
     (unless frame (set! frame (top-texframe)))
-    (let* ((frame-defs (texframe.definitions frame))
+    (let* ((frame-defs (texframe*-definitions frame))
            (d (or (table-get frame-defs name)
-                  (let ((d (make-tdef)))
+                  (let ((d (make-tdef*)))
                     (table-put! frame-defs name
                                 d)
                     d))))
-      (set!tdef.argpat d argpat)
-      (set!tdef.expansion d expansion)
-      (set!tdef.optarg d optarg)
-      (set!tdef.thunk d thunk)
-      (set!tdef.prim d prim)
-      (set!tdef.defer d defer))
+      (set!tdef*-argpat d argpat)
+      (set!tdef*-expansion d expansion)
+      (set!tdef*-optarg d optarg)
+      (set!tdef*-thunk d thunk)
+      (set!tdef*-prim d prim)
+      (set!tdef*-defer d defer))
     (perform-afterassignment)))
 
 (define tex-def-prim
@@ -1783,7 +1783,7 @@
 
 (define ctl-seq-no-arg-expand-once
   (lambda (cs)
-    (cond ((find-def cs) => tdef.expansion)
+    (cond ((find-def cs) => tdef*-expansion)
           (else #f))))
 
 (define tex-gdef-0arg
@@ -1798,7 +1798,7 @@
 
 (define get-0arg-expn
   (lambda (cs)
-    (cond ((find-def cs) => tdef.expansion)
+    (cond ((find-def cs) => tdef*-expansion)
           (else "0"))))
 
 (define tex2page-flag-value
@@ -1813,10 +1813,10 @@
 (define tex-let
   (lambda (lft rt frame)
     (unless frame (set! frame (top-texframe)))
-    (let* ((frame-defs (texframe.definitions frame))
+    (let* ((frame-defs (texframe*-definitions frame))
            (lft-def
              (or (table-get frame-defs lft)
-                 (let ((lft-def (make-tdef)))
+                 (let ((lft-def (make-tdef*)))
                    (table-put! frame-defs lft lft-def)
                    lft-def))))
       (cond ((find-def rt)
@@ -1824,7 +1824,7 @@
                   (kopy-tdef lft-def rt-def)))
             (else
               (cleanse-tdef lft-def)
-              ;(set!tdef.defer lft-def rt)
+              ;(set!tdef*-defer lft-def rt)
               )))))
 
 (define (tex-let-general lhs rhs frame)
@@ -1845,18 +1845,18 @@
 (define tex-def-count
   (lambda (name num g?)
     (let ((frame (if g? *global-texframe* (top-texframe))))
-      (table-put! (texframe.counts frame) name num))
+      (table-put! (texframe*-counts frame) name num))
     (perform-afterassignment)))
 
 (define tex-def-toks
   (lambda (name tokens g?)
     (let ((frame (if g? *global-texframe* (top-texframe))))
-      (table-put! (texframe.toks frame) name tokens))))
+      (table-put! (texframe*-toks frame) name tokens))))
 
 (define tex-def-dimen
   (lambda (name len g?)
     (let ((frame (if g? *global-texframe* (top-texframe))))
-      (table-put! (texframe.dimens frame) name len)
+      (table-put! (texframe*-dimens frame) name len)
     (perform-afterassignment))))
 
 ;char defs
@@ -1866,38 +1866,38 @@
     ;are we using argpat?
     (unless frame (set! frame (top-texframe)))
     (let ((d (ensure-cdef char frame)))
-      (set!cdef.argpat d argpat)
-      (set!cdef.expansion d expansion)
-      ;(set!cdef.active d #t)
+      (set!cdef*-argpat d argpat)
+      (set!cdef*-expansion d expansion)
+      ;(set!cdef*-active d #t)
       )
     (perform-afterassignment)))
 
 (define ensure-cdef
   (lambda (c f)
-    (let ((f-chardefs (texframe.chardefinitions f)))
+    (let ((f-chardefs (texframe*-chardefinitions f)))
       (or (table-get f-chardefs c)
-          (let ((d (make-cdef)))
+          (let ((d (make-cdef*)))
             (table-put! f-chardefs c d)
             d)))))
 
 (define find-chardef
   (lambda (c)
     (let ((x (or (ormap (lambda (f)
-                          (table-get (texframe.chardefinitions f) c))
+                          (table-get (texframe*-chardefinitions f) c))
                         *tex-env*)
-                 (table-get (texframe.chardefinitions
+                 (table-get (texframe*-chardefinitions
                            *global-texframe*) c)
-                 (table-get (texframe.chardefinitions
+                 (table-get (texframe*-chardefinitions
                            *primitive-texframe*) c))))
-      (and x (cdef.active x) x))))
+      (and x (cdef*-active x) x))))
 
 (define find-chardef-in-top-frame
   (lambda (c)
     (let ((x (if (null? *tex-env*)
-                 (or (table-get (texframe.chardefinitions *global-texframe*) c)
-                     (table-get (texframe.chardefinitions *primitive-texframe*) c))
-               (table-get (texframe.chardefinitions (car *tex-env*)) c))))
-      (and x (cdef.active x) x))))
+                 (or (table-get (texframe*-chardefinitions *global-texframe*) c)
+                     (table-get (texframe*-chardefinitions *primitive-texframe*) c))
+               (table-get (texframe*-chardefinitions (car *tex-env*)) c))))
+      (and x (cdef*-active x) x))))
 
 (define do-defcsactive
   (lambda (g?)
@@ -1913,24 +1913,24 @@
   (lambda (c)
     (let ((y (cond ((find-chardef-in-top-frame c)
                     => (lambda (y)
-                         (set!cdef.active y #t)
+                         (set!cdef*-active y #t)
                          y))
                    (else
                      (let* ((d (find-chardef c))
                             (y (ensure-cdef c (top-texframe))))
                        (when d (kopy-cdef y d))
-                       (set!cdef.active y #t)
+                       (set!cdef*-active y #t)
                        y)))))
       (add-postlude-to-top-frame
         (lambda ()
-          (set!cdef.active y #f))))))
+          (set!cdef*-active y #f))))))
 
 (define deactivate-cdef
   (lambda (c)
     (cond ((find-chardef-in-top-frame c)
            ;if c is active in current group,
            ;deactivate it
-           => (lambda (y) (set!cdef.active y #f)))
+           => (lambda (y) (set!cdef*-active y #f)))
           ((find-chardef c)
            ;if c is active in an enclosing group,
            ;create a shadowing unactive def for
@@ -1938,7 +1938,7 @@
            => (lambda (y)
                 (let ((d (ensure-cdef c (top-texframe))))
                   (kopy-cdef d y)
-                  (set!cdef.active d #f)))))))
+                  (set!cdef*-active d #f)))))))
 
 (define do-undefcsactive
   (lambda ()
@@ -2286,7 +2286,7 @@
     ;this section level
     (for-each
       (lambda (counter-name)
-        (set!counter.value
+        (set!counter*-value
           (table-get *dotted-counters* counter-name)
           0))
       (table-get *section-counter-dependencies* seclvl '()))))
@@ -2652,10 +2652,10 @@
 (define bump-dotted-counter
   (lambda (name)
     (let* ((counter (table-get *dotted-counters* name))
-           (new-value (+ 1 (counter.value counter))))
-      (set!counter.value counter new-value)
+           (new-value (+ 1 (counter*-value counter))))
+      (set!counter*-value counter new-value)
       (let ((num (string-append
-                 (cond ((counter.within counter)
+                 (cond ((counter*-within counter)
                         => (lambda (sec-num)
                              (string-append
                               (section-counter-value sec-num)
@@ -2855,9 +2855,9 @@
              (let ((tocdepth (get-gcount "\\tocdepth")))
                (for-each
                 (lambda (x)
-                  (let* ((lvl (tocentry.level x))
-                         (secnum (tocentry.number x))
-                         (seclabel (tocentry.label x))
+                  (let* ((lvl (tocentry*-level x))
+                         (secnum (tocentry*-number x))
+                         (seclabel (tocentry*-label x))
                          (subentries?
                           (or (= lvl -1) ;always bold parts
                               (and (= lvl 0)
@@ -2876,7 +2876,7 @@
                     (indent-n-levels lvl)
                     (emit-anchor (string-append *html-node-prefix* "toc_" seclabel))
                     (emit-page-node-link-start
-                     (tocentry.page x)
+                     (tocentry*-page x)
                      seclabel)
                     ;(when (= lvl -1) (emit "Part "))
                     (unless (or (string=? secnum "") (string=? secnum "IGNORE"))
@@ -2886,7 +2886,7 @@
                       (emit-nbsp 2))
                     (fluid-let ((*tabular-stack* (list ':header)))
                       ;tex2page-string
-                      (emit (tocentry.header x)))
+                      (emit (tocentry*-header x)))
                     (emit-link-stop)
                     (when subentries?
                       (emit "</b>"))
@@ -2895,7 +2895,7 @@
                 *toc-list*))))
       (emit-anchor (string-append *html-node-prefix* "toc_end")))))
 
-(defstruct footnotev mark text tag caller)
+(defstruct footnotev* mark text tag caller)
 
 (define do-numbered-footnote
   (lambda ()
@@ -2987,7 +2987,7 @@
         (lambda ()
           ;(close-output-port *html*)
           (set! *footnote-list*
-            (cons (make-footnotev
+            (cons (make-footnotev*
                     'mark fnmark
                     'text (get-output-string fn-tmp-port)
                     'tag fntag
@@ -3006,12 +3006,12 @@
         (let loop ((i (- n 1)))
           (unless (< i 0)
             (let* ((fv (list-ref *footnote-list* i))
-                   (fnmark (footnotev.mark fv))
+                   (fnmark (footnotev*-mark fv))
                    (fnno (string->number fnmark))
-                   (fncalltag (footnotev.caller fv)))
+                   (fncalltag (footnotev*-caller fv)))
               (do-para)
               (when fncalltag
-                (emit-anchor (footnotev.tag fv))
+                (emit-anchor (footnotev*-tag fv))
                 (when fnno (emit "<sup><small>"))
                 (emit-page-node-link-start #f fncalltag))
               (emit fnmark)
@@ -3019,7 +3019,7 @@
                 (emit-link-stop)
                 (when fnno (emit "</small></sup>")))
               (emit " ")
-              (emit (footnotev.text fv))
+              (emit (footnotev*-text fv))
               (do-end-para)
               (loop (- i 1)))))
         (emit "</div>")
@@ -3147,7 +3147,7 @@
      (call-with-input-string
        (tex-string-to-html-string (get-token))
        (lambda (i)
-         (let ((rrggbb (atom-to-6hex (read i))))
+         (let ((rrggbb (read-6hex i)))
            (ignorespaces)
            rrggbb))))
     ((:hsb)
@@ -3225,11 +3225,12 @@
     (display "; }" *css-port*)
     (newline *css-port*)))
 
-(define (atom-to-6hex x)
-  (let ((htmlcolor (string-upcase
-                     (cond ((symbol? x) (symbol->string x))
-                           ((number? x) (number->string x))
-                           (else (terror 'atom-to-6hex "Misformed argument."))))))
+(define (read-6hex i)
+  (let* ((x (read i))
+         (htmlcolor (string-upcase
+                      (cond ((symbol? x) (symbol->string x))
+                            ((number? x) (number->string x))
+                            (else (terror 'atom-to-6hex "Misformed argument."))))))
     (string-append "#" (case (string-length htmlcolor)
                          ((1) "00000")
                          ((2) "0000")
@@ -3700,7 +3701,7 @@
 
 ;cross-references
 
-(defstruct label (src #f) page name value)
+(defstruct label* (src #f) page name value)
 
 (define get-label
   (lambda ()
@@ -3865,12 +3866,12 @@
     (let* ((label-ref (label-bound? label ext-file))
            (label-text
             (cond (link-text (tex-string-to-html-string link-text))
-                  (label-ref (label.value label-ref))
+                  (label-ref (label*-value label-ref))
                   (else #f))))
       (cond (label-ref (emit-ext-page-node-link-start
-                        (or ext-file (label.src label-ref))
-                        (label.page label-ref)
-                        (label.name label-ref))
+                        (or ext-file (label*-src label-ref))
+                        (label*-page label-ref)
+                        (label*-name label-ref))
                        (emit label-text)
                        (emit-link-stop))
             (else (non-fatal-error label))))))
@@ -4021,9 +4022,9 @@
   (lambda ()
     (let ((label-ref (label-bound? (get-peeled-group))))
       (if label-ref
-          (let ((pageno (label.page label-ref)))
+          (let ((pageno (label*-page label-ref)))
             (emit-ext-page-node-link-start
-             (label.src label-ref) pageno #f)
+             (label*-src label-ref) pageno #f)
             (emit pageno)
             (emit-link-stop))
           (non-fatal-error "***")))))
@@ -4034,8 +4035,8 @@
       (let ((label-ref (label-bound? label)))
         (emit "\"")
         (if label-ref
-            (emit (maybe-label-page (label.src label-ref)
-                                    (label.page label-ref)))
+            (emit (maybe-label-page (label*-src label-ref)
+                                    (label*-page label-ref)))
             ;above needs trailing # ?
             (emit *log-file*))
         (emit "\"")))))
@@ -4049,8 +4050,8 @@
               (let* ((label (substring url 1 n))
                      (label-ref (label-bound? label)))
                 (if label-ref
-                    (if (label.src label-ref) #f
-                        (list (label.page label-ref) (label.name label-ref)))
+                    (if (label*-src label-ref) #f
+                        (list (label*-page label-ref) (label*-name label-ref)))
                     #f)))
              (else #f)))))
 
@@ -4062,10 +4063,10 @@
                      (label-ref (label-bound? label)))
                 (if label-ref
                     (string-append
-                      (maybe-label-page (label.src label-ref)
-                                       (label.page label-ref))
+                      (maybe-label-page (label*-src label-ref)
+                                       (label*-page label-ref))
                      "#"
-                     (label.name label-ref))
+                     (label*-name label-ref))
                     url)))
             ((fully-qualified-url-p url) url)
             (else (ensure-url-reachable url)
@@ -5038,7 +5039,7 @@
   (let ((cl-p (not 'nil))
         (doc-expects-cl-p (tex2page-flag-boolean "\\TZPcommonlisp")))
     (unless (eqv? cl-p doc-expects-cl-p)
-      (write-log :separation-newline)
+      (write-log ':separation-newline)
       (write-log "! Document ")
       (write-log *main-tex-file*)
       (write-log " appears to require ")
@@ -5174,7 +5175,7 @@
   (lambda ()
     (let ((hsize (cond ((find-def "\\TZPhsize")
                         => (lambda (d)
-                             (tex2page-string (string-append "\\TIIPhsize=" (tdef.expansion d)))
+                             (tex2page-string (string-append "\\TIIPhsize=" (tdef*-expansion d)))
                              (find-dimen "\\TIIPhsize")))
                        (*tex-like-layout-p* (find-dimen "\\hsize"))
                        (else #f))))
@@ -5192,7 +5193,7 @@
            => (lambda (d)
                 (write-aux
                  `(!preferred-title
-                   ,(tex-string-to-html-string (tdef.expansion d)))))))
+                   ,(tex-string-to-html-string (tdef*-expansion d)))))))
     (when (tex2page-flag-boolean "\\TZPcolophonlastpage")
       (write-aux `(!colophon :last-page)))
     (when (or (tex2page-flag-boolean "\\TZPcolophondisabletimestamp")
@@ -5715,7 +5716,7 @@
                      (open-output-file f))
                     (else
                      (set! f (actual-tex-filename f #f))
-                     (make-bport 'port (open-input-file f))))))))
+                     (make-bport* 'port (open-input-file f))))))))
 
 (define do-close-stream
   (lambda (type)
@@ -5728,7 +5729,7 @@
         (terror 'do-close-stream))
       (case type
         ((:out) (close-output-port  c))
-        ((:in) (close-output-port (bport.port c))))
+        ((:in) (close-output-port (bport*-port c))))
       (table-put! sl o ':free))))
 
 (define tex-write-output-string
@@ -5793,7 +5794,7 @@
            (x (begin (get-to) (get-ctl-seq)))
            (p #f))
       (cond ((ormap (lambda (j) (= i j)) '(-1 16))
-             (set! p (make-bport 'port (current-input-port)))
+             (set! p (make-bport* 'port (current-input-port)))
              (unless (= i -1)
                (write-log x) (write-log #\=)))
             ((table-get *input-streams* i)
@@ -5808,7 +5809,7 @@
 (define do-typein
   (lambda ()
     (let ((ctlseq (get-bracketed-text-if-any))
-          (p (make-bport 'port (current-input-port))))
+          (p (make-bport* 'port (current-input-port))))
       (write-log ':separation-newline)
       (write-log (tex-string-to-html-string (get-group)))
       (write-log ':separation-newline)
@@ -5859,16 +5860,16 @@
                (set! one2
                  (cond ((find-def one)
                         => (lambda (d)
-                             (or (tdef.expansion d)
-                                 (tdef.prim d))))
+                             (or (tdef*-expansion d)
+                                 (tdef*-prim d))))
                        ((find-math-def one) => (lambda (x) x))
                        (else "UnDeFiNeD"))))
              (when (ctl-seq? two)
                (set! two2
                  (cond ((find-def two)
                         => (lambda (d)
-                             (or (tdef.expansion d)
-                                 (tdef.prim d))))
+                             (or (tdef*-expansion d)
+                                 (tdef*-prim d))))
                        ((find-math-def two) => (lambda (x) x))
                        (else "UnDeFiNeD"))))
              (if (or (eqv? one2 two2)
@@ -6067,7 +6068,7 @@
     ;run tex on f and return f.ps or f.pdf if successful
     (unless tex-prog-name
       (let ((d (find-def "\\TZPtexprogname")))
-        (when d (set! tex-prog-name (tdef.expansion d))))
+        (when d (set! tex-prog-name (tdef*-expansion d))))
       (unless tex-prog-name (set! tex-prog-name "pdftex"))
       (set! tex-output-format
         (if (or (eqv? (substring? "pdf" tex-prog-name) 0)
@@ -6907,30 +6908,30 @@
     (cond ((find-chardef c)
            => (lambda (y)
                 (get-actual-char)
-                (expand-tex-macro (cdef.optarg y)
-                                  (cdef.argpat y)
-                                  (cdef.expansion y))))
+                (expand-tex-macro (cdef*-optarg y)
+                                  (cdef*-argpat y)
+                                  (cdef*-expansion y))))
           (else #f))))
 
 (define resolve-defs
   (lambda (x)
     (cond ((find-def x)
            => (lambda (y)
-                (cond ((tdef.defer y) => (lambda (z) z))
-                      ((tdef.thunk y) #f)
+                (cond ((tdef*-defer y) => (lambda (z) z))
+                      ((tdef*-thunk y) #f)
                       (else
                         (cond ((and (inside-false-world?)
                                     (not (if-aware-ctl-seq? x))
-                                    ;(> (length (tdef.argpat y)) 0)
+                                    ;(> (length (tdef*-argpat y)) 0)
                                     ) #f)
                               (else
                                 (when *outer-p*
                                   (set! *outer-p* #f)
                                   (toss-back-char *outer-invisible-space*))
                                 (expand-tex-macro
-                                  (tdef.optarg y)
-                                  (tdef.argpat y)
-                                  (tdef.expansion y))))))))
+                                  (tdef*-optarg y)
+                                  (tdef*-argpat y)
+                                  (tdef*-expansion y))))))))
           (else #f))))
 
 (define do-expandafter
@@ -6994,7 +6995,7 @@
 
 (define initialize-globals
   (lambda ()
-    (set! *global-texframe* (make-texframe))
+    (set! *global-texframe* (make-texframe*))
     (set! *section-counter-dependencies* (make-table))
     (set! *dotted-counters* (make-table 'equ string=?))
 
@@ -7093,42 +7094,42 @@
   (lambda (ctlseq)
     (or (ormap
           (lambda (fr)
-            (table-get (texframe.definitions fr) ctlseq))
+            (table-get (texframe*-definitions fr) ctlseq))
           *tex-env*)
         (and *global-texframe*
-             (table-get (texframe.definitions *global-texframe*) ctlseq))
-        (table-get (texframe.definitions *primitive-texframe*) ctlseq))))
+             (table-get (texframe*-definitions *global-texframe*) ctlseq))
+        (table-get (texframe*-definitions *primitive-texframe*) ctlseq))))
 
 ;(trace find-def)
 
 (define find-math-def
   (lambda (ctlseq)
-    (table-get (texframe.definitions *math-primitive-texframe*)
+    (table-get (texframe*-definitions *math-primitive-texframe*)
                ctlseq)))
 
 (define find-count
   (lambda (ctlseq)
     (or (ormap (lambda (fr)
-                 (table-get (texframe.counts fr) ctlseq))
+                 (table-get (texframe*-counts fr) ctlseq))
                  *tex-env*)
-        (table-get (texframe.counts *global-texframe*) ctlseq)
-        (table-get (texframe.counts *primitive-texframe*) ctlseq))))
+        (table-get (texframe*-counts *global-texframe*) ctlseq)
+        (table-get (texframe*-counts *primitive-texframe*) ctlseq))))
 
 (define find-toks
   (lambda (ctlseq)
     (or (ormap (lambda (fr)
-                 (table-get (texframe.toks fr) ctlseq))
+                 (table-get (texframe*-toks fr) ctlseq))
                *tex-env*)
-        (table-get  (texframe.toks *global-texframe*) ctlseq)
-        (table-get (texframe.toks *primitive-texframe*) ctlseq))))
+        (table-get  (texframe*-toks *global-texframe*) ctlseq)
+        (table-get (texframe*-toks *primitive-texframe*) ctlseq))))
 
 (define find-dimen
   (lambda (ctlseq)
     (or (ormap (lambda (fr)
-                 (table-get (texframe.dimens fr) ctlseq))
+                 (table-get (texframe*-dimens fr) ctlseq))
           *tex-env*)
-        (table-get (texframe.dimens *global-texframe*) ctlseq)
-        (table-get (texframe.dimens *primitive-texframe*) ctlseq))))
+        (table-get (texframe*-dimens *global-texframe*) ctlseq)
+        (table-get (texframe*-dimens *primitive-texframe*) ctlseq))))
 
 (define get-toks
   (lambda (ctlseq)
@@ -7166,7 +7167,7 @@
     (ignorespaces)))
 
 (define (get-gcount ctlseq)
-  (or (table-get (texframe.counts *global-texframe*) ctlseq) 0))
+  (or (table-get (texframe*-counts *global-texframe*) ctlseq) 0))
 
 (define set-gcount!
   (lambda (ctlseq v)
@@ -7225,7 +7226,7 @@
   (lambda ()
     (let* ((counter-name (ungroup (get-group)))
            (counter (table-get *dotted-counters* counter-name)))
-      (cond ((counter.value counter) => emit)
+      (cond ((counter*-value counter) => emit)
             (else (trace-if #f "do-arabic failed"))))))
 
 (define find-corresp-prim
@@ -7233,14 +7234,14 @@
   ;take over this too?
   (lambda (ctlseq)
     (let ((y (find-def ctlseq)))
-      (or (and y (tdef.defer y))
+      (or (and y (tdef*-defer y))
           ctlseq))))
 
 (define find-corresp-prim-thunk
   (lambda (ctlseq)
     (let ((y (find-def ctlseq)))
-      (if (and y (tdef.thunk y))
-          (tdef.prim y)
+      (if (and y (tdef*-thunk y))
+          (tdef*-prim y)
           ctlseq))))
 
 (define globally-p
@@ -7376,7 +7377,7 @@
         (cons counter-name
           (table-get *section-counter-dependencies* sec-num '()))))
     (table-put! *dotted-counters* counter-name
-      (make-counter 'within sec-num))))
+      (make-counter* 'within sec-num))))
 
 (define do-newtheorem
   (lambda ()
@@ -7402,9 +7403,9 @@
            (counter (table-get *dotted-counters* counter-name))
            (caption (ungroup (get-group))))
       (unless counter (terror 'do-theorem))
-      (let ((new-counter-value (+ 1 (counter.value counter))))
-        (set!counter.value counter new-counter-value)
-        (let* ((thm-num (let ((sec-num (counter.within counter)))
+      (let ((new-counter-value (+ 1 (counter*-value counter))))
+        (set!counter*-value counter new-counter-value)
+        (let* ((thm-num (let ((sec-num (counter*-within counter)))
                           (if sec-num
                               (string-append (section-counter-value sec-num) "."
                                 (number->string new-counter-value))
@@ -7790,14 +7791,14 @@
                                       x2))
                                    ((find-def x)
                                     => (lambda (y)
-                                         (cond ((and (null? (tdef.argpat y))
-                                                     (not (tdef.optarg y))
-                                                     (not (tdef.thunk y))
-                                                     (not (tdef.prim y))
-                                                     (not (tdef.defer y)))
+                                         (cond ((and (null? (tdef*-argpat y))
+                                                     (not (tdef*-optarg y))
+                                                     (not (tdef*-thunk y))
+                                                     (not (tdef*-prim y))
+                                                     (not (tdef*-defer y)))
                                                 (toss-back-char *invisible-space*)
                                                 (toss-back-string
-                                                  (tdef.expansion y))
+                                                  (tdef*-expansion y))
                                                 "")
                                                (else x))))
                                    (else x))))
@@ -8939,20 +8940,20 @@
              (fr (top-texframe)))
         (table-put!
           ((case kase
-             ((:lccode) texframe.uccodes)
-             ((:uccode) texframe.lccodes)) fr)
+             ((:lccode) texframe*-uccodes)
+             ((:uccode) texframe*-lccodes)) fr)
           c1 c2)))))
 
 (define tex-char-downcase
   (lambda (c)
     (or (ormap (lambda (f)
-                 (table-get (texframe.lccodes f) c)) *tex-env*)
+                 (table-get (texframe*-lccodes f) c)) *tex-env*)
         (char-downcase c))))
 
 (define tex-char-upcase
   (lambda (c)
     (or (ormap (lambda (f)
-                 (table-get (texframe.uccodes f) c)) *tex-env*)
+                 (table-get (texframe*-uccodes f) c)) *tex-env*)
         (char-upcase c))))
 
 (define do-flipcase
@@ -8993,9 +8994,9 @@
   (lambda (counter-name add? new-value)
     (cond ((table-get *dotted-counters* counter-name)
            => (lambda (counter)
-                (set!counter.value counter
+                (set!counter*-value counter
                                    (if add?
-                                       (+ new-value (counter.value counter))
+                                       (+ new-value (counter*-value counter))
                                        new-value))))
           (else
             (let ((count-seq (string-append "\\" counter-name)))
@@ -9020,12 +9021,12 @@
   (lambda (z)
     (cond ((find-def z)
            => (lambda (y)
-             (cond ((tdef.defer y) => toss-back-string)
-                   ((tdef.thunk y) => (lambda (th) (th)))
+             (cond ((tdef*-defer y) => toss-back-string)
+                   ((tdef*-thunk y) => (lambda (th) (th)))
                    (else (expand-tex-macro
-                          (tdef.optarg y)
-                          (tdef.argpat y)
-                          (tdef.expansion y))))))
+                          (tdef*-optarg y)
+                          (tdef*-argpat y)
+                          (tdef*-expansion y))))))
           (*math-mode-p* (do-math-ctl-seq z))
           (else
             (trace-if (> (find-count "\\tracingcommands") 0)
@@ -9418,6 +9419,18 @@
     (fluid-let ((*html* p))
       (th))))
 
+(define (load-eval4tex-aux-file-if-found)
+  (let ((eval4tex-aux-file (string-append *jobname* ".eval4tex")))
+    (when (file-exists? eval4tex-aux-file)
+      (let ((load-it (call-with-input-file eval4tex-aux-file
+                       (lambda (i)
+                         (let ((x (read i)))
+                           (and (not (eof-object? x))
+                                (pair? x)
+                                (eq? (car x) (if 'nil 'define 'defun))))))))
+        (when load-it
+          (load eval4tex-aux-file))))))
+
 ;aux file
 
 (define call-external-programs-if-necessary
@@ -9475,16 +9488,7 @@
           (write-log " ... failed; try manually"))
         (write-log ':separation-newline))
       ;eval4tex
-      (let ((eval4tex-aux-file (string-append *jobname* ".eval4tex")))
-        (when (file-exists? eval4tex-aux-file)
-          (let ((load-it (call-with-input-file eval4tex-aux-file
-                           (lambda (i)
-                             (let ((x (read i)))
-                               (and (not (eof-object? x))
-                                    (pair? x)
-                                    (eq? (car x) (if 'nil 'define 'defun))))))))
-            (when load-it
-              (load eval4tex-aux-file)))))
+      (load-eval4tex-aux-file-if-found)
       ;metapost
       (for-each
         (lambda (f)
@@ -9963,7 +9967,7 @@
   (lambda (level number page label header)
     (set! *toc-list*
           (cons
-           (make-tocentry 'level level
+           (make-tocentry* 'level level
                           'number number
                           'page page
                           'label label
@@ -9973,7 +9977,7 @@
 (define !label
   (lambda (label html-page name value)
     (table-put! *label-table* label
-                (make-label 'src *label-source*
+                (make-label* 'src *label-source*
                             'page html-page
                             'name name
                             'value value))))
@@ -10284,7 +10288,7 @@ Try the commands
 (define do-math-ctl-seq
   (lambda (s)
     (cond ((find-math-def s)
-           => (lambda (x) ((tdef.thunk x))))
+           => (lambda (x) ((tdef*-thunk x))))
           (else
             (unless *math-needs-image-p* (set! *math-needs-image-p* #t))
             (emit (substring s 1 (string-length s)))

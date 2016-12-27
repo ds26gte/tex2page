@@ -1,6 +1,6 @@
-;last change: 2016-12-14
+;last change: 2016-12-27
 
-(scmxlate-cond 
+(scmxlate-cond
 ((eqv? *operating-system* 'unix)
  (scmxlate-insert
   (string-append
@@ -11,11 +11,10 @@
    "-eval \"(%exit)\"
 "))))
 
-;  "\":\";exec scheme -eval \"(define arg-one \\\"$1\\\")\" 
+;  "\":\";exec scheme -eval \"(define arg-one \\\"$1\\\")\"
 ;  (scmxlate-insert
 ;   "\":\";echo \"(define arg-one \\\"$1\\\")(load \\\"$0\\\")(exit)\"|exec /usr/local/bin/scheme
 ;"
-
 
 (declare (usual-integrations))
 
@@ -35,7 +34,6 @@
  require
  trace
  )
-
 
 (scmxlate-rename
  (date-day decoded-time/day)
@@ -67,13 +65,12 @@
  ;(substring? t2p-substring?)
  )
 
-
 (define get-arg1
   (lambda ()
     (and (environment-bound? user-initial-environment 'arg-one)
          arg-one)))
 
-(scmxlate-cond 
+(scmxlate-cond
  ((environment-bound? user-initial-environment 'rsc-macro-transformer)
   (define-syntax when
     (rsc-macro-transformer
@@ -125,7 +122,7 @@
 
 (define current-seconds
   (lambda ()
-    (universal-time->file-time 
+    (universal-time->file-time
      (get-universal-time))))
 
 (scmxlate-postamble)
@@ -133,12 +130,12 @@
 (and (environment-bound? user-initial-environment 'arg-one)
      (tex2page arg-one))
 
-(scmxlate-cond 
- ((and (environment-bound? user-initial-environment 'syntax-table-define) 
+(scmxlate-cond
+ ((and (environment-bound? user-initial-environment 'syntax-table-define)
        ;do only for older MIT Schemes for now
        (eqv? *operating-system* 'unix))
   (scmxlate-postprocess
-(unix/system 
+(unix/system
  "cp -p my-tex2page t2p.scm")
 
 (syntax-table-define system-global-syntax-table 'unless
@@ -149,10 +146,58 @@
                      (macro (b . ee)
                             `(if ,b (begin ,@ee))))
 
-(syntax-table-define system-global-syntax-table (quote defstruct) (macro (s . ff) (let ((s-s (symbol->string s)) (n (length ff))) (let* ((n+1 (+ n 1)) (vv (make-vector n+1))) (let loop ((i 1) (ff ff)) (if (< i n+1) (let ((f (car ff))) (vector-set! vv i (if (pair? f) (cadr f) (quote (if () ())))) (loop (+ i 1) (cdr ff))))) (let ((ff (map (lambda (f) (if (pair? f) (car f) f)) ff))) (quasiquote (begin (define (unquote (string->symbol (string-append "make-" s-s))) (lambda fvfv (let ((st (make-vector (unquote n+1))) (ff (quote (unquote ff)))) (vector-set! st 0 (quote (unquote s))) (unquote-splicing (let loop ((i 1) (r (quote ()))) (if (>= i n+1) r (loop (+ i 1) (cons (quasiquote (vector-set! st (unquote i) (unquote (vector-ref vv i)))) r))))) (let loop ((fvfv fvfv)) (unless (null? fvfv) (vector-set! st (+ (list-position (car fvfv) ff) 1) (cadr fvfv)) (loop (cddr fvfv)))) st))) (unquote-splicing (let loop ((i 1) (procs (quote ()))) (if (>= i n+1) procs (loop (+ i 1) (let ((f (symbol->string (list-ref ff (- i 1))))) (cons (quasiquote (define (unquote (string->symbol (string-append s-s "." f))) (lambda (x) (vector-ref x (unquote i))))) (cons (quasiquote (define (unquote (string->symbol (string-append "set!" s-s "." f))) (lambda (x v) (vector-set! x (unquote i) v)))) procs))))))) (define (unquote (string->symbol (string-append s-s "?"))) (lambda (x) (and (vector? x) (eq? (vector-ref x 0) (quote (unquote s)))))))))))))
+(syntax-table-define
+  system-global-syntax-table
+  (quote defstruct)
+  (macro (s . ff)
+         (let ((s-s (symbol->string s)) (n (length ff)))
+           (let* ((n+1 (+ n 1))
+                  (vv (make-vector n+1)))
+             (let loop ((i 1) (ff ff))
+               (if (< i n+1)
+                   (let ((f (car ff)))
+                     (vector-set! vv i (if (pair? f) (cadr f)
+                                           ;would like void here
+                                           #f))
+                     (loop (+ i 1) (cdr ff))) #f))
+             (let ((ff (map (lambda (f) (if (pair? f) (car f) f)) ff)))
+               `(begin
+                  (define ,(string->symbol (string-append "make-" s-s))
+                    (lambda fvfv
+                      (let ((st (make-vector ,n+1)) (ff ',ff))
+                        (vector-set! st 0 ',s)
+                        ,@(let loop ((i 1) (r '()))
+                            (if (>= i n+1) r
+                                (loop (+ i 1)
+                                      (cons `(vector-set! st ,i
+                                                          ,(vector-ref vv i))
+                                            r))))
+                        (let loop ((fvfv fvfv))
+                          (unless (null? fvfv)
+                            (vector-set! st (+ (list-position (car fvfv) ff) 1)
+                                         (cadr fvfv))
+                            (loop (cddr fvfv))))
+                        st)))
+                  ,@(let loop ((i 1) (procs '()))
+                      (if (>= i n+1) procs
+                          (loop (+ i 1)
+                                (let ((f (symbol->string
+                                           (list-ref ff (- i 1)))))
+                                  (cons
+                                    `(define ,(string->symbol
+                                                (string-append s-s "-" f))
+                                       (lambda (x) (vector-ref x ,i)))
+                                    (cons
+                                      `(define ,(string->symbol
+                                                  (string-append
+                                                    "set!" s-s "-" f))
+                                         (lambda (x v) (vector-set! x ,i v)))
+                                      procs))))))
+                  (define ,(string->symbol (string-append s-s "?"))
+                    (lambda (x)
+                      (and (vector? x) (eq? (vector-ref x 0) ',s))))))))))
 
 (cf "t2p")
 
 ;(%exit)
-)))
-
+))) 

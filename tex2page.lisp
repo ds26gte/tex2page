@@ -29,7 +29,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* (concatenate 'string "20161228" "c")) ;last change
+(defparameter *tex2page-version* (concatenate 'string "20161229" "c")) ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -325,9 +325,9 @@
 (defvar *scm-token-delims*
   (list #\( #\) #\[ #\] #\{ #\} #\' #\` #\" #\; #\, #\|))
 
-(defstruct counter*  (value 0) (within nil))
+(defstruct counter* (:value 0) (:within nil))
 
-(defstruct tocentry*  level number page label header)
+(defstruct tocentry* :level :number :page :label :header)
 
 #+sbcl
 (sb-alien:define-alien-routine system sb-alien:int (command sb-alien:c-string))
@@ -540,7 +540,7 @@
   (tex-def-count "\\tracingcommands" 1 nil)
   (tex-def-count "\\tracingmacros" 1 nil))
 
-(defstruct bport* (port nil) (buffer '()))
+(defstruct bport* (:port nil) (:buffer '()))
 
 (defun call-with-input-file/buffered (f th)
   (unless (probe-file f)
@@ -1149,15 +1149,15 @@
     (emit-html-char (char s i))))
 
 (defstruct texframe*
-  (definitions (make-hash-table :test #'equal))
-  (chardefinitions (make-hash-table))
-  (counts (make-hash-table :test #'equal))
-  (toks (make-hash-table :test #'equal))
-  (dimens (make-hash-table :test #'equal))
-  (postludes '())
-  (uccodes (make-hash-table :test #'eql))
-  (lccodes (make-hash-table :test #'eql))
-  (aftergroups '()))
+  (:definitions (make-hash-table :test #'equal))
+  (:chardefinitions (make-hash-table))
+  (:counts (make-hash-table :test #'equal))
+  (:toks (make-hash-table :test #'equal))
+  (:dimens (make-hash-table :test #'equal))
+  (:postludes '())
+  (:uccodes (make-hash-table :test #'eql))
+  (:lccodes (make-hash-table :test #'eql))
+  (:aftergroups '()))
 
 (defvar *primitive-texframe* (make-texframe*))
 
@@ -1263,18 +1263,18 @@
   (if (null *tex-env*) *global-texframe* (car *tex-env*)))
 
 (defstruct tdef*
-  (argpat '())
-  (expansion "")
-  (optarg nil)
-  (thunk nil)
-  (prim nil)
-  (defer nil))
+  (:argpat '())
+  (:expansion "")
+  (:optarg nil)
+  (:thunk nil)
+  (:prim nil)
+  (:defer nil))
 
 (defstruct cdef*
-  (argpat nil)
-  (expansion nil)
-  (optarg nil)
-  (active nil))
+  (:argpat nil)
+  (:expansion nil)
+  (:optarg nil)
+  (:active nil))
 
 (defun kopy-tdef (lft rt)
   (setf (tdef*-argpat lft) (tdef*-argpat rt))
@@ -1599,7 +1599,8 @@
 
 (defun do-para ()
   (do-end-para)
-  (let ((in-table-p (member (car *tabular-stack*) '(:block))))
+  (let ((in-table-p (and (not (null *tabular-stack*))
+                         (member (car *tabular-stack*) '(:block)))))
     (when in-table-p (emit "</td></tr><tr><td>") (emit-newline))
     (emit "<p>")
     (setq *in-para-p* t)))
@@ -2223,7 +2224,7 @@
                 *toc-list*))))
     (emit-anchor (concatenate 'string *html-node-prefix* "toc_end"))))
 
-(defstruct footnotev*  mark text tag caller)
+(defstruct footnotev* :mark :text :tag :caller)
 
 (defun do-numbered-footnote ()
   (do-footnote-aux nil))
@@ -2881,7 +2882,7 @@
 
 ;cross-references
 
-(defstruct label*  (src nil) page name value)
+(defstruct label* (:src nil) :page :name :value)
 
 (defun get-label ()
   (let* ((lbl (get-peeled-group))
@@ -5710,10 +5711,10 @@
 ;(trace do-futurelet-aux)
 
 (defun set-start-time ()
-  (multiple-value-bind (s m h d mo y)
+  (multiple-value-bind (s m h d mo y &rest ign)
       (decode-universal-time (get-universal-time))
       ;TeX uses local time zone so we don't worry about reporting what it is
-    (declare (ignore s))
+    (declare (ignore s ign))
     (tex-def-count "\\time" (+ (* 60 h) m) t)
     (tex-def-count "\\day" d t)
     (tex-def-count "\\month" mo t)
@@ -8417,15 +8418,16 @@
 (defun load-tex2page-data-file (f)
   (with-open-file (i f :direction :input :if-does-not-exist nil)
     (when i
-      (let ((*current-source-file* f) (*input-line-no* 0))
+      (let ((*current-source-file* f) (*input-line-no* 0)
+                                      e directive)
         (loop
-          (let* ((e (read i nil nil))
-                 (directive (car e)))
-            (unless e (return))
-            (incf *input-line-no*)
-            (apply
-             (case directive
-               ((!colophon
+          (setq e (read i nil nil))
+          (unless e (return))
+          (setq directive (car e))
+          (incf *input-line-no*)
+          (apply
+            (case directive
+              ((!colophon
                  !default-title
                  !definitely-latex
                  !doctype
@@ -8452,9 +8454,9 @@
                  !toc-page
                  !using-chapters
                  !using-external-program) (symbol-function directive))
-               (t (terror 'load-tex2page-data-file
-                          "Fatal aux file error; I'm stymied.")))
-             (cdr e))))))))
+              (t (terror 'load-tex2page-data-file
+                         "Fatal aux file error " directive "; I'm stymied.")))
+            (cdr e)))))))
 
 (defun tex2page-massage-file (f)
   ;can be redefined to process formats like Texinfo that use different
@@ -9955,7 +9957,7 @@ Try the commands
         (*scm-keywords* nil)
         (*scm-special-symbols* nil)
         (*scm-variables* nil)
-        (*scripts* nil)
+        (*scripts* '())
         (*section-counter-dependencies* nil)
         (*section-counters* (make-hash-table))
         (*slatex-math-escape* nil)

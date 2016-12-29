@@ -1,4 +1,4 @@
-;last change: 2016-12-27
+;last change: 2016-12-29
 
 (scmxlate-cond
 ((eqv? *operating-system* 'unix)
@@ -181,8 +181,8 @@
                   ,@(let loop ((i 1) (procs '()))
                       (if (>= i n+1) procs
                           (loop (+ i 1)
-                                (let ((f (symbol->string
-                                           (list-ref ff (- i 1)))))
+                                (let ((f (substring (symbol->string
+                                                      (list-ref ff (- i 1))) 1))
                                   (cons
                                     `(define ,(string->symbol
                                                 (string-append s-s "-" f))

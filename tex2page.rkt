@@ -8,7 +8,7 @@
 (require mzlib/trace)
 (require racket/private/more-scheme)
 
-(define *tex2page-version* "20161228") ;last change
+(define *tex2page-version* "20161229") ;last change
 
 (define *tex2page-website*
   ;for details, please see
@@ -451,13 +451,13 @@
                   i))
             #f)))))
 
-;(defstruct structname [field | (field default-value)] ...)
+;(defstruct structname [:field | (:field default-value)] ...)
 ;
 ;creates
 ;the constructor make-structname
 ;the predicate structname?
-;the accessors structname-field (for each field)
-;the setters set!structname-field (for each field)
+;the accessors structname-field (for each :field)
+;the setters set!structname-field (for each :field)
 ;
 ;make-structname can take {field init-value} arguments,
 ;in which it case it sets field to init-value.  Otherwise,
@@ -508,8 +508,8 @@
                    ,@(let loop ((i 1) (procs '()))
                        (if (>= i n+1) procs
                            (loop (+ i 1)
-                                 (let ((f (symbol->string
-                                          (list-ref ff (- i 1)))))
+                                 (let ((f (substring (symbol->string
+                                                       (list-ref ff (- i 1))) 1)))
                                    (cons
                                      `(define ,(string->symbol
                                                  (string-append s-s "-" f))
@@ -524,11 +524,11 @@
                      (lambda (x)
                        (and (vector? x) (eq? (vector-ref x 0) ',s)))))))))))))
 
-(defstruct table (equ eqv?) (alist '()))
+(defstruct table (:test eqv?) (:alist '()))
 
 (define table-get
   (lambda (tbl k . d)
-    (cond ((lassoc k (table-alist tbl) (table-equ tbl))
+    (cond ((lassoc k (table-alist tbl) (table-test tbl))
            => (lambda (c) (vector-ref (cdr c) 0)))
           ((pair? d) (car d))
           (else #f))))
@@ -536,7 +536,7 @@
 (define table-put!
   (lambda (tbl k v)
     (let ((al (table-alist tbl)))
-      (let ((c (lassoc k al (table-equ tbl))))
+      (let ((c (lassoc k al (table-test tbl))))
         (if c (vector-set! (cdr c) 0 v)
             (set!table-alist tbl (cons (cons k (vector v)) al)))))))
 
@@ -564,9 +564,9 @@
               (if (equ? x y) r
                   (cons x r))))))))
 
-(defstruct counter* (value 0) (within #f))
+(defstruct counter* (:value 0) (:within #f))
 
-(defstruct tocentry* level number page label header)
+(defstruct tocentry* :level :number :page :label :header)
 
 (define string-trim-blanks
   (lambda (s)
@@ -835,7 +835,7 @@
 
 ;Input port buffers
 
-(defstruct bport* (port #f) (buffer '()))
+(defstruct bport* (:port #f) (:buffer '()))
 
 (define call-with-input-file/buffered
   (lambda (f th)
@@ -844,7 +844,7 @@
         "I can't find file " f))
     (call-with-input-file f
       (lambda (i)
-        (fluid-let ((*current-tex2page-input* (make-bport* 'port i))
+        (fluid-let ((*current-tex2page-input* (make-bport* ':port i))
                     (*current-source-file* f)
                     (*input-line-no* 1))
           (th))))))
@@ -852,7 +852,7 @@
 (define call-with-input-string/buffered
   (lambda (s th)
     (fluid-let ((*current-tex2page-input*
-                  (make-bport* 'buffer (string->list s)))
+                  (make-bport* ':buffer (string->list s)))
                 (*input-line-no* *input-line-no*))
       (th))))
 
@@ -1584,15 +1584,15 @@
 ;Groups
 
 (defstruct texframe*
-  (definitions (make-table 'equ string=?))
-  (chardefinitions (make-table))
-  (counts (make-table 'equ string=?))
-  (toks (make-table 'equ string=?))
-  (dimens (make-table 'equ string=?))
-  (postludes '())
-  (uccodes (make-table 'equ char=?))
-  (lccodes (make-table 'equ char=?))
-  (aftergroups '()))
+  (:definitions (make-table ':test string=?))
+  (:chardefinitions (make-table))
+  (:counts (make-table ':test string=?))
+  (:toks (make-table ':test string=?))
+  (:dimens (make-table ':test string=?))
+  (:postludes '())
+  (:uccodes (make-table ':test char=?))
+  (:lccodes (make-table ':test char=?))
+  (:aftergroups '()))
 
 (define *primitive-texframe* (make-texframe*))
 (define *math-primitive-texframe* (make-texframe*))
@@ -1721,11 +1721,20 @@
 ;
 
 (defstruct tdef*
-  (argpat '()) (expansion "") (optarg #f)
-  (thunk #f) (prim #f) (defer #f))
+  (:argpat '())
+  (:expansion "")
+  (:optarg #f)
+  (:thunk #f)
+  (:prim #f)
+  (:defer #f))
+
 
 (defstruct cdef*
-  (argpat #f) (expansion #f) (optarg #f) (active #f))
+  (:argpat #f)
+  (:expansion #f)
+  (:optarg #f)
+  (:active #f))
+
 
 (define kopy-tdef
   (lambda (lft rt)
@@ -2895,7 +2904,7 @@
                 *toc-list*))))
       (emit-anchor (string-append *html-node-prefix* "toc_end")))))
 
-(defstruct footnotev* mark text tag caller)
+(defstruct footnotev* :mark :text :tag :caller)
 
 (define do-numbered-footnote
   (lambda ()
@@ -2988,10 +2997,10 @@
           ;(close-output-port *html*)
           (set! *footnote-list*
             (cons (make-footnotev*
-                    'mark fnmark
-                    'text (get-output-string fn-tmp-port)
-                    'tag fntag
-                    'caller fncalltag)
+                    ':mark fnmark
+                    ':text (get-output-string fn-tmp-port)
+                    ':tag fntag
+                    ':caller fncalltag)
                   *footnote-list*))
           (set! *html* old-html))))))
 
@@ -3701,7 +3710,7 @@
 
 ;cross-references
 
-(defstruct label* (src #f) page name value)
+(defstruct label* (:src #f) :page :name :value)
 
 (define get-label
   (lambda ()
@@ -3798,7 +3807,7 @@
                              *label-file-suffix* ".scm"))
            (ext-label-table (table-get *external-label-tables* f)))
       (unless ext-label-table
-        (set! ext-label-table (make-table 'equ string=?))
+        (set! ext-label-table (make-table ':test string=?))
         (table-put! *external-label-tables* f ext-label-table))
       (when (file-exists? ext-label-file)
         (fluid-let ((*label-source* fq-f)
@@ -5716,7 +5725,7 @@
                      (open-output-file f))
                     (else
                      (set! f (actual-tex-filename f #f))
-                     (make-bport* 'port (open-input-file f))))))))
+                     (make-bport* ':port (open-input-file f))))))))
 
 (define do-close-stream
   (lambda (type)
@@ -5794,7 +5803,7 @@
            (x (begin (get-to) (get-ctl-seq)))
            (p #f))
       (cond ((ormap (lambda (j) (= i j)) '(-1 16))
-             (set! p (make-bport* 'port (current-input-port)))
+             (set! p (make-bport* ':port (current-input-port)))
              (unless (= i -1)
                (write-log x) (write-log #\=)))
             ((table-get *input-streams* i)
@@ -5809,7 +5818,7 @@
 (define do-typein
   (lambda ()
     (let ((ctlseq (get-bracketed-text-if-any))
-          (p (make-bport* 'port (current-input-port))))
+          (p (make-bport* ':port (current-input-port))))
       (write-log ':separation-newline)
       (write-log (tex-string-to-html-string (get-group)))
       (write-log ':separation-newline)
@@ -6740,10 +6749,10 @@
 
 (define initialize-scm-words
   (lambda ()
-    (set! *scm-keywords* (make-table 'equ string=?))
-    (set! *scm-builtins* (make-table 'equ string=?))
-    (set! *scm-special-symbols* (make-table 'equ string=?))
-    (set! *scm-variables* (make-table 'equ string=?))
+    (set! *scm-keywords* (make-table ':test string=?))
+    (set! *scm-builtins* (make-table ':test string=?))
+    (set! *scm-special-symbols* (make-table ':test string=?))
+    (set! *scm-variables* (make-table ':test string=?))
     (for-each (lambda (s) (table-put! *scm-keywords* s #t))
               '(
                 ;#include scmkeywords.lisp
@@ -6997,7 +7006,7 @@
   (lambda ()
     (set! *global-texframe* (make-texframe*))
     (set! *section-counter-dependencies* (make-table))
-    (set! *dotted-counters* (make-table 'equ string=?))
+    (set! *dotted-counters* (make-table ':test string=?))
 
     ;#include globdefs.scm
   ;
@@ -7377,7 +7386,7 @@
         (cons counter-name
           (table-get *section-counter-dependencies* sec-num '()))))
     (table-put! *dotted-counters* counter-name
-      (make-counter* 'within sec-num))))
+      (make-counter* ':within sec-num))))
 
 (define do-newtheorem
   (lambda ()
@@ -9966,21 +9975,21 @@
 (define !toc-entry
   (lambda (level number page label header)
     (set! *toc-list*
-          (cons
-           (make-tocentry* 'level level
-                          'number number
-                          'page page
-                          'label label
-                          'header header)
-           *toc-list*))))
+      (cons
+        (make-tocentry* ':level level
+                        ':number number
+                        ':page page
+                        ':label label
+                        ':header header)
+        *toc-list*))))
 
 (define !label
   (lambda (label html-page name value)
     (table-put! *label-table* label
-                (make-label* 'src *label-source*
-                            'page html-page
-                            'name name
-                            'value value))))
+                (make-label* ':src *label-source*
+                             ':page html-page
+                             ':name name
+                             ':value value))))
 
 (define !index
   (lambda (index-number html-page-number)
@@ -10063,7 +10072,7 @@
 (define !opmac-iis
   (lambda (lhs sub)
     (unless *opmac-index-sub-table*
-      (set! *opmac-index-sub-table* (make-table 'equ string=?)))
+      (set! *opmac-index-sub-table* (make-table ':test string=?)))
     (table-put! *opmac-index-sub-table* lhs sub)))
 
 ;;
@@ -11625,7 +11634,7 @@ Try the commands
                 (*esc-char-std* #\\ )
                 (*esc-char-verb* #\|)
                 (*eval-for-tex-only-p* #f)
-                (*external-label-tables* (make-table 'equ string=?))
+                (*external-label-tables* (make-table ':test string=?))
                 ;
                 (*footnote-list* '())
                 (*footnote-sym* 0)
@@ -11663,7 +11672,7 @@ Try the commands
                 ;
                 (*label-port* #f)
                 (*label-source* #f)
-                (*label-table* (make-table 'equ string=?))
+                (*label-table* (make-table ':test string=?))
                 (*last-modification-time* #f)
                 (*last-page-number* -1)
                 (*latex-probability* 0)
@@ -11691,7 +11700,7 @@ Try the commands
                 (*opmac-list-style* #\o)
                 (*opmac-nonum-p* #f)
                 (*opmac-notoc-p* #f)
-                (*opmac-verbinput-table* (make-table 'equ string=?))
+                (*opmac-verbinput-table* (make-table ':test string=?))
                 (*outer-p* #t)
                 (*output-streams* (make-table))
                 (*outputting-external-title-p* #f)

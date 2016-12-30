@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Last modified: 2016-12-20
+# Last modified: 2017-01-02
 
 # Set scmxlate to the pathname of scmxlate/scmxlate.scm
 # on your system, if you know it.  Otherwise let
@@ -45,6 +45,7 @@ adieu() {
   if test -f my-tex2page
   then
     mv my-tex2page tex2page
+    chmod +x tex2page
     echo tex2page has been successfully configured for $dialect.
     echo You may put it in your PATH.
   else
@@ -56,7 +57,8 @@ makeit() {
   case "$dialect" in
     abcl|allegro|clisp|clozure|cmucl|ecl|mkcl|sbcl-compiled)
     :;;
-    bigloo|chez|chicken|gambit|gauche|guile|mitscheme|petite|plt|scm|sxm)
+    #bigloo|chez|chicken|gambit|gauche|guile|mitscheme|petite|plt|scm|sxm)
+    chez|chicken|gambit|gauche|guile|petite|plt)
     findscmxlate;;
     *)
     echo Dialect $dialect not supported!
@@ -73,8 +75,7 @@ makeit() {
 
     abcl|allegro|clisp|clozure|cmucl|ecl|mkcl)
     echo \":\"\; export LISP=$dialect > my-tex2page
-    cat tex2page.lisp >> my-tex2page
-    chmod +x my-tex2page;;
+    cat tex2page.lisp >> my-tex2page;;
 
     bigloo)
     echo bigloo|bigloo -eval '(load "'$scmxlate'")';;
@@ -122,53 +123,60 @@ makeit() {
 
 echodialectsuggestions() {
   test "`which abcl 2>/dev/null|grep -v ' '`"  &&\
-  abclpresent=yes
+    abclpresent=yes
   test "`which clisp 2>/dev/null|grep -v ' '`"  &&\
-  clisppresent=yes
+    clisppresent=yes
+  test "`which csi 2>/dev/null|grep -v ' '`"  &&\
+    chickenpresent=yes
   test "`which ccl 2>/dev/null|grep -v ' '`"  &&\
-  clozurepresent=yes
+    clozurepresent=yes
   test "`which ecl 2>/dev/null|grep -v ' '`" &&\
-  eclpresent=yes
+    eclpresent=yes
   test "`which gosh 2>/dev/null|grep -v ' '`"  &&\
-  gauchepresent=yes
+    gauchepresent=yes
   test "`which guile 2>/dev/null|grep -v ' '`"  &&\
-  guilepresent=yes
+    guilepresent=yes
   test "`which mkcl 2>/dev/null|grep -v ' '`" &&\
-  mkclpresent=yes
+    mkclpresent=yes
   test "`which racket 2>/dev/null|grep -v ' '`" &&\
-  racketpresent=yes
+    racketpresent=yes
   test "`which sbcl 2>/dev/null|grep -v ' '`"  &&\
-  sbclpresent=yes
-  if test "$clisppresent" -o "$eclpresent" -o "$guilepresent"
-  then
-    echo
-    echo Note: The following look promising on your system:
-    echo
-    echo Schemes:
-    echo
-    test "$gauchepresent" &&\
-    echo \ \ ./configure --dialect=gauche
-    test "$guilepresent" &&\
-    echo \ \ ./configure --dialect=guile
-    test "$racketpresent" &&\
+    sbclpresent=yes
+  echo
+  echo Note: The following look promising on your system:
+  echo
+  echo Schemes:
+  echo
+  test "$racketpresent" &&\
     echo \ \ ./configure --dialect=racket
-    echo
-    echo Common Lisps:
-    echo
-    test "$abclpresent" &&\
-    echo \ \ ./configure --dialect=abcl
-    test "$clozurepresent" &&\
-    echo \ \ ./configure --dialect=clisp
-    test "$sbclpresent" &&\
-    echo \ \ ./configure --dialect=clozure
-    test "$eclpresent" &&\
-    echo \ \ ./configure --dialect=ecl
-    test "$mkclpresent" &&\
-    echo \ \ ./configure --dialect=mkcl
-    test "$clisppresent" &&\
+  test "$chezpresent" &&\
+    echo \ \ ./configure --dialect=chez
+  test "$chickenpresent" &&\
+    echo \ \ ./configure --dialect=chicken
+  test "$gambitpresent" &&\
+    echo \ \ ./configure --dialect=gambit
+  test "$gauchepresent" &&\
+    echo \ \ ./configure --dialect=gauche
+  test "$guilepresent" &&\
+    echo \ \ ./configure --dialect=guile
+  test "$petitepresent" &&\
+    echo \ \ ./configure --dialect=petite
+  echo
+  echo Common Lisps:
+  echo
+  test "$sbclpresent" &&\
     echo \ \ ./configure --dialect=sbcl &&\
     echo \ \ ./configure --dialect=sbcl-compiled
-  fi
+  test "$abclpresent" &&\
+    echo \ \ ./configure --dialect=abcl
+  test "$clisppresent" &&\
+    echo \ \ ./configure --dialect=clisp
+  test "$clozurepresent" &&\
+    echo \ \ ./configure --dialect=clozure
+  test "$eclpresent" &&\
+    echo \ \ ./configure --dialect=ecl
+  test "$mkclpresent" &&\
+    echo \ \ ./configure --dialect=mkcl
 }
 
 echohelp() {

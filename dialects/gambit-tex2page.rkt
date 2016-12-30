@@ -1,4 +1,4 @@
-; last change: 2012-04-21
+; last change: 2017-01-03
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -25,6 +25,21 @@
  (eof #!eof)
  (getenv gambit-getenv)
  )
+
+(define (remove y xx)
+  (let loop ((xx xx) (r '()))
+    (if (null? xx) (nreverse r)
+      (let ((x (car xx)))
+        (loop (cdr xx)
+              (if (equal? x y) r
+                (cons x r)))))))
+
+(define-macro cl-with-output-to-string 
+  (lambda (ignore-wots-arg . body)
+    `(with-output-to-string '() (lambda () ,@body))))
+
+(define (string-upcase s)
+  (list->string (map char-upcase (string->list s))))
 
 (define current-seconds
   (lambda ()
@@ -88,6 +103,25 @@
                   s1)
                 (loop r2))))))))
 
+(define (add1 n) (+ n 1))
+(define (sub1 n) (- n 1))
+
+(define (string-trim s)
+  (let ((orig-n (string-length s)))
+    (let ((i 0) (n orig-n))
+      (let loop ((k i))
+        (cond ((>= k n) (set! i n))
+              ((char-whitespace? (string-ref s k))
+               (loop (+ k 1)))
+              (else (set! i k))))
+      (let loop ((k (- n 1)))
+        (cond ((<= k i) (set! n (+ k 1)))
+              ((char-whitespace? (string-ref s k))
+               (loop (- k 1)))
+              (else (set! n (+ k 1)))))
+      (if (and (= i 0) (= n orig-n)) s
+        (substring s i n)))))
+
 (define file-or-directory-modify-seconds
   (lambda (f)
     (inexact->exact
@@ -96,8 +130,9 @@
 
 (scmxlate-include "seconds-to-date.scm")
 
+(define strftime strftime-like)
+
 (scmxlate-postamble)
 
 ;mzscheme main works just fine
 
-; vi:ft=lisp

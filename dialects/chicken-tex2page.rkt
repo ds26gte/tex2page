@@ -1,4 +1,4 @@
-; last change: 2012-04-21
+; last change: 2017-01-03
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -34,11 +34,53 @@
   )
 
 (scmxlate-rename
-  (seconds->date seconds->local-time)
   (eof #!eof)
+  (remove chicken-remove)
+  (seconds->date seconds->local-time)
   )
 
-(define strftime-like
+(define nreverse
+  (lambda (s)
+    (let loop ((s s) (r '()))
+      (if (null? s) r
+	  (let ((d (cdr s)))
+            (set-cdr! s r)
+	    (loop d s))))))
+
+(define (string-is-flanked-by-stars-p s)
+  (let ((n (string-length s)))
+    (and (>= n 3)
+         (char=? (string-ref s 0) #\*)
+         (char=? (string-ref s (sub1 n)) #\*))))
+
+(define (chicken-remove y xx)
+  (let loop ((xx xx) (r '()))
+    (if (null? xx) (nreverse r)
+      (let ((x (car xx)))
+        (loop (cdr xx)
+              (if (equal? x y) r
+                (cons x r)))))))
+
+(define (string-upcase s)
+  (list->string (map char-upcase (string->list s))))
+
+(define (string-trim s)
+  (let ((orig-n (string-length s)))
+    (let ((i 0) (n orig-n))
+      (let loop ((k i))
+        (cond ((>= k n) (set! i n))
+              ((char-whitespace? (string-ref s k))
+               (loop (+ k 1)))
+              (else (set! i k))))
+      (let loop ((k (- n 1)))
+        (cond ((<= k i) (set! n (+ k 1)))
+              ((char-whitespace? (string-ref s k))
+               (loop (- k 1)))
+              (else (set! n (+ k 1)))))
+      (if (and (= i 0) (= n orig-n)) s
+          (substring s i n)))))
+
+(define strftime
   (lambda (ignore d)
     (let ((s (time->string d))
           (tz (get-environment-variable "TZ")))

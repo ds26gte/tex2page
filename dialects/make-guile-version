@@ -1,14 +1,17 @@
 #!/bin/sh
 
-# last modified 2016-12-19
+# last modified 2017-01-02
 
 sed -e 's/	/ /g' tex2page.rkt |\
+sed -e 's/ \ *$//' |\
 sed -e 's/^ *$/END_OF_CURR_EXP/' > my-tex2page
 
 ignoredef() {
   for f in "$@"
   do
     sed -e '/^(define \ *'$f' *$/,/^END_OF_CURR_EXP/d' my-tex2page |\
+    sed -e '/^(define \ *('$f') *$/,/^END_OF_CURR_EXP/d' |\
+    sed -e '/^(define \ *('$f' \ *.*$/,/^END_OF_CURR_EXP/d' |\
     sed -e '/^(define \ *'$f' \ *.*$/,/^END_OF_CURR_EXP/d' > .sedtmp
     mv .sedtmp my-tex2page
   done
@@ -33,7 +36,7 @@ ignoredef \
 call-with-input-string \
 eval1 \
 get-arg1 get-time-zone \
-strftime-like string-index \
+strftime string-index \
 with-output-to-port \
 main
 
@@ -60,15 +63,24 @@ exec guile -e main -s \$0 \"\$@\"
 (define date-minute tm:min)
 (define date-month tm:mon)
 (define date-year tm:year)
+(define date-week-day tm:wday)
+(define date-dst? tm:isdst)
+(define date-time-zone-offset tm:gmtoff)
 (define eof the-eof-object)
+(define false #f)
 (define flush-output force-output)
+(define null '())
 (define ormap or-map)
 (define seconds->date localtime)
-(define strftime-like strftime)
 (define string-reverse-index string-rindex)
+(define true #t)
+(define add1 1+)
+(define sub1 1-)
+(define remove delete)
 
 (define *scheme-version*
-  (string-append "Guile " (version)))
+  (string-append "Guile " (version)
+    (if (getenv "COMSPEC") " windows" " unix")))
 
 (define eval1
   (lambda (e)

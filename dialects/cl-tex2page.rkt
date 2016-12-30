@@ -1,4 +1,4 @@
-; last change: 2016-12-18
+; last change: 2017-01-03
 
 ;works with CLISP, Clozure CL, CMU CL, ECL, SBCL; but scmxlate
 ;translation to CL is mostly for verification (of scmxlate?) these days.
@@ -103,7 +103,17 @@
 
 ;It may not be very human-readable.
 
+#+sbcl
+(declaim (sb-ext:muffle-conditions style-warning))
+
  ")
+
+(scmxlate-ignore-define
+  decode-universal-time
+  strftime
+  subseq
+  write-to-string
+  )
 
 (defpackage :tex2page
   (:use :cl
@@ -137,8 +147,6 @@
   (shell
    (concatenate 'string "cmd /c " cmd)))
 
-
-
 #+cmu
 (defun getenv (v)
   (cdr (assoc (intern v :keyword) ext:*environment-list*)))
@@ -150,8 +158,8 @@
  getenv
  ;list-position
  defstruct
- string-index
- string-reverse-index
+ ;string-index
+ ;string-reverse-index
 ; sort!
  table
  nreverse
@@ -213,20 +221,32 @@
 
 (defun valid-img-file? (f) nil)
 
+(defun string-index (s c)
+  (position c s :test #'char=))
+
+(defun string-reverse-index (s c)
+  (position c s :test #'char= :from-end t))
+
 (scmxlate-rename
+ (current-seconds #'get-universal-time)
  (eof :eof-object)
  (file-or-directory-modify-seconds #'file-write-date)
- (current-seconds #'get-universal-time)
+ (string-index #'string-index)
+ (string-reverse-index #'string-reverse-index)
  )
 
 (scmxlate-rename-define
- (eval1 #'eval)
- (substring? #'search)
- (list-position #'position)
- (*return* #\return)
- (*tab* #\tab)
- (*epoch* 1900)
- )
+  (cl-with-output-to-string with-output-to-string)
+  (*epoch* 1900)
+  (eval1 #'eval)
+  (list-position #'position)
+  (*return* #\return)
+  (string-trim #'string-trim-blanks)
+  (substring? #'search)
+  (*tab* #\tab)
+  (table-for-each #'maphash)
+  (table-get gethash)
+  )
 
 (scmxlate-uncall
  trace
@@ -237,14 +257,9 @@
       (make-hash-table)
       (make-hash-table :test 'equal)))
 
-(defun table-get (ht k &optional d)
-  (gethash k ht d))
-
-(defun table-put! (ht k v)
+(defun table-put! (k ht v)
   (setf (gethash k ht) v))
 
-(defun table-for-each (ht p)
-  (maphash p ht))
 
 (setq *print-case* :downcase)
 
@@ -261,9 +276,9 @@
 (scmxlate-rename-define
  (*scheme-version* *common-lisp-version*))
 
-(defun number-to-roman (n upcase?)
+(defun number-to-roman (n &optional upcasep)
   (format nil
-    (if upcase? "~@r" "~(~@r~)") n))
+    (if upcasep "~@r" "~(~@r~)") n))
 
 (defun lassoc (k al equ?)
   (assoc k al :test equ?))
@@ -287,7 +302,9 @@
   (or (probe-file (make-pathname :name ".no-tex2page-aux-dir"))
       (probe-file (make-pathname :name ".no-tex2page-aux"))))
 
-(scmxlate-include "fake-strftime.lsp")
+;(scmxlate-include "fake-strftime.lsp")
+
+;(defun strftime (&rest ee) (apply #'strftime-like ee))
 
 ;(defvar *tab* #\tab)
 

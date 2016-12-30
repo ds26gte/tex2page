@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2016-12-21} %last change
+\c{2017-01-02} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1137,7 +1137,7 @@ behaves differently than a \LaTeX-like `\ref`.}
 `cmyk`, `gray`, `hsb`, `rgb`, and `RGB`, also provided by
 `color.sty`); and `cmy`, `Gray`, `Hsb`, `HSB`, `HTML`,
 and `wave`, provided by the \LaTeX\ package `xcolor.sty`, which
-is a superset of `color.sty`. 
+is a superset of `color.sty`.
 
 \begintt
 {\color[cmy]{.46, .8, .86} burnt umber},
@@ -1170,7 +1170,7 @@ and {\color{magenta} magenta}.
 %
 \TeX2page doesn't need either `color.sty` or `xcolor.sty` to
 process these commands, but you need these packages if you wish
-to see the color in your PDF output. 
+to see the color in your PDF output.
 Unfortunately, while `color.sty`
 can be loaded into plain \TeX (after loading `miniltx`),
 `xcolor.sty` cannot. The \TeX2page distribution does provide a
@@ -1178,15 +1178,15 @@ plain-\TeX-loadable macro file
 `coloraug.tex` that provides some of the functionality of
 `xcolor.sty`.
 
-
 `\definecolor` defines new color names, e.g.,
 
 \begintt
 \definecolor{dodgerblue}{rgb}{.116, .565, 1}
 \definecolor{orangered}{rgb}{1, .27, 0}
 \definecolor{thistle}{cmyk}{.12, .59, 0, 0}
+
 Poor Mr Norrell could only watch on helplessly as the gentleman
-with the {\color{thistle}thistle-down hair} seized his only
+with the {\color{thistle}thistle-down hair} seized his
 copies of \colorbox{dodgerblue}{\color{white}The \TeX book} and
 \colorbox{orangered}{\color{white} The \MF book}.
 \endtt
@@ -1197,7 +1197,7 @@ produces
 \definecolor{thistle}{cmyk}{.12, .59, 0, 0}
 \quote
 Poor Mr Norrell could only watch on helplessly as the gentleman
-with the {\color{thistle}thistle-down hair} seized his only
+with the {\color{thistle}thistle-down hair} seized his
 copies of \colorbox{dodgerblue}{\color{white}The \TeX book} and
 \colorbox{orangered}{\color{white} The \MF book}.
 \endquote
@@ -3572,9 +3572,12 @@ If your dialect \p{|meta[D]} is one of them,
 Put it in your `PATH`.
 
 \TeX2page is known to configure for the Scheme dialects
-Chicken~\cite{chicken}, Gambit~\cite{gambit}, Gauche~\cite{gauche},
-Guile~\cite{guile}, Petite
-Chez~\cite{petite} and Racket~\cite{racket}; and the Common Lisp
+Chez~\cite{chez},
+Chicken~\cite{chicken},
+Gambit~\cite{gambit},
+Gauche~\cite{gauche},
+Guile~\cite{guile},
+and Racket~\cite{racket}; and the Common Lisp
 implementations ABCL, Allegro, CLISP, Clozure, CMUCL, ECL, and SBCL.
 \iffalse how about bigloo mitscheme pocketscheme s48 scm scsh
 stklos sxm \fi

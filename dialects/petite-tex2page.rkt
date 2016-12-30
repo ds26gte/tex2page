@@ -1,3 +1,3 @@
-;last change: 2003-05-31
+;last change: 2017-01-01
 
-(scmxlate-include "chez-tex2page")
+(scmxlate-include "chez-tex2page.rkt")

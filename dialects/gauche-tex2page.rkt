@@ -1,4 +1,4 @@
-; last change: 2016-12-27
+; last change: 2017-01-03
 
 (scmxlate-cond
   ((eqv? *operating-system* 'unix)
@@ -18,17 +18,94 @@
   )
 
 (scmxlate-rename
-  (seconds->date sys-localtime)
   (load disable-load-for-tex2page)
+  (remove delete)
+  (seconds->date sys-localtime)
   )
 
 (scmxlate-rename-define
   (*january-number* 0)
   (*anno-domini-at-0* 1900)
-  (strftime-like sys-strftime) 
+  (strftime sys-strftime) 
   (nreverse reverse!)
   (nconc append!)
   )
+
+(define (strftime-n fmt s)
+  (sys-strftime fmt (sys-localtime s)))
+
+(define (add1 n) (+ n 1))
+(define (sub1 n) (- n 1))
+
+(define string-trim
+  (lambda (s)
+    (let ((orig-n (string-length s)))
+      (let ((i 0) (n orig-n))
+        (let loop ((k i))
+          (cond ((>= k n) (set! i n))
+                ((char-whitespace? (string-ref s k))
+                 (loop (+ k 1)))
+                (else (set! i k))))
+        (let loop ((k (- n 1)))
+          (cond ((<= k i) (set! n (+ k 1)))
+                ((char-whitespace? (string-ref s k))
+                 (loop (- k 1)))
+                (else (set! n (+ k 1)))))
+        (if (and (= i 0) (= n orig-n)) s
+            (substring s i n))))))
+
+(define-macro defstruct 
+  (lambda (s . ff)
+    (let ((s-s (symbol->string s)) (n (length ff)))
+      (let* ((n+1 (+ n 1))
+             (vv (make-vector n+1)))
+        (let loop ((i 1) (ff ff))
+          (if (< i n+1)
+              (let ((f (car ff)))
+                (vector-set! vv i (if (pair? f) (cadr f) (not 't)))
+                (loop (+ i 1) (cdr ff)))
+              0))
+        (let* ((ff-without-colons
+                 (map (lambda (f)
+                        (symbol->string (if (pair? f) (car f) f))) ff))
+               (ff-with-colons
+                 (map make-keyword ff-without-colons)))
+          `(begin
+             (define ,(string->symbol (string-append "make-" s-s))
+               (lambda fvfv
+                 (let ((st (make-vector ,n+1)) (ff ',ff-with-colons))
+                   (vector-set! st 0 ',s)
+                   ,@(let loop ((i 1) (r '()))
+                       (if (>= i n+1) r
+                           (loop (+ i 1)
+                                 (cons `(vector-set! st ,i
+                                                     ,(vector-ref vv i))
+                                       r))))
+                   (let loop ((fvfv fvfv))
+                     (if (null? fvfv) 0
+                         (begin
+                           (vector-set! st (+ (list-position (car fvfv) ff) 1)
+                                        (cadr fvfv))
+                           (loop (cddr fvfv)))))
+                   st)))
+             ,@(let loop ((i 1) (procs '()))
+                 (if (>= i n+1) procs
+                     (loop (+ i 1)
+                           (let* ((f-s (list-ref ff-without-colons (- i 1)))) 
+                             (cons
+                               `(define ,(string->symbol
+                                           (string-append s-s "-" f-s))
+                                  (lambda (x) (vector-ref x ,i)))
+                               (cons
+                                 `(define ,(string->symbol
+                                             (string-append
+                                               "set!" s-s "-" f-s))
+                                    (lambda (x v) (vector-set! x ,i v)))
+                                 procs))))))
+             (define ,(string->symbol (string-append s-s "?"))
+               (lambda (x)
+                 (and (vector? x) (eq? (vector-ref x 0) ',s))))))))    ))
+
 
 (define (disable-load-for-tex2page f) #f)
 
@@ -41,6 +118,9 @@
 (define date-minute (lambda (tm) (slot-ref tm 'min)))
 (define date-month (lambda (tm) (slot-ref tm 'mon)))
 (define date-year (lambda (tm) (slot-ref tm 'year)))
+(define date-week-day (lambda (tm) (slot-ref tm 'wday)))
+(define date-dst? (lambda (tm) (slot-ref tm 'isdst)))
+(define date-time-zone-offset (lambda (tm) #f))
 
 (define eof (with-input-from-string "" read-char))
 

@@ -10,7 +10,7 @@
   \let\maybeendinput\endinput\fi
 \maybeendinput
 
-\message{version 20161223} % last change
+\message{version 20170104} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -499,23 +499,35 @@
 
 % Title
 
-\let\titlefont\bf
+\def\title{\futurelet\titleQfirstc\titleQcheckfirstc}
 
-\def\title{%
+\def\titleQcheckfirstc{\ifx\titleQfirstc\bgroup
+  \let\titleQnext\titleQbraced
+  \else\let\titleQnext\titleQpar\fi
+  \titleQcatcode}
+
+\def\titleQcatcode{\begingroup
+  \def\do##1{\catcode`##1=11 }\dospecials
+  \catcode`\{=1 \catcode`\}=2
+  \titleQnext}
+
+\def\titleQbraced#1{\endgroup
+  \def\titleQtext{#1}\titleQdisplay}
+
+\def\titleQpar#1\par{\endgroup
+  \def\titleQtext{#1}\titleQdisplay}
+
+\def\titleQdisplay{%
   \immediate\openout\sectionQscratchfileport Z-sec-temp
-  \begingroup
-    \def\do##1{\catcode`##1=11 }\dospecials
-    \catcode`\{=1 \catcode`\}=2
-    \titleI}
-
-\def\titleI#1{\endgroup
-  \immediate\write\sectionQscratchfileport {#1}%
+  \immediate\write\sectionQscratchfileport{\titleQtext}%
   \immediate\closeout\sectionQscratchfileport
   $$\vbox{\titlefont \def\\{\cr}%
       \halign{\hfil##\hfil\cr
         \input Z-sec-temp
         \cr}}$$%
-  \medskip}
+  \medskip\noindent}
+
+\let\titlefont\bf
 
 \let\subject\title
 
@@ -820,7 +832,7 @@
   \afterassignment\urlhQii
   \gdef\urlhQurlarg}
 
-\def\tit#1 \par{\title{#1}}
+\let\tit\title
 \def\chap{\beginchapter {} }
 \let\secQtrig\sec
 \def\sec{\ifmmode\secQtrig\else\beginsection\fi}

@@ -1,4 +1,4 @@
-% last change: 2016-12-21
+% last change: 2017-01-05
 % Dorai Sitaram
 %
 %
@@ -193,8 +193,15 @@ $\Vert$\or
 \evalq{
 (tex2page "texample")
 (tex2page "mpexample")
-(tex2page "story")
 }
+
+\ifx\TZPcommonlisp 1
+\evalq{
+(unless (probe-file "story.hlog") (tex2page "story"))
+}\else
+\evalq{
+(if (not (file-exists? "story.hlog")) (tex2page "story") 0)
+}\fi
 
 % make it easy for the search engines to find us
 \htmlheadonly

@@ -12,7 +12,7 @@
 \ifx\TZPtitle\UnDeFiNeD
 \def\TZPtitle{TeX2page}\fi
 
-\title{\TeX2page}
+\title \TeX2page
 
 \smallskip
 
@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2017-01-02} %last change
+\c{2017-01-06} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1168,7 +1168,7 @@ produces
 and {\color{magenta} magenta}.
 \endquote
 %
-\TeX2page doesn't need either `color.sty` or `xcolor.sty` to
+\TeX2page doesn’t need either `color.sty` or `xcolor.sty` to
 process these commands, but you need these packages if you wish
 to see the color in your PDF output.
 Unfortunately, while `color.sty`
@@ -2153,7 +2153,7 @@ makes ‘`@`’ the verbatim escape.
 \TeX2page also understands \LaTeX’s `{verbatim}`
 environment, the `\path` macro from `path.sty`,
 Eplain’s `\verbatim`, and  OPmac’s
-`\activettchar`\f{\verb{\activettchar`} lets you write
+`\activettchar`\f{Setting \verb{\activettchar`} lets you write
 \verb+\verb`\c@de_fr&gm%#t$`+
 as simply
 \verb+`\c@de_fr&gm%#t$`+,

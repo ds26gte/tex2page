@@ -29,7 +29,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170103") ;last change
+(defparameter *tex2page-version* "20170104") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1515,7 +1515,6 @@
 (defun do-externaltitle ()
   (write-aux `(!preferred-title ,(tex-string-to-html-string (get-group)))))
 
-
 (defun make-external-title (title)
   (let ((*outputting-external-title-p* t))
     (bgroup)
@@ -1542,13 +1541,18 @@
   (tex2page-string (concatenate 'string "\\let\\\\\\break " title))
   (egroup)
   (emit "</h1>")
-  (emit-newline))
+  (do-noindent)
+  )
 
 (defun do-subject ()
   (tex-gdef-0arg "\\TIIPtitleused" "1")
   (do-end-para)
   (ignorespaces)
-  (let ((title (get-group)))
+  (let ((title
+          (let ((c (snoop-actual-char)))
+            (if (or (eq c :eof-object) (not (char= c #\{)))
+                (get-till-par)
+                (get-group)))))
     (unless *title* (flag-missing-piece :document-title))
     (write-aux `(!default-title ,(make-external-title title)))
     (output-title title)))
@@ -5490,7 +5494,6 @@
        *scm-variables* (make-hash-table :test #'equal))
   (mapc (lambda (s) (setf (gethash s *scm-keywords*) t))
         '(
-          ;#include scmkeywords.lisp
           "=>"
           "and"
           "begin"
@@ -5529,9 +5532,7 @@
           "when"
           "with"
           "with-handlers"
-          ;#endinclude scmkeywords.lisp
 
-          ;#include lispkeywords.lisp
           "assert"
           "block"
           "decf"
@@ -5568,7 +5569,6 @@
           "with-open-stream"
           "with-output-to-string"
           "with-slots"
-          ;#endinclude lispkeywords.lisp
 
           ))
   t)
@@ -5748,7 +5748,6 @@
         *section-counter-dependencies* (make-hash-table)
         *dotted-counters* (make-hash-table :test #'equal))
 
-  ;#include globdefs.lisp
   ;
   ;for TeX, 0 <= \language <= 255; for TeX2page, let's make \language =
   ;256
@@ -5832,7 +5831,6 @@
   (tex-gdef-0arg "\\TZPtextext" "1")
   (tex-gdef-0arg "\\TZPraggedright" "1")
   (tex-gdef-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))
-  ;#endinclude globdefs.lisp
 
   (initialize-scm-words)
 
@@ -7968,7 +7966,6 @@
     (setq *css-port* (open css-file :direction :output
                            :if-exists :supersede))
     (princ
-      ;#include tex2page.css
       "body {
       color: black;
       /*   background-color: #e5e5e5;*/
@@ -8275,7 +8272,6 @@
       margin-left: 0pt;
       }
       "
-      ;#endinclude tex2page.css
       *css-port*)))
 
 (defun load-aux-file ()
@@ -8604,7 +8600,6 @@ Try the commands
           (concatenate 'string "\\global\\imgdef" cs "{$" expn "$}"))
          (tex2page-string cs)))))
 
-;#include primdefs.lisp
 ;TeXbook, sec 18.2, non-italic letters in formulas
 
 (tex-defsym-math-prim "\\Pr" "Pr ")
@@ -9878,8 +9873,6 @@ Try the commands
 (tex-let-prim "\\Lrbrace" "\\char`\\}")
 (tex-let-prim "\\Lsup" "\\char`\\^")
 (tex-let-prim "\\Lsub" "\\char`\\_")
-
-;#endinclude primdefs.lisp
 
 (defun tex2page (tex-file)
   (unless (= *write-log-index* 0)

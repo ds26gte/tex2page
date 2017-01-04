@@ -301,7 +301,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170103.
 
 
-(define *tex2page-version* "20170103")
+(define *tex2page-version* "20170104")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -778,15 +778,14 @@
      (begin
       (cond
        (slash
-        (begin
-         (set! f
-          (subseq f (+ slash 1)
-                  (let ((%length-arg f))
-                    ((if (string? %length-arg)
-                         string-length
-                         length)
-                     %length-arg))))
-         f))
+        (set! f
+         (subseq f (+ slash 1)
+                 (let ((%length-arg f))
+                   ((if (string? %length-arg)
+                        string-length
+                        length)
+                    %length-arg))))
+        f)
        (else false))
       (let ((dot
              (let ((%position-v #\.)
@@ -1008,55 +1007,53 @@
  (lambda (x)
    (cond
     ((not *log-port*)
-     (begin
-      (set! *log-file*
-       (let ((%type 'string) (%ee (list *aux-dir/* *jobname* ".hlog")))
-         (let ((%res
-                (if (eq? %type 'string)
-                    ""
-                    null)))
-           (let %concatenate-loop
-             ((%ee %ee))
-             (if (null? %ee)
-                 %res
-                 (let ((%a (car %ee)))
-                   (unless (not %a)
-                     (set! %res
-                      (if (eq? %type 'string)
-                          (string-append %res
-                           (if (string? %a)
-                               %a
-                               (list->string %a)))
-                          (append %res
-                                  (if (string? %a)
-                                      (string->list %a)
-                                      %a)))))
-                   (%concatenate-loop (cdr %ee)))))
-           %res)))
-      (set! *log-port*
-       (let* ((%f *log-file*)
-              (%ee (list ':direction ':output ':if-exists ':supersede))
-              (%direction (memv ':direction %ee))
-              (%if-exists (memv ':if-exists %ee))
-              (%if-does-not-exist ':error)
-              (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-         (when %direction (set! %direction (cadr %direction)))
-         (when %if-exists (set! %if-exists (cadr %if-exists)))
-         (when %if-does-not-exist-from-user
-           (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-         (cond
-          ((eqv? %direction ':output)
-           (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-             (delete-file %f))
-           (open-output-file %f))
-          ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-          (else (open-input-file %f)))))
-      *log-port*))
+     (set! *log-file*
+      (let ((%type 'string) (%ee (list *aux-dir/* *jobname* ".hlog")))
+        (let ((%res
+               (if (eq? %type 'string)
+                   ""
+                   null)))
+          (let %concatenate-loop
+            ((%ee %ee))
+            (if (null? %ee)
+                %res
+                (let ((%a (car %ee)))
+                  (unless (not %a)
+                    (set! %res
+                     (if (eq? %type 'string)
+                         (string-append %res
+                          (if (string? %a)
+                              %a
+                              (list->string %a)))
+                         (append %res
+                                 (if (string? %a)
+                                     (string->list %a)
+                                     %a)))))
+                  (%concatenate-loop (cdr %ee)))))
+          %res)))
+     (set! *log-port*
+      (let* ((%f *log-file*)
+             (%ee (list ':direction ':output ':if-exists ':supersede))
+             (%direction (memv ':direction %ee))
+             (%if-exists (memv ':if-exists %ee))
+             (%if-does-not-exist ':error)
+             (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
+        (when %direction (set! %direction (cadr %direction)))
+        (when %if-exists (set! %if-exists (cadr %if-exists)))
+        (when %if-does-not-exist-from-user
+          (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
+        (cond
+         ((eqv? %direction ':output)
+          (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
+            (delete-file %f))
+          (open-output-file %f))
+         ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
+         (else (open-input-file %f)))))
+     *log-port*)
     (else false))
    (cond
     ((and *write-log-possible-break-p* (char? x) (member x '(#\) #\] #\} #\,)))
-     (begin (set! *write-log-possible-break-p* false)
-      *write-log-possible-break-p*))
+     (set! *write-log-possible-break-p* false) *write-log-possible-break-p*)
     (else false))
    (cond
     ((and *write-log-possible-break-p* (> *write-log-index* *write-log-max*))
@@ -1072,15 +1069,15 @@
        ((#\newline :separation-newline)
         (cond
          (*write-log-possible-break-p*
-          (begin (set! *write-log-possible-break-p* false)
-           *write-log-possible-break-p*))
+          (set! *write-log-possible-break-p* false)
+          *write-log-possible-break-p*)
          (else false))
         (newline *log-port*)
         (newline)
         (begin (set! *write-log-index* 0) *write-log-index*))
        ((:separation-space)
-        (begin (set! *write-log-possible-break-p* true)
-         *write-log-possible-break-p*))
+        (set! *write-log-possible-break-p* true)
+        *write-log-possible-break-p*)
        (else
         (cond
          (*write-log-possible-break-p* (write-char #\  *log-port*)
@@ -1148,40 +1145,38 @@
                              false)
                             (else (open-input-file %f))))))
                     (let ((%with-open-file-res
-                           (begin
-                            (let ((i 1) (ll null))
-                              (let* ((%loop-returned false)
-                                     (%loop-result 0)
-                                     (return
-                                      (lambda %args
-                                        (set! %loop-returned true)
-                                        (set! %loop-result
-                                         (and (pair? %args) (car %args))))))
-                                (let %loop
-                                  ()
-                                  (unless %loop-returned
-                                    (let ((l
-                                           (let ((%read-line-res
-                                                  (read-line ip)))
-                                             (when (eof-object? %read-line-res)
-                                               (set! %read-line-res
-                                                ':eof-object))
-                                             %read-line-res)))
-                                      (cond ((eq? l ':eof-object) (return ll))
-                                            ((< i n1)
-                                             (let ((%tmp (+ i 1)))
-                                               (begin (set! i %tmp) i)))
-                                            ((<= i nf)
-                                             (let ((%tmp (+ i 1)))
-                                               (begin (set! i %tmp) i))
-                                             (let ((%push-new-stack
-                                                    (cons (cons i l) ll)))
-                                               (begin (set! ll %push-new-stack)
-                                                ll)))
-                                            (true (return ll)))))
-                                  (if %loop-returned
-                                      %loop-result
-                                      (%loop))))))))
+                           (let ((i 1) (ll null))
+                             (let* ((%loop-returned false)
+                                    (%loop-result 0)
+                                    (return
+                                     (lambda %args
+                                       (set! %loop-returned true)
+                                       (set! %loop-result
+                                        (and (pair? %args) (car %args))))))
+                               (let %loop
+                                 ()
+                                 (unless %loop-returned
+                                   (let ((l
+                                          (let ((%read-line-res (read-line ip)))
+                                            (when (eof-object? %read-line-res)
+                                              (set! %read-line-res
+                                               ':eof-object))
+                                            %read-line-res)))
+                                     (cond ((eq? l ':eof-object) (return ll))
+                                           ((< i n1)
+                                            (let ((%tmp (+ i 1)))
+                                              (begin (set! i %tmp) i)))
+                                           ((<= i nf)
+                                            (let ((%tmp (+ i 1)))
+                                              (begin (set! i %tmp) i))
+                                            (let ((%push-new-stack
+                                                   (cons (cons i l) ll)))
+                                              (begin (set! ll %push-new-stack)
+                                               ll)))
+                                           (else (return ll)))))
+                                 (if %loop-returned
+                                     %loop-result
+                                     (%loop)))))))
                       (begin
                        (cond
                         (ip
@@ -1280,7 +1275,7 @@
                                   (%concatenate-loop (cdr %ee)))))
                           %res)))
                      texedit-string)))
-                 (true (begin (set! texedit-string false) texedit-string))))
+                 (else (set! texedit-string false) texedit-string)))
                (else false))
               (cond
                (texedit-string
@@ -1317,7 +1312,7 @@
                                   (%concatenate-loop (cdr %ee)))))
                           %res)))
                      texedit-string)))
-                 (true (begin (set! texedit-string false) texedit-string))))
+                 (else (set! texedit-string false) texedit-string)))
                (else false))
               (cond
                ((not texedit-string)
@@ -1433,16 +1428,14 @@
              ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
              (else (open-input-file %f))))))
      (let ((%with-open-file-res
-            (begin
-             (let ((%fluid-var-*current-tex2page-input* (make-bport* ':port i))
-                   (%fluid-var-*current-source-file* f)
-                   (%fluid-var-*input-line-no* 1))
-               (fluid-let
-                ((*input-line-no* %fluid-var-*input-line-no*)
-                 (*current-source-file* %fluid-var-*current-source-file*)
-                 (*current-tex2page-input*
-                  %fluid-var-*current-tex2page-input*))
-                (th))))))
+            (let ((%fluid-var-*current-tex2page-input* (make-bport* ':port i))
+                  (%fluid-var-*current-source-file* f)
+                  (%fluid-var-*input-line-no* 1))
+              (fluid-let
+               ((*input-line-no* %fluid-var-*input-line-no*)
+                (*current-source-file* %fluid-var-*current-source-file*)
+                (*current-tex2page-input* %fluid-var-*current-tex2page-input*))
+               (th)))))
        (begin
         (cond
          (i
@@ -1512,7 +1505,7 @@
                         (let ((%tmp (+ *input-line-no* 1)))
                           (begin (set! *input-line-no* %tmp) *input-line-no*))
                         c)
-                       (true c)))))
+                       (else c)))))
          (let ((c (car b)))
            (begin
             (begin (set!bport*-buffer *current-tex2page-input* (cdr b))
@@ -1521,34 +1514,33 @@
 
 (define toss-back-string
  (lambda (s)
-   (begin
-    (set!bport*-buffer *current-tex2page-input*
-     (append
-      (let ((%type 'list) (%ee (list s)))
-        (let ((%res
-               (if (eq? %type 'string)
-                   ""
-                   null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a)
-                              %a
-                              (list->string %a)))
-                         (append %res
-                                 (if (string? %a)
-                                     (string->list %a)
-                                     %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res))
-      (bport*-buffer *current-tex2page-input*)))
-    (bport*-buffer *current-tex2page-input*))))
+   (set!bport*-buffer *current-tex2page-input*
+    (append
+     (let ((%type 'list) (%ee (list s)))
+       (let ((%res
+              (if (eq? %type 'string)
+                  ""
+                  null)))
+         (let %concatenate-loop
+           ((%ee %ee))
+           (if (null? %ee)
+               %res
+               (let ((%a (car %ee)))
+                 (unless (not %a)
+                   (set! %res
+                    (if (eq? %type 'string)
+                        (string-append %res
+                         (if (string? %a)
+                             %a
+                             (list->string %a)))
+                        (append %res
+                                (if (string? %a)
+                                    (string->list %a)
+                                    %a)))))
+                 (%concatenate-loop (cdr %ee)))))
+         %res))
+     (bport*-buffer *current-tex2page-input*)))
+   (bport*-buffer *current-tex2page-input*)))
 
 (define toss-back-char
  (lambda (c)
@@ -1567,9 +1559,8 @@
 
 (define check-outerness
  (lambda (c)
-   (cond
-    ((eq? c *outer-invisible-space*) (begin (set! *outer-p* true) *outer-p*))
-    (else false))))
+   (cond ((eq? c *outer-invisible-space*) (set! *outer-p* true) *outer-p*)
+         (else false))))
 
 (define snoop-actual-char
  (lambda ()
@@ -1582,7 +1573,7 @@
               (if (and (not (eq? c ':eof-object)) (char=? c #\newline))
                   c
                   (begin (toss-back-char #\newline) #\newline))))
-           (true c)))))
+           (else c)))))
 
 (define get-actual-char
  (lambda ()
@@ -1594,7 +1585,7 @@
               (if (and (not (eq? c ':eof-object)) (char=? c #\newline))
                   (get-actual-char)
                   #\newline)))
-           (true c)))))
+           (else c)))))
 
 (define get-line
  (lambda ()
@@ -1662,7 +1653,7 @@
                                                %a)))))
                             (%concatenate-loop (cdr %ee)))))
                     %res))))
-              (true
+              (else
                (let ((%push-new-stack (cons c r)))
                  (begin (set! r %push-new-stack) r))))))
          (if %loop-returned
@@ -1686,9 +1677,8 @@
            (unless %loop-returned
              (let ((c (snoop-char)))
                (begin
-                (cond
-                 ((eqv? c #\return) (begin (set! c (snoop-actual-char)) c))
-                 (else false))
+                (cond ((eqv? c #\return) (set! c (snoop-actual-char)) c)
+                      (else false))
                 (cond ((eq? c ':eof-object) (return))
                       ((invisible-space-p c) (get-char)
                        (cond (*reading-control-sequence-p* (return))
@@ -1697,11 +1687,11 @@
                        (cond (newline-active-p (return))
                              (newline-already-read-p (toss-back-char #\newline)
                               (return))
-                             (true (get-actual-char)
+                             (else (get-actual-char)
                               (begin (set! newline-already-read-p true)
                                newline-already-read-p))))
                       ((char-whitespace? c) (get-actual-char))
-                      (true (return))))))
+                      (else (return))))))
            (if %loop-returned
                %loop-result
                (%loop))))))
@@ -1718,7 +1708,7 @@
                (set! %loop-result (and (pair? %args) (car %args))))))
        (let %loop
          ()
-         (unless %loop-returned (begin (set! c (snoop-actual-char)) c))
+         (unless %loop-returned (set! c (snoop-actual-char)) c)
          (unless %loop-returned
            (cond ((eq? c ':eof-object) (return)) (else false)))
          (unless %loop-returned
@@ -1746,7 +1736,7 @@
                     (let ((%tmp (+ n 1)))
                       (begin (set! n %tmp) n)))
                    ((char-whitespace? c) (get-actual-char))
-                   (true (return n)))))
+                   (else (return n)))))
          (if %loop-returned
              %loop-result
              (%loop)))))))
@@ -1766,7 +1756,7 @@
            (cond ((eq? c ':eof-object) (return false))
                  ((char=? c #\newline) (get-actual-char) (return true))
                  ((char-whitespace? c) (get-actual-char))
-                 (true (return false)))))
+                 (else (return false)))))
        (if %loop-returned
            %loop-result
            (%loop))))))
@@ -1815,7 +1805,7 @@
                                         ((char-tex-alphabetic-p c) (get-char)
                                          (let ((%push-new-stack (cons c s)))
                                            (begin (set! s %push-new-stack) s)))
-                                        (true
+                                        (else
                                          (cond
                                           ((not
                                             (or *math-mode-p*
@@ -1854,7 +1844,7 @@
                                               %a)))))
                            (%concatenate-loop (cdr %ee)))))
                    %res)))
-              (true
+              (else
                (let ((%type 'string) (%ee (list (list #\\ c))))
                  (let ((%res
                         (if (eq? %type 'string)
@@ -1967,7 +1957,7 @@
                                                                   %a)))))
                                                (%concatenate-loop (cdr %ee)))))
                                        %res)))
-                                  (true (tex-string-to-html-string x)))))))
+                                  (else (tex-string-to-html-string x)))))))
                          (begin
                           (set! s
                            (append
@@ -2016,7 +2006,7 @@
                         (let ((%tmp (- nesting 1)))
                           (begin (set! nesting %tmp) nesting))
                         (begin (set! escape-p false) escape-p))))
-                  (true
+                  (else
                    (let ((%push-new-stack (cons c s)))
                      (begin (set! s %push-new-stack) s))
                    (begin (set! escape-p false) escape-p))))))
@@ -2102,7 +2092,7 @@
                                                       %a)))))
                                    (%concatenate-loop (cdr %ee)))))
                            %res))))
-                     (true (for-each toss-back-char s) (toss-back-char #\{)
+                     (else (for-each toss-back-char s) (toss-back-char #\{)
                       (return false)))))
                 (if %loop-returned
                     %loop-result
@@ -2161,7 +2151,7 @@
                                     (return s)
                                     (let ((%push-new-stack (cons c s)))
                                       (begin (set! s %push-new-stack) s))))
-                               (true
+                               (else
                                 (let ((%push-new-stack (cons c s)))
                                   (begin (set! s %push-new-stack) s)))))))
                          (if %loop-returned
@@ -2218,7 +2208,7 @@
                    (set! %loop-result (and (pair? %args) (car %args))))))
            (let %loop
              ()
-             (unless %loop-returned (begin (set! c (snoop-actual-char)) c))
+             (unless %loop-returned (set! c (snoop-actual-char)) c)
              (unless %loop-returned
                (cond
                 ((not
@@ -2309,7 +2299,7 @@
                                       s)
                                      (begin (toss-back-char *invisible-space*)
                                       (toss-back-string x) (return s)))))
-                              (true (get-actual-char)
+                              (else (get-actual-char)
                                (let ((%push-new-stack (cons c s)))
                                  (begin (set! s %push-new-stack) s))))))
                     (if %loop-returned
@@ -2367,7 +2357,7 @@
                                  (and *comment-char* (char=? c *comment-char*))
                                  (esc-char-p c))
                              (return s))
-                            (true (get-actual-char)
+                            (else (get-actual-char)
                              (let ((%push-new-stack (cons c s)))
                                (begin (set! s %push-new-stack) s))))))
                   (if %loop-returned
@@ -2398,7 +2388,6 @@
 
 (define get-integer
  (lambda (base)
-   false
    (ignorespaces)
    (let ((s null) (c false))
      (begin
@@ -2410,7 +2399,7 @@
                 (set! %loop-result (and (pair? %args) (car %args))))))
         (let %loop
           ()
-          (unless %loop-returned (begin (set! c (snoop-actual-char)) c))
+          (unless %loop-returned (set! c (snoop-actual-char)) c)
           (unless %loop-returned
             (cond ((eq? c ':eof-object) (return)) (else false)))
           (unless %loop-returned
@@ -2457,8 +2446,7 @@
    (ignorespaces)
    (let ((negative? false) (c (snoop-actual-char)))
      (begin
-      (cond ((char=? c #\-) (begin (set! negative? true) negative?))
-            (else false))
+      (cond ((char=? c #\-) (set! negative? true) negative?) (else false))
       (cond ((or negative? (char=? c #\+)) (get-actual-char)) (else false))
       (let ((s null))
         (begin
@@ -2476,7 +2464,7 @@
                        ((or (char-numeric? c) (char=? c #\.)) (get-actual-char)
                         (let ((%push-new-stack (cons c s)))
                           (begin (set! s %push-new-stack) s)))
-                       (true (ignorespaces) (return)))))
+                       (else (ignorespaces) (return)))))
              (if %loop-returned
                  %loop-result
                  (%loop))))
@@ -2532,7 +2520,7 @@
    (cond
     ((char=? (snoop-actual-char) #\t) (get-actual-char)
      (cond ((char=? (snoop-actual-char) #\o) (get-actual-char) (ignorespaces))
-           (true (toss-back-char #\t))))
+           (else (toss-back-char #\t))))
     (else false))))
 
 (define get-number-corresp-to-ctl-seq
@@ -2549,7 +2537,7 @@
            0))
          ((string=? x "\\magstep") (get-number-or-false)) ((find-count x))
          ((find-dimen x))
-         (true
+         (else
           (let ((it (resolve-defs x)))
             (if it
                 (char->integer (string-ref it 0))
@@ -2571,7 +2559,7 @@
            ((char=? c #\-) (get-actual-char)
             (let ((n (get-number-or-false)))
               (and n (- n))))
-           ((char-numeric? c) (get-integer 10)) (true false)))))
+           ((char-numeric? c) (get-integer 10)) (else false)))))
 
 (define get-number
  (lambda () (or (get-number-or-false) (terror 'get-number "Missing number."))))
@@ -2628,12 +2616,12 @@
                                (begin (set! s %push-new-stack) s)))
                             ((char=? c #\})
                              (cond ((= nesting 0) (return s))
-                                   (true
+                                   (else
                                     (let ((%tmp (- nesting 1)))
                                       (begin (set! nesting %tmp) nesting))
                                     (let ((%push-new-stack (cons c s)))
                                       (begin (set! s %push-new-stack) s)))))
-                            (true
+                            (else
                              (let ((%push-new-stack (cons c s)))
                                (begin (set! s %push-new-stack) s)))))))
                       (if %loop-returned
@@ -2686,7 +2674,7 @@
                      (cond ((char=? c #\,) (return s))
                            ((char=? c closing-delim) (toss-back-char c)
                             (return s))
-                           (true
+                           (else
                             (let ((%push-new-stack (cons c s)))
                               (begin (set! s %push-new-stack) s)))))))
                 (if %loop-returned
@@ -2727,7 +2715,7 @@
             (let ((%fluid-var-*not-processing-p* true))
               (fluid-let ((*not-processing-p* %fluid-var-*not-processing-p*))
                (get-ctl-seq))))
-           (true
+           (else
             (let ((%type 'string) (%ee (list (list (get-actual-char)))))
               (let ((%res
                      (if (eq? %type 'string)
@@ -2759,7 +2747,7 @@
      (cond ((eq? c ':eof-object) c) ((esc-char-p c) (get-ctl-seq))
            ((and *comment-char* (char=? c *comment-char*)) (eat-till-eol)
             (get-raw-token/is))
-           (true
+           (else
             (let ((%type 'string) (%ee (list (list (get-actual-char)))))
               (let ((%res
                      (if (eq? %type 'string)
@@ -2792,7 +2780,7 @@
            ((char=? c #\{) (get-group))
            ((and *comment-char* (char=? c *comment-char*)) (eat-till-eol)
             (get-token))
-           (true
+           (else
             (let ((%type 'string) (%ee (list (list (get-actual-char)))))
               (let ((%res
                      (if (eq? %type 'string)
@@ -2824,7 +2812,7 @@
            ((char=? c #\{) (get-group))
            ((and *comment-char* (char=? c *comment-char*)) (eat-till-eol)
             (get-token/ps))
-           (true
+           (else
             (let ((%type 'string) (%ee (list (list (get-actual-char)))))
               (let ((%res
                      (if (eq? %type 'string)
@@ -2869,14 +2857,16 @@
          (let %loop
            ()
            (unless %loop-returned
-             (cond ((>= i %dotimes-n) (return true)) (else false)))
+             (if (>= i %dotimes-n)
+                 (return true)
+                 false))
            (unless %loop-returned
              (let ((c (snoop-actual-char)))
                (cond
                 ((char=? c (string-ref word i)) (get-actual-char)
                  (let ((%push-new-stack (cons c r)))
                    (begin (set! r %push-new-stack) r)))
-                (true (for-each toss-back-char r) (return false)))))
+                (else (for-each toss-back-char r) (return false)))))
            (unless %loop-returned (set! i (+ i 1)))
            (if %loop-returned
                %loop-result
@@ -2887,7 +2877,7 @@
    (let ((go-ahead-p true))
      (begin
       (cond (fullp (get-equal-sign)) ((ormap eat-word '("plus" "minus")) true)
-            (true (begin (set! go-ahead-p false) go-ahead-p)))
+            (else (set! go-ahead-p false) go-ahead-p))
       (cond
        (go-ahead-p
         (let ((%fluid-var-*not-processing-p* true))
@@ -2913,8 +2903,8 @@
                              '("bp" "cc" "cm" "dd" "em" "ex" "filll" "fill"
                                "fil" "in" "minus" "mm" "pc" "plus" "pt" "sp"
                                "true"))
-                            (begin (set! firstp false) firstp))
-                           (true (return)))))
+                            (set! firstp false) firstp)
+                           (else (return)))))
                  (if %loop-returned
                      %loop-result
                      (%loop))))))))
@@ -2943,8 +2933,7 @@
                         (set! %loop-result (and (pair? %args) (car %args))))))
                 (let %loop
                   ()
-                  (unless %loop-returned
-                    (begin (set! c (snoop-actual-char)) c))
+                  (unless %loop-returned (set! c (snoop-actual-char)) c)
                   (unless %loop-returned
                     (cond ((eq? c ':eof-object) (return s)) (else false)))
                   (unless %loop-returned
@@ -2959,7 +2948,7 @@
                       (begin (set! esc-p true) esc-p))
                      ((or (char-whitespace? c) (member c *scm-token-delims*))
                       (return s))
-                     (true (get-actual-char)
+                     (else (get-actual-char)
                       (let ((%push-new-stack (cons c s)))
                         (begin (set! s %push-new-stack) s)))))
                   (if %loop-returned
@@ -2994,7 +2983,7 @@
     ((not (eq? c ':eof-object))
      (cond ((char=? c #\newline) (emit-newline))
            (*outputting-to-non-html-p* (emit c))
-           (true
+           (else
             (emit
              (case c
                ((#\<) "&#x3c;")
@@ -3022,7 +3011,9 @@
        (let %loop
          ()
          (unless %loop-returned
-           (cond ((>= i %dotimes-n) (return)) (else false)))
+           (if (>= i %dotimes-n)
+               (return)
+               false))
          (unless %loop-returned (emit-html-char (string-ref s i)))
          (unless %loop-returned (set! i (+ i 1)))
          (if %loop-returned
@@ -3155,15 +3146,12 @@
      (let ((s (get-token)))
        (begin (bgroup)
         (cond
-         ((string=? s "(")
-          (begin (set! *math-delim-left* ':lparen) *math-delim-left*))
-         ((string=? s "[")
-          (begin (set! *math-delim-left* ':lbrack) *math-delim-left*))
-         ((string=? s "\\{")
-          (begin (set! *math-delim-left* ':lbrace) *math-delim-left*))
-         ((string=? s "|")
-          (begin (set! *math-delim-left* ':lvert) *math-delim-left*))
-         (true (terror 'do-math-left))))))
+         ((string=? s "(") (set! *math-delim-left* ':lparen) *math-delim-left*)
+         ((string=? s "[") (set! *math-delim-left* ':lbrack) *math-delim-left*)
+         ((string=? s "\\{") (set! *math-delim-left* ':lbrace)
+          *math-delim-left*)
+         ((string=? s "|") (set! *math-delim-left* ':lvert) *math-delim-left*)
+         (else (terror 'do-math-left))))))
     (else false))))
 
 (define do-math-right
@@ -3174,15 +3162,15 @@
      (let ((s (get-token)))
        (begin
         (cond
-         ((string=? s ")")
-          (begin (set! *math-delim-right* ':rparen) *math-delim-right*))
-         ((string=? s "]")
-          (begin (set! *math-delim-right* ':rbrack) *math-delim-right*))
-         ((string=? s "\\}")
-          (begin (set! *math-delim-right* ':rbrace) *math-delim-right*))
-         ((string=? s "|")
-          (begin (set! *math-delim-right* ':rvert) *math-delim-right*))
-         (true (terror 'do-math-right)))
+         ((string=? s ")") (set! *math-delim-right* ':rparen)
+          *math-delim-right*)
+         ((string=? s "]") (set! *math-delim-right* ':rbrack)
+          *math-delim-right*)
+         ((string=? s "\\}") (set! *math-delim-right* ':rbrace)
+          *math-delim-right*)
+         ((string=? s "|") (set! *math-delim-right* ':rvert)
+          *math-delim-right*)
+         (else (terror 'do-math-right)))
         (egroup))))
     (else false))))
 
@@ -3277,7 +3265,7 @@
 
 (define tex-def
  (lambda (name argpat expansion optarg thunk prim defer frame)
-   (cond ((not frame) (begin (set! frame (top-texframe)) frame)) (else false))
+   (cond ((not frame) (set! frame (top-texframe)) frame) (else false))
    (let ((frame-defs (texframe*-definitions frame)))
      (let ((d
             (or (table-get name frame-defs)
@@ -3331,7 +3319,7 @@
 
 (define tex-let
  (lambda (lft rt frame)
-   (cond ((not frame) (begin (set! frame (top-texframe)) frame)) (else false))
+   (cond ((not frame) (set! frame (top-texframe)) frame) (else false))
    (let ((frame-defs (texframe*-definitions frame)))
      (let ((lft-def
             (or (table-get lft frame-defs)
@@ -3344,7 +3332,7 @@
         ((begin (set! *it* (find-def rt)) *it*)
          (let ((rt-def *it*))
            (kopy-tdef lft-def rt-def)))
-        (true (cleanse-tdef lft-def)))))))
+        (else (cleanse-tdef lft-def)))))))
 
 (define tex-let-general
  (lambda (lhs rhs frame)
@@ -3393,7 +3381,7 @@
 
 (define tex-def-char
  (lambda (c argpat expansion frame)
-   (cond ((not frame) (begin (set! frame (top-texframe)) frame)) (else false))
+   (cond ((not frame) (set! frame (top-texframe)) frame) (else false))
    (let ((d (ensure-cdef c frame)))
      (begin (set!cdef*-argpat d argpat) (set!cdef*-expansion d expansion)
       (cdef*-expansion d)))
@@ -3447,13 +3435,13 @@
            ((begin (set! *it* (find-chardef-in-top-frame c)) *it*)
             (let ((y *it*))
               (begin (begin (set!cdef*-active y true) (cdef*-active y)) y)))
-           (true
+           (else
             (let ((d (find-chardef c)))
               (let ((y (ensure-cdef c (top-texframe))))
                 (begin (cond (d (kopy-cdef y d)) (else false))
                  (begin (set!cdef*-active y true) (cdef*-active y)) y)))))))
      (add-postlude-to-top-frame
-      (lambda () (begin (set!cdef*-active y false) (cdef*-active y)))))))
+      (lambda () (set!cdef*-active y false) (cdef*-active y))))))
 
 (define deactivate-cdef
  (lambda (c)
@@ -3480,9 +3468,8 @@
  (lambda (c val)
    (cond ((not (= val 13)) (deactivate-cdef c)) (else false))
    (cond
-    ((not (= val 11))
-     (begin (set! *tex-extra-letters* (remove c *tex-extra-letters*))
-      *tex-extra-letters*))
+    ((not (= val 11)) (set! *tex-extra-letters* (remove c *tex-extra-letters*))
+     *tex-extra-letters*)
     (else false))
    (case val
      ((0)
@@ -3507,9 +3494,9 @@
    (let ((%fluid-var-*ligatures-p* false))
      (fluid-let ((*ligatures-p* %fluid-var-*ligatures-p*))
       (cond (*outputting-external-title-p* false)
-            (true (emit "<code class=verbatim>")))
+            (else (emit "<code class=verbatim>")))
       (do-verb-delimed *opmac-active-tt-char*)
-      (cond (*outputting-external-title-p* false) (true (emit "</code>")))))
+      (cond (*outputting-external-title-p* false) (else (emit "</code>")))))
    (egroup)))
 
 (define do-global
@@ -3530,7 +3517,7 @@
             (make-reusable-img true))
            ((find-count next) (do-count= next true))
            ((find-toks next) (do-toks= next true))
-           (true (toss-back-string next))))))
+           (else (toss-back-string next))))))
 
 (define do-externaltitle
  (lambda ()
@@ -3613,14 +3600,18 @@
         %res)))
    (egroup)
    (emit "</h1>")
-   (emit-newline)))
+   (do-noindent)))
 
 (define do-subject
  (lambda ()
    (tex-gdef-0arg "\\TIIPtitleused" "1")
    (do-end-para)
    (ignorespaces)
-   (let ((title (get-group)))
+   (let ((title
+          (let ((c (snoop-actual-char)))
+            (if (or (eq? c ':eof-object) (not (char=? c #\{)))
+                (get-till-par)
+                (get-group)))))
      (begin
       (cond ((not *title*) (flag-missing-piece ':document-title)) (else false))
       (write-aux `(!default-title ,(make-external-title title)))
@@ -3787,11 +3778,11 @@
                    (for-each toss-back-string r) (toss-back-char c)
                    (toss-back-char #\{) (toss-back-string "TIIPcsname")
                    (toss-back-char c) (return))
-                  (true
+                  (else
                    (let ((%push-new-stack
                           (cons (expand-ctl-seq-into-string x) r)))
                      (begin (set! r %push-new-stack) r))))))
-              (true (get-actual-char)
+              (else (get-actual-char)
                (let ((%push-new-stack
                       (cons
                        (let ((%type 'string) (%ee (list (list c))))
@@ -3884,8 +3875,8 @@
     ((not nonum-p)
      (cond
       ((not (table-get seclvl *section-counters*))
-       (begin (table-put! seclvl *section-counters* 0)
-        (table-get seclvl *section-counters*)))
+       (table-put! seclvl *section-counters* 0)
+       (table-get seclvl *section-counters*))
       (else false))
      (let ((%tmp (+ (table-get seclvl *section-counters*) 1)))
        (begin (table-put! seclvl *section-counters* %tmp)
@@ -3893,18 +3884,16 @@
     (else false))
    (table-for-each
     (lambda (k v)
-      false
       (cond
-       ((and (> k seclvl) (> k 0))
-        (begin (table-put! k *section-counters* 0)
-         (table-get k *section-counters*)))
+       ((and (> k seclvl) (> k 0)) (table-put! k *section-counters* 0)
+        (table-get k *section-counters*))
        (else false)))
     *section-counters*)
    (cond ((= seclvl 0) (tex-gdef-count "\\footnotenumber" 0)) (else false))
    (for-each
     (lambda (counter-name)
-      (begin (set!counter*-value (table-get counter-name *dotted-counters*) 0)
-       (counter*-value (table-get counter-name *dotted-counters*))))
+      (set!counter*-value (table-get counter-name *dotted-counters*) 0)
+      (counter*-value (table-get counter-name *dotted-counters*)))
     (table-get seclvl *section-counter-dependencies* null))))
 
 (define section-counter-value
@@ -3958,36 +3947,35 @@
                  (unless %loop-returned
                    (cond ((> i seclvl) (return r)) (else false)))
                  (unless %loop-returned
-                   (begin
-                    (set! r
-                     (let ((%type 'string)
-                           (%ee
-                            (list r "."
-                                  (write-to-string
-                                   (table-get i *section-counters* 0)))))
-                       (let ((%res
-                              (if (eq? %type 'string)
-                                  ""
-                                  null)))
-                         (let %concatenate-loop
-                           ((%ee %ee))
-                           (if (null? %ee)
-                               %res
-                               (let ((%a (car %ee)))
-                                 (unless (not %a)
-                                   (set! %res
-                                    (if (eq? %type 'string)
-                                        (string-append %res
-                                         (if (string? %a)
-                                             %a
-                                             (list->string %a)))
-                                        (append %res
-                                                (if (string? %a)
-                                                    (string->list %a)
-                                                    %a)))))
-                                 (%concatenate-loop (cdr %ee)))))
-                         %res)))
-                    r))
+                   (set! r
+                    (let ((%type 'string)
+                          (%ee
+                           (list r "."
+                                 (write-to-string
+                                  (table-get i *section-counters* 0)))))
+                      (let ((%res
+                             (if (eq? %type 'string)
+                                 ""
+                                 null)))
+                        (let %concatenate-loop
+                          ((%ee %ee))
+                          (if (null? %ee)
+                              %res
+                              (let ((%a (car %ee)))
+                                (unless (not %a)
+                                  (set! %res
+                                   (if (eq? %type 'string)
+                                       (string-append %res
+                                        (if (string? %a)
+                                            %a
+                                            (list->string %a)))
+                                       (append %res
+                                               (if (string? %a)
+                                                   (string->list %a)
+                                                   %a)))))
+                                (%concatenate-loop (cdr %ee)))))
+                        %res)))
+                   r)
                  (unless %loop-returned
                    (let ((%tmp (+ i 1)))
                      (begin (set! i %tmp) i)))
@@ -3999,7 +3987,7 @@
  (lambda (s)
    (cond ((string=? s "\\sectiond") (string->number (ungroup (get-token))))
          ((string=? s "\\part") -1) ((string=? s "\\chapter") 0)
-         (true
+         (else
           (let ((n
                  (let ((%length-arg s))
                    ((if (string? %length-arg)
@@ -4021,9 +4009,9 @@
                          (unless %loop-returned
                            (cond ((> i+3 n-9) (return k))
                                  ((string=? (subseq s i i+3) "sub")
-                                  (begin (set! i i+3) (set! i+3 (+ i+3 3))
-                                   (set! k (add1 k)) k))
-                                 (true (return false))))
+                                  (set! i i+3) (set! i+3 (+ i+3 3))
+                                  (set! k (add1 k)) k)
+                                 (else (return false))))
                          (if %loop-returned
                              %loop-result
                              (%loop))))))
@@ -4041,23 +4029,23 @@
                          (unless %loop-returned
                            (cond ((> i+3 n-7) (return k))
                                  ((string=? (subseq s i i+3) "sub")
-                                  (begin (set! i i+3) (set! i+3 (+ i+3 3))
-                                   (set! k (add1 k)) k))
-                                 (true (return false))))
+                                  (set! i i+3) (set! i+3 (+ i+3 3))
+                                  (set! k (add1 k)) k)
+                                 (else (return false))))
                          (if %loop-returned
                              %loop-result
                              (%loop))))))
-                  (true false)))))))
+                  (else false)))))))
 
 (define do-heading
  (lambda (seclvl)
    (let ((starred-p
           (cond ((char=? (snoop-actual-char) #\*) (get-actual-char) true)
-                (true false))))
+                (else false))))
      (let ((too-deep-p
             (let ((secnumdepth (get-gcount "\\secnumdepth")))
               (cond ((< secnumdepth -1) false) ((> seclvl secnumdepth) true)
-                    (true false)))))
+                    (else false)))))
        (let ((nonum-p (or starred-p too-deep-p)))
          (let ((header
                 (let ((%fluid-var-*tabular-stack* (list ':header)))
@@ -4077,20 +4065,19 @@
      (cond
       ((or (> *html-page-count* 0) (tex2page-flag-boolean "\\TIIPtitleused"))
        (do-eject))
-      (true (tex-gdef-0arg "\\TIIPtitleused" "1") (do-para))))
+      (else (tex-gdef-0arg "\\TIIPtitleused" "1") (do-para))))
     (else false))
    (cond ((and (= seclvl 1) (tex2page-flag-boolean "\\TZPslides")) (do-eject))
          (else false))
    (increment-section-counter seclvl nonum-p)
-   (cond (lbl-val (begin (set! nonum-p false) nonum-p)) (else false))
+   (cond (lbl-val (set! nonum-p false) nonum-p) (else false))
    (cond
     ((not lbl-val)
-     (begin
-      (set! lbl-val
-       (if nonum-p
-           "IGNORE"
-           (section-counter-value seclvl)))
-      lbl-val))
+     (set! lbl-val
+      (if nonum-p
+          "IGNORE"
+          (section-counter-value seclvl)))
+     lbl-val)
     (else false))
    (let ((htmlnum
           (max 1
@@ -4288,7 +4275,7 @@
          ((string=? sectype "section") 1) ((string=? sectype "subsection") 2)
          ((string=? sectype "subsubsection") 3)
          ((string=? sectype "paragraph") 4)
-         ((string=? sectype "subparagraph") 5) (true 3))))
+         ((string=? sectype "subparagraph") 5) (else 3))))
 
 (define do-write-to-toc-aux
  (lambda (seclvl secnum sectitle)
@@ -4421,8 +4408,8 @@
                    (begin (set! r %push-new-stack) r))
                  (begin (set! newline-p false) newline-p))
                 (else false)))
-              ((char=? c #\newline) (begin (set! newline-p true) newline-p))
-              (true
+              ((char=? c #\newline) (set! newline-p true) newline-p)
+              (else
                (let ((%push-new-stack (cons c r)))
                  (begin (set! r %push-new-stack) r))
                (begin (set! newline-p false) newline-p)))))
@@ -4450,8 +4437,7 @@
                 (tex-string-to-html-string (get-till-par)))))))
        (begin (tex-gdef-0arg "\\chapno" chapno) (tex-gdef-count "\\subsecno" 0)
         (tex-gdef-count "\\footnotenumber" 0)
-        (cond ((string=? chapno "") (begin (set! chapno false) chapno))
-              (else false))
+        (cond ((string=? chapno "") (set! chapno false) chapno) (else false))
         (do-heading-help 0 false true false chapno header))))))
 
 (define do-opmac-heading
@@ -4476,18 +4462,17 @@
 (define do-appendix
  (lambda ()
    (cond
-    ((not *inside-appendix-p*)
-     (begin (set! *inside-appendix-p* true)
-      (table-put!
-       (if *using-chapters-p*
-           0
-           1)
-       *section-counters* 0)
-      (table-get
-       (if *using-chapters-p*
-           0
-           1)
-       *section-counters*)))
+    ((not *inside-appendix-p*) (set! *inside-appendix-p* true)
+     (table-put!
+      (if *using-chapters-p*
+          0
+          1)
+      *section-counters* 0)
+     (table-get
+      (if *using-chapters-p*
+          0
+          1)
+      *section-counters*))
     (else false))))
 
 (define do-table-plain
@@ -4668,7 +4653,7 @@
                 (terror 'do-caption "Mislaid \\caption"))
                ((not i-fig) ':table) ((not i-tbl) ':figure)
                ((< i-fig i-tbl) ':figure) ((< i-tbl i-fig) ':table)
-               (true (terror 'do-caption "cant happen")))))
+               (else (terror 'do-caption "cant happen")))))
          (let ((counter-name
                 (if (eq? type ':table)
                     "table"
@@ -4740,12 +4725,10 @@
      (do-latex-env-as-image
       (case type ((:equation) "equation") ((:align) "align") (else "eqnarray"))
       ':display))
-    (true (do-end-para) (bgroup)
-     (cond ((eqv? type ':align) (begin (set! type ':eqnarray) type))
-           (else false))
+    (else (do-end-para) (bgroup)
+     (cond ((eqv? type ':align) (set! type ':eqnarray) type) (else false))
      (cond
-      ((and (eqv? type ':eqnarray) (eat-star))
-       (begin (set! type ':eqnarray*) type))
+      ((and (eqv? type ':eqnarray) (eat-star)) (set! type ':eqnarray*) type)
       (else false))
      (let ((%push-new-stack (cons type *tabular-stack*)))
        (begin (set! *tabular-stack* %push-new-stack) *tabular-stack*))
@@ -4780,8 +4763,8 @@
         (emit-anchor eqn-tag) (emit-newline)
         (cond
          ((not (eqv? type ':eqnarray*))
-          (begin (set! *equation-number* (bump-dotted-counter "equation"))
-           *equation-number*))
+          (set! *equation-number* (bump-dotted-counter "equation"))
+          *equation-number*)
          (else false))
         (emit "<div align=") (emit *display-justification*)
         (emit "><table width=100%>") (emit-newline) (emit "<tr><td align=")
@@ -4829,7 +4812,9 @@
               (let %loop
                 ()
                 (unless %loop-returned
-                  (cond ((>= i %dotimes-n) (return)) (else false)))
+                  (if (>= i %dotimes-n)
+                      (return)
+                      false))
                 (unless %loop-returned (ignorespaces))
                 (unless %loop-returned
                   (let ((c (snoop-actual-char)))
@@ -4863,7 +4848,7 @@
                     (%loop))))))))))
 
 (define do-nonumber
- (lambda () (begin (set! *equation-numbered-p* false) *equation-numbered-p*)))
+ (lambda () (set! *equation-numbered-p* false) *equation-numbered-p*))
 
 (define indent-n-levels
  (lambda (n)
@@ -4877,7 +4862,9 @@
        (let %loop
          ()
          (unless %loop-returned
-           (cond ((>= i %dotimes-n) (return)) (else false)))
+           (if (>= i %dotimes-n)
+               (return)
+               false))
          (unless %loop-returned (emit-nbsp 1))
          (unless %loop-returned (emit " "))
          (unless %loop-returned (emit-nbsp 1))
@@ -4954,7 +4941,7 @@
       (cond
        ((null? *toc-list*) (flag-missing-piece ':toc)
         (non-fatal-error "Table of contents not generated; rerun TeX2page"))
-       (true (do-noindent)
+       (else (do-noindent)
         (let ((tocdepth (get-gcount "\\tocdepth")))
           (for-each
            (lambda (x)
@@ -5055,8 +5042,8 @@
  (lambda (s)
    (let ((tmp-port (open-output-string)))
      (let ((%fluid-var-*html* tmp-port))
-       (fluid-let ((*html* %fluid-var-*html*))
-        (begin (tex2page-string s) (get-output-string tmp-port)))))))
+       (fluid-let ((*html* %fluid-var-*html*)) (tex2page-string s)
+        (get-output-string tmp-port))))))
 
 (define expand-tex-string
  (lambda (s)
@@ -5066,24 +5053,23 @@
         (let ((%fluid-var-*outputting-to-non-html-p* true))
           (fluid-let
            ((*outputting-to-non-html-p* %fluid-var-*outputting-to-non-html-p*))
-           (begin (tex2page-string s) (get-output-string tmp-port)))))))))
+           (tex2page-string s) (get-output-string tmp-port))))))))
 
 (define number-to-footnote-symbol
  (let ((symlist false) (symlist-len 0))
    (lambda (n)
      (cond
       ((not symlist)
-       (begin
-        (set! symlist
-         '("*" "&#x2020;" "&#x2021;" "&#xa7;" "&#xb6;" "&#x2225;" "*"
-           "&#x2020;&#x2020;" "&#x2021;&#x2021;"))
-        (set! symlist-len
-         (let ((%length-arg symlist))
-           ((if (string? %length-arg)
-                string-length
-                length)
-            %length-arg)))
-        symlist-len))
+       (set! symlist
+        '("*" "&#x2020;" "&#x2021;" "&#xa7;" "&#xb6;" "&#x2225;" "*"
+          "&#x2020;&#x2020;" "&#x2021;&#x2021;"))
+       (set! symlist-len
+        (let ((%length-arg symlist))
+          ((if (string? %length-arg)
+               string-length
+               length)
+           %length-arg)))
+       symlist-len)
       (else false))
      (list-ref symlist (modulo (sub1 n) symlist-len)))))
 
@@ -5322,19 +5308,13 @@
              (let ((f (- hue6 i)))
                (begin
                 (case i
-                  ((0)
-                   (begin (set! red 0) (set! green (- 1 f)) (set! blue 1)
-                    blue))
-                  ((1) (begin (set! red f) (set! green 0) (set! blue 1) blue))
-                  ((2)
-                   (begin (set! red 1) (set! green 0) (set! blue (- 1 f))
-                    blue))
-                  ((3) (begin (set! red 1) (set! green f) (set! blue 0) blue))
-                  ((4)
-                   (begin (set! red (- 1 f)) (set! green 1) (set! blue 0)
-                    blue))
-                  ((5) (begin (set! red 0) (set! green 1) (set! blue f) blue))
-                  ((6) (begin (set! red 0) (set! green 1) (set! blue 1) blue))
+                  ((0) (set! red 0) (set! green (- 1 f)) (set! blue 1) blue)
+                  ((1) (set! red f) (set! green 0) (set! blue 1) blue)
+                  ((2) (set! red 1) (set! green 0) (set! blue (- 1 f)) blue)
+                  ((3) (set! red 1) (set! green f) (set! blue 0) blue)
+                  ((4) (set! red (- 1 f)) (set! green 1) (set! blue 0) blue)
+                  ((5) (set! red 0) (set! green 1) (set! blue f) blue)
+                  ((6) (set! red 0) (set! green 1) (set! blue 1) blue)
                   (else (terror 'hsb-to-rrggbb "Can't happen.")))
                 (let ((fu (lambda (x) (* brightness (- 1 (* saturation x))))))
                   (rgb-frac-to-rrggbb (fu red) (fu green) (fu blue))))))))))))
@@ -5347,11 +5327,11 @@
                    ((< w 490) (- 4 (/ (- w 440) 50)))
                    ((< w 510) (+ 2 (/ (- w 510) -20)))
                    ((< w 580) (- 2 (/ (- w 510) 70)))
-                   ((< w 645) (/ (- w 645) -65)) (true 0))))
+                   ((< w 645) (/ (- w 645) -65)) (else 0))))
          (brightness
           (cond ((<= w 362.857) 0) ((< w 420) (+ 0.3 (* 0.7 (/ (- w 380) 40))))
                 ((<= w 700) 1)
-                ((< w 814.285) (+ 0.3 (* 0.7 (/ (- w 780) -80)))) (true 0))))
+                ((< w 814.285) (+ 0.3 (* 0.7 (/ (- w 780) -80)))) (else 0))))
      (hsb-to-rrggbb hue 1 brightness))))
 
 (define read-color-as-rrggbb
@@ -5717,7 +5697,7 @@
          ((string=? model "Gray") ':gray15) ((string=? model "HTML") ':html)
          ((string=? model "hsb") ':hsb) ((string=? model "Hsb") ':hsb360)
          ((string=? model "HSB") ':hsb240) ((string=? model "wave") ':wave)
-         (true ':colornamed))))
+         (else ':colornamed))))
 
 (define do-color
  (lambda ()
@@ -5759,8 +5739,7 @@
           (*math-mode-p*
            (let ((old-math-font *math-font*))
              (begin (begin (set! *math-font* ':rm) *math-font*)
-              (lambda ()
-                (begin (set! *math-font* old-math-font) *math-font*)))))
+              (lambda () (set! *math-font* old-math-font) *math-font*))))
           (else false)))
         ((:em) (emit "<em>") (lambda () (emit "</em>")))
         ((:it) (emit "<i>") (lambda () (emit "</i>")))
@@ -5782,8 +5761,8 @@
          (let ((old-in-small-caps-p *in-small-caps-p*))
            (begin (begin (set! *in-small-caps-p* true) *in-small-caps-p*)
             (lambda ()
-              (begin (set! *in-small-caps-p* old-in-small-caps-p)
-               *in-small-caps-p*)))))
+              (set! *in-small-caps-p* old-in-small-caps-p)
+              *in-small-caps-p*))))
         ((:span)
          (emit "<span ")
          (emit (get-peeled-group))
@@ -5898,11 +5877,10 @@
              (begin (set! *math-mode-p* false) *math-mode-p*) (emit "<b>"))
             ((or (string=? fn "\\textit") (string=? fn "\\textsl"))
              (begin (set! *math-mode-p* false) *math-mode-p*) (emit "<i>"))
-            ((string=? fn "\\textrm")
-             (begin (set! *math-mode-p* false) *math-mode-p*))
+            ((string=? fn "\\textrm") (set! *math-mode-p* false) *math-mode-p*)
             ((string=? fn "\\texttt")
              (begin (set! *math-mode-p* false) *math-mode-p*) (emit "<tt>"))
-            (true (terror 'do-function "Unknown function " fn)))
+            (else (terror 'do-function "Unknown function " fn)))
       (bgroup) (tex2page-string (get-token)) (egroup)
       (cond (*outputting-external-title-p* false)
             ((string=? fn "\\emph") (emit "</em>"))
@@ -5946,7 +5924,9 @@
        (let %loop
          ()
          (unless %loop-returned
-           (cond ((>= i %dotimes-n) (return)) (else false)))
+           (if (>= i %dotimes-n)
+               (return)
+               false))
          (unless %loop-returned (emit "&#xa0;"))
          (unless %loop-returned (set! i (+ i 1)))
          (if %loop-returned
@@ -6009,7 +5989,7 @@
                     ((eat-word "mm") (tex-length 1 ':mm))
                     ((eat-word "pc") (tex-length 1 ':pc))
                     ((eat-word "pt") (tex-length 1 ':pt)) ((eat-word "sp") 1)
-                    (true 1)))))))))
+                    (else 1)))))))))
 
 (define get-points (lambda () (/ (get-scaled-points) 65536.0)))
 
@@ -6077,7 +6057,7 @@
           "-"
           "&#x2212;")))
     ((not *ligatures-p*) (emit #\-))
-    (true
+    (else
      (let ((c (snoop-actual-char)))
        (if (and (char? c) (char=? c #\-))
            (begin (get-actual-char) (do-ndash))
@@ -6129,7 +6109,7 @@
             (begin (get-actual-char) "&#x2033;")
             "&#x2032;")))
      ((not *ligatures-p*) #\')
-     (true
+     (else
       (let ((c (snoop-actual-char)))
         (if (and (char? c) (char=? c #\'))
             (begin (get-actual-char) "&#x201d;")
@@ -6286,7 +6266,7 @@
                            (begin (set! r %push-new-stack) r)))
                         (else false))
                        (begin (set! whitep true) whitep))
-                      (true
+                      (else
                        (let ((%push-new-stack (cons c r)))
                          (begin (set! r %push-new-stack) r))
                        (begin (set! whitep false) whitep)))))
@@ -6356,8 +6336,7 @@
 (define do-label (lambda () (do-label-aux (get-label))))
 
 (define do-node
- (lambda ()
-   (begin (set! *recent-node-name* (get-peeled-group)) *recent-node-name*)))
+ (lambda () (set! *recent-node-name* (get-peeled-group)) *recent-node-name*))
 
 (define do-label-aux
  (lambda (label)
@@ -6567,13 +6546,13 @@
    (let ((label-ref (label-bound-p label ext-file)))
      (let ((label-text
             (cond (link-text (tex-string-to-html-string link-text))
-                  (label-ref (label*-value label-ref)) (true label))))
+                  (label-ref (label*-value label-ref)) (else label))))
        (cond
         (label-ref
          (emit-ext-page-node-link-start (or ext-file (label*-src label-ref))
           (label*-page label-ref) (label*-name label-ref))
          (emit label-text) (emit-link-stop))
-        (true (non-fatal-error label)))))))
+        (else (non-fatal-error label)))))))
 
 (define maybe-label-page
  (lambda (this-label-src this-label-pageno)
@@ -6879,7 +6858,7 @@
                    false
                    (list (label*-page label-ref) (label*-name label-ref)))
                false))))
-      (true false)))))
+      (else false)))))
 
 (define fully-qualify-url
  (lambda (url)
@@ -6924,7 +6903,7 @@
                    %res))
                url))))
       ((fully-qualified-url-p url) url)
-      (true (ensure-url-reachable url) url)))))
+      (else (ensure-url-reachable url) url)))))
 
 (define do-url
  (lambda ()
@@ -7060,10 +7039,9 @@
         (let %loop
           ()
           (unless %loop-returned
-            (cond
-             ((eat-word "height") (begin (set! height (get-pixels)) height))
-             ((eat-word "width") (begin (set! width (get-pixels)) width))
-             ((eat-word "depth") (get-pixels)) (true (return))))
+            (cond ((eat-word "height") (set! height (get-pixels)) height)
+                  ((eat-word "width") (set! width (get-pixels)) width)
+                  ((eat-word "depth") (get-pixels)) (else (return))))
           (if %loop-returned
               %loop-result
               (%loop))))
@@ -7081,7 +7059,7 @@
        (set! extra-text (list-ref %lambda-rest-arg 0)))
      (let ((closing-delim
             (cond ((char=? delim #\{) #\}) ((char=? delim #\[) #\])
-                  (true (terror 'do-cite-help "faulty delim" delim)))))
+                  (else (terror 'do-cite-help "faulty delim" delim)))))
        (begin (ignorespaces)
         (cond
          ((not (char=? (get-actual-char) delim))
@@ -7098,13 +7076,11 @@
                      (set! %loop-result (and (pair? %args) (car %args))))))
              (let %loop
                ()
-               (unless %loop-returned
-                 (begin (set! key (get-csv closing-delim)) key))
+               (unless %loop-returned (set! key (get-csv closing-delim)) key)
                (unless %loop-returned (cond ((not key) (return)) (else false)))
                (unless %loop-returned
-                 (cond
-                  (first-key-p (begin (set! first-key-p false) first-key-p))
-                  (true (emit ",") (emit-nbsp 1))))
+                 (cond (first-key-p (set! first-key-p false) first-key-p)
+                       (else (emit ",") (emit-nbsp 1))))
                (unless %loop-returned (write-bib-aux "\\citation{"))
                (unless %loop-returned (write-bib-aux key))
                (unless %loop-returned (write-bib-aux "}"))
@@ -7181,8 +7157,7 @@
                     (set! %loop-result (and (pair? %args) (car %args))))))
             (let %loop
               ()
-              (unless %loop-returned
-                (begin (set! key (get-csv closing-delim)) key))
+              (unless %loop-returned (set! key (get-csv closing-delim)) key)
               (unless %loop-returned (cond ((not key) (return)) (else false)))
               (unless %loop-returned (write-bib-aux "\\citation{"))
               (unless %loop-returned (write-bib-aux key))
@@ -7267,7 +7242,7 @@
       (cond
        ((file-exists? bbl-file) (begin (set! *bibitem-num* 0) *bibitem-num*)
         (tex2page-file bbl-file) (emit-newline))
-       (true (flag-missing-piece ':bibliography)
+       (else (flag-missing-piece ':bibliography)
         (non-fatal-error "Bibliography not generated; rerun TeX2page")))))))
 
 (define do-opmac-usebibtex
@@ -7357,7 +7332,7 @@
                              (%concatenate-loop (cdr %ee)))))
                      %res))))
             (begin (tex-def-0arg "\\TIIPcurrentnodename" node-name)
-             (cond ((not bibmark) (begin (set! bibmark bibitem-num-s) bibmark))
+             (cond ((not bibmark) (set! bibmark bibitem-num-s) bibmark)
                    (else false))
              (tex-def-0arg "\\@currentlabel" bibmark) (emit-anchor node-name)
              (emit "[") (tex2page-string bibmark) (emit "]") (emit-nbsp 2)
@@ -7552,7 +7527,7 @@
         (let ((i *it*))
           (begin (display-index-entry (subseq idx-entry 0 i) *index-port*)
            (display "|expandhtmlindex" *index-port*))))
-       (true (display-index-entry idx-entry *index-port*)
+       (else (display-index-entry idx-entry *index-port*)
         (display "|expandhtmlindex" *index-port*)))
       (display "}{" *index-port*) (display *index-count* *index-port*)
       (display "}" *index-port*) (newline *index-port*)))))
@@ -7584,7 +7559,9 @@
           (let %loop
             ()
             (unless %loop-returned
-              (cond ((>= i %dotimes-n) (return)) (else false)))
+              (if (>= i %dotimes-n)
+                  (return)
+                  false))
             (unless %loop-returned
               (let ((c (string-ref x i)))
                 (case c
@@ -7641,7 +7618,7 @@
             (ignorespaces))
         (do-index-help
          (cond (sub sub)
-               (true
+               (else
                 (string=join
                  (map escape-opmac-index-entry (string=split lhs #\/))
                  #\!)))))))))
@@ -7722,7 +7699,7 @@
                       (begin
                        (set! sub
                         (cond ((string=? sub "") additive)
-                              (true
+                              (else
                                (let ((%type 'string)
                                      (%ee (list sub "!" additive)))
                                  (let ((%res
@@ -7824,7 +7801,7 @@
                         (%concatenate-loop (cdr %ee)))))
                 %res))))
        (cond ((file-exists? ind-file) (tex2page-file ind-file))
-             (true (flag-missing-piece ':index)
+             (else (flag-missing-piece ':index)
               (non-fatal-error "Index not generated; rerun TeX2page")))))))
 
 (define do-theindex
@@ -7875,9 +7852,8 @@
               (begin (emit (number-to-roman n))
                (begin (table-put! pageno *index-page-mention-alist* n)
                 (table-get pageno *index-page-mention-alist*)))))
-           (true
-            (begin (table-put! pageno *index-page-mention-alist* 1)
-             (table-get pageno *index-page-mention-alist*))))
+           (else (table-put! pageno *index-page-mention-alist* 1)
+            (table-get pageno *index-page-mention-alist*)))
           (emit-link-stop)))))))
 
 (define do-see-also
@@ -7924,18 +7900,17 @@
                 (begin (set! i %tmp) i))
               (cond
                (skip-tag
-                (cond ((char=? c #\>) (begin (set! skip-tag false) skip-tag))
+                (cond ((char=? c #\>) (set! skip-tag false) skip-tag)
                       (else false)))
                (skip-entity
-                (cond
-                 ((char=? c #\;) (begin (set! skip-entity false) skip-entity))
-                 (else false)))
-               ((char=? c #\<) (begin (set! skip-tag true) skip-tag))
+                (cond ((char=? c #\;) (set! skip-entity false) skip-entity)
+                      (else false)))
+               ((char=? c #\<) (set! skip-tag true) skip-tag)
                ((char=? c #\&)
                 (let ((%tmp (+ res 1)))
                   (begin (set! res %tmp) res))
                 (begin (set! skip-entity true) skip-entity))
-               (true
+               (else
                 (let ((%tmp (+ res 1)))
                   (begin (set! res %tmp) res)))))))
          (if %loop-returned
@@ -8169,7 +8144,7 @@
 (define do-htmldoctype
  (lambda ()
    (let ((d (get-peeled-group)))
-     (begin (cond ((string=? d "") (begin (set! d 'none) d)) (else false))
+     (begin (cond ((string=? d "") (set! d 'none) d) (else false))
       (write-aux `(!doctype ,d))))))
 
 (define do-htmlcolophon
@@ -8268,7 +8243,7 @@
             "\\the\\headline"
             "\\the\\footline"))
        (egroup))
-      (true (output-navigation-bar head-or-foot)))
+      (else (output-navigation-bar head-or-foot)))
      (emit "</div>") (emit-newline))
     (else false))))
 
@@ -8419,7 +8394,7 @@
     ((tex2page-flag-boolean "\\TZPslides") (do-end-para) (emit "</div>")
      (emit-newline) (emit "<div class=slide>") (do-para))
     ((tex2page-flag-boolean "\\TZPsinglepage") true)
-    (true
+    (else
      (cond
       ((not
         (and (eq? (snoop-actual-char) ':eof-object)
@@ -8649,7 +8624,6 @@
     (else false))
    (table-for-each
     (lambda (k v)
-      false
       (cond
        ((not (eq? v ':free))
         (let ((%close-port-arg v))
@@ -8661,7 +8635,6 @@
     *input-streams*)
    (table-for-each
     (lambda (k v)
-      false
       (cond
        ((not (eq? v ':free))
         (let ((%close-port-arg v))
@@ -8687,7 +8660,7 @@
        (cond ((not (= *img-file-tally* 1)) (write-log #\s)) (else false)))
       (else false))
      (write-log ")."))
-    (true (write-log "No pages of output.")))
+    (else (write-log "No pages of output.")))
    (write-log #\newline)
    (cond
     (*log-port*
@@ -8782,7 +8755,7 @@
                          (%concatenate-loop (cdr %ee)))))
                  %res)))
             (find-dimen "\\TIIPhsize"))
-           (*tex-like-layout-p* (find-dimen "\\hsize")) (true false))))
+           (*tex-like-layout-p* (find-dimen "\\hsize")) (else false))))
      (cond
       (hsize (display "body { max-width: " *css-port*)
        (display (sp-to-pixels hsize) *css-port*) (display "pt; }" *css-port*)
@@ -8833,10 +8806,9 @@
        (begin
         (cond
          ((not (file-exists? slidy-css-file))
-          (begin
-           (set! slidy-css-file
-            "http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css")
-           slidy-css-file))
+          (set! slidy-css-file
+           "http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css")
+          slidy-css-file)
          (else false))
         (cond ((null? *stylesheets*) (flag-missing-piece ':stylesheets))
               (else false))
@@ -8845,10 +8817,9 @@
        (begin
         (cond
          ((not (file-exists? slidy-js-file))
-          (begin
-           (set! slidy-js-file
-            "http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js")
-           slidy-js-file))
+          (set! slidy-js-file
+           "http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js")
+          slidy-js-file)
          (else false))
         (cond ((null? *scripts*) (flag-missing-piece ':scripts)) (else false))
         (write-aux `(!script ,slidy-js-file)))))
@@ -8908,7 +8879,7 @@
      (let ((x (get-token-or-peeled-group)))
        (cond ((and (string=? x "\\i") (member diac top-diacritics)) (emit "i"))
              ((and (string=? x "\\j") (member diac top-diacritics)) (emit "j"))
-             (true (tex2page-string x))))
+             (else (tex2page-string x))))
      (emit
       (case diac
         ((:grave) "&#x300;")
@@ -9160,29 +9131,53 @@
      (begin
       (case type
         ((:lparen)
-         (begin (set! top "&#x239b;") (set! bot "&#x239d;")
-          (set! ext "&#x239c;") (set! mid ext) mid))
+         (set! top "&#x239b;")
+         (set! bot "&#x239d;")
+         (set! ext "&#x239c;")
+         (set! mid ext)
+         mid)
         ((:lbrack)
-         (begin (set! top "&#x23a1;") (set! bot "&#x23a3;")
-          (set! ext "&#x23a2;") (set! mid ext) mid))
+         (set! top "&#x23a1;")
+         (set! bot "&#x23a3;")
+         (set! ext "&#x23a2;")
+         (set! mid ext)
+         mid)
         ((:lbrace)
-         (begin (set! top "&#x23a7;") (set! mid "&#x23a8;")
-          (set! bot "&#x23a9;") (set! ext "&#x23aa;") ext))
+         (set! top "&#x23a7;")
+         (set! mid "&#x23a8;")
+         (set! bot "&#x23a9;")
+         (set! ext "&#x23aa;")
+         ext)
         ((:lvert)
-         (begin (set! ext "&#x239c;") (set! top ext) (set! mid ext)
-          (set! bot ext) bot))
+         (set! ext "&#x239c;")
+         (set! top ext)
+         (set! mid ext)
+         (set! bot ext)
+         bot)
         ((:rparen)
-         (begin (set! top "&#x239e;") (set! bot "&#x23a0;")
-          (set! ext "&#x239f;") (set! mid ext) mid))
+         (set! top "&#x239e;")
+         (set! bot "&#x23a0;")
+         (set! ext "&#x239f;")
+         (set! mid ext)
+         mid)
         ((:rbrack)
-         (begin (set! top "&#x23a4;") (set! bot "&#x23a6;")
-          (set! ext "&#x23a5;") (set! mid ext) mid))
+         (set! top "&#x23a4;")
+         (set! bot "&#x23a6;")
+         (set! ext "&#x23a5;")
+         (set! mid ext)
+         mid)
         ((:rbrace)
-         (begin (set! top "&#x23ab;") (set! mid "&#x23ac;")
-          (set! bot "&#x23ad;") (set! ext "&#x23ae;") ext))
+         (set! top "&#x23ab;")
+         (set! mid "&#x23ac;")
+         (set! bot "&#x23ad;")
+         (set! ext "&#x23ae;")
+         ext)
         ((:rvert)
-         (begin (set! ext "&#x239f;") (set! top ext) (set! mid ext)
-          (set! bot ext) bot))
+         (set! ext "&#x239f;")
+         (set! top ext)
+         (set! mid ext)
+         (set! bot ext)
+         bot)
         (else (error 'ecase "0xdeadc0de")))
       (let ((%type 'string)
             (%ee
@@ -9206,42 +9201,42 @@
                                    (let %loop
                                      ()
                                      (unless %loop-returned
-                                       (cond ((>= i %dotimes-n) (return r))
-                                             (else false)))
+                                       (if (>= i %dotimes-n)
+                                           (return r)
+                                           false))
                                      (unless %loop-returned
-                                       (begin
-                                        (set! r
-                                         (let ((%type 'string)
-                                               (%ee
-                                                (list r "<tr><td>" ext
-                                                      "</td></tr>")))
-                                           (let ((%res
-                                                  (if (eq? %type 'string)
-                                                      ""
-                                                      null)))
-                                             (let %concatenate-loop
-                                               ((%ee %ee))
-                                               (if (null? %ee)
-                                                   %res
-                                                   (let ((%a (car %ee)))
-                                                     (unless (not %a)
-                                                       (set! %res
-                                                        (if (eq? %type 'string)
-                                                            (string-append %res
-                                                             (if (string? %a)
-                                                                 %a
-                                                                 (list->string
-                                                                  %a)))
-                                                            (append %res
-                                                                    (if (string?
-                                                                         %a)
-                                                                        (string->list
-                                                                         %a)
-                                                                        %a)))))
-                                                     (%concatenate-loop
-                                                      (cdr %ee)))))
-                                             %res)))
-                                        r))
+                                       (set! r
+                                        (let ((%type 'string)
+                                              (%ee
+                                               (list r "<tr><td>" ext
+                                                     "</td></tr>")))
+                                          (let ((%res
+                                                 (if (eq? %type 'string)
+                                                     ""
+                                                     null)))
+                                            (let %concatenate-loop
+                                              ((%ee %ee))
+                                              (if (null? %ee)
+                                                  %res
+                                                  (let ((%a (car %ee)))
+                                                    (unless (not %a)
+                                                      (set! %res
+                                                       (if (eq? %type 'string)
+                                                           (string-append %res
+                                                            (if (string? %a)
+                                                                %a
+                                                                (list->string
+                                                                 %a)))
+                                                           (append %res
+                                                                   (if (string?
+                                                                        %a)
+                                                                       (string->list
+                                                                        %a)
+                                                                       %a)))))
+                                                    (%concatenate-loop
+                                                     (cdr %ee)))))
+                                            %res)))
+                                       r)
                                      (unless %loop-returned (set! i (+ i 1)))
                                      (if %loop-returned
                                          %loop-result
@@ -9260,42 +9255,42 @@
                                    (let %loop
                                      ()
                                      (unless %loop-returned
-                                       (cond ((>= i %dotimes-n) (return r))
-                                             (else false)))
+                                       (if (>= i %dotimes-n)
+                                           (return r)
+                                           false))
                                      (unless %loop-returned
-                                       (begin
-                                        (set! r
-                                         (let ((%type 'string)
-                                               (%ee
-                                                (list r "<tr><td>" ext
-                                                      "</td></tr>")))
-                                           (let ((%res
-                                                  (if (eq? %type 'string)
-                                                      ""
-                                                      null)))
-                                             (let %concatenate-loop
-                                               ((%ee %ee))
-                                               (if (null? %ee)
-                                                   %res
-                                                   (let ((%a (car %ee)))
-                                                     (unless (not %a)
-                                                       (set! %res
-                                                        (if (eq? %type 'string)
-                                                            (string-append %res
-                                                             (if (string? %a)
-                                                                 %a
-                                                                 (list->string
-                                                                  %a)))
-                                                            (append %res
-                                                                    (if (string?
-                                                                         %a)
-                                                                        (string->list
-                                                                         %a)
-                                                                        %a)))))
-                                                     (%concatenate-loop
-                                                      (cdr %ee)))))
-                                             %res)))
-                                        r))
+                                       (set! r
+                                        (let ((%type 'string)
+                                              (%ee
+                                               (list r "<tr><td>" ext
+                                                     "</td></tr>")))
+                                          (let ((%res
+                                                 (if (eq? %type 'string)
+                                                     ""
+                                                     null)))
+                                            (let %concatenate-loop
+                                              ((%ee %ee))
+                                              (if (null? %ee)
+                                                  %res
+                                                  (let ((%a (car %ee)))
+                                                    (unless (not %a)
+                                                      (set! %res
+                                                       (if (eq? %type 'string)
+                                                           (string-append %res
+                                                            (if (string? %a)
+                                                                %a
+                                                                (list->string
+                                                                 %a)))
+                                                           (append %res
+                                                                   (if (string?
+                                                                        %a)
+                                                                       (string->list
+                                                                        %a)
+                                                                       %a)))))
+                                                    (%concatenate-loop
+                                                     (cdr %ee)))))
+                                            %res)))
+                                       r)
                                      (unless %loop-returned (set! i (+ i 1)))
                                      (if %loop-returned
                                          %loop-result
@@ -9322,7 +9317,7 @@
                                                     %a)))))
                                  (%concatenate-loop (cdr %ee)))))
                          %res)))
-                    (true
+                    (else
                      (let ((r ""))
                        (let ((%dotimes-n *math-height*) (i 0))
                          (let* ((%loop-returned false)
@@ -9335,38 +9330,38 @@
                            (let %loop
                              ()
                              (unless %loop-returned
-                               (cond ((>= i %dotimes-n) (return r))
-                                     (else false)))
+                               (if (>= i %dotimes-n)
+                                   (return r)
+                                   false))
                              (unless %loop-returned
-                               (begin
-                                (set! r
-                                 (let ((%type 'string)
-                                       (%ee
-                                        (list r "<tr><td>" ext "</td></tr>")))
-                                   (let ((%res
-                                          (if (eq? %type 'string)
-                                              ""
-                                              null)))
-                                     (let %concatenate-loop
-                                       ((%ee %ee))
-                                       (if (null? %ee)
-                                           %res
-                                           (let ((%a (car %ee)))
-                                             (unless (not %a)
-                                               (set! %res
-                                                (if (eq? %type 'string)
-                                                    (string-append %res
-                                                     (if (string? %a)
-                                                         %a
-                                                         (list->string %a)))
-                                                    (append %res
-                                                            (if (string? %a)
-                                                                (string->list
-                                                                 %a)
-                                                                %a)))))
-                                             (%concatenate-loop (cdr %ee)))))
-                                     %res)))
-                                r))
+                               (set! r
+                                (let ((%type 'string)
+                                      (%ee
+                                       (list r "<tr><td>" ext "</td></tr>")))
+                                  (let ((%res
+                                         (if (eq? %type 'string)
+                                             ""
+                                             null)))
+                                    (let %concatenate-loop
+                                      ((%ee %ee))
+                                      (if (null? %ee)
+                                          %res
+                                          (let ((%a (car %ee)))
+                                            (unless (not %a)
+                                              (set! %res
+                                               (if (eq? %type 'string)
+                                                   (string-append %res
+                                                    (if (string? %a)
+                                                        %a
+                                                        (list->string %a)))
+                                                   (append %res
+                                                           (if (string? %a)
+                                                               (string->list
+                                                                %a)
+                                                               %a)))))
+                                            (%concatenate-loop (cdr %ee)))))
+                                    %res)))
+                               r)
                              (unless %loop-returned (set! i (+ i 1)))
                              (if %loop-returned
                                  %loop-result
@@ -9400,10 +9395,9 @@
    (let ((tmp-port (open-output-string)))
      (let ((%fluid-var-*html* tmp-port))
        (fluid-let ((*html* %fluid-var-*html*))
-        (begin
-         (call-with-input-string/buffered ""
-          (lambda () (do-math-fragment s false) (generate-html)))
-         (get-output-string tmp-port)))))))
+        (call-with-input-string/buffered ""
+         (lambda () (do-math-fragment s false) (generate-html)))
+        (get-output-string tmp-port))))))
 
 (define do-intext-math
  (lambda (tex-string)
@@ -9473,7 +9467,7 @@
                (set! %loop-result (and (pair? %args) (car %args))))))
        (let %loop
          ()
-         (unless %loop-returned (begin (set! c (get-actual-char)) c))
+         (unless %loop-returned (set! c (get-actual-char)) c)
          (unless %loop-returned
            (cond
             ((eq? c ':eof-object) (terror 'dump-till-char "Missing " d "."))
@@ -9482,14 +9476,14 @@
            (cond ((and (char=? c d) (= nesting 0)) (return)) (else false)))
          (unless %loop-returned (display c o))
          (unless %loop-returned
-           (cond (escape-p (begin (set! escape-p false) escape-p))
+           (cond (escape-p (set! escape-p false) escape-p)
                  ((char=? c #\{)
                   (let ((%tmp (+ nesting 1)))
                     (begin (set! nesting %tmp) nesting)))
                  ((char=? c #\})
                   (let ((%tmp (- nesting 1)))
                     (begin (set! nesting %tmp) nesting)))
-                 ((char=? c #\\) (begin (set! escape-p true) escape-p))))
+                 ((char=? c #\\) (set! escape-p true) escape-p)))
          (if %loop-returned
              %loop-result
              (%loop)))))))
@@ -9518,7 +9512,7 @@
                      (if (string=? x cs)
                          (return)
                          (display x o))))
-                  (true (display (get-actual-char) o)
+                  (else (display (get-actual-char) o)
                    (cond
                     ((char=? c #\{)
                      (let ((%tmp (+ nesting 1)))
@@ -9655,11 +9649,11 @@
                                       (begin (set! env-nesting %tmp)
                                        env-nesting)))
                                    (else false)))))
-                              (true (display x o)))))
+                              (else (display x o)))))
                           ((and (char=? c *comment-char*)
                                 (not *dumping-nontex-p*))
                            (do-comment) (write-char #\% o) (newline o))
-                          (true (write-char (get-actual-char) o)
+                          (else (write-char (get-actual-char) o)
                            (cond
                             ((char=? c #\{)
                              (let ((%tmp (+ brace-nesting 1)))
@@ -9733,92 +9727,91 @@
 
 (define do-img-preamble
  (lambda ()
-   (begin
-    (set! *imgpreamble*
-     (let ((%fluid-var-*not-processing-p* true) (r *imgpreamble*))
-       (fluid-let ((*not-processing-p* %fluid-var-*not-processing-p*))
-        (let* ((%loop-returned false)
-               (%loop-result 0)
-               (return
-                (lambda %args
-                  (set! %loop-returned true)
-                  (set! %loop-result (and (pair? %args) (car %args))))))
-          (let %loop
-            ()
-            (unless %loop-returned
-              (let ((c (snoop-actual-char)))
-                (begin
-                 (cond
-                  ((eq? c ':eof-object)
-                   (terror 'do-img-preamble "Missing \\endimgpreamble"))
-                  (else false))
-                 (cond
-                  ((esc-char-p c)
-                   (let ((x (get-ctl-seq)))
+   (set! *imgpreamble*
+    (let ((%fluid-var-*not-processing-p* true) (r *imgpreamble*))
+      (fluid-let ((*not-processing-p* %fluid-var-*not-processing-p*))
+       (let* ((%loop-returned false)
+              (%loop-result 0)
+              (return
+               (lambda %args
+                 (set! %loop-returned true)
+                 (set! %loop-result (and (pair? %args) (car %args))))))
+         (let %loop
+           ()
+           (unless %loop-returned
+             (let ((c (snoop-actual-char)))
+               (begin
+                (cond
+                 ((eq? c ':eof-object)
+                  (terror 'do-img-preamble "Missing \\endimgpreamble"))
+                 (else false))
+                (cond
+                 ((esc-char-p c)
+                  (let ((x (get-ctl-seq)))
+                    (begin
+                     (cond
+                      ((member x
+                               '("\\endimgpreamble" "\\endgifpreamble"
+                                 "\\endmathpreamble"))
+                       (return r))
+                      (else false))
                      (begin
-                      (cond
-                       ((member x
-                                '("\\endimgpreamble" "\\endgifpreamble"
-                                  "\\endmathpreamble"))
-                        (return r))
-                       (else false))
-                      (begin
-                       (set! r
-                        (let ((%type 'string) (%ee (list r x)))
-                          (let ((%res
-                                 (if (eq? %type 'string)
-                                     ""
-                                     null)))
-                            (let %concatenate-loop
-                              ((%ee %ee))
-                              (if (null? %ee)
-                                  %res
-                                  (let ((%a (car %ee)))
-                                    (unless (not %a)
-                                      (set! %res
-                                       (if (eq? %type 'string)
-                                           (string-append %res
-                                            (if (string? %a)
-                                                %a
-                                                (list->string %a)))
-                                           (append %res
-                                                   (if (string? %a)
-                                                       (string->list %a)
-                                                       %a)))))
-                                    (%concatenate-loop (cdr %ee)))))
-                            %res)))
-                       r))))
-                  (true (get-actual-char)
-                   (begin
-                    (set! r
-                     (let ((%type 'string) (%ee (list r (list c))))
-                       (let ((%res
-                              (if (eq? %type 'string)
-                                  ""
-                                  null)))
-                         (let %concatenate-loop
-                           ((%ee %ee))
-                           (if (null? %ee)
-                               %res
-                               (let ((%a (car %ee)))
-                                 (unless (not %a)
-                                   (set! %res
-                                    (if (eq? %type 'string)
-                                        (string-append %res
-                                         (if (string? %a)
-                                             %a
-                                             (list->string %a)))
-                                        (append %res
-                                                (if (string? %a)
-                                                    (string->list %a)
-                                                    %a)))))
-                                 (%concatenate-loop (cdr %ee)))))
-                         %res)))
-                    r))))))
-            (if %loop-returned
-                %loop-result
-                (%loop)))))))
-    *imgpreamble*)))
+                      (set! r
+                       (let ((%type 'string) (%ee (list r x)))
+                         (let ((%res
+                                (if (eq? %type 'string)
+                                    ""
+                                    null)))
+                           (let %concatenate-loop
+                             ((%ee %ee))
+                             (if (null? %ee)
+                                 %res
+                                 (let ((%a (car %ee)))
+                                   (unless (not %a)
+                                     (set! %res
+                                      (if (eq? %type 'string)
+                                          (string-append %res
+                                           (if (string? %a)
+                                               %a
+                                               (list->string %a)))
+                                          (append %res
+                                                  (if (string? %a)
+                                                      (string->list %a)
+                                                      %a)))))
+                                   (%concatenate-loop (cdr %ee)))))
+                           %res)))
+                      r))))
+                 (else (get-actual-char)
+                  (begin
+                   (set! r
+                    (let ((%type 'string) (%ee (list r (list c))))
+                      (let ((%res
+                             (if (eq? %type 'string)
+                                 ""
+                                 null)))
+                        (let %concatenate-loop
+                          ((%ee %ee))
+                          (if (null? %ee)
+                              %res
+                              (let ((%a (car %ee)))
+                                (unless (not %a)
+                                  (set! %res
+                                   (if (eq? %type 'string)
+                                       (string-append %res
+                                        (if (string? %a)
+                                            %a
+                                            (list->string %a)))
+                                       (append %res
+                                               (if (string? %a)
+                                                   (string->list %a)
+                                                   %a)))))
+                                (%concatenate-loop (cdr %ee)))))
+                        %res)))
+                   r))))))
+           (if %loop-returned
+               %loop-result
+               (%loop)))))))
+   *imgpreamble*))
 
 (define pick-new-stream-number
  (lambda (stream-list)
@@ -9946,28 +9939,27 @@
         ((*outputting-to-non-html-p* %fluid-var-*outputting-to-non-html-p*))
         (let ((%fluid-var-*html* o))
           (fluid-let ((*html* %fluid-var-*html*))
-           (begin
-            (call-with-input-string/buffered s
-             (lambda ()
-               (let* ((%loop-returned false)
-                      (%loop-result 0)
-                      (return
-                       (lambda %args
-                         (set! %loop-returned true)
-                         (set! %loop-result (and (pair? %args) (car %args))))))
-                 (let %loop
-                   ()
-                   (unless %loop-returned
-                     (let ((c (snoop-actual-char)))
-                       (begin
-                        (cond ((eq? c ':eof-object) (return)) (else false))
-                        (case c
-                          ((#\\) (do-tex-ctl-seq (get-ctl-seq)))
-                          (else (emit-html-char (get-actual-char)))))))
-                   (if %loop-returned
-                       %loop-result
-                       (%loop))))))
-            (get-output-string o)))))))))
+           (call-with-input-string/buffered s
+            (lambda ()
+              (let* ((%loop-returned false)
+                     (%loop-result 0)
+                     (return
+                      (lambda %args
+                        (set! %loop-returned true)
+                        (set! %loop-result (and (pair? %args) (car %args))))))
+                (let %loop
+                  ()
+                  (unless %loop-returned
+                    (let ((c (snoop-actual-char)))
+                      (begin
+                       (cond ((eq? c ':eof-object) (return)) (else false))
+                       (case c
+                         ((#\\) (do-tex-ctl-seq (get-ctl-seq)))
+                         (else (emit-html-char (get-actual-char)))))))
+                  (if %loop-returned
+                      %loop-result
+                      (%loop))))))
+           (get-output-string o))))))))
 
 (define do-write-aux
  (lambda (o)
@@ -9980,7 +9972,7 @@
               (begin
                (cond ((eq? p ':free) (terror 'do-write-aux)) (else false))
                (display output p) (display #\  p))))
-           (true (terror 'do-write-aux))))))
+           (else (terror 'do-write-aux))))))
 
 (define do-write (lambda () (do-write-aux (get-number))))
 
@@ -10131,7 +10123,7 @@
            ((begin (set! *it* (table-get i *input-streams*)) *it*)
             (begin (set! p *it*) p)
             (cond ((not (eq? p ':free)) (terror 'do-read)) (else false)))
-           (true (terror 'do-read)))
+           (else (terror 'do-read)))
           ((if global-p
                tex-gdef-0arg
                tex-def-0arg)
@@ -10150,9 +10142,9 @@
       (write-log ':separation-newline) (write-log (or ctlseq "\\@typein"))
       (write-log #\=)
       (let ((l (read-tex-line p)))
-        (begin (cond ((eq? l ':eof-object) (begin (set! l "") l)) (else false))
+        (begin (cond ((eq? l ':eof-object) (set! l "") l) (else false))
          (cond (ctlseq (tex-def-0arg ctlseq l))
-               (true (tex2page-string l)))))))))
+               (else (tex2page-string l)))))))))
 
 (define do-ifeof
  (lambda ()
@@ -10199,27 +10191,25 @@
                (begin
                 (cond
                  ((ctl-seq-p one)
-                  (begin
-                   (set! one2
-                    (cond
-                     ((begin (set! *it* (find-def one)) *it*)
-                      (let ((d *it*))
-                        (or (tdef*-expansion d) (tdef*-prim d))))
-                     ((begin (set! *it* (find-math-def one)) *it*) *it*)
-                     (true "UnDeFiNeD")))
-                   one2))
+                  (set! one2
+                   (cond
+                    ((begin (set! *it* (find-def one)) *it*)
+                     (let ((d *it*))
+                       (or (tdef*-expansion d) (tdef*-prim d))))
+                    ((begin (set! *it* (find-math-def one)) *it*) *it*)
+                    (else "UnDeFiNeD")))
+                  one2)
                  (else false))
                 (cond
                  ((ctl-seq-p two)
-                  (begin
-                   (set! two2
-                    (cond
-                     ((begin (set! *it* (find-def two)) *it*)
-                      (let ((d *it*))
-                        (or (tdef*-expansion d) (tdef*-prim d))))
-                     ((begin (set! *it* (find-math-def two)) *it*) *it*)
-                     (true "UnDeFiNeD")))
-                   two2))
+                  (set! two2
+                   (cond
+                    ((begin (set! *it* (find-def two)) *it*)
+                     (let ((d *it*))
+                       (or (tdef*-expansion d) (tdef*-prim d))))
+                    ((begin (set! *it* (find-math-def two)) *it*) *it*)
+                    (else "UnDeFiNeD")))
+                  two2)
                  (else false))
                 (if (or (eqv? one2 two2)
                         (and (string? one2) (string? two2)
@@ -10253,7 +10243,7 @@
                  (let ((z *it*))
                    (begin (toss-back-char *invisible-space*)
                     (toss-back-string z))))
-                (true (return x)))
+                (else (return x)))
                (return x))))
        (if %loop-returned
            %loop-result
@@ -10353,10 +10343,9 @@
                                       (begin (set! elsep true) elsep) (return))
                                      ((string=? x "\\fi") (ignorespaces)
                                       (cond
-                                       (elsep
-                                        (begin (set! else-clause clause)
-                                         else-clause))
-                                       (true
+                                       (elsep (set! else-clause clause)
+                                        else-clause)
+                                       (else
                                         (let ((%push-new-stack
                                                (cons clause or-clauses)))
                                           (begin
@@ -10365,39 +10354,38 @@
                                       (begin (set! outer-loop-done true)
                                        outer-loop-done)
                                       (return))
-                                     (true
-                                      (begin
-                                       (set! clause
-                                        (let ((%type 'string)
-                                              (%ee (list clause x)))
-                                          (let ((%res
-                                                 (if (eq? %type 'string)
-                                                     ""
-                                                     null)))
-                                            (let %concatenate-loop
-                                              ((%ee %ee))
-                                              (if (null? %ee)
-                                                  %res
-                                                  (let ((%a (car %ee)))
-                                                    (unless (not %a)
-                                                      (set! %res
-                                                       (if (eq? %type 'string)
-                                                           (string-append %res
-                                                            (if (string? %a)
-                                                                %a
-                                                                (list->string
-                                                                 %a)))
-                                                           (append %res
-                                                                   (if (string?
-                                                                        %a)
-                                                                       (string->list
-                                                                        %a)
-                                                                       %a)))))
-                                                    (%concatenate-loop
-                                                     (cdr %ee)))))
-                                            %res)))
-                                       clause)))))
-                                 (true (get-actual-char)
+                                     (else
+                                      (set! clause
+                                       (let ((%type 'string)
+                                             (%ee (list clause x)))
+                                         (let ((%res
+                                                (if (eq? %type 'string)
+                                                    ""
+                                                    null)))
+                                           (let %concatenate-loop
+                                             ((%ee %ee))
+                                             (if (null? %ee)
+                                                 %res
+                                                 (let ((%a (car %ee)))
+                                                   (unless (not %a)
+                                                     (set! %res
+                                                      (if (eq? %type 'string)
+                                                          (string-append %res
+                                                           (if (string? %a)
+                                                               %a
+                                                               (list->string
+                                                                %a)))
+                                                          (append %res
+                                                                  (if (string?
+                                                                       %a)
+                                                                      (string->list
+                                                                       %a)
+                                                                      %a)))))
+                                                   (%concatenate-loop
+                                                    (cdr %ee)))))
+                                           %res)))
+                                      clause))))
+                                 (else (get-actual-char)
                                   (begin
                                    (set! clause
                                     (let ((%type 'string)
@@ -10600,9 +10588,8 @@
 (define call-mp
  (let ((tex-prog-name false))
    (lambda (f)
-     (cond
-      ((not tex-prog-name) (begin (set! tex-prog-name "tex") tex-prog-name))
-      (else false))
+     (cond ((not tex-prog-name) (set! tex-prog-name "tex") tex-prog-name)
+           (else false))
      (system
       (let ((%type 'string)
             (%ee (list *metapost* " -tex=" tex-prog-name " " f)))
@@ -10635,13 +10622,10 @@
      (cond
       ((not tex-prog-name)
        (let ((d (find-def "\\TZPtexprogname")))
-         (cond
-          (d (begin (set! tex-prog-name (tdef*-expansion d)) tex-prog-name))
-          (else false)))
-       (cond
-        ((not tex-prog-name)
-         (begin (set! tex-prog-name "xetex") tex-prog-name))
-        (else false))
+         (cond (d (set! tex-prog-name (tdef*-expansion d)) tex-prog-name)
+               (else false)))
+       (cond ((not tex-prog-name) (set! tex-prog-name "xetex") tex-prog-name)
+             (else false))
        (begin
         (set! tex-output-format
          (if (or (eqv? (substring? "pdf" tex-prog-name) 0)
@@ -10652,43 +10636,42 @@
         tex-output-format)
        (cond
         ((eq? *tex-format* ':latex)
-         (begin
-          (set! tex-prog-name
-           (let ((%type 'string)
-                 (%ee
-                  (list
-                   (subseq tex-prog-name 0
-                           (-
-                            (let ((%length-arg tex-prog-name))
-                              ((if (string? %length-arg)
-                                   string-length
-                                   length)
-                               %length-arg))
-                            3))
-                   "latex")))
-             (let ((%res
-                    (if (eq? %type 'string)
-                        ""
-                        null)))
-               (let %concatenate-loop
-                 ((%ee %ee))
-                 (if (null? %ee)
-                     %res
-                     (let ((%a (car %ee)))
-                       (unless (not %a)
-                         (set! %res
-                          (if (eq? %type 'string)
-                              (string-append %res
-                               (if (string? %a)
-                                   %a
-                                   (list->string %a)))
-                              (append %res
-                                      (if (string? %a)
-                                          (string->list %a)
-                                          %a)))))
-                       (%concatenate-loop (cdr %ee)))))
-               %res)))
-          tex-prog-name))
+         (set! tex-prog-name
+          (let ((%type 'string)
+                (%ee
+                 (list
+                  (subseq tex-prog-name 0
+                          (-
+                           (let ((%length-arg tex-prog-name))
+                             ((if (string? %length-arg)
+                                  string-length
+                                  length)
+                              %length-arg))
+                           3))
+                  "latex")))
+            (let ((%res
+                   (if (eq? %type 'string)
+                       ""
+                       null)))
+              (let %concatenate-loop
+                ((%ee %ee))
+                (if (null? %ee)
+                    %res
+                    (let ((%a (car %ee)))
+                      (unless (not %a)
+                        (set! %res
+                         (if (eq? %type 'string)
+                             (string-append %res
+                              (if (string? %a)
+                                  %a
+                                  (list->string %a)))
+                             (append %res
+                                     (if (string? %a)
+                                         (string->list %a)
+                                         %a)))))
+                      (%concatenate-loop (cdr %ee)))))
+              %res)))
+         tex-prog-name)
         (else false)))
       (else false))
      (let ((dvi-file
@@ -10802,39 +10785,36 @@
                                   false)
                                  (else (open-input-file %f))))))
                          (let ((%with-open-file-res
-                                (begin
-                                 (let ((x false))
-                                   (let* ((%loop-returned false)
-                                          (%loop-result 0)
-                                          (return
-                                           (lambda %args
-                                             (set! %loop-returned true)
-                                             (set! %loop-result
-                                              (and (pair? %args)
-                                                   (car %args))))))
-                                     (let %loop
-                                       ()
-                                       (unless %loop-returned
-                                         (begin
-                                          (set! x
-                                           (let ((%read-line-res (read-line i)))
-                                             (when (eof-object? %read-line-res)
-                                               (set! %read-line-res
-                                                ':eof-object))
-                                             %read-line-res))
-                                          x))
-                                       (unless %loop-returned
-                                         (cond
-                                          ((eq? x ':eof-object) (return true))
-                                          (else false)))
-                                       (unless %loop-returned
-                                         (cond
-                                          ((substring? "! I can't find file" x)
-                                           (return false))
-                                          (else false)))
-                                       (if %loop-returned
-                                           %loop-result
-                                           (%loop))))))))
+                                (let ((x false))
+                                  (let* ((%loop-returned false)
+                                         (%loop-result 0)
+                                         (return
+                                          (lambda %args
+                                            (set! %loop-returned true)
+                                            (set! %loop-result
+                                             (and (pair? %args) (car %args))))))
+                                    (let %loop
+                                      ()
+                                      (unless %loop-returned
+                                        (set! x
+                                         (let ((%read-line-res (read-line i)))
+                                           (when (eof-object? %read-line-res)
+                                             (set! %read-line-res
+                                              ':eof-object))
+                                           %read-line-res))
+                                        x)
+                                      (unless %loop-returned
+                                        (cond
+                                         ((eq? x ':eof-object) (return true))
+                                         (else false)))
+                                      (unless %loop-returned
+                                        (cond
+                                         ((substring? "! I can't find file" x)
+                                          (return false))
+                                         (else false)))
+                                      (if %loop-returned
+                                          %loop-result
+                                          (%loop)))))))
                            (begin
                             (cond
                              (i
@@ -11431,7 +11411,7 @@
                           (%concatenate-loop (cdr %ee)))))
                   %res))))
            '(".aux" ".dvi" ".log" ".pdf" ".ps" ".tex")))
-        (true (write-log "failed, try manually")))
+        (else (write-log "failed, try manually")))
        (write-log #\}) (write-log ':separation-space))
       (else false)))))
 
@@ -11502,7 +11482,7 @@
 (define retry-lazy-image
  (lambda (eps-file img-file-stem)
    (cond ((file-exists? eps-file) (tex-to-img img-file-stem))
-         (true (write-log "! I can't find EPS file ") (write-log eps-file)
+         (else (write-log "! I can't find EPS file ") (write-log eps-file)
           (write-log ':separation-newline)))))
 
 (define lazily-make-epsf-image-file
@@ -11529,7 +11509,7 @@
            (let ((img-file-stem (next-html-image-file-stem)))
              (begin (lazily-make-epsf-image-file f img-file-stem)
               (source-img-file img-file-stem))))
-          (true
+          (else
            (cond ((not (= epsf-x-size 0)) (tex2page-string "\\epsfxsize=0pt"))
                  (else false))
            (cond ((not (= epsf-y-size 0)) (tex2page-string "\\epsfysize=0pt"))
@@ -11595,7 +11575,7 @@
                ((eat-word "width") (get-equal-sign)
                 (begin (set! width (get-pixels)) width))
                ((eat-word "enoughalready") (ignorespaces) (return))
-               (true (get-actual-char))))
+               (else (get-actual-char))))
             (if %loop-returned
                 %loop-result
                 (%loop))))
@@ -11648,7 +11628,7 @@
                (cond
                 ((and ffull-ext (member ffull-ext '(".jpg" ".jpeg" ".png")))
                  (do-includegraphics-web b1 ffull))
-                (true
+                (else
                  (let ((%fluid-var-*imgpreamble-inferred*
                         (cons ':includegraphics *imgpreamble-inferred*))
                        (img-file-stem (next-html-image-file-stem)))
@@ -11715,13 +11695,11 @@
                     ()
                     (unless %loop-returned
                       (cond
-                       ((eat-word "height")
-                        (begin (set! height (get-pixels)) height))
-                       ((eat-word "rotated")
-                        (begin (set! rotated (get-number)) rotated))
-                       ((eat-word "width")
-                        (begin (set! width (get-pixels)) width))
-                       (true (return))))
+                       ((eat-word "height") (set! height (get-pixels)) height)
+                       ((eat-word "rotated") (set! rotated (get-number))
+                        rotated)
+                       ((eat-word "width") (set! width (get-pixels)) width)
+                       (else (return))))
                     (if %loop-returned
                         %loop-result
                         (%loop))))
@@ -11759,11 +11737,10 @@
         (let %loop
           ()
           (unless %loop-returned
-            (cond
-             ((eat-word "height") (begin (set! height (get-pixels)) height))
-             ((eat-word "rotated") (begin (set! rotated (get-number)) rotated))
-             ((eat-word "width") (begin (set! width (get-pixels)) width))
-             (true (return))))
+            (cond ((eat-word "height") (set! height (get-pixels)) height)
+                  ((eat-word "rotated") (set! rotated (get-number)) rotated)
+                  ((eat-word "width") (set! width (get-pixels)) width)
+                  (else (return))))
           (if %loop-returned
               %loop-result
               (%loop))))
@@ -12073,17 +12050,18 @@
        (begin (set! *math-mode-p* false) (set! *in-display-math-p* false)
         (set! *tabular-stack* null) (set! *ligatures-p* true) *ligatures-p*)
        (lambda ()
-         (begin (set! *math-mode-p* old-math-mode-p)
-          (set! *in-display-math-p* old-in-display-math-p)
-          (set! *tabular-stack* old-tabular-stack)
-          (set! *ligatures-p* old-ligatures-p) *ligatures-p*)))))))
+         (set! *math-mode-p* old-math-mode-p)
+         (set! *in-display-math-p* old-in-display-math-p)
+         (set! *tabular-stack* old-tabular-stack)
+         (set! *ligatures-p* old-ligatures-p)
+         *ligatures-p*))))))
 
 (define do-latex-frac
  (lambda ()
    (tex2page-string (ungroup (get-token)))
    (emit
     (cond ((or (not *in-display-math-p*) *math-script-mode-p*) "/")
-          (true
+          (else
            (let ((%tmp (+ *math-height* 1)))
              (begin (set! *math-height* %tmp) *math-height*))
            "</td></tr><tr><td style=\"height=1pt; background-color: black\"></td></tr><tr><td align=center>")))
@@ -12100,7 +12078,7 @@
        (inner-level-p (emit "<sup>") (tex2page-string (get-till-char #\/))
         (emit "</sup>/<sub>") (get-actual-char) (ignorespaces)
         (tex2page-string (get-token)) (emit "</sub>"))
-       (true (emit "</td><td><table align=left><tr><td align=center>")
+       (else (emit "</td><td><table align=left><tr><td align=center>")
         (tex2page-string (get-till-char #\/)) (get-actual-char) (ignorespaces)
         (emit "<hr noshade>") (tex2page-string (get-token))
         (emit "</td></tr></table></td><td>")))))))
@@ -12157,7 +12135,7 @@
          (split-p (do-end-para) (emit-newline)
           (emit "<div align=center><table><tr><td>") (toss-back-char #\{)
           (do-eqalign type))
-         (true (emit "</td></tr>") (emit-newline) (emit "<tr><td>"))))))))
+         (else (emit "</td></tr>") (emit-newline) (emit "<tr><td>"))))))))
 
 (define do-pmatrix
  (lambda ()
@@ -12176,7 +12154,7 @@
  (lambda ()
    (emit
     (cond ((or (not *in-display-math-p*) *math-script-mode-p*) "/")
-          (true
+          (else
            (let ((%tmp (+ *math-height* 1)))
              (begin (set! *math-height* %tmp) *math-height*))
            "</td></tr><tr><td style=\"height=1pt; background-color: black\"></td></tr><tr><td align=center>")))))
@@ -12288,7 +12266,7 @@
              (begin
               (set! res
                (cond ((string=? res "") s)
-                     (true
+                     (else
                       (let ((%type 'string) (%ee (list res (list sepc) s)))
                         (let ((%res
                                (if (eq? %type 'string)
@@ -12397,11 +12375,10 @@
                              false)
                             (else (open-input-file %f))))))
                     (let ((%with-open-file-res
-                           (begin
-                            (let ((%read-line-res (read-line i)))
-                              (when (eof-object? %read-line-res)
-                                (set! %read-line-res ':eof-object))
-                              %read-line-res))))
+                           (let ((%read-line-res (read-line i)))
+                             (when (eof-object? %read-line-res)
+                               (set! %read-line-res ':eof-object))
+                             %read-line-res)))
                       (begin
                        (cond
                         (i
@@ -12424,7 +12401,7 @@
                      %length-arg))
                   0)
                  false)
-                ((file-exists? f) f) (true false))))))))))
+                ((file-exists? f) f) (else false))))))))))
 
 (define find-tex-file
  (lambda (file)
@@ -12464,7 +12441,9 @@
                  (let %loop
                    ()
                    (unless %loop-returned
-                     (cond ((null? %dolist-l) (return)) (else false)))
+                     (if (null? %dolist-l)
+                         (return)
+                         false))
                    (unless %loop-returned (set! dir (car %dolist-l)))
                    (unless %loop-returned (set! %dolist-l (cdr %dolist-l)))
                    (unless %loop-returned
@@ -12535,7 +12514,8 @@
     (set! *scm-variables* (make-table ':test equal?)) *scm-variables*)
    (for-each
     (lambda (s)
-      (begin (table-put! s *scm-keywords* true) (table-get s *scm-keywords*)))
+      (table-put! s *scm-keywords* true)
+      (table-get s *scm-keywords*))
     '("=>" "and" "begin" "begin0" "case" "cond" "define" "define-macro"
       "define-syntax" "defmacro" "defstruct" "delay" "do" "else" "flet"
       "fluid-let" "if" "labels" "lambda" "let" "let*" "let-syntax" "let-values"
@@ -12736,7 +12716,7 @@
                          (let ((g (get-grouped-environment-name-if-any)))
                            (cond ((and g (string=? g env)) (return))
                                  (else false)))))))
-               (true (get-actual-char))))))
+               (else (get-actual-char))))))
          (if %loop-returned
              %loop-result
              (%loop)))))))
@@ -12794,8 +12774,8 @@
                                 (return)
                                 (begin (emit "\\end{") (emit g) (emit "}"))))))
                        ((string=? x "\\\\") (emit c) (toss-back-char c))
-                       (true (emit x))))))
-            (true (get-actual-char) (emit c)))))
+                       (else (emit x))))))
+            (else (get-actual-char) (emit c)))))
        (if %loop-returned
            %loop-result
            (%loop))))))
@@ -12876,8 +12856,8 @@
                        ((string=? x "\\input")
                         (let ((f (get-filename-possibly-braced)))
                           (call-with-input-file/buffered f do-htmlheadonly)))
-                       (true (write-aux `(!html-head ,x))))))
-              (true (get-actual-char)
+                       (else (write-aux `(!html-head ,x))))))
+              (else (get-actual-char)
                (let ((%push-new-stack (cons c s)))
                  (begin (set! s %push-new-stack) s))))))
          (if %loop-returned
@@ -12902,7 +12882,7 @@
        (cond ((begin (set! *it* (tdef*-defer y)) *it*) *it*)
              ((tdef*-thunk y) false)
              ((and (inside-false-world-p) (not (if-aware-ctl-seq-p x))) false)
-             (true
+             (else
               (cond
                (*outer-p* (begin (set! *outer-p* false) *outer-p*)
                 (toss-back-char *outer-invisible-space*))
@@ -12919,7 +12899,7 @@
         (cond
          ((ctl-seq-p second)
           (toss-back-string (expand-ctl-seq-into-string second)))
-         (true (toss-back-string second)))
+         (else (toss-back-string second)))
         (toss-back-char *invisible-space*) (toss-back-string first))))))
 
 (define resolve-expandafters
@@ -12959,7 +12939,6 @@
  (lambda ()
    (apply
     (lambda (s m h d mo y . ign)
-      false
       (tex-def-count "\\time" (+ (* 60 h) m) true)
       (tex-def-count "\\day" d true)
       (tex-def-count "\\month" mo true)
@@ -13085,7 +13064,7 @@
 (define get-toks (lambda (ctlseq) (or (find-toks ctlseq) (terror 'get-toks))))
 
 (define get-dimen
- (lambda (ctlseq) (cond ((find-dimen ctlseq)) (true (tex-length 6.5 ':in)))))
+ (lambda (ctlseq) (cond ((find-dimen ctlseq)) (else (tex-length 6.5 ':in)))))
 
 (define the-count
  (lambda (dracula) (or (find-count dracula) (terror 'the-count))))
@@ -13155,7 +13134,7 @@
       ((begin (set! *it* (find-dimen ctlseq)) *it*)
        (scaled-point-to-tex-point *it*))
       ((begin (set! *it* (get-number-corresp-to-ctl-seq ctlseq)) *it*) *it*)
-      ((find-toks ctlseq)) (true (trace-if false "expand-the failed"))))))
+      ((find-toks ctlseq)) (else (trace-if false "expand-the failed"))))))
 
 (define do-the
  (lambda ()
@@ -13166,7 +13145,7 @@
       ((begin (set! *it* (get-number-corresp-to-ctl-seq ctlseq)) *it*)
        (emit *it*))
       ((begin (set! *it* (find-toks ctlseq)) *it*) (tex2page-string *it*))
-      (true (trace-if false "do-the failed"))))))
+      (else (trace-if false "do-the failed"))))))
 
 (define do-arabic
  (lambda ()
@@ -13174,7 +13153,7 @@
      (let ((counter (table-get counter-name *dotted-counters*)))
        (let ((it false))
          (cond ((begin (set! it (counter*-value counter)) it) (emit it))
-               (true (trace-if false "do-arabic failed"))))))))
+               (else (trace-if false "do-arabic failed"))))))))
 
 (define find-corresp-prim
  (lambda (ctlseq)
@@ -13208,18 +13187,17 @@
        (begin
         (cond
          ((and (ctl-seq-p lhs) (string=? lhs "\\TIIPcsname"))
-          (begin (set! lhs (get-peeled-group)) lhs))
+          (set! lhs (get-peeled-group)) lhs)
          (else false))
         (let ((argpat (get-def-arguments lhs)))
           (let ((rhs (ungroup (get-group))))
             (let ((frame (and globalp *global-texframe*)))
               (begin
-               (cond (e-p (begin (set! rhs (expand-edef-macro rhs)) rhs))
-                     (else false))
+               (cond (e-p (set! rhs (expand-edef-macro rhs)) rhs) (else false))
                (cond
                 ((ctl-seq-p lhs)
                  (tex-def lhs argpat rhs false false false false frame))
-                (true
+                (else
                  (tex-def-char (string-ref lhs 0) argpat rhs frame))))))))))
     (else false))))
 
@@ -13264,9 +13242,9 @@
                   (begin
                    (cond
                     ((begin (set! *it* (get-bracketed-text-if-any)) *it*)
-                     (begin (set! optarg *it*) optarg)))
+                     (set! optarg *it*) optarg))
                    (string->number (string-trim s)))))
-               (true 0))))
+               (else 0))))
          (let ((rhs (ungroup (get-token))))
            (let ((ok-to-def-p (or renewp (not (find-def lhs)))))
              (begin
@@ -13320,9 +13298,9 @@
                     (begin
                      (cond
                       ((begin (set! *it* (get-bracketed-text-if-any)) *it*)
-                       (begin (set! optarg *it*) optarg)))
+                       (set! optarg *it*) optarg))
                      (string->number (string-trim s)))))
-                 (true 0))))
+                 (else 0))))
            (let ((beginning
                   (let ((%type 'string)
                         (%ee (list "\\begingroup " (ungroup (get-token)))))
@@ -13413,8 +13391,8 @@
     (sec-num
      (cond
       ((not (table-get sec-num *section-counter-dependencies*))
-       (begin (table-put! sec-num *section-counter-dependencies* null)
-        (table-get sec-num *section-counter-dependencies*)))
+       (table-put! sec-num *section-counter-dependencies* null)
+       (table-get sec-num *section-counter-dependencies*))
       (else false))
      (let ((%push-new-stack
             (cons counter-name
@@ -13692,7 +13670,7 @@
                                         %a)))))
                      (%concatenate-loop (cdr %ee)))))
              %res))))))
-    (true (toss-back-char *invisible-space*) (toss-back-string "\\TIIPbye")))))
+    (else (toss-back-char *invisible-space*) (toss-back-string "\\TIIPbye")))))
 
 (define latex-argnum-to-plain-argpat
  (lambda (n)
@@ -13781,7 +13759,7 @@
            %res))
        false false false false (and globalp *global-texframe*))))))
 
-(define valid-img-file-p (lambda (f) false false))
+(define valid-img-file-p (lambda (f) false))
 
 (define source-img-file
  (lambda (img-file-stem . alt)
@@ -13841,7 +13819,7 @@
          (begin (write-log #\() (write-log f) (write-log ':separation-space)
           (valid-img-file-p f) (emit "<img src=\"") (emit img-file)
           (emit "\" border=\"0\" alt=\"")
-          (cond (alt (emit alt)) (true (emit "[") (emit img-file) (emit "]")))
+          (cond (alt (emit alt)) (else (emit "[") (emit img-file) (emit "]")))
           (emit "\">") (write-log #\)) (write-log ':separation-space) true))))))
 
 (define reuse-img (lambda () (source-img-file (ungroup (get-group)))))
@@ -13889,10 +13867,10 @@
                         %res))
                     (aux)))))
             ((char=? c #\{) null)
-            (true
+            (else
              (cond ((char=? c #\newline) (get-actual-char) (ignorespaces))
                    ((char-whitespace? c) (ignorespaces) (begin (set! c #\ ) c))
-                   (true (get-actual-char)))
+                   (else (get-actual-char)))
              (cons c (aux)))))))))
     (aux))))
 
@@ -13944,7 +13922,7 @@
                         ((and (char-whitespace? c) (not (char=? c0 #\newline))
                               (char-whitespace? c0))
                          (return s))
-                        (true
+                        (else
                          (let ((%push-new-stack (cons (get-actual-char) s)))
                            (begin (set! s %push-new-stack) s)))))))
                   (if %loop-returned
@@ -14007,7 +13985,7 @@
                  (cond
                   ((char=? c #\}) (get-actual-char) (emit "</table>")
                    (emit-newline) (egroup) (do-para) (return))
-                  (true (expand-halign-line tmplt))))))
+                  (else (expand-halign-line tmplt))))))
             (if %loop-returned
                 %loop-result
                 (%loop)))))))))
@@ -14041,7 +14019,7 @@
                ((string=? x "&")
                 (let ((%push-new-stack (cons false s)))
                   (begin (set! s %push-new-stack) s)))
-               (true
+               (else
                 (let ((%push-new-stack (cons x s)))
                   (begin (set! s %push-new-stack) s)))))))
          (if %loop-returned
@@ -14196,33 +14174,32 @@
                       (if %loop-returned
                           %loop-result
                           (%loop))))))
-               (true
-                (begin
-                 (set! ins
-                  (let ((%type 'string) (%ee (list ins x)))
-                    (let ((%res
-                           (if (eq? %type 'string)
-                               ""
-                               null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a)
-                                          %a
-                                          (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res)))
-                 ins))))))
+               (else
+                (set! ins
+                 (let ((%type 'string) (%ee (list ins x)))
+                   (let ((%res
+                          (if (eq? %type 'string)
+                              ""
+                              null)))
+                     (let %concatenate-loop
+                       ((%ee %ee))
+                       (if (null? %ee)
+                           %res
+                           (let ((%a (car %ee)))
+                             (unless (not %a)
+                               (set! %res
+                                (if (eq? %type 'string)
+                                    (string-append %res
+                                     (if (string? %a)
+                                         %a
+                                         (list->string %a)))
+                                    (append %res
+                                            (if (string? %a)
+                                                (string->list %a)
+                                                %a)))))
+                             (%concatenate-loop (cdr %ee)))))
+                     %res)))
+                ins)))))
          (if %loop-returned
              %loop-result
              (%loop)))))))
@@ -14274,33 +14251,32 @@
                 (return))
                ((string=? x "\\cr")
                 (tex-def-count "\\TIIPsettabscolumns" 0 false) (return))
-               (true
-                (begin
-                 (set! settabs-spec
-                  (let ((%type 'string) (%ee (list settabs-spec x)))
-                    (let ((%res
-                           (if (eq? %type 'string)
-                               ""
-                               null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a)
-                                          %a
-                                          (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res)))
-                 settabs-spec))))))
+               (else
+                (set! settabs-spec
+                 (let ((%type 'string) (%ee (list settabs-spec x)))
+                   (let ((%res
+                          (if (eq? %type 'string)
+                              ""
+                              null)))
+                     (let %concatenate-loop
+                       ((%ee %ee))
+                       (if (null? %ee)
+                           %res
+                           (let ((%a (car %ee)))
+                             (unless (not %a)
+                               (set! %res
+                                (if (eq? %type 'string)
+                                    (string-append %res
+                                     (if (string? %a)
+                                         %a
+                                         (list->string %a)))
+                                    (append %res
+                                            (if (string? %a)
+                                                (string->list %a)
+                                                %a)))))
+                             (%concatenate-loop (cdr %ee)))))
+                     %res)))
+                settabs-spec)))))
          (if %loop-returned
              %loop-result
              (%loop)))))))
@@ -14310,9 +14286,8 @@
    (emit-newline)
    (let ((table-width "") (num-cols (find-count "\\TIIPsettabscolumns")))
      (begin
-      (cond
-       ((> num-cols 0) (begin (set! table-width " width=100%") table-width))
-       (else false))
+      (cond ((> num-cols 0) (set! table-width " width=100%") table-width)
+            (else false))
       (emit "<table") (emit table-width) (emit ">") (emit-newline)
       (let* ((%loop-returned false)
              (%loop-result 0)
@@ -14327,7 +14302,7 @@
             (let ((x (get-token/ps)))
               (cond ((eq? x ':eof-object) (return))
                     ((or (string=? x "\\+") (string=? x "\\tabalign")) true)
-                    (true (toss-back-string x) (return)))))
+                    (else (toss-back-string x) (return)))))
           (if %loop-returned
               %loop-result
               (%loop))))))
@@ -14342,33 +14317,32 @@
      (begin
       (cond
        ((> num-cols 0)
-        (begin
-         (set! cell-width
-          (let ((%type 'string)
-                (%ee (list " width=" (write-to-string (/ 100.0 num-cols)) "%")))
-            (let ((%res
-                   (if (eq? %type 'string)
-                       ""
-                       null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a)
-                                  %a
-                                  (list->string %a)))
-                             (append %res
-                                     (if (string? %a)
-                                         (string->list %a)
-                                         %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res)))
-         cell-width))
+        (set! cell-width
+         (let ((%type 'string)
+               (%ee (list " width=" (write-to-string (/ 100.0 num-cols)) "%")))
+           (let ((%res
+                  (if (eq? %type 'string)
+                      ""
+                      null)))
+             (let %concatenate-loop
+               ((%ee %ee))
+               (if (null? %ee)
+                   %res
+                   (let ((%a (car %ee)))
+                     (unless (not %a)
+                       (set! %res
+                        (if (eq? %type 'string)
+                            (string-append %res
+                             (if (string? %a)
+                                 %a
+                                 (list->string %a)))
+                            (append %res
+                                    (if (string? %a)
+                                        (string->list %a)
+                                        %a)))))
+                     (%concatenate-loop (cdr %ee)))))
+             %res)))
+        cell-width)
        (else false))
       (let* ((%loop-returned false)
              (%loop-result 0)
@@ -14391,33 +14365,32 @@
                  (begin (set! cell-contents "") cell-contents) (emit "</td>")
                  (emit-newline)
                  (cond ((string=? x "\\cr") (return)) (else false)))
-                (true
-                 (begin
-                  (set! cell-contents
-                   (let ((%type 'string) (%ee (list cell-contents x)))
-                     (let ((%res
-                            (if (eq? %type 'string)
-                                ""
-                                null)))
-                       (let %concatenate-loop
-                         ((%ee %ee))
-                         (if (null? %ee)
-                             %res
-                             (let ((%a (car %ee)))
-                               (unless (not %a)
-                                 (set! %res
-                                  (if (eq? %type 'string)
-                                      (string-append %res
-                                       (if (string? %a)
-                                           %a
-                                           (list->string %a)))
-                                      (append %res
-                                              (if (string? %a)
-                                                  (string->list %a)
-                                                  %a)))))
-                               (%concatenate-loop (cdr %ee)))))
-                       %res)))
-                  cell-contents))))))
+                (else
+                 (set! cell-contents
+                  (let ((%type 'string) (%ee (list cell-contents x)))
+                    (let ((%res
+                           (if (eq? %type 'string)
+                               ""
+                               null)))
+                      (let %concatenate-loop
+                        ((%ee %ee))
+                        (if (null? %ee)
+                            %res
+                            (let ((%a (car %ee)))
+                              (unless (not %a)
+                                (set! %res
+                                 (if (eq? %type 'string)
+                                     (string-append %res
+                                      (if (string? %a)
+                                          %a
+                                          (list->string %a)))
+                                     (append %res
+                                             (if (string? %a)
+                                                 (string->list %a)
+                                                 %a)))))
+                              (%concatenate-loop (cdr %ee)))))
+                      %res)))
+                 cell-contents)))))
           (if %loop-returned
               %loop-result
               (%loop))))))
@@ -14474,7 +14447,7 @@
                                 (%concatenate-loop (cdr %ee)))))
                         %res)))))
             (else false)))
-         (unless %loop-returned (begin (set! i k) (set! s null) s))
+         (unless %loop-returned (set! i k) (set! s null) s)
          (unless %loop-returned
            (let* ((%loop-returned false)
                   (%loop-result 0)
@@ -14485,12 +14458,11 @@
              (let %loop
                ()
                (unless %loop-returned
-                 (begin
-                  (set! c
-                   (if (< i n)
-                       (list-ref argpat i)
-                       #\#))
-                  c))
+                 (set! c
+                  (if (< i n)
+                      (list-ref argpat i)
+                      #\#))
+                 c)
                (unless %loop-returned
                  (cond
                   ((char=? c #\#)
@@ -14533,7 +14505,7 @@
                             (cons d ss))))
                       ss)
                      (return))
-                    (true (begin (set! ss (append s ss)) ss) (return)))))
+                    (else (begin (set! ss (append s ss)) ss) (return)))))
                (if %loop-returned
                    %loop-result
                    (%loop)))))
@@ -14573,7 +14545,7 @@
                     (let ((%push-new-stack (cons (ungroup (get-token)) r)))
                       (begin (set! r %push-new-stack) r))
                     (return r))
-                   (true
+                   (else
                     (let ((c2 (list-ref argpat (+ k 2))))
                       (if (char=? c2 #\#)
                           (begin
@@ -14588,7 +14560,7 @@
                              (let ((%push-new-stack (cons s r)))
                                (begin (set! r %push-new-stack) r)))
                            (read-till-next-sharp (+ k 2) argpat)))))))
-                 (true
+                 (else
                   (let ((d (get-actual-char)))
                     (begin
                      (cond
@@ -14604,7 +14576,7 @@
                           "Use of macro doesn't match its definition."))
                         (else false)))
                       ((char=? c d) true)
-                      (true
+                      (else
                        (terror 'read-macro-args
                         "Use of macro doesn't match its definition.")))
                      (let ((%tmp (+ k 1)))
@@ -14646,8 +14618,8 @@
                                  ((ctl-seq-p x2)
                                   (cond ((string=? x "\\the") (expand-the))
                                         ((string=? x "\\number") (get-number))
-                                        (true "DeAdCoDe")))
-                                 (true x)))))
+                                        (else "DeAdCoDe")))
+                                 (else x)))))
                             ((string=? x "\\noexpand")
                              (let ((x2 (get-raw-token/is)))
                                (begin (toss-back-char *invisible-space*) x2)))
@@ -14661,9 +14633,9 @@
                                       (not (tdef*-defer y)))
                                  (toss-back-char *invisible-space*)
                                  (toss-back-string (tdef*-expansion y)) "")
-                                (true x))))
-                            (true x)))))
-                       (true (get-actual-char) c))
+                                (else x))))
+                            (else x)))))
+                       (else (get-actual-char) c))
                       tmp-port))))
                 (if %loop-returned
                     %loop-result
@@ -14680,7 +14652,7 @@
                  (list
                   (cond
                    ((begin (set! *it* (get-bracketed-text-if-any)) *it*) *it*)
-                   (true optarg)))))))
+                   (else optarg)))))))
        (let ((args (read-macro-args argpat k r)))
          (let ((rhs-n
                 (let ((%length-arg rhs))
@@ -14743,7 +14715,7 @@
                                             (return
                                              (append (reverse (cons c s))
                                                      (aux (add1 j)))))
-                                           (true
+                                           (else
                                             (return
                                              (append (reverse s) (aux j)))))))
                                       (if %loop-returned
@@ -14796,8 +14768,8 @@
                                                       (cdr %ee)))))
                                              %res))
                                          (aux (+ k 2))))
-                                       (true (cons #\# (aux (add1 k))))))))
-                               (true (cons c (aux (add1 k))))))))))
+                                       (else (cons #\# (aux (add1 k))))))))
+                               (else (cons c (aux (add1 k))))))))))
                     (aux 0)))))
              (let ((%res
                     (if (eq? %type 'string)
@@ -14836,7 +14808,6 @@
 
 (define do-verb-braced
  (lambda (ignore)
-   false
    (let ((%fluid-var-*esc-chars* (list *esc-char-verb*))
          (%fluid-var-*tex-extra-letters* null)
          (nesting 0))
@@ -14867,7 +14838,7 @@
                            (get-ctl-seq)))))
                    (cond
                     ((member x '("\\ " "\\{" "\\}")) (emit (string-ref x 1)))
-                    (true
+                    (else
                      (let ((%fluid-var-*esc-chars* (list *esc-char-std*)))
                        (fluid-let ((*esc-chars* %fluid-var-*esc-chars*))
                         (do-tex-ctl-seq-completely x)))))))
@@ -14886,9 +14857,9 @@
                 ((char=? c #\newline)
                  (cond (*verb-display-p* (emit "&#xa0;") (emit-newline))
                        (*verb-visible-space-p* (emit *verbatim-visible-space*))
-                       (true (emit-newline))))
+                       (else (emit-newline))))
                 ((and (char=? c #\-) (not *verb-display-p*)) (emit "&#x2011;"))
-                (true (emit-html-char c))))))
+                (else (emit-html-char c))))))
           (if %loop-returned
               %loop-result
               (%loop))))))))
@@ -14920,10 +14891,10 @@
                    (cond (*verb-display-p* (emit "&#xa0;") (emit-newline))
                          (*verb-visible-space-p*
                           (emit *verbatim-visible-space*))
-                         (true (emit-newline))))
+                         (else (emit-newline))))
                   ((and (char=? c #\-) (not *verb-display-p*))
                    (emit "&#x2011;"))
-                  (true (emit-html-char c))))))
+                  (else (emit-html-char c))))))
        (if %loop-returned
            %loop-result
            (%loop))))))
@@ -14939,18 +14910,17 @@
          (let ((d (get-actual-char)))
            (let ((%fluid-var-*verb-display-p* (munched-a-newline-p)))
              (fluid-let ((*verb-display-p* %fluid-var-*verb-display-p*))
-              (begin
-               (cond (*outputting-external-title-p* false)
-                     (*verb-display-p* (do-end-para)
-                      (emit "<pre class=verbatim>"))
-                     (true (emit "<code class=verbatim>")))
-               ((if (char=? d #\{)
-                    do-verb-braced
-                    do-verb-delimed)
-                d)
-               (cond (*outputting-external-title-p* false)
-                     (*verb-display-p* (emit "</pre>") (do-noindent))
-                     (true (emit "</code>")))))))))))
+              (cond (*outputting-external-title-p* false)
+                    (*verb-display-p* (do-end-para)
+                     (emit "<pre class=verbatim>"))
+                    (else (emit "<code class=verbatim>")))
+              ((if (char=? d #\{)
+                   do-verb-braced
+                   do-verb-delimed)
+               d)
+              (cond (*outputting-external-title-p* false)
+                    (*verb-display-p* (emit "</pre>") (do-noindent))
+                    (else (emit "</code>"))))))))))
    (egroup)))
 
 (define do-verbc
@@ -14993,32 +14963,31 @@
                     false)
                    (else (open-input-file %f))))))
            (let ((%with-open-file-res
-                  (begin
-                   (let* ((%loop-returned false)
-                          (%loop-result 0)
-                          (return
-                           (lambda %args
-                             (set! %loop-returned true)
-                             (set! %loop-result
-                              (and (pair? %args) (car %args))))))
-                     (let %loop
-                       ()
-                       (unless %loop-returned
-                         (let ((c
-                                (let* ((%read-char-port p)
-                                       (%read-char-res
-                                        (if %read-char-port
-                                            (read-char %read-char-port)
-                                            (read-char))))
-                                  (when (eof-object? %read-char-res)
-                                    (set! %read-char-res ':eof-object))
-                                  %read-char-res)))
-                           (begin
-                            (cond ((eq? c ':eof-object) (return)) (else false))
-                            (emit-html-char c))))
-                       (if %loop-returned
-                           %loop-result
-                           (%loop)))))))
+                  (let* ((%loop-returned false)
+                         (%loop-result 0)
+                         (return
+                          (lambda %args
+                            (set! %loop-returned true)
+                            (set! %loop-result
+                             (and (pair? %args) (car %args))))))
+                    (let %loop
+                      ()
+                      (unless %loop-returned
+                        (let ((c
+                               (let* ((%read-char-port p)
+                                      (%read-char-res
+                                       (if %read-char-port
+                                           (read-char %read-char-port)
+                                           (read-char))))
+                                 (when (eof-object? %read-char-res)
+                                   (set! %read-char-res ':eof-object))
+                                 %read-char-res)))
+                          (begin
+                           (cond ((eq? c ':eof-object) (return)) (else false))
+                           (emit-html-char c))))
+                      (if %loop-returned
+                          %loop-result
+                          (%loop))))))
              (begin
               (cond
                (p
@@ -15029,7 +14998,7 @@
                (else false))
               %with-open-file-res)))
          (emit "</pre>") (egroup) (do-para))
-        (true (non-fatal-error "File " f0 " not found")))))))
+        (else (non-fatal-error "File " f0 " not found")))))))
 
 (define get-char-definitely
  (lambda (c0)
@@ -15047,14 +15016,14 @@
    (ignorespaces)
    (let ((c (snoop-actual-char)))
      (cond ((eq? c ':eof-object) false) ((member c cc) (get-actual-char) c)
-           (true false)))))
+           (else false)))))
 
 (define get-unsigned-number-optionally
  (lambda ()
    (ignorespaces)
    (let ((c (snoop-actual-char)))
      (cond ((eq? c ':eof-object) false) ((char-numeric? c) (get-integer 10))
-           (true false)))))
+           (else false)))))
 
 (define opmac-verbinput-skip-lines
  (lambda (i n)
@@ -15068,7 +15037,9 @@
        (let %loop
          ()
          (unless %loop-returned
-           (cond ((>= _ %dotimes-n) (return)) (else false)))
+           (if (>= _ %dotimes-n)
+               (return)
+               false))
          (unless %loop-returned
            (let ((x
                   (let ((%read-line-res (read-line i)))
@@ -15116,7 +15087,9 @@
            (let %loop
              ()
              (unless %loop-returned
-               (cond ((>= _ %dotimes-n) (return)) (else false)))
+               (if (>= _ %dotimes-n)
+                   (return)
+                   false))
              (unless %loop-returned
                (let ((x
                       (let ((%read-line-res (read-line i)))
@@ -15183,46 +15156,44 @@
                               false)
                              (else (open-input-file %f))))))
                      (let ((%with-open-file-res
-                            (begin
-                             (cond
-                              ((and s1 n1 s2 n2 (char=? s1 #\-)
-                                    (char=? s2 #\+))
-                               (opmac-verbinput-skip-lines i (+ n n1))
-                               (opmac-verbinput-print-lines i n2)
-                               (let ((%tmp (+ n (+ n1 n2))))
-                                 (begin (set! n %tmp) n)))
-                              ((and (not s1) n1 s2 n2 (char=? s2 #\-))
-                               (opmac-verbinput-skip-lines i (- n1 1))
-                               (opmac-verbinput-print-lines i (+ (- n2 n1) 1))
-                               (begin (set! n n2) n))
-                              ((and (not s1) n1 s2 n2 (char=? s2 #\+))
-                               (opmac-verbinput-skip-lines i (- n1 1))
-                               (opmac-verbinput-print-lines i n2)
-                               (begin (set! n (+ (- n1 1) n2)) n))
-                              ((and s1 n1 (not s2) (not n2) (char=? s1 #\-))
-                               (opmac-verbinput-print-lines i n1)
-                               (begin (set! n n1) n))
-                              ((and s1 n1 (not s2) (not n2) (char=? s1 #\+))
-                               (opmac-verbinput-skip-lines i n)
-                               (opmac-verbinput-print-lines i n1)
-                               (let ((%tmp (+ n1 1)))
-                                 (begin (set! n1 %tmp) n1)))
-                              ((and (not s1) n1 s2 (not n2) (char=? s2 #\-))
-                               (opmac-verbinput-skip-lines i (- n1 1))
-                               (opmac-verbinput-print-lines i true)
-                               (begin (set! n 0) n))
-                              ((and s1 (not n1) (not s2) (not n2)
-                                    (char=? s1 #\+))
-                               (opmac-verbinput-skip-lines i n)
-                               (opmac-verbinput-print-lines i true)
-                               (begin (set! n 0) n))
-                              ((and s1 (not n1) (not s2) (not n2)
-                                    (char=? s1 #\-))
-                               (opmac-verbinput-print-lines i true)
-                               (begin (set! n 0) n))
-                              (true
-                               (terror 'do-opmac-verbinput
-                                "Malformed \\verbinput" s1 n1 s2 n2 f))))))
+                            (cond
+                             ((and s1 n1 s2 n2 (char=? s1 #\-) (char=? s2 #\+))
+                              (opmac-verbinput-skip-lines i (+ n n1))
+                              (opmac-verbinput-print-lines i n2)
+                              (let ((%tmp (+ n (+ n1 n2))))
+                                (begin (set! n %tmp) n)))
+                             ((and (not s1) n1 s2 n2 (char=? s2 #\-))
+                              (opmac-verbinput-skip-lines i (- n1 1))
+                              (opmac-verbinput-print-lines i (+ (- n2 n1) 1))
+                              (begin (set! n n2) n))
+                             ((and (not s1) n1 s2 n2 (char=? s2 #\+))
+                              (opmac-verbinput-skip-lines i (- n1 1))
+                              (opmac-verbinput-print-lines i n2)
+                              (begin (set! n (+ (- n1 1) n2)) n))
+                             ((and s1 n1 (not s2) (not n2) (char=? s1 #\-))
+                              (opmac-verbinput-print-lines i n1)
+                              (begin (set! n n1) n))
+                             ((and s1 n1 (not s2) (not n2) (char=? s1 #\+))
+                              (opmac-verbinput-skip-lines i n)
+                              (opmac-verbinput-print-lines i n1)
+                              (let ((%tmp (+ n1 1)))
+                                (begin (set! n1 %tmp) n1)))
+                             ((and (not s1) n1 s2 (not n2) (char=? s2 #\-))
+                              (opmac-verbinput-skip-lines i (- n1 1))
+                              (opmac-verbinput-print-lines i true)
+                              (begin (set! n 0) n))
+                             ((and s1 (not n1) (not s2) (not n2)
+                                   (char=? s1 #\+))
+                              (opmac-verbinput-skip-lines i n)
+                              (opmac-verbinput-print-lines i true)
+                              (begin (set! n 0) n))
+                             ((and s1 (not n1) (not s2) (not n2)
+                                   (char=? s1 #\-))
+                              (opmac-verbinput-print-lines i true)
+                              (begin (set! n 0) n))
+                             (else
+                              (terror 'do-opmac-verbinput
+                               "Malformed \\verbinput" s1 n1 s2 n2 f)))))
                        (begin
                         (cond
                          (i
@@ -15235,7 +15206,7 @@
                    (begin (table-put! f *opmac-verbinput-table* n)
                     (table-get f *opmac-verbinput-table*))
                    (emit "</pre>") (egroup) (do-para))
-                  (true (non-fatal-error "File " f0 " not found"))))))))))))
+                  (else (non-fatal-error "File " f0 " not found"))))))))))))
 
 (define do-verbwritefile
  (lambda ()
@@ -15363,10 +15334,8 @@
    (ignorespaces)
    (let ((write-char write-char) (d (get-actual-char)))
      (begin
-      (cond
-       ((not p)
-        (begin (set! write-char (lambda (x y) false false)) write-char))
-       (else false))
+      (cond ((not p) (set! write-char (lambda (x y) false)) write-char)
+            (else false))
       (case d
         ((#\{)
          (let ((nesting 0) (c false))
@@ -15378,7 +15347,7 @@
                      (set! %loop-result (and (pair? %args) (car %args))))))
              (let %loop
                ()
-               (unless %loop-returned (begin (set! c (get-actual-char)) c))
+               (unless %loop-returned (set! c (get-actual-char)) c)
                (unless %loop-returned
                  (cond
                   ((eq? c ':eof-object)
@@ -15393,10 +15362,10 @@
                      (begin (set! nesting %tmp) nesting)))
                   ((char=? c #\})
                    (cond ((= nesting 0) (return))
-                         (true (write-char c p)
+                         (else (write-char c p)
                           (let ((%tmp (- nesting 1)))
                             (begin (set! nesting %tmp) nesting)))))
-                  (true (write-char c p))))
+                  (else (write-char c p))))
                (if %loop-returned
                    %loop-result
                    (%loop))))))
@@ -15441,7 +15410,7 @@
            ((esc-char-p c) (get-actual-char) (toss-back-char *invisible-space*)
             (toss-back-string "\\TIIPbackslash"))
            ((char=? c *comment-char*) (eat-till-eol) (do-string))
-           (true (toss-back-char (get-actual-char)))))))
+           (else (toss-back-char (get-actual-char)))))))
 
 (define do-verbatim
  (lambda ()
@@ -15458,32 +15427,31 @@
      (fluid-let ((*verb-visible-space-p* %fluid-var-*verb-visible-space-p*))
       (cond
        (*verb-visible-space-p*
-        (begin
-         (set! env
-          (let ((%type 'string) (%ee (list env "*")))
-            (let ((%res
-                   (if (eq? %type 'string)
-                       ""
-                       null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a)
-                                  %a
-                                  (list->string %a)))
-                             (append %res
-                                     (if (string? %a)
-                                         (string->list %a)
-                                         %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res)))
-         env))
+        (set! env
+         (let ((%type 'string) (%ee (list env "*")))
+           (let ((%res
+                  (if (eq? %type 'string)
+                      ""
+                      null)))
+             (let %concatenate-loop
+               ((%ee %ee))
+               (if (null? %ee)
+                   %res
+                   (let ((%a (car %ee)))
+                     (unless (not %a)
+                       (set! %res
+                        (if (eq? %type 'string)
+                            (string-append %res
+                             (if (string? %a)
+                                 %a
+                                 (list->string %a)))
+                            (append %res
+                                    (if (string? %a)
+                                        (string->list %a)
+                                        %a)))))
+                     (%concatenate-loop (cdr %ee)))))
+             %res)))
+        env)
        (else false))
       (munched-a-newline-p)
       (let ((%fluid-var-*ligatures-p* false))
@@ -15517,14 +15485,14 @@
                                      (else false))
                                (emit-html-string cs) (emit-html-char #\{)
                                (emit-html-string e) (emit-html-char #\}))))
-                           (true (emit-html-string cs)))
+                           (else (emit-html-string cs)))
                           (begin (emit-html-string cs)))))
                    ((char=? c #\ ) (get-actual-char)
                     (emit
                      (if *verb-visible-space-p*
                          *verbatim-visible-space*
                          #\ )))
-                   (true (emit-html-char (get-actual-char)))))))
+                   (else (emit-html-char (get-actual-char)))))))
              (if %loop-returned
                  %loop-result
                  (%loop))))))))
@@ -15564,17 +15532,16 @@
                            ((*not-processing-p* %fluid-var-*not-processing-p*))
                            (get-ctl-seq)))))
                    (cond ((string=? x "\\ ") (emit " "))
-                         (true (do-tex-ctl-seq-completely x)))))
+                         (else (do-tex-ctl-seq-completely x)))))
                 ((char=? c #\ ) (emit "&#xa0;"))
                 ((char=? c #\newline) (emit "<br>") (emit-newline))
-                (true (emit-html-char c))))))
+                (else (emit-html-char c))))))
           (if %loop-returned
               %loop-result
               (%loop))))))))
 
 (define do-endverbatim-eplain
- (lambda ()
-   (begin (set! *inside-eplain-verbatim-p* false) *inside-eplain-verbatim-p*)))
+ (lambda () (set! *inside-eplain-verbatim-p* false) *inside-eplain-verbatim-p*))
 
 (define do-begintt
  (lambda ()
@@ -15626,7 +15593,7 @@
                       (let ((%fluid-var-*esc-chars* (list *esc-char-std*)))
                         (fluid-let ((*esc-chars* %fluid-var-*esc-chars*))
                          (do-tex-ctl-seq-completely cs)))))
-                   (true (emit-html-char (get-actual-char)))))))
+                   (else (emit-html-char (get-actual-char)))))))
              (if %loop-returned
                  %loop-result
                  (%loop))))))
@@ -15696,8 +15663,8 @@
             (cond ((eq? (snoop-actual-char) ':eof-object) (return))
                   (else false)))
           (unless %loop-returned
-            (begin (table-put! (scm-get-token) *scm-special-symbols* false)
-             (table-get (scm-get-token) *scm-special-symbols*)))
+            (table-put! (scm-get-token) *scm-special-symbols* false)
+            (table-get (scm-get-token) *scm-special-symbols*))
           (if %loop-returned
               %loop-result
               (%loop))))))))
@@ -15805,7 +15772,7 @@
        (emit "<span class=keyword>") (scm-emit-html-char c) (emit "</span>"))
       ((or (char-whitespace? c) (member c *scm-token-delims*))
        (get-actual-char) (scm-emit-html-char c))
-      (true (scm-output-token (scm-get-token)))))))
+      (else (scm-output-token (scm-get-token)))))))
 
 (define scm-set-mathescape
  (lambda (yes-p)
@@ -15817,7 +15784,7 @@
       (yes-p (begin (set! *slatex-math-escape* c) *slatex-math-escape*)
        (let ((%push-new-stack (cons *slatex-math-escape* *scm-token-delims*)))
          (begin (set! *scm-token-delims* %push-new-stack) *scm-token-delims*)))
-      (true (begin (set! *slatex-math-escape* false) *slatex-math-escape*)
+      (else (begin (set! *slatex-math-escape* false) *slatex-math-escape*)
        (begin (set! *scm-token-delims* (remove c *scm-token-delims*))
         *scm-token-delims*))))))
 
@@ -15890,7 +15857,7 @@
                    (let ((c2 (snoop-actual-char)))
                      (or (eq? c2 ':eof-object) (char=? c2 #\newline))))
               (emit "</span>") (scm-emit-html-char (get-actual-char)) (return))
-             (true (scm-emit-html-char c))))))
+             (else (scm-emit-html-char c))))))
        (if %loop-returned
            %loop-result
            (%loop))))))
@@ -15923,8 +15890,8 @@
                     (cond
                      ((eq? c2 ':eof-object) (scm-emit-html-char c) (return))
                      ((char=? c2 #\#) (get-actual-char) (return))
-                     (true (scm-emit-html-char c)))))
-                 (true (scm-emit-html-char c)))))
+                     (else (scm-emit-html-char c)))))
+                 (else (scm-emit-html-char c)))))
        (if %loop-returned
            %loop-result
            (%loop))))
@@ -15973,7 +15940,7 @@
       ((eq? c ':eof-object) (emit "<span class=selfeval>")
        (scm-emit-html-char #\#) (emit "</span>"))
       ((char=? c #\|) (scm-output-extended-comment))
-      (true (toss-back-char #\#) (scm-output-token (scm-get-token)))))))
+      (else (toss-back-char #\#) (scm-output-token (scm-get-token)))))))
 
 (define scm-output-token
  (lambda (s)
@@ -16038,7 +16005,7 @@
       (cond
        ((not display-p) (emit "<code class=scheme")
         (cond (result-p (emit "response")) (else false)) (emit ">"))
-       (true (do-end-para) (emit "<pre class=scheme>")))
+       (else (do-end-para) (emit "<pre class=scheme>")))
       (bgroup)
       (let ((%fluid-var-*esc-chars* (list *esc-char-verb*))
             (%fluid-var-*verb-display-p* display-p)
@@ -16072,7 +16039,7 @@
                       (cond
                        ((member x '("\\ " "\\{" "\\}"))
                         (scm-emit-html-char (string-ref x 1)))
-                       (true
+                       (else
                         (let ((%fluid-var-*esc-chars* (list *esc-char-std*)))
                           (fluid-let ((*esc-chars* %fluid-var-*esc-chars*))
                            (do-tex-ctl-seq-completely x)))))))
@@ -16084,7 +16051,7 @@
                     (scm-emit-html-char c)
                     (let ((%tmp (- nesting 1)))
                       (begin (set! nesting %tmp) nesting)))
-                   (true (scm-output-next-chunk))))))
+                   (else (scm-output-next-chunk))))))
              (if %loop-returned
                  %loop-result
                  (%loop))))))
@@ -16101,7 +16068,7 @@
         (cond
          ((not display-p) (emit "<code class=scheme")
           (cond (result-p (emit "response")) (else false)) (emit ">"))
-         (true (do-end-para) (emit "<pre class=scheme>")))
+         (else (do-end-para) (emit "<pre class=scheme>")))
         (let ((%fluid-var-*verb-display-p* display-p)
               (%fluid-var-*scm-token-delims* (cons d *scm-token-delims*)))
           (fluid-let
@@ -16129,7 +16096,7 @@
                    %loop-result
                    (%loop))))))
         (cond ((not display-p) (emit "</code>"))
-              (true (emit "</pre>") (do-noindent))))))))
+              (else (emit "</pre>") (do-noindent))))))))
 
 (define do-scm
  (lambda %lambda-rest-arg
@@ -16137,7 +16104,7 @@
      (when (< 0 %lambda-rest-arg-len)
        (set! result-p (list-ref %lambda-rest-arg 0)))
      (cond (*outputting-external-title-p* (do-verb))
-           (true (ignorespaces) (bgroup)
+           (else (ignorespaces) (bgroup)
             (let ((%fluid-var-*ligatures-p* false))
               (fluid-let ((*ligatures-p* %fluid-var-*ligatures-p*))
                ((if (char=? (snoop-actual-char) #\{)
@@ -16277,7 +16244,7 @@
                              (g (scm-output-token "{") (scm-output-token g)
                               (scm-output-token "}"))
                              (else false)))))
-                        (true (scm-output-token x))))))
+                        (else (scm-output-token x))))))
                    ((esc-char-p c)
                     (let ((cs
                            (let ((%fluid-var-*not-processing-p* true))
@@ -16288,7 +16255,7 @@
                       (let ((%fluid-var-*esc-chars* (list *esc-char-std*)))
                         (fluid-let ((*esc-chars* %fluid-var-*esc-chars*))
                          (do-tex-ctl-seq-completely cs)))))
-                   (true (scm-output-next-chunk))))))
+                   (else (scm-output-next-chunk))))))
              (if %loop-returned
                  %loop-result
                  (%loop))))))
@@ -16313,7 +16280,9 @@
        (let %loop
          ()
          (unless %loop-returned
-           (cond ((>= i %dotimes-n) (return true)) (else false)))
+           (if (>= i %dotimes-n)
+               (return true)
+               false))
          (unless %loop-returned
            (cond ((not (char=? (string-ref s i) #\.)) (return false))
                  (else false)))
@@ -16357,7 +16326,7 @@
               ':variable))
          ((string-is-all-dots-p s) ':background)
          ((char=? (string-ref s 0) #\#) ':selfeval)
-         ((string->number s) ':selfeval) (true ':variable))))
+         ((string->number s) ':selfeval) (else ':variable))))
 
 (define eat-star
  (lambda ()
@@ -16387,7 +16356,7 @@
       (cond
        (*equation-numbered-p* (emit "<td>(") (emit *equation-number*)
         (bump-dotted-counter "equation") (emit ")</td>"))
-       (true (begin (set! *equation-numbered-p* true) *equation-numbered-p*)))
+       (else (set! *equation-numbered-p* true) *equation-numbered-p*))
       (emit "</tr>")
       (emit-newline)
       (begin (set! *equation-position* 0) *equation-position*)
@@ -16505,7 +16474,7 @@
                      (let ((n (ungroup (get-token))))
                        (begin (get-token) (emit " colspan=") (emit n)
                         (return))))
-                    (true (toss-back-char *invisible-space*)
+                    (else (toss-back-char *invisible-space*)
                      (toss-back-string x) (return)))))))
        (if %loop-returned
            %loop-result
@@ -16604,7 +16573,7 @@
               (counter*-value counter)))
            (begin (set!counter*-value counter new-value)
             (counter*-value counter)))))
-    (true
+    (else
      (let ((count-seq
             (let ((%type 'string) (%ee (list "\\" counter-name)))
               (let ((%res
@@ -16643,7 +16612,7 @@
           (if addp
               (+ new-value (get-gcount count-seq))
               new-value)))
-        (true false)))))))
+        (else false)))))))
 
 (define do-tex-prim
  (lambda (z)
@@ -16654,18 +16623,18 @@
         ((begin (set! *it* (tdef*-defer y)) *it*) (begin (set! y *it*) y)
          (toss-back-string y))
         ((begin (set! *it* (tdef*-thunk y)) *it*) (begin (set! y *it*) y) (y))
-        (true
+        (else
          (expand-tex-macro (tdef*-optarg y) (tdef*-argpat y)
           (tdef*-expansion y)))))
       (*math-mode-p* (do-math-ctl-seq z))
-      (true (trace-if (> (find-count "\\tracingcommands") 0) "Ignoring " z))))))
+      (else (trace-if (> (find-count "\\tracingcommands") 0) "Ignoring " z))))))
 
 (define do-char
  (lambda ()
    (let ((n (get-number-or-false)))
      (begin (cond ((not n) (terror 'do-char "not a char")) (else false))
       (cond ((< n 128) (emit-html-char (integer->char n)))
-            (true (emit "&#x") (emit (write-to-string n ':base 16))
+            (else (emit "&#x") (emit (write-to-string n ':base 16))
              (emit ";")))))))
 
 (define do-chardef
@@ -16840,14 +16809,14 @@
                (emit ">"))
               ((:tabular) (do-tabular-colsep))
               ((:ruled-table) (do-ruledtable-colsep))))
-           (true (emit-html-char c))))
+           (else (emit-html-char c))))
          ((char=? c #\|)
           (if (eq? (car *tabular-stack*) ':ruled-table)
               (do-ruledtable-colsep)
               (emit c)))
          ((char=? c #\newline) (do-newline)) ((char=? c #\ ) (do-space))
          ((char=? c #\tab) (do-tab))
-         (true
+         (else
           (cond
            (*math-mode-p*
             (case c
@@ -16863,7 +16832,7 @@
                    (emit c)))))
            ((and *in-small-caps-p* (char-lower-case? c)) (emit "<small>")
             (emit (char-upcase c)) (emit "</small>"))
-           (true (emit c)))))))
+           (else (emit c)))))))
 
 (define do-tex-ctl-seq-completely
  (lambda (x)
@@ -16894,7 +16863,7 @@
         (else false)))
      ':encountered-endinput)
     ((find-count z) (do-count= z false)) ((find-toks z) (do-toks= z false))
-    ((find-dimen z) (do-dimen= z false)) (true (do-tex-prim z)))))
+    ((find-dimen z) (do-dimen= z false)) (else (do-tex-prim z)))))
 
 (define generate-html
  (lambda ()
@@ -16920,7 +16889,7 @@
                        ((:encountered-endinput) (return true))
                        ((:encountered-bye) (return ':encountered-bye))
                        (else true)))
-                    (true (get-actual-char) (do-tex-char c)))))
+                    (else (get-actual-char) (do-tex-char c)))))
           (if %loop-returned
               %loop-result
               (%loop))))))))
@@ -16953,7 +16922,7 @@
        3)
       (char=? (string-ref f 0) #\.) (char=? (string-ref f 1) #\/))
      false)
-    ((member f *verb-written-files*) false) (true true))))
+    ((member f *verb-written-files*) false) (else true))))
 
 (define do-inputiffileexists
  (lambda ()
@@ -16961,7 +16930,7 @@
      (let ((then-txt (ungroup (get-group))))
        (let ((else-txt (ungroup (get-group))))
          (cond (f (tex2page-string then-txt) (tex2page-file f))
-               (true (tex2page-string else-txt))))))))
+               (else (tex2page-string else-txt))))))))
 
 (define tex2page-string
  (lambda (s) (call-with-input-string/buffered s generate-html)))
@@ -16985,23 +16954,22 @@
  (lambda (f)
    (let ((e (or (file-extension f) "")))
      (cond ((string-ci=? e ".sty") true)
-           (true
+           (else
             (cond
              ((string-ci=? e ".tex")
-              (begin
-               (set! f
-                (subseq f 0
-                        (-
-                         (let ((%length-arg f))
-                           ((if (string? %length-arg)
-                                string-length
-                                length)
-                            %length-arg))
-                         4)))
-               f))
+              (set! f
+               (subseq f 0
+                       (-
+                        (let ((%length-arg f))
+                          ((if (string? %length-arg)
+                               string-length
+                               length)
+                           %length-arg))
+                        4)))
+              f)
              (else false))
             (cond ((string=? f "opmac") (tex-gdef-0arg "\\TZPopmac" "1") true)
-                  (true (member f *tex-files-to-ignore*))))))))
+                  (else (member f *tex-files-to-ignore*))))))))
 
 (define do-input
  (lambda ()
@@ -17011,8 +16979,7 @@
        (begin
         (cond
          ((eqv? *inputting-boilerplate-p* 0)
-          (begin (set! *inputting-boilerplate-p* false)
-           *inputting-boilerplate-p*))
+          (set! *inputting-boilerplate-p* false) *inputting-boilerplate-p*)
          (else false))
         (let ((%fluid-var-*inputting-boilerplate-p*
                (and boilerplate-index (add1 boilerplate-index))))
@@ -17036,7 +17003,7 @@
                     (actual-tex-filename f (check-input-file-timestamp-p f)))
                    *it*)
                   (tex2page-file *it*))
-                 (true (write-log #\() (write-log f)
+                 (else (write-log #\() (write-log f)
                   (write-log ':separation-space) (write-log "not found)")
                   (write-log ':separation-space))))))))))
 
@@ -17044,8 +17011,8 @@
  (lambda ()
    (ignorespaces)
    (cond
-    ((eq? *includeonly-list* true)
-     (begin (set! *includeonly-list* null) *includeonly-list*))
+    ((eq? *includeonly-list* true) (set! *includeonly-list* null)
+     *includeonly-list*)
     (else false))
    (let ((c (get-actual-char)))
      (cond
@@ -17072,7 +17039,7 @@
                 ((char=? c #\,) (get-actual-char))
                 ((char=? c #\}) (get-actual-char) (return))
                 ((member c *filename-delims*) (terror 'do-includeonly))
-                (true
+                (else
                  (let ((%push-new-stack
                         (cons (get-filename) *includeonly-list*)))
                    (begin (set! *includeonly-list* %push-new-stack)
@@ -17111,12 +17078,11 @@
           (let %loop
             ()
             (unless %loop-returned
-              (begin
-               (set! x
-                (let ((%read-res (read i)))
-                  (when (eof-object? %read-res) (set! %read-res ':eof-object))
-                  %read-res))
-               x))
+              (set! x
+               (let ((%read-res (read i)))
+                 (when (eof-object? %read-res) (set! %read-res ':eof-object))
+                 %read-res))
+              x)
             (unless %loop-returned
               (cond ((eq? x ':eof-object) (return)) (else false)))
             (unless %loop-returned (eval1 x))
@@ -17138,7 +17104,7 @@
               (tex-write-output-string (ungroup (get-group))))))
      (cond
       ((not (inside-false-world-p))
-       (cond ((> *html-only* 0) (begin (set! kind ':html) kind)) (else false))
+       (cond ((> *html-only* 0) (set! kind ':html) kind) (else false))
        (case kind
          ((:quiet) (do-eval-string s))
          (else
@@ -17224,7 +17190,7 @@
                 ((member ':bibliography *missing-pieces*) true)
                 (*source-changed-since-last-run-p*
                  (flag-missing-piece ':fresh-bibliography) true)
-                (true false)))
+                (else false)))
          (run-makeindex-p
           (cond ((not *using-index-p*) false)
                 ((not
@@ -17260,7 +17226,7 @@
                 ((member ':index *missing-pieces*) true)
                 (*source-changed-since-last-run-p*
                  (flag-missing-piece ':fresh-index) true)
-                (true false))))
+                (else false))))
      (begin
       (cond
        (run-bibtex-p (write-log ':separation-newline)
@@ -17441,7 +17407,9 @@
        (let %loop
          ()
          (unless %loop-returned
-           (cond ((null? %dolist-l) (return)) (else false)))
+           (if (null? %dolist-l)
+               (return)
+               false))
          (unless %loop-returned (set! f (car %dolist-l)))
          (unless %loop-returned (set! %dolist-l (cdr %dolist-l)))
          (unless %loop-returned
@@ -18193,16 +18161,16 @@
       (else false)))
    (start-css-file)
    (cond
-    ((not (null? *toc-list*))
-     (begin (set! *toc-list* (reverse *toc-list*)) *toc-list*))
+    ((not (null? *toc-list*)) (set! *toc-list* (reverse *toc-list*))
+     *toc-list*)
     (else false))
    (cond
-    ((not (null? *stylesheets*))
-     (begin (set! *stylesheets* (reverse *stylesheets*)) *stylesheets*))
+    ((not (null? *stylesheets*)) (set! *stylesheets* (reverse *stylesheets*))
+     *stylesheets*)
     (else false))
    (cond
-    ((not (null? *html-head*))
-     (begin (set! *html-head* (reverse *html-head*)) *html-head*))
+    ((not (null? *html-head*)) (set! *html-head* (reverse *html-head*))
+     *html-head*)
     (else false))))
 
 (define update-last-modification-time
@@ -18242,15 +18210,15 @@
       (else false)))))
 
 (define !tex-like-layout
- (lambda () (begin (set! *tex-like-layout-p* true) *tex-like-layout-p*)))
+ (lambda () (set! *tex-like-layout-p* true) *tex-like-layout-p*))
 
 (define !head-line (lambda (e) (tex-def-toks "\\headline" e true)))
 
 (define !foot-line (lambda (e) (tex-def-toks "\\footline" e true)))
 
-(define !toc-page (lambda (p) (begin (set! *toc-page* p) *toc-page*)))
+(define !toc-page (lambda (p) (set! *toc-page* p) *toc-page*))
 
-(define !index-page (lambda (p) (begin (set! *index-page* p) *index-page*)))
+(define !index-page (lambda (p) (set! *index-page* p) *index-page*))
 
 (define !toc-entry
  (lambda (level number page label header)
@@ -18263,33 +18231,30 @@
 
 (define !label
  (lambda (label html-page name value)
-   (begin
-    (table-put! label *label-table*
-     (make-label* ':src *label-source* ':page html-page ':name name ':value
-      value))
-    (table-get label *label-table*))))
+   (table-put! label *label-table*
+    (make-label* ':src *label-source* ':page html-page ':name name ':value
+     value))
+   (table-get label *label-table*)))
 
 (define !index
  (lambda (index-number html-page-number)
-   (begin (table-put! index-number *index-table* html-page-number)
-    (table-get index-number *index-table*))))
+   (table-put! index-number *index-table* html-page-number)
+   (table-get index-number *index-table*)))
 
 (define !last-modification-time
  (lambda (s . %lambda-rest-arg)
    (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (epoch 1900))
      (when (< 0 %lambda-rest-arg-len)
        (set! epoch (list-ref %lambda-rest-arg 0)))
-     false
-     (begin
-      (set! *last-modification-time*
-       (case epoch
-         ((1900) s)
-         ((1970) (+ s 2208988800))
-         (else (error 'ecase "0xdeadc0de"))))
-      *last-modification-time*))))
+     (set! *last-modification-time*
+      (case epoch
+        ((1900) s)
+        ((1970) (+ s 2208988800))
+        (else (error 'ecase "0xdeadc0de"))))
+     *last-modification-time*)))
 
 (define !last-page-number
- (lambda (n) (begin (set! *last-page-number* n) *last-page-number*)))
+ (lambda (n) (set! *last-page-number* n) *last-page-number*))
 
 (define !single-page (lambda () (tex-def-0arg "\\TZPsinglepage" "1")))
 
@@ -18301,11 +18266,11 @@
     ((or (fully-qualified-url-p jsf) (file-exists? (ensure-url-reachable jsf)))
      (let ((%push-new-stack (cons jsf *scripts*)))
        (begin (set! *scripts* %push-new-stack) *scripts*)))
-    (true (write-log "! Can't find script ") (write-log jsf)
+    (else (write-log "! Can't find script ") (write-log jsf)
      (write-log ':separation-newline)))))
 
 (define !using-chapters
- (lambda () (begin (set! *using-chapters-p* true) *using-chapters-p*)))
+ (lambda () (set! *using-chapters-p* true) *using-chapters-p*))
 
 (define !definitely-latex
  (lambda ()
@@ -18314,11 +18279,11 @@
     ((< (get-gcount "\\secnumdepth") -1) (tex-gdef-count "\\secnumdepth" 3))
     (else false))))
 
-(define !using-external-program (lambda (x) false false))
+(define !using-external-program (lambda (x) false))
 
-(define !external-labels (lambda (f) false false))
+(define !external-labels (lambda (f) false))
 
-(define !doctype (lambda (d) (begin (set! *doctype* d) *doctype*)))
+(define !doctype (lambda (d) (set! *doctype* d) *doctype*))
 
 (define !colophon
  (lambda (x)
@@ -18336,15 +18301,14 @@
 
 (define !tex-text
  (lambda (n)
-   (cond ((= n 0) (begin (set! *ligatures-p* false) *ligatures-p*))
-         (else false))))
+   (cond ((= n 0) (set! *ligatures-p* false) *ligatures-p*) (else false))))
 
 (define !opmac-iis
  (lambda (lhs sub)
    (cond
     ((not *opmac-index-sub-table*)
-     (begin (set! *opmac-index-sub-table* (make-table ':test equal?))
-      *opmac-index-sub-table*))
+     (set! *opmac-index-sub-table* (make-table ':test equal?))
+     *opmac-index-sub-table*)
     (else false))
    (begin (table-put! lhs *opmac-index-sub-table* sub)
     (table-get lhs *opmac-index-sub-table*))))
@@ -18366,7 +18330,7 @@
            (cond ((char=? c0 #\/) true) ((= n 1) false)
                  ((and (char-alphabetic? c0) (char=? (string-ref f 1) #\:))
                   true)
-                 (true false)))))))
+                 (else false)))))))
 
 (define ensure-url-reachable
  (lambda (f)
@@ -18432,7 +18396,7 @@
     ((or (fully-qualified-url-p css) (file-exists? (ensure-url-reachable css)))
      (let ((%push-new-stack (cons css *stylesheets*)))
        (begin (set! *stylesheets* %push-new-stack) *stylesheets*)))
-    (true (write-log "! Can't find stylesheet ") (write-log css)
+    (else (write-log "! Can't find stylesheet ") (write-log css)
      (write-log ':separation-newline)))))
 
 (define !html-head
@@ -18474,14 +18438,14 @@
 
 (define !default-title
  (lambda (title)
-   (cond ((not *title*) (begin (set! *title* title) *title*)) (else false))))
+   (cond ((not *title*) (set! *title* title) *title*) (else false))))
 
-(define !preferred-title (lambda (title) (begin (set! *title* title) *title*)))
+(define !preferred-title (lambda (title) (set! *title* title) *title*))
 
 (define !infructuous-calls-to-tex2page
  (lambda (n)
-   (begin (set! *infructuous-calls-to-tex2page* n)
-    *infructuous-calls-to-tex2page*)))
+   (set! *infructuous-calls-to-tex2page* n)
+   *infructuous-calls-to-tex2page*))
 
 (define load-tex2page-data-file
  (lambda (f)
@@ -18504,80 +18468,76 @@
              ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
              (else (open-input-file %f))))))
      (let ((%with-open-file-res
-            (begin
-             (cond
-              (i
-               (let ((%fluid-var-*current-source-file* f)
-                     (%fluid-var-*input-line-no* 0)
-                     (e false)
-                     (directive false))
-                 (fluid-let
-                  ((*input-line-no* %fluid-var-*input-line-no*)
-                   (*current-source-file* %fluid-var-*current-source-file*))
-                  (let* ((%loop-returned false)
-                         (%loop-result 0)
-                         (return
-                          (lambda %args
-                            (set! %loop-returned true)
-                            (set! %loop-result
-                             (and (pair? %args) (car %args))))))
-                    (let %loop
-                      ()
-                      (unless %loop-returned
-                        (begin
-                         (set! e
-                          (let ((%read-res (read i)))
-                            (when (eof-object? %read-res)
-                              (set! %read-res false))
-                            %read-res))
-                         e))
-                      (unless %loop-returned
-                        (cond ((not e) (return)) (else false)))
-                      (unless %loop-returned
-                        (begin (set! directive (car e)) directive))
-                      (unless %loop-returned
-                        (let ((%tmp (+ *input-line-no* 1)))
-                          (begin (set! *input-line-no* %tmp) *input-line-no*)))
-                      (unless %loop-returned
-                        (apply
-                         (case directive
-                           ((!colophon) !colophon)
-                           ((!default-title) !default-title)
-                           ((!definitely-latex) !definitely-latex)
-                           ((!doctype) !doctype)
-                           ((!external-labels) !external-labels)
-                           ((!foot-line) !foot-line)
-                           ((!head-line) !head-line)
-                           ((!html-head) !html-head)
-                           ((!html-redirect) !html-redirect)
-                           ((!index) !index)
-                           ((!index-page) !index-page)
-                           ((!infructuous-calls-to-tex2page)
-                            !infructuous-calls-to-tex2page)
-                           ((!label) !label)
-                           ((!last-modification-time) !last-modification-time)
-                           ((!last-page-number) !last-page-number)
-                           ((!opmac-iis) !opmac-iis)
-                           ((!preferred-title) !preferred-title)
-                           ((!script) !script)
-                           ((!single-page) !single-page)
-                           ((!slides) !slides)
-                           ((!stylesheet) !stylesheet)
-                           ((!tex-like-layout) !tex-like-layout)
-                           ((!tex-text) !tex-text)
-                           ((!toc-entry) !toc-entry)
-                           ((!toc-page) !toc-page)
-                           ((!using-chapters) !using-chapters)
-                           ((!using-external-program) !using-external-program)
-                           (else
-                            (terror 'load-tex2page-data-file
-                             "Fatal aux file error " directive
-                             "; I'm stymied.")))
-                         (cdr e)))
-                      (if %loop-returned
-                          %loop-result
-                          (%loop)))))))
-              (else false)))))
+            (cond
+             (i
+              (let ((%fluid-var-*current-source-file* f)
+                    (%fluid-var-*input-line-no* 0)
+                    (e false)
+                    (directive false))
+                (fluid-let
+                 ((*input-line-no* %fluid-var-*input-line-no*)
+                  (*current-source-file* %fluid-var-*current-source-file*))
+                 (let* ((%loop-returned false)
+                        (%loop-result 0)
+                        (return
+                         (lambda %args
+                           (set! %loop-returned true)
+                           (set! %loop-result
+                            (and (pair? %args) (car %args))))))
+                   (let %loop
+                     ()
+                     (unless %loop-returned
+                       (set! e
+                        (let ((%read-res (read i)))
+                          (when (eof-object? %read-res) (set! %read-res false))
+                          %read-res))
+                       e)
+                     (unless %loop-returned
+                       (cond ((not e) (return)) (else false)))
+                     (unless %loop-returned (set! directive (car e)) directive)
+                     (unless %loop-returned
+                       (let ((%tmp (+ *input-line-no* 1)))
+                         (begin (set! *input-line-no* %tmp) *input-line-no*)))
+                     (unless %loop-returned
+                       (apply
+                        (case directive
+                          ((!colophon) !colophon)
+                          ((!default-title) !default-title)
+                          ((!definitely-latex) !definitely-latex)
+                          ((!doctype) !doctype)
+                          ((!external-labels) !external-labels)
+                          ((!foot-line) !foot-line)
+                          ((!head-line) !head-line)
+                          ((!html-head) !html-head)
+                          ((!html-redirect) !html-redirect)
+                          ((!index) !index)
+                          ((!index-page) !index-page)
+                          ((!infructuous-calls-to-tex2page)
+                           !infructuous-calls-to-tex2page)
+                          ((!label) !label)
+                          ((!last-modification-time) !last-modification-time)
+                          ((!last-page-number) !last-page-number)
+                          ((!opmac-iis) !opmac-iis)
+                          ((!preferred-title) !preferred-title)
+                          ((!script) !script)
+                          ((!single-page) !single-page)
+                          ((!slides) !slides)
+                          ((!stylesheet) !stylesheet)
+                          ((!tex-like-layout) !tex-like-layout)
+                          ((!tex-text) !tex-text)
+                          ((!toc-entry) !toc-entry)
+                          ((!toc-page) !toc-page)
+                          ((!using-chapters) !using-chapters)
+                          ((!using-external-program) !using-external-program)
+                          (else
+                           (terror 'load-tex2page-data-file
+                            "Fatal aux file error " directive
+                            "; I'm stymied.")))
+                        (cdr e)))
+                     (if %loop-returned
+                         %loop-result
+                         (%loop)))))))
+             (else false))))
        (begin
         (cond
          (i
@@ -18592,9 +18552,8 @@
 
 (define tex2page-help
  (lambda (not-a-file)
-   (cond
-    ((not not-a-file) (begin (set! not-a-file "--missing-arg") not-a-file))
-    (else false))
+   (cond ((not not-a-file) (set! not-a-file "--missing-arg") not-a-file)
+         (else false))
    (write-aux
     `(!infructuous-calls-to-tex2page ,(+ *infructuous-calls-to-tex2page* 1)))
    (cond
@@ -18638,7 +18597,7 @@ main TeX file.
 For more information on how to use tex2page, please see")
      (write-log #\newline) (write-log *tex2page-website*) (write-log #\.)
      (write-log #\newline) (write-log #\newline))
-    (true
+    (else
      (cond
       ((string=? not-a-file "--missing-arg")
        (write-log "! Missing command-line argument.")
@@ -18656,7 +18615,7 @@ For more information on how to use tex2page, please see")
        (write-log "I can't go on meeting you like this.")
        (write-log ':separation-newline) (write-log "Good bye!")
        (write-log ':separation-newline))
-      (true
+      (else
        (write-log "Do you need help using TeX2page?
 Try the commands
   tex2page --help
@@ -18698,10 +18657,10 @@ Try the commands
 (define do-math-ctl-seq
  (lambda (s)
    (cond ((begin (set! *it* (find-math-def s)) *it*) ((tdef*-thunk *it*)))
-         (true
+         (else
           (cond
-           ((not *math-needs-image-p*)
-            (begin (set! *math-needs-image-p* true) *math-needs-image-p*))
+           ((not *math-needs-image-p*) (set! *math-needs-image-p* true)
+            *math-needs-image-p*)
            (else false))
           (emit (subseq s 1))))))
 
@@ -19136,7 +19095,7 @@ Try the commands
                   ((string=? x "\\approx") "&#x2249;")
                   ((string=? x "\\cong") "&#x2247;")
                   ((string=? x "\\asymp") "&#x226d;")
-                  (true (toss-back-string x) "/"))))
+                  (else (toss-back-string x) "/"))))
          (case c
            ((#\< #\> #\=)
             (get-actual-char)
@@ -19831,8 +19790,8 @@ Try the commands
 (tex-def-prim "\\ignorenextinputtimestamp"
  (lambda ()
    (cond
-    ((not *inputting-boilerplate-p*)
-     (begin (set! *inputting-boilerplate-p* 0) *inputting-boilerplate-p*))
+    ((not *inputting-boilerplate-p*) (set! *inputting-boilerplate-p* 0)
+     *inputting-boilerplate-p*)
     (else false))))
 
 (tex-def-prim "\\ignorespaces" ignorespaces)
@@ -19916,8 +19875,7 @@ Try the commands
 (tex-def-prim "\\lccode" (lambda () (do-tex-case-code ':lccode)))
 
 (tex-def-prim "\\leftdisplays"
- (lambda ()
-   (begin (set! *display-justification* "left") *display-justification*)))
+ (lambda () (set! *display-justification* "left") *display-justification*))
 
 (tex-def-prim "\\leftline" (lambda () (do-function "\\leftline")))
 
@@ -20007,16 +19965,14 @@ Try the commands
 
 (tex-def-prim "\\noindent" do-noindent)
 
-(tex-def-prim "\\nonum"
- (lambda () (begin (set! *opmac-nonum-p* true) *opmac-nonum-p*)))
+(tex-def-prim "\\nonum" (lambda () (set! *opmac-nonum-p* true) *opmac-nonum-p*))
 
 (tex-def-prim "\\nonumber" do-nonumber)
 
 (tex-def-prim "\\noslatexlikecomments"
  (lambda () (tex-def-0arg "\\TZPslatexcomments" "0")))
 
-(tex-def-prim "\\notoc"
- (lambda () (begin (set! *opmac-notoc-p* true) *opmac-notoc-p*)))
+(tex-def-prim "\\notoc" (lambda () (set! *opmac-notoc-p* true) *opmac-notoc-p*))
 
 (tex-def-prim "\\notimestamp"
  (lambda () (tex-def-0arg "\\TZPcolophondisabletimestamp" "1")))
@@ -21120,8 +21076,8 @@ Try the commands
  (lambda (tex-file)
    (cond ((not (= *write-log-index* 0)) (newline)) (else false))
    (cond
-    ((or (not tex-file) (string=? tex-file ""))
-     (begin (set! tex-file "--missing-arg") tex-file))
+    ((or (not tex-file) (string=? tex-file "")) (set! tex-file "--missing-arg")
+     tex-file)
     (else false))
    (let ((%fluid-var-*afterassignment* false)
          (%fluid-var-*afterbye* null)
@@ -21469,7 +21425,7 @@ Try the commands
           (insert-missing-end))
          (else false))
         (do-bye))
-       (true (tex2page-help tex-file)))
+       (else (tex2page-help tex-file)))
       (output-stats)))))
 
 (define (main . args) (tex2page (and (>= (length args) 1) (list-ref args 0))))

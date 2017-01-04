@@ -1,8 +1,22 @@
-Last change 2016-12-25
+Last change 2017-01-04
+
+2017 Jan 4
+
+Allow \title to take its argument to next \par (like \beginsection). This
+happens only if first character isn't lbrace.
+
+2017 Jan 3
+
+Avoid having to maintain tex2page.rkt in additino to tex2page.lisp by having
+CLiiScm create former from latter.
+
+In tex2page.lisp: ensure all loop returns are in the tail-call position of an
+immediate subform of the loop. This is an easy enough rule to follow and the
+payoff is efficient translation to Scheme.
 
 2016 Dec 25
 
-Added \settabs, \+ (\tabalign) (TeXbk, ch 22). Recognize “n \columns” 
+Added \settabs, \+ (\tabalign) (TeXbk, ch 22). Recognize “n \columns”
 argument for \settabs, but not sample line.
 
 2016 Dec 22
@@ -20,7 +34,7 @@ Simplify installation process and instructions.
 
 2016 Dec 18
 
-Setting \TZPslides now uses Slidy to create a Web presentation. 
+Setting \TZPslides now uses Slidy to create a Web presentation.
 
 2016 Dec 17
 
@@ -43,7 +57,7 @@ altogether. TeX continues to generate subfiles via jobname.eval4tex, and these
 can continue to be processed by loading jobname.eval4tex in Scheme or Common
 Lisp.
 
-As a convenience, have TeX2page process jobname.eval4tex if it finds it. 
+As a convenience, have TeX2page process jobname.eval4tex if it finds it.
 
 This should make the confusing extra machinery of \htmlonly (on top of things
 like \ifx\shipout) obsolete. \htmlonly was really only being used to avoid
@@ -91,7 +105,7 @@ manmac-like.)
 
 2016 Dec 5
 
-\inputcss sheets should be linked before \cssblock's so latter can 
+\inputcss sheets should be linked before \cssblock's so latter can
 refer to any fonts loaded by the former.
 
 Special-case \item(...) without losing plain's version.

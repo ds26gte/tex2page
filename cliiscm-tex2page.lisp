@@ -1,4 +1,4 @@
-;last modified 2017-01-03
+;last modified 2017-01-04
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -m -- \"$@\"
@@ -128,7 +128,6 @@
   (gethash table-get)
   (make-hash-table make-table)
   (maphash table-for-each)
-  (symbol-function eval)
   (with-output-to-string cl-with-output-to-string)
 
   )

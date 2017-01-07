@@ -29,7 +29,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170104") ;last change
+(defparameter *tex2page-version* "20170107") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -435,7 +435,7 @@
                                    (t (return ll)))))))))
         (unless (null ll)
           (let* ((border "__________________________...")
-                 (only-1-p (= (length ll) 1))
+                 (only-1-p (= (list-length ll) 1))
                  (nf (caar ll))
                  (ll (nreverse ll))
                  (n1 (caar ll)))
@@ -2262,7 +2262,7 @@
             '("*" "&#x2020;" "&#x2021;" "&#xa7;" "&#xb6;"
               "&#x2225;" ; ||
               "*" "&#x2020;&#x2020;" "&#x2021;&#x2021;")
-            symlist-len (length symlist)))
+            symlist-len (list-length symlist)))
     (elt symlist (mod (1- n) symlist-len))))
 
 (defun do-plain-footnote ()
@@ -2319,7 +2319,7 @@
        (setq *html* old-html)))))
 
 (defun output-footnotes ()
-  (let ((n (length *footnote-list*)))
+  (let ((n (list-length *footnote-list*)))
     (unless (= n 0)
       (emit "<div class=footnoterule><hr></div>")
       (do-para)
@@ -3090,7 +3090,7 @@
   (unless (null *unresolved-xrefs*)
     (write-log :separation-newline)
     (write-log "Unresolved cross-reference")
-    (when (> (length *unresolved-xrefs*) 1) (write-log "s"))
+    (when (> (list-length *unresolved-xrefs*) 1) (write-log "s"))
     (write-log ": ")
     (setq *unresolved-xrefs* (nreverse *unresolved-xrefs*))
     (write-log (car *unresolved-xrefs*))
@@ -3483,7 +3483,7 @@
          (lhs-list (mapcar #'escape-opmac-index-entry (string=split lhs #\/)))
          (rhs-list (mapcar #'escape-opmac-index-entry (string=split rhs #\/)))
          (sub ""))
-    (unless (= (length lhs-list) (length rhs-list))
+    (unless (= (list-length lhs-list) (list-length rhs-list))
       (terror 'do-opmac-iis "Malformed \\iis."))
     (loop
       (when (null lhs-list) (return t))
@@ -4141,12 +4141,12 @@
   (check-tex2page-lisp)
   (note-down-tex2page-flags)
   (unless (null *tex-if-stack*)
-    (let ((n (length *tex-if-stack*)))
+    (let ((n (list-length *tex-if-stack*)))
       (trace-if t "(\\end occurred when " n " \\if"
                 (if (> n 1) "s were" " was") " incomplete)")))
   (unless (null *tex-env*)
     (trace-if t "\\end occurred inside a group at level "
-              (length *tex-env*)))
+              (list-length *tex-env*)))
   (perform-postludes)
   (unless (or (>= *last-page-number* 0) (= *html-page-count* 0))
     (flag-missing-piece :last-page))
@@ -5734,7 +5734,7 @@
 ;(trace do-futurelet-aux)
 
 (defun set-start-time ()
-  (multiple-value-bind (s m h d mo y &rest ign)
+  (multiple-value-bind (s m h d mo y)
       (decode-universal-time (get-universal-time))
       ;TeX uses local time zone so we don't worry about reporting what it is
     (declare (ignore s ign))
@@ -6350,7 +6350,7 @@
 
 (defun read-till-next-sharp (k argpat)
   ;simplify simplify
-  (let ((n (length argpat)) (ss '()) i s c (outer-loop-done nil))
+  (let ((n (list-length argpat)) (ss '()) i s c (outer-loop-done nil))
     (loop
       (when outer-loop-done
         (return (values i (concatenate 'string (nreverse ss)))))
@@ -6399,7 +6399,7 @@
 
 (defun read-macro-args (argpat k r)
   ;(format t "argpat = ~s~%" argpat)
-  (let ((n (length argpat)))
+  (let ((n (list-length argpat)))
     (nreverse
      (let ((k k) (r r))
        (loop
@@ -6498,12 +6498,12 @@
                               (let ((c (char rhs j)))
                                 (cond ((alpha-char-p c)
                                        (incf j) (push c s))
-                                      ((and (char= c #\#) (> (length s) 1))
+                                      ((and (char= c #\#) (> (list-length s) 1))
                                        (return
                                         (append
                                          (nreverse s)
                                          (cons #\ (aux j)))))
-                                      ((= (length s) 1)
+                                      ((= (list-length s) 1)
                                        (return
                                         (append
                                          (nreverse
@@ -6519,7 +6519,7 @@
                               (cond ((char= n #\#)
                                      (cons #\# (aux (+ k 2))))
                                     ((and (digit-char-p n)
-                                          (<= (digit-to-int n) (length args)))
+                                          (<= (digit-to-int n) (list-length args)))
                                      (append
                                       (concatenate 'list
                                                    (elt args

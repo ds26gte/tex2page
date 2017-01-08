@@ -1,4 +1,4 @@
-; last change: 2017-01-03
+; last change: 2017-01-07
 
 (scmxlate-eval
  (define *chez-name*
@@ -44,6 +44,7 @@
   (eof #!eof)
   (error petite-error)
   (get-char t2p-get-char)
+  (substring subseq)
   )
 
 ;(define get-arg1

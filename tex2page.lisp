@@ -29,7 +29,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170107") ;last change
+(defparameter *tex2page-version* "20170108") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -352,7 +352,7 @@
 
 (defun file-stem-name (f)
   (let ((slash (position #\/ f :test #'char= :from-end t)))
-    (when slash (setq f (subseq f (+ slash 1) (length f))))
+    (when slash (setq f (subseq f (+ slash 1))))
     (let ((dot (position #\. f :test #'char= :from-end t)))
       (if dot (subseq f 0 dot) f))))
 
@@ -360,7 +360,7 @@
   (let ((slash (position #\/ f :test #'char= :from-end t))
         (dot (position #\. f :test #'char= :from-end t)))
     (if (and dot (not (= dot 0)) (or (not slash) (< (+ slash 1) dot)))
-        (subseq f dot (length f)) nil)))
+        (subseq f dot) nil)))
 
 (defun ensure-file-deleted (f) (when (probe-file f) (delete-file f)))
 
@@ -639,7 +639,7 @@
   (or (char= c #\space) (char= c #\tab)
       (not (graphic-char-p c))))
 
-(defun ignorespaces ()
+(defun ignorespaces (&optional stop-at-first-newline-p)
   (unless (and (find-chardef #\space) (not *ignore-active-space-p*))
     (let ((newline-active-p (find-chardef #\newline))
           (newline-already-read-p nil))
@@ -650,12 +650,15 @@
                      (get-char)
                      (when *reading-control-sequence-p* (return)))
                     ((char= c #\newline)
-                    (cond (newline-active-p (return))
-                          (newline-already-read-p
-                            (toss-back-char #\newline)
-                            (return))
-                          (t (get-actual-char)
-                             (setq newline-already-read-p t))))
+                     (cond (newline-active-p (return))
+                           (newline-already-read-p
+                             (toss-back-char #\newline)
+                             (return))
+                           (t (get-actual-char)
+                              ;(format t "swallowing a newline~%")
+                              (setq newline-already-read-p t)
+                              (when stop-at-first-newline-p
+                                (return)))))
                     ((char-whitespace-p c)
                      (get-actual-char))
                     (t (return))))))))
@@ -715,9 +718,12 @@
                                             *not-processing-p*
                                             (eq *tex-format* :texinfo))
                                   (let ((*reading-control-sequence-p* t))
-                                    (ignorespaces)))
+                                    ;(format t "ignoring spaces~%")
+                                    (ignorespaces t)))
                                 (return s)))))))))
             (t (concatenate 'string (list #\\ c)))))))
+
+;(trace get-ctl-seq)
 
 (defun ctl-seq-p (z)
   (char= (char z 0) #\\))
@@ -1747,14 +1753,14 @@
         ;optional [...] after section commands?
         (t (let ((n (length s)))
              (cond ((< n 8) nil)
-                   ((and (>= n 10) (string= (subseq s (- n 9) n) "paragraph"))
+                   ((and (>= n 10) (string= (subseq s (- n 9)) "paragraph"))
                     (let ((n-9 (- n 9)) (i 1) (i+3 4) (k 4))
                       (loop
                         (cond ((> i+3 n-9) (return k))
                               ((string= (subseq s i i+3) "sub")
                                (setq i i+3 i+3 (+ i+3 3) k (1+ k)))
                               (t (return nil))))))
-                   ((string= (subseq s (- n 7) n) "section")
+                   ((string= (subseq s (- n 7)) "section")
                     (let ((n-7 (- n 7)) (i 1) (i+3 4) (k 1))
                       (loop
                         (cond ((> i+3 n-7) (return k))
@@ -3157,7 +3163,7 @@
 (defun doc-internal-url (url)
   (let ((n (length url)))
     (cond ((and (> n 0) (char= (char url 0) #\#))
-           (let* ((label (subseq url 1 n))
+           (let* ((label (subseq url 1))
                   (label-ref (label-bound-p label)))
              (if label-ref
                  (if (label*-src label-ref) nil
@@ -3168,7 +3174,7 @@
 (defun fully-qualify-url (url)
   (let ((n (length url)))
     (cond ((and (> n 0) (char= (char url 0) #\#))
-           (let* ((label (subseq url 1 n))
+           (let* ((label (subseq url 1))
                   (label-ref (label-bound-p label)))
              (if label-ref
                  (concatenate 'string
@@ -5692,6 +5698,8 @@
                                  (tdef*-argpat y)
                                  (tdef*-expansion y)))))))
 
+;(trace resolve-defs)
+
 (defun do-expandafter ()
   (let* ((first (get-raw-token/is))
          (second (get-raw-token/is)))
@@ -5737,7 +5745,7 @@
   (multiple-value-bind (s m h d mo y)
       (decode-universal-time (get-universal-time))
       ;TeX uses local time zone so we don't worry about reporting what it is
-    (declare (ignore s ign))
+    (declare (ignore s))
     (tex-def-count "\\time" (+ (* 60 h) m) t)
     (tex-def-count "\\day" d t)
     (tex-def-count "\\month" mo t)
@@ -6403,7 +6411,9 @@
     (nreverse
      (let ((k k) (r r))
        (loop
-         (when (>= k n) (return r))
+         (when (>= k n) 
+           (when (= k 0) (ignorespaces t))
+           (return r))
          (let ((c (elt argpat k)))
            ;eql rather than char= because \par may show up as :par?
            (cond ((char= c #\#)
@@ -6434,6 +6444,8 @@
                             (t (terror 'read-macro-args
                                        "Use of macro doesn't match its definition.")))
                       (incf k))))))))))
+
+;(trace read-macro-args)
 
 (defun expand-edef-macro (rhs)
   (let* ((*not-processing-p* t)
@@ -6528,6 +6540,8 @@
                                     (t (cons #\# (aux (1+ k))))))))
                          (t (cons c (aux (1+ k)))))))))
        (aux 0)))))
+
+;(trace expand-tex-macro)
 
 (defun do-verbatimescapechar ()
   (ignorespaces)
@@ -6862,7 +6876,7 @@
     (do-tex-ctl-seq-completely "\\tthook")
     (setq *esc-chars* (delete *esc-char-std* *esc-chars* :test #'char=))
     (emit "<pre class=verbatim>")
-    (munched-a-newline-p)
+    ;(munched-a-newline-p)
     (let ((*ligatures-p* nil))
       (loop
         (let ((c (snoop-actual-char)))
@@ -7194,7 +7208,7 @@
         (in-table-p (and (not (null *tabular-stack*))
                          (member (car *tabular-stack*) '(:block :figure :table)))))
     (cond (display-p (do-end-para)) (in-table-p (emit "</td><td>")))
-    (munched-a-newline-p)
+    ;(munched-a-newline-p)
     (bgroup)
     (when (string= env "tt")
       (do-tex-ctl-seq-completely "\\tthook")
@@ -7629,6 +7643,8 @@
         ((find-toks z) (do-toks= z nil))
         ((find-dimen z) (do-dimen= z nil))
         (t (do-tex-prim z))))
+
+;(trace do-tex-ctl-seq)
 
 (defun generate-html ()
   (let ((*outer-p* t))

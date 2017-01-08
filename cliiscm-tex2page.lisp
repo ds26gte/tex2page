@@ -1,4 +1,4 @@
-;last modified 2017-01-04
+;last modified 2017-01-07
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -m -- \"$@\"
@@ -18,10 +18,6 @@
   tex2page
 
   )
-
-(defmacro subseq (s i . z)
-  (if (null? z) `(substring ,s ,i)
-      `(substring ,s ,i ,(car z))))
 
 (define *operating-system*
   ;change if you need a better OS identifier

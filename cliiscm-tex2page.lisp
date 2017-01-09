@@ -1,4 +1,4 @@
-;last modified 2017-01-07
+;last modified 2017-01-09
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -m -- \"$@\"
@@ -10,9 +10,7 @@
 
 (cliiscm-uncall
 
-  declaim
   defpackage
-  eval-when
   in-package
   sb-alien:define-alien-routine
   tex2page

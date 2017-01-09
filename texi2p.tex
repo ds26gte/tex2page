@@ -1,7 +1,7 @@
 % texi2p.tex
 % Dorai Sitaram
 
-% last changed 2016-12-06
+% last changed 2017-01-13
 
 % This macro file is loaded by TeX2page when processing Texinfo files.  If
 % the input document, say jobname.texi, needs additional TeX2page-specific
@@ -14,13 +14,20 @@
 % \input texi2p, jobname.texi will implicitly \input texi2p where it
 % tries to \input texinfo.
 
-\ifx\ifinfo\undefined
-\let\endloadingtexinfotiipnow\relax
+\ifx\ifinfo\UnDeFiNeD
+\let\endloadingtexiiip\relax
 \else
-\let\endloadingtexinfotiipnow\endinput
+\let\endloadingtexiiip\endinput
 \message{texi2p already loaded}
 \fi
-\endloadingtexinfotiipnow
+\endloadingtexiiip
+
+\evalq{
+(setq *tex-format* :texinfo)
+(activate-cdef #\newline)
+(tex-def-char #\newline '() "\\TIIPnewline" nil)
+(set-catcode #\@ 0)
+}
 
 \let\comment\TIIPcomment
 \let\c\comment
@@ -45,7 +52,6 @@
 
 %\let\contents\tableofcontents
 
-
 \def\contents{\evalh{
 (toss-back-string "\\tableofcontents")
 (toss-back-string
@@ -62,37 +68,37 @@
 %
 %\let\endtitlepage\endgroup
 
-
 \let\titlepage\relax
 \let\endtitlepage\relax
 
 \def\titlepage{\TIIPendgraf\begingroup\large}
 \let\endtitlepage\endgroup
 
-\evalh{(define *texinfo-values* '())}
+\evalq{(defvar *texinfo-values* '())}
 
-\def\setQii{%
-\evalh{
+\def\setQii{\evalq{
 (let* ((var (get-peeled-group))
        (val (get-peeled-group)))
-  (set! *texinfo-values* 
-    (cons (cons var val) *texinfo-values*)))
+  ;(format t "var= ~s; val= ~s~%" var val)
+  (push (cons var val) *texinfo-values*)
+  ;(format t "tvv= ~s~%" *texinfo-values*)
+  )
 }}
 
 \def\set#1 #2
 {\setQii{#1}{#2}}
 
-\def\value{%
-\evalh{
+\def\value{\evalh{
 (let* ((var (get-peeled-group))
-       (c (assoc var *texinfo-values*)))
-  (when c
-  (tex2page-string (cdr c))))
+       (c (assoc var *texinfo-values* :test #'string=)))
+  ;(format t "var= ~s; c= ~s~%" var c)
+  (when c (tex2page-string (cdr c))))
 }}
 
 \let\NONTEXINFOend\end
 
-%\def\end#1 {\csname end#1\endcsname}
+\def\end #1
+{\message{doing end #1}\csname end#1\endcsname}
 
 \let\group\begingroup
 
@@ -102,25 +108,27 @@
 %{\NONTEXINFOnode{#1}}
 
 \def\ignorespacestillnewlineinclusive{\evalh{
-(let loop ()
-  (let ((c (snoop-actual-char)))
-    (unless (eof-object? c)
-      (when (char-whitespace? c)
-        (get-actual-char)
-        (unless (char=? c #\newline) (loop))))))
+(let (c)
+  (loop
+    (setq c (snoop-actual-char))
+    (when (eq c :eof-object) (return))
+    (unless (char-whitespace-p c) (return))
+    (get-actual-char)
+    (when (char= c #\newline) (return))))
 }}
 
 \def\node{\evalh{
-(let loop ((r '()))
-  (let ((c (snoop-actual-char)))
-    (cond ((or (char=? c #\,)
-               (char=? c #\return)
-               (char=? c #\newline))
-           (if (char=? c #\,) (eat-till-eol))
-           (set! *recent-node-name*
-             ;htmlize-label?
-             (list->string (reverse r))))
-          (else (get-actual-char) (loop (cons c r))))))
+(let (c (r '()))
+  (loop
+    (setq c (snoop-actual-char))
+    (case c
+      ((#\, #\return #\newline)
+       (when (char= c #\,) (eat-till-eol))
+       (setq *recent-node-name*
+         (concatenate 'string (reverse r)))
+       (return))
+      (t (get-actual-char)
+         (push c r)))))
 }}
 
 \def\anchor#1{\tag{#1}{#1}}
@@ -137,14 +145,23 @@
 \def\ignore{\iffalse}
 \def\endignore{\fi}
 
+\def\ifplaintext{\iffalse}
+\def\endifplaintext{\fi}
+
+\def\ifxml{\iffalse}
+\def\endifxml{\fi}
+
 \def\ifinfo{\iffalse}
 \def\endifinfo{\fi}
+
+\def\ifdocbook{\iffalse}
+\def\endifdocbook{\fi}
 
 \def\ifnottex{\iffalse}
 \def\endifnottex{\fi}
 
-\let\ifhtml\htmlonly
-\let\endifhtml\endhtmlonly
+\def\ifhtml{\iftrue}
+\def\endifhtml{\fi}
 
 \let\html\rawhtml
 \let\endhtml\endrawhtml
@@ -163,8 +180,11 @@
 \let\include\input
 
 %\verbescapechar\\
-\let\code\texttt
-\let\samp\texttt
+
+\let\code\verb
+\let\key\verb
+\let\kbd\verb
+\let\samp\verb
 
 \def\xref{See \S\ref}
 
@@ -191,8 +211,9 @@
 \def\cindex#1
 {\index{#1}}
 
-\def\pindex#1
-{\index{#1@{\tt#1}}}
+\let\pindex\cindex
+%\def\pindex#1
+%{\index{#1@{\tt#1}}}
 
 \let\findex\pindex
 
@@ -200,9 +221,11 @@
 
 \let\vindex\pindex
 
-\let\opindex\index
+%\let\opindex\index
+\let\opindex\pindex
 
-\let\cmindex\index
+%\let\cmindex\index
+\let\cmindex\pindex
 
 \let\footnote\numfootnote
 
@@ -243,6 +266,8 @@
 
 \def\endexample{\egroup\par}
 
+% check above and @smallexample
+
 \let\lisp\example
 \let\endlisp\endexample
 
@@ -254,8 +279,11 @@
 
 \def\endenumerate{\NONTEXINFOendenumerate\egroup}
 
-\def\display#1
-{\par\bgroup\obeywhitespace}
+\def\display{\par\bgroup%
+\def\end#1#2
+{\enddisplay}\obeywhitespace
+}
+
 \def\enddisplay{\egroup\par}
 
 %
@@ -266,7 +294,6 @@
 \let\NONTEXINFOsubsection\subsection
 \let\NONTEXINFOsubsubsection\subsubsection
 \let\NONTEXINFOappendix\appendix
-
 
 \let\page\eject
 
@@ -346,95 +373,15 @@
 
 % is foll right?
 
-\def\iftex{\bgroup
-\def\tex{\fi\iftrue}
-\def\endtex{\fi\iffalse}
-\iffalse}
-\def\endiftex{\fi\egroup}
+%\def\iftex{\bgroup
+%  \def\tex{\fi\iftrue}
+%  \def\endtex{\fi\iffalse}
+%  \iffalse}
+%\def\endiftex{\fi\egroup}
 
-\evalh{
-(set! *tex-format* :texinfo)
-
-(define *texi-file-suffix* "-Z-T-")
-(define *texi-file-count* 0)
-
-(define texi-to-tex
-  (lambda (f)
-    (write-log 'separation-space) (write-log #\{)
-    (write-log f) (write-log 'separation-space) (write-log "->")
-    (write-log 'separation-space)
-    (set! *texi-file-count* (+ *texi-file-count* 1))
-    (let ((fo (string-append *aux-dir/* *jobname* *texi-file-suffix*
-                             (number->string *texi-file-count*) ".tex")))
-      (ensure-file-deleted fo)
-      (write-log fo)
-      ;this makes tex2page not read past newline
-      ;when eating whitespace
-      (call-with-input-file/buffered
-       f
-       (lambda ()
-         (call-with-output-file fo
-           (lambda (o)
-             (fluid-let ((*not-processing-p* #t)
-                         (*esc-chars* (list #\@)))
-               (let loop ()
-                 (let ((c (snoop-actual-char)))
-                   (unless (eof-object? c)
-                     (cond ((char=? c #\@)
-                            (let ((x (get-ctl-seq)))
-                              (display x o)
-                              (cond ((string=? x "\\tex") (dump-till-end-tex o))
-                                    ((string=? x "\\end") (ignorespaces)))
-                              (loop)))
-                           ((ormap (lambda (x) (char=? c x))
-                                   '(#\\ #\% #\$ #\#))
-                            (get-actual-char)
-                            (write-char #\\ o) (write-char c o) (loop))
-                           (else (get-actual-char)
-                                 (write-char c o) (loop)))))))))))
-      (write-log #\})
-      (write-log 'separation-space)
-      fo)))
-
-(define dump-till-end-tex
-  (lambda (o)
-    (let loop ()
-      (let ((c (snoop-actual-char)))
-        (cond ((eof-object? c) (terror 'dump-till-end-tex))
-              ((char=? c #\@)
-               (let ((x (get-ctl-seq)))
-                 (cond ((string=? x "\\end")
-                        (ignorespaces)
-                        (toss-back-string "@end")
-                        (set! x (get-ctl-seq))
-                        (display x o)
-                        (unless (string=? x "\\endtex")
-                          (loop)))
-                       ((string=? x "\\comment")
-                        (write-char #\% o) (newline o)
-                        (eat-till-eol) (loop))
-                       (else (display x o)
-                         (loop)))))
-              (else (get-actual-char)
-                (write-char c o)
-                (loop)))))))
-
-(set! tex2page-massage-file
-  (lambda (f)
-    (let ((e (file-extension f)))
-      (cond ((and e (member/string-ci=? 
-                     e '(".t2p" ".ind" ".bbl")))
-             (deactivate-cdef #\newline)
-             f)
-            (else (tex-def-char #\newline '() "\\TIIPnewline" #f)
-                  (texi-to-tex f))))))
-
-
-}
+\def\iftex{\iftrue}
+\def\tex{\iftrue}
+\def\endtex{\fi}
+\def\endiftex{\fi}
 
 \let\backslash\\
-
-\def\\input texinfo{%
-%\csname Texinfohook\endcsname
-\global\let\\\backslash}
-

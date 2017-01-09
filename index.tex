@@ -23,7 +23,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2017-01-06} %last change
+\c{2017-01-12} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1740,10 +1740,15 @@ Setting `\TZPrightjustify` has no effect unless `\TZPtexlayout` is
 also set.
 
 \index{TZPtextext@`\TZPtextext`}
-\item(iv) Finally, \TeX\ uses pseudo-ligatures to convert occurrences of \p{`}, `'`, \p{``}, `''`, `--`, and `---`
-in the source to left quote, right quote, left double quote, right double quote, en-dash, and em-dash respectively.
-If you use a Unicode-friendly \TeX\ such as \XeTeX\ with a Unicode font and a text editor that lets you enter these quotes and dashes directly, then you may
-not need the ligatures, and may indeed, want `--` to show up as two hyphens, both in the HTML and the DVI.  To disable the ligatures,
+\item(iv) Finally, \TeX\ uses pseudo-ligatures to convert
+occurrences of \p{`}, `'`, \p{``}, \p{''}, `--`, and `---`
+in the source to left quote, right quote, left double quote,
+right double quote, en-dash, and em-dash respectively.
+If you use a Unicode-friendly \TeX\ such as \XeTeX\ with a Unicode font
+and a text editor that lets you enter these quotes and dashes directly,
+then you may not need the ligatures, and may indeed, want `--` to
+show up as two hyphens, both in the HTML and the DVI.  To
+disable the ligatures,
 
 \begintt
 \let\TZPtextext=0
@@ -2258,8 +2263,8 @@ of your verbatim text by defining a style for
 .verbatim        {color: rgb(0,49,83)}
 \endtt
 %
-sets {\color[RGB]{0,49,83} \p{all verbatim text
-in Prussian blue}}.
+sets {\color[RGB]{0,49,83} `all verbatim text
+in Prussian blue`}.
 
 \beginsection Syntax-highlighting of program code
 

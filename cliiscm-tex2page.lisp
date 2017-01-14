@@ -1,4 +1,4 @@
-;last modified 2017-01-09
+;last modified 2017-01-14
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -m -- \"$@\"
@@ -122,6 +122,7 @@
   (gethash table-get)
   (make-hash-table make-table)
   (maphash table-for-each)
+  (remhash table-rem)
   (with-output-to-string cl-with-output-to-string)
 
   )
@@ -231,6 +232,9 @@
          => (lambda (c) (vector-ref (cdr c) 0)))
         ((pair? d) (car d))
         (else false)))
+
+(define (table-rem k tbl)
+  (table-put! k tbl false))
 
 (define (table-put! k tbl v)
   (let ((al (table-alist tbl)))

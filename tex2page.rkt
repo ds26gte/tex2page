@@ -178,6 +178,8 @@
    (lambda (c) (vector-ref (cdr c) 0)))
   ((pair? d) (car d)) (else false)))
 
+(define (table-rem k tbl) (table-put! k tbl false))
+
 (define (table-put! k tbl v)
  (let ((al (table-alist tbl)))
    (let ((c (lassoc k al (table-test tbl))))
@@ -2929,22 +2931,24 @@
  (set!tdef*-prim d false) (tdef*-prim d) (set!tdef*-defer d false)
  (tdef*-defer d))
 
+(define (ensure-def name frame)
+ (let ((frame-defs (texframe*-definitions frame)))
+   (or (table-get name frame-defs)
+       (let ((d (make-tdef*)))
+         (table-put! name frame-defs d)
+         (table-get name frame-defs)
+         d))))
+
 (define (tex-def name argpat expansion optarg thunk prim defer frame)
  (cond ((not frame) (set! frame (top-texframe)) frame) (else false))
- (let ((frame-defs (texframe*-definitions frame)))
-   (let ((d
-          (or (table-get name frame-defs)
-              (let ((d (make-tdef*)))
-                (table-put! name frame-defs d)
-                (table-get name frame-defs)
-                d))))
-     (set!tdef*-argpat d argpat)
-     (set!tdef*-expansion d expansion)
-     (set!tdef*-optarg d optarg)
-     (set!tdef*-thunk d thunk)
-     (set!tdef*-prim d prim)
-     (set!tdef*-defer d defer)
-     (tdef*-defer d)))
+ (let ((d (ensure-def name frame)))
+   (set!tdef*-argpat d argpat)
+   (set!tdef*-expansion d expansion)
+   (set!tdef*-optarg d optarg)
+   (set!tdef*-thunk d thunk)
+   (set!tdef*-prim d prim)
+   (set!tdef*-defer d defer)
+   (tdef*-defer d))
  (perform-afterassignment))
 
 (define (tex-def-prim prim thunk)
@@ -3008,37 +3012,38 @@
 
 (define (tex-def-count name num globalp)
  (let ((frame
-        (if globalp
-            *global-texframe*
-            (top-texframe))))
+        (cond
+         (globalp
+          (for-each (lambda (fr) (table-rem name (texframe*-counts fr)))
+           *tex-env*)
+          *global-texframe*)
+         (else (top-texframe)))))
    (table-put! name (texframe*-counts frame) num)
    (table-get name (texframe*-counts frame)))
  (perform-afterassignment))
 
 (define (tex-def-toks name tokens globalp)
  (let ((frame
-        (if globalp
-            *global-texframe*
-            (top-texframe))))
+        (cond
+         (globalp
+          (for-each (lambda (fr) (table-rem name (texframe*-toks fr)))
+           *tex-env*)
+          *global-texframe*)
+         (else (top-texframe)))))
    (table-put! name (texframe*-toks frame) tokens)
    (table-get name (texframe*-toks frame))))
 
 (define (tex-def-dimen name len globalp)
  (let ((frame
-        (if globalp
-            *global-texframe*
-            (top-texframe))))
+        (cond
+         (globalp
+          (for-each (lambda (fr) (table-rem name (texframe*-dimens fr)))
+           *tex-env*)
+          *global-texframe*)
+         (else (top-texframe)))))
    (table-put! name (texframe*-dimens frame) len)
    (table-get name (texframe*-dimens frame))
    (perform-afterassignment)))
-
-(define (tex-def-char c argpat expansion frame)
- (cond ((not frame) (set! frame (top-texframe)) frame) (else false))
- (let ((d (ensure-cdef c frame)))
-   (set!cdef*-argpat d argpat)
-   (set!cdef*-expansion d expansion)
-   (cdef*-expansion d))
- (perform-afterassignment))
 
 (define (ensure-cdef c f)
  (let ((f-chardefs (texframe*-chardefinitions f)))
@@ -3047,6 +3052,14 @@
          (table-put! c f-chardefs d)
          (table-get c f-chardefs)
          d))))
+
+(define (tex-def-char c argpat expansion frame)
+ (cond ((not frame) (set! frame (top-texframe)) frame) (else false))
+ (let ((d (ensure-cdef c frame)))
+   (set!cdef*-argpat d argpat)
+   (set!cdef*-expansion d expansion)
+   (cdef*-expansion d))
+ (perform-afterassignment))
 
 (define (find-chardef c)
  (let ((x
@@ -10976,11 +10989,18 @@
   ((not (inside-false-world-p)) (ignorespaces)
    (let ((lhs (get-ctl-seq)))
      (let ((rhs (begin (get-equal-sign) (get-raw-token/is))))
-       (let ((frame (and globalp *global-texframe*)))
+       (let ((frame
+              (cond
+               (globalp
+                (for-each
+                 (lambda (fr) (table-rem lhs (texframe*-definitions fr)))
+                 *tex-env*)
+                *global-texframe*)
+               (else false))))
          (tex-let-general lhs rhs frame)))))
   (else false)))
 
-(define (do-def globalp e-p)
+(define (do-def globalp expandp)
  (cond
   ((not (inside-false-world-p))
    (let ((lhs (get-raw-token/is)))
@@ -10990,8 +11010,19 @@
       (else false))
      (let ((argpat (get-def-arguments lhs)))
        (let ((rhs (ungroup (get-group))))
-         (let ((frame (and globalp *global-texframe*)))
-           (cond (e-p (set! rhs (expand-edef-macro rhs)) rhs) (else false))
+         (cond (expandp (set! rhs (expand-edef-macro rhs)) rhs) (else false))
+         (let ((frame
+                (cond
+                 (globalp
+                  (for-each
+                   (lambda (fr)
+                     (table-rem lhs
+                      (if (ctl-seq-p lhs)
+                          (texframe*-definitions fr)
+                          (texframe*-chardefinitions fr))))
+                   *tex-env*)
+                  *global-texframe*)
+                 (else false))))
            (cond
             ((ctl-seq-p lhs)
              (tex-def lhs argpat rhs false false false false frame))

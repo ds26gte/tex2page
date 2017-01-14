@@ -1351,13 +1351,16 @@
   (setf (tdef*-prim d) nil)
   (setf (tdef*-defer d) nil))
 
+(defun ensure-def (name frame)
+  (let ((frame-defs (texframe*-definitions frame)))
+    (or (gethash name frame-defs)
+        (let ((d (make-tdef*)))
+          (setf (gethash name frame-defs) d)
+          d))))
+
 (defun tex-def (name argpat expansion optarg thunk prim defer frame)
   (unless frame (setq frame (top-texframe)))
-  (let* ((frame-defs (texframe*-definitions frame))
-         (d (or (gethash name frame-defs)
-                (let ((d (make-tdef*)))
-                  (setf (gethash name frame-defs) d)
-                  d))))
+  (let ((d (ensure-def name frame)))
     (setf (tdef*-argpat d) argpat
           (tdef*-expansion d) expansion
           (tdef*-optarg d) optarg
@@ -1438,26 +1441,34 @@
 
 (defun tex-def-count (name num globalp)
   (declare (string name) (number num))
-  (let ((frame (if globalp *global-texframe* (top-texframe))))
+  (let ((frame (cond (globalp
+                       (mapc (lambda (fr)
+                               (remhash name (texframe*-counts fr)))
+                             *tex-env*)
+                       *global-texframe*)
+                     (t (top-texframe)))))
     (setf (gethash name (texframe*-counts frame)) num))
   (perform-afterassignment))
 
 (defun tex-def-toks (name tokens globalp)
   (declare (string name tokens))
-  (let ((frame (if globalp *global-texframe* (top-texframe))))
+  (let ((frame (cond (globalp
+                       (mapc (lambda (fr)
+                               (remhash name (texframe*-toks fr)))
+                             *tex-env*)
+                       *global-texframe*)
+                     (t (top-texframe)))))
     (setf (gethash name (texframe*-toks frame)) tokens)))
 
 (defun tex-def-dimen (name len globalp)
-  (let ((frame (if globalp *global-texframe* (top-texframe))))
+  (let ((frame (cond (globalp
+                       (mapc (lambda (fr)
+                               (remhash name (texframe*-dimens fr)))
+                             *tex-env*)
+                       *global-texframe*)
+                     (t (top-texframe)))))
     (setf (gethash name (texframe*-dimens frame)) len)
     (perform-afterassignment)))
-
-(defun tex-def-char (c argpat expansion frame)
-  (unless frame (setq frame (top-texframe)))
-  (let ((d (ensure-cdef c frame)))
-    (setf (cdef*-argpat d) argpat
-          (cdef*-expansion d) expansion))
-  (perform-afterassignment))
 
 (defun ensure-cdef (c f)
   (let ((f-chardefs (texframe*-chardefinitions f)))
@@ -1465,6 +1476,13 @@
         (let ((d (make-cdef*)))
           (setf (gethash c f-chardefs) d)
           d))))
+
+(defun tex-def-char (c argpat expansion frame)
+  (unless frame (setq frame (top-texframe)))
+  (let ((d (ensure-cdef c frame)))
+    (setf (cdef*-argpat d) argpat
+          (cdef*-expansion d) expansion))
+  (perform-afterassignment))
 
 (defun find-chardef (c)
   (let ((x (or (some (lambda (f) (gethash c (texframe*-chardefinitions f)))
@@ -5608,22 +5626,35 @@
     (ignorespaces)
     (let* ((lhs (get-ctl-seq))
            (rhs (progn (get-equal-sign) (get-raw-token/is)))
-           (frame (and globalp *global-texframe*)))
+           (frame (cond (globalp
+                          (mapc (lambda (fr)
+                                  (remhash lhs (texframe*-definitions fr)))
+                                *tex-env*)
+                          *global-texframe*)
+                        (t nil))))
       (tex-let-general lhs rhs frame))))
 
-(defun do-def (globalp e-p)
+(defun do-def (globalp expandp)
   (unless (inside-false-world-p)
     (let ((lhs (get-raw-token/is)))
       ;(format t "lhs= ~s~%" lhs)
       (when (and (ctl-seq-p lhs) (string= lhs "\\TIIPcsname"))
         (setq lhs (get-peeled-group)))
       (let* ((argpat (get-def-arguments lhs))
-             (rhs (ungroup (get-group)))
-             (frame (and globalp *global-texframe*)))
+             (rhs (ungroup (get-group))))
         ;(format t "argpat= ~s; rhs= ~s~%" argpat rhs)
-        (when e-p (setq rhs (expand-edef-macro rhs)))
-        (cond ((ctl-seq-p lhs) (tex-def lhs argpat rhs nil nil nil nil frame))
-              (t (tex-def-char (char lhs 0) argpat rhs frame)))))))
+        (when expandp (setq rhs (expand-edef-macro rhs)))
+        (let ((frame (cond (globalp
+                             (mapc (lambda (fr)
+                                     (remhash lhs
+                                              (if (ctl-seq-p lhs)
+                                                  (texframe*-definitions fr)
+                                                  (texframe*-chardefinitions fr))))
+                                   *tex-env*)
+                             *global-texframe*)
+                           (t nil))))
+          (cond ((ctl-seq-p lhs) (tex-def lhs argpat rhs nil nil nil nil frame))
+                (t (tex-def-char (char lhs 0) argpat rhs frame))))))))
 
 ;(trace do-def tex-def)
 

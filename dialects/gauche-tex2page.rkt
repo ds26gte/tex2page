@@ -1,4 +1,4 @@
-; last change: 2017-01-03
+; last change: 2017-01-15
 
 (scmxlate-cond
   ((eqv? *operating-system* 'unix)
@@ -21,6 +21,7 @@
   (load disable-load-for-tex2page)
   (remove delete)
   (seconds->date sys-localtime)
+  (substring subseq)
   )
 
 (scmxlate-rename-define
@@ -126,6 +127,10 @@
 
 (define (string-upcase s)
   (list->string (map char-upcase (string->list s))))
+
+(define (subseq s i . z)
+  (let ((f (if (pair? z) (car z) (string-length s))))
+    (substring s i f)))
 
 (define andmap
   (lambda (f s)

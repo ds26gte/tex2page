@@ -1,4 +1,4 @@
-;last modified 2017-01-14
+;last modified 2017-01-15
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -m -- \"$@\"
@@ -132,12 +132,14 @@
   (bport*-buffer set!bport*-buffer)
   (cdef*-active set!cdef*-active)
   (cdef*-argpat set!cdef*-argpat)
+  (cdef*-catcodes set!cdef*-catcodes)
   (cdef*-expansion set!cdef*-expansion)
   (cdef*-optarg set!cdef*-optarg)
   (counter*-value set!counter*-value)
   (table-get table-put!)
   (tdef*-active set!tdef*-active)
   (tdef*-argpat set!tdef*-argpat)
+  (tdef*-catcodes set!tdef*-catcodes)
   (tdef*-defer set!tdef*-defer)
   (tdef*-expansion set!tdef*-expansion)
   (tdef*-optarg set!tdef*-optarg)
@@ -271,6 +273,16 @@
     (if (null? al) false
         (let ((c (car al)))
           (if (equ? (car c) k) c
+              (loop (cdr al)))))))
+
+(defmacro rassoc (k al . z)
+  `(scheme-rassoc ,k ,al ,(if (null? z) 'eqv? (cadr z))))
+
+(define (scheme-rassoc k al equ)
+  (let loop ((al al))
+    (if (null? al) false
+        (let ((c (car al)))
+          (if (equ (cdr c) k) c
               (loop (cdr al)))))))
 
 (define (write-to-string n . z)

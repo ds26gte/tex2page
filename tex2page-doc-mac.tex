@@ -1,4 +1,4 @@
-% last change: 2017-01-05
+% last change: 2017-01-16
 % Dorai Sitaram
 %
 %
@@ -61,6 +61,8 @@
 \def\proto#1#2#3{\noindent
 \hbox{{\tt(#1}\spaceifnotempty{#2}{\it#2}{\tt)}%
 \qquad ;#3}\par}
+
+% We want images to be a bit bigger
 
 \ifx\shipout\UnDeFiNeD
 \imgpreamble
@@ -169,18 +171,18 @@ $\Vert$\or
 
 \slatexlikecomments
 
-% We want images to be a bit bigger
-
 \ifx\TZPcommonlisp 1
 \evalq{
-(defun all-blanks? (s)
+(defun all-blanks-p (s)
   (every (lambda (c) (or (char= c #\space) (char= c #\tab)
                           (not (graphic-char-p c))))
         s))
 }
 \else
 \evalq{
-(define all-blanks?
+(define princ display)
+
+(define all-blanks-p
   (lambda (s)
     (let loop ((L (string->list s)))
       (if (null? L) #t
@@ -216,13 +218,13 @@ from TeX documents">
 \ifx\TZPcommonlisp 1
 \def\spaceifnotempty{\eval{
 (let ((x (ungroup (get-token))))
-  (unless (all-blanks? x)
+  (unless (all-blanks-p x)
     (princ (code-char 92))
     (princ "space")))}}
 \else
 \def\spaceifnotempty{\eval{
 (let ((x (ungroup (get-token))))
-  (if (not (all-blanks? x))
+  (if (not (all-blanks-p x))
       (begin (display (integer->char 92))
              (display "space"))
       0))

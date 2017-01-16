@@ -314,7 +314,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170110.
 
 
-(define *tex2page-version* "20170115")
+(define *tex2page-version* "20170116")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -395,6 +395,8 @@
 (define *bib-aux-file-suffix* "-Z-B")
 
 (define *css-file-suffix* "-Z-S.css")
+
+(define *eval4tex-file-suffix* "-Z-E.lisp")
 
 (define *html-node-prefix* "TAG:__tex2page_")
 
@@ -14355,7 +14357,7 @@
      (write-log ':separation-newline))
     (else false))
    (let* ((%f
-           (let ((%type 'string) (%ee (list *jobname* ".eval4tex")))
+           (let ((%type 'string) (%ee (list *jobname* *eval4tex-file-suffix*)))
              (let ((%res
                     (if (eq? %type 'string)
                         ""

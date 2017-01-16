@@ -18,16 +18,14 @@
 
 \c{\urlh{http://ds26gte.github.io}{Dorai Sitaram}}
 %
-\ifx\inpltdist\Undefined
 \ifx\shipout\UnDeFiNeD
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2017-01-12} %last change
+\c{2017-01-16} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
-\fi
 \fi
 %
 
@@ -68,7 +66,7 @@ equivalent HTML markup.
 file syntax, calling conventions, and  error-recovery
 mechanisms as \TeX.  Thus, \TeX2page demands no additional
 expertise of a user already familiar with \TeX.
-\TeX2page runs on modern Schemes and Common Lisp.
+\TeX2page runs on Common Lisp and modern Schemes.
 %However, for the user who wants more, \TeX2page
 %provides Scheme as an extension language.
 
@@ -96,7 +94,8 @@ markup enables the format converted to to also benefit
 from \TeX’s extensibility.  For the cases where
 \TeX2page’s implementation of the \TeX\ macro system is
 not manipulable enough, the document writer can use the
-\TeX2page {\em extension language}, which is full Scheme or Common Lisp
+\TeX2page {\em extension language}, which is full Common Lisp or
+Scheme
 augmented with all the \TeX2page procedure definitions.
 
 The rest of this manual is organized as follows:
@@ -111,10 +110,14 @@ The rest of this manual is organized as follows:
 \xrdef{usage}
 \index{running \TeX2page!from system command-line}
 %
-\TeX2page is invoked in much the same way as plain \TeX\
-or \LaTeX.\f{Hereafter, we will use {\em \TeX} to mean
-any format of \TeX, and {\em plain \TeX} when we
-specifically mean the “plain” format.}
+\TeX2page is invoked in much the same way as \TeX.\f{Hereafter,
+we will use “\TeX” to mean
+any format of \TeX, and “plain \TeX” when we
+specifically mean the “plain” format. We will use “Lisp” to refer
+to the implementation language of the \TeX2page script under
+discussion, although this can be either Common Lisp or Scheme,
+with near-identical behavior. For the minor differences, see
+Appendix A.}
 For instance, given a plain-\TeX\ document file
 \p{|meta[wherever-it-is/jobname].|meta[ext]}, which can
 be either a full pathname or a pathname relative to either the
@@ -222,7 +225,7 @@ to the pages as numbered in the printed document.
 
 Thus, from one \TeX\ source file, you can get both a printable `.dvi` and a
 browsable `.html` document, using the same calling
-conventions.\iffalse ifx\inpltdist\undefined\f{Quite a few documents profit from
+conventions.\iffalse \f{Quite a few documents profit from
 being available additionally as plain text, either as a man page, or as
 tagged text on a general-purpose text editor, instead of requiring an HTML
 browser.  The scripts `t2p2man`,
@@ -310,52 +313,32 @@ In all these cases, the help displayed on the console
 is also saved in the specially named log file
 `texput.hlog`.
 
-\beginsection Calling \TeX2page from Scheme or Common Lisp
-
-\index{running \TeX2page!from Scheme}
-\index{tex2page (Scheme p)@\q{tex2page} (Scheme procedure)}
-\index{tex2page (Scheme f)@`tex2page` (Scheme file)}
-%
-\ifx\inpltdist\Undefined
-If, for any reason, it is not possible to call `tex2page`
-from your operating-system command line, you may load the
-file `tex2page` into your Scheme
-\else
-You may load the
-library `tex2page.ss` into Scheme
-\fi and call the
-{\em procedure} \q{tex2page} with the name of the \TeX\ file
-as argument:
-
-\ifx\inpltdist\Undefined
-\begintts
-(load "tex2page") ;use appropriate pathname
-
-(tex2page |meta[filename])
-\endtt
-\else
-\begintts
-(require (lib "tex2page.ss" "tex2page"))
-
-(tex2page filename)
-\endtt
-\fi
-%
-You can call the procedure
-\q{tex2page} several times from the same Scheme
-session, on the same file or on different files.
+\beginsection Calling \TeX2page from Lisp
 
 \index{running \TeX2page!from Common Lisp}
 \index{tex2page:tex2page (Common Lisp f)@\q{tex2page:tex2page} (Common
 Lisp function)}
-If using the Common Lisp version of \TeX2page, the same method applies,
-but note that the Common Lisp \TeX2page is provided as a Lisp package
-\q{tex2page} whose one exported symbol is \q{tex2page}.  Thus, the
-function to call has the qualified name \q{tex2page:tex2page}.
+%
+If, for any reason, it is not possible to call `tex2page`
+from your operating-system command line, you may load the
+file `tex2page` into your Lisp
+and call the
+{\em procedure} \q{tex2page:tex2page} with the name of the \TeX\ file
+as argument:
 
 \begintts
+(load "tex2page") ;use appropriate pathname
+
 (tex2page:tex2page |meta[filename])
 \endtt
+You can call the procedure
+\q{tex2page:tex2page} several times from the same Lisp
+session, on the same file or on different files.
+
+Note that we’ve used a package-qualified name, as the Common
+Lisp \TeX2page is provided as a Common Lisp package \q{tex2page}
+whose one exported symbol is \q{tex2page}. (But see Appendix A if
+using the Scheme version of \TeX2page.)
 
 \beginsection Specifying a target directory
 %\label{hdir}
@@ -1507,7 +1490,7 @@ colophon,
 \endtt
 %
 If the underlying
-Scheme is incapable of determining a file’s write date, \TeX2page will
+Lisp is incapable of determining a file’s write date, \TeX2page will
 not mention the timestamp, regardless of the `\TZPcolophondisabletimestamp` setting.
 
 \index{TZPcolophondisablecredit@`\TZPcolophondisablecredit`}
@@ -1608,14 +1591,14 @@ which will be used to generate images if the entire document is in the
 (p.~\ref{imgpreamble}) you use match the
 document’s format.)
 
-\beginsection Flag for Scheme code comments
+\beginsection Flag for Lisp code comments
 
 \xrdef{slatexlikecomments}
 \index{TZPslatexcomments@`\TZPslatexcomments`}
-The flag `\TZPslatexcomments` governs whether Scheme comments
-should inside verbatim Scheme code should be rendered verbatim or as \TeX.
+The flag `\TZPslatexcomments` governs whether Lisp comments
+should inside verbatim Lisp code should be rendered verbatim or as \TeX.
 By default, they are rendered verbatim.   To allow \TeX\ commands inside
-Scheme comment text, do
+Lisp comment text, do
 
 \begintt
 \let\TZPslatexcomments=1
@@ -1643,7 +1626,7 @@ produces
 
 \fi
 Note that `\TZPslatexcomments=1` is not an unmixed blessing, as it
-restricts your Scheme comments to text that is valid \TeX.
+restricts your Lisp comments to text that is valid \TeX.
 
 \beginsection Flags for page and paragraph layout
 
@@ -1851,11 +1834,11 @@ decide which form of the macros `\cite` and `\nocite` to use.
 In contrast to most other styles (including \LaTeX), which use
 `{}` for these macros’ argument, OPmac uses `[]`.
 
-\beginsection Scheme or Common Lisp?
+\beginsection Common Lisp or Scheme?
 
 \index{TZPcommonlisp@`\TZPcommonlisp`}
 The flag `\TZPcommonlisp` can be used to decide whether calls to
-`\eval` (p.~\ref{eval}) should contain Scheme or Common Lisp code.
+`\eval` (p.~\ref{eval}) should contain Common Lisp or Scheme code.
 Typically, the construct `\ifx\TZPcommonlisp 1` is used to introduce
 the Common Lisp and Scheme versions as the two conditional clauses, so
 the document remains processable in both languages.
@@ -1863,7 +1846,7 @@ the document remains processable in both languages.
 \TeX2page pre-sets `\TZPcommonlisp` to 1 in Common Lisp and 0 in Scheme.
 
 You may set `\TZPcommonlisp` to specify that the document needs
-either the Scheme or Common Lisp version of \TeX2page. If
+either the Common Lisp or Scheme version of \TeX2page. If
 the incorrect version is used, \TeX2page will display a warning
 message, but will not crash for this reason alone.
 
@@ -2275,29 +2258,27 @@ in Prussian blue`}.
 %
 The commands `\scm` and `\scminput` are variants
 of `\verb` and `\verbatiminput`.  They are
-useful for producing syntax-highlighted Scheme
+useful for producing syntax-highlighted Lisp
 code in the HTML file.  E.g.,
 
 \begintt
 \scm{
-(define factorial
-  (lambda (n)
-    (when *debug?*
-      (printf "Calling factorial ~a~%" n))
-    (if (= n 0) 1 ;the base case
-        (* n (fact (- n 1))))))
+(defun factorial (n)
+  (when *debug* 
+    (format t "Calling factorial ~a~%" n))
+  (if (= n 0) 1 ;the base case
+      (* n (factorial (1- n)))))
 }
 \endtt
 \ifx\shipout\UnDeFiNeD % since the colors won’t show on the DVI
 produces
 
 \begintts
-(define factorial
-  (lambda (n)
-    (when *debug?*
-      (printf "Calling factorial ~a~%" n))
-    (if (= n 0) 1 ;the base case
-        (* n (fact (- n 1))))))
+(defun factorial (n)
+  (when *debug* 
+    (format t "Calling factorial ~a~%" n))
+  (if (= n 0) 1 ;the base case
+      (* n (factorial (1- n)))))
 \endtt
 (Your browser needs to support style sheets for the
 syntax-highlighting to show.)
@@ -2319,7 +2300,7 @@ Seven categories of code text are distinguished:
 
 \item(vii) comments.
 
-To distinguish between the categories of Scheme code
+To distinguish between the categories of Lisp code
 text, \TeX2page uses a style class called `scheme`
 with six subclasses, viz., `selfeval`,
 `keyword`, `builtin`, `global`, `variable`, and
@@ -2385,7 +2366,7 @@ non-variables (e.g., keywords or self-evaluators).  E.g.,
 \index{scheme@`\scheme`}
 \index{schemedisplay@`{schemedisplay}`}
 %
-\TeX2page also syntax-highlights Scheme code introduced
+\TeX2page also syntax-highlights Lisp code introduced
 using the S\LaTeX\ commands, chiefly
 `\scheme` and `{schemedisplay}`.  S\LaTeX\ users know
 that these commands typeset code in the DVI output
@@ -2393,9 +2374,9 @@ using fonts (rather than color) for highlighting.
 For the HTML, \TeX2page will use color.
 
 A minor point is that S\LaTeX’s commands allow \TeX\
-commands inside Scheme comments.  This is useful
-if you want to highlight mentions of Scheme code inside
-Scheme comments.  To get the same effect with \TeX2page,
+commands inside Lisp comments.  This is useful
+if you want to highlight mentions of Lisp code inside
+Lisp comments.  To get the same effect with \TeX2page,
 use the `\TZPslatexcomments` flag (p.~\ref{slatexlikecomments}).
 
 \beginsection Documenting your code
@@ -2961,21 +2942,19 @@ a previous run, instead of generating them anew.
 To {\em force} generation of new image files, delete
 the old image files.
 
-\beginchapter  10 Extending \TeX\ with Scheme or Common Lisp
+\beginchapter  10 Extending \TeX\ with Lisp
 
 \xrdef{eval}
 \index{eval@`\eval`}
 \index{dirty tricks}
 %
 The command `\eval` allows you to use arbitrary
-Scheme or Common Lisp expressions, as opposed to just \TeX\ macros, to
-guide the course of the typesetter.  In the following we will describe
-just
-the Scheme version of \TeX2page: read Common Lisp for Scheme if
-using the Common Lisp version of \TeX2page.
+Lisp
+expressions, as opposed to just \TeX\ macros, to
+guide the course of the typesetter.  
 
 The text written
-to standard output by the Scheme code is substituted
+to standard output by the Lisp code is substituted
 for the `\eval` statement.  E.g., consider the
 following complete document, `root2.tex`:
 
@@ -2986,7 +2965,7 @@ The square root of 2 is
 \eval{
 \endtt
 \begintts
-(display (sqrt 2))
+(princ (sqrt 2))
 \endtt
 \begintt
 }.
@@ -2995,15 +2974,18 @@ The square root of 2 is
 \endtt
 Running \TeX2page on `root2.tex` produces
 the following HTML output:
+\evalq{
+  (if 'nil (define princ display) (not 0))
+}
 
 \quote
 The square root of 2 is
 \eval{
-(display (sqrt 2))
+(princ (sqrt 2))
 }.
 \endquote
 In effect, \TeX2page processes the `\eval` call
-using Scheme, producing some output in an auxiliary
+using Lisp, producing some output in an auxiliary
 \TeX\ file, which is then re-inserted into the document at the location of
 the `\eval`.
 
@@ -3024,29 +3006,30 @@ content matches the HTML version.
 % saves the user the trouble of having to call Scheme explicitly to create
 % the aux \TeX\ files.}
 
-It is clear that Scheme code via `\eval` can serve as
+It is clear that Lisp code via `\eval` can serve as
 a very powerful {\em second extension language} for
 \TeX, and that its benefits are available to both the
 DVI and the HTML outputs.  As we have seen, \TeX2page
 implements a subset of the \TeX\ macro language, and for
 those cases where this macro language isn’t enough,
-Scheme can be used to fill the breach.  More generally,
-Scheme may be preferable to the \TeX\ macro language even
+Lisp can be used to fill the breach.  More generally,
+Lisp may be preferable to the \TeX\ macro language even
 for just DVI, where no HTML version of the document is
 contemplated.  We’ll explore both of these
 aspects of `\eval`.
 
 `\eval`’s argument is a balanced-brace
 expression.  At the top-level, i.e., not within the body of a macro,
-`\eval`’s argument is sent verbatim to Scheme, except that the pipe character
+`\eval`’s argument is sent verbatim to Lisp, except that the pipe character
 (‘\p+|+’) functions as the \TeX\ escape.  Use \p+||+ to represent a single
-pipe in the Scheme code.  If you need to include an unmatched brace, simply
-put a bogus matching brace inside a Scheme comment.
+pipe in the Lisp code.  If you need to include an unmatched brace, simply
+put a bogus matching brace inside a Lisp comment.
 
 Inside a macro body, it is too late for `\eval` to set the catcodes
 to make verbatim any character within its argument.  Either define or
-use control sequences to represent special characters, or use Scheme
-workarounds (\q{integer->char}) to construct those characters.
+use control sequences to represent special characters, or use
+Lisp
+workarounds (e.g., \q{code-char}) to construct those characters.
 
 Let us first look at a simple example where
 `\eval` lets you define an HTML version of an already
@@ -3054,7 +3037,7 @@ existing \TeX\ macro that is either impossible or at
 least prohibitively difficult  to process using
 \TeX2page’s  mimicry of \TeX.  Consider a hypothetical
 `\proto` macro, used to introduce the description of
-a Scheme operator by presenting a {\em prototypical}
+a Lisp operator by presenting a {\em prototypical}
 use of it.
 Typical calls to `\proto` are:
 
@@ -3132,20 +3115,17 @@ This piece of box-measuring contortion is
 too much for \TeX2page’s mimicry of the \TeX\ macro
 system.  However, it’s easy enough to  achieve the
 same effect using the string-processing capabilities
-of Scheme:
+of Lisp:
 
 \begintt
 \ifx\shipout\UnDeFiNeD
 \eval{
 \endtt
 \begintts
-(define all-blanks?
-  (lambda (s)
-    (let loop ((L (string->list s)))
-      (if (null? L) #t
-          (let ((c (car L)))
-            (if (char-whitespace? c) (loop (cdr L))
-                #f))))))
+(defun all-blanks-p (s)
+  (every (lambda (c) (or (char= c #\space) (char= c #\tab)
+                          (not (graphic-char-p c))))
+        s))
 \endtt
 \begintt
 }
@@ -3154,29 +3134,29 @@ of Scheme:
 \endtt
 \begintts
 (let ((x (ungroup (get-token))))
-  (if (not (all-blanks? x))
-      (begin (display (integer->char 92))
-             (display "space"))
-      0))
+  (unless (all-blanks-p x)
+    (princ (code-char 92))
+    (princ "space")))
 \endtt
 \begintt
 }}
 \fi
 \endtt
-Note that we had to use \q{(integer->char 92)} to refer to the
+Note that we had to use \q{(code-char 92)} to refer to the
 backslash character, as the `\eval` is inside a macro body and ‘`\`’
 is not and cannot be made a letter.
-(Otherwise we could have simply written \q{(display "\\space")}.)
+(Otherwise we could have simply written \q{(princ "\\space")}.)
 
 Later `\eval`s can
 use definitions introduced in previous `\eval`s,
-as with \q{all-blanks?} in our example.
+as with \q{all-blanks-p} in our example.
 
 If being processed by \TeX2page only (as in our example),
-the code inside `\eval` is allowed to use not just general Scheme
+the code inside `\eval` is allowed to use not just general Lisp
 but also procedures like
 \q{ungroup} and \q{get-token}, which are defined by
-\TeX2page.
+\TeX2page. (There is no need to package-qualify their names, as `\eval`
+code is evaluated inside the `tex2page` package.)
 
 \beginsection {eval} without regard to HTML
 
@@ -3184,7 +3164,7 @@ but also procedures like
 %
 The key thing to remember is that
 an `\eval`-call is replaced by whatever text the
-Scheme code in that `\eval`-call writes to its
+Lisp code in that `\eval`-call writes to its
 standard output.  This approach will work whether the
 document is being processed by \TeX2page to produce HTML
 or by \TeX\ to produce DVI.
@@ -3193,14 +3173,14 @@ For those \TeX\ documents that are not intended for HTML conversion, but
 nevertheless use `\eval`, this macro is available in the macro file
 `eval4tex.tex`.  Run \TeX\ (or \LaTeX) on such a document, say
 \p{|meta[jobname].tex}, and then evaluate
-the resultant \p{|meta[jobname].eval4tex} in Scheme, to create the
+the resultant \p{|meta[jobname]-Z-E.lisp} in Lisp, to create the
 necessary aux \TeX\ files.  Running \TeX\ on the master document a {\em second}
 time will
 insert these aux \TeX\ files at the location of the corresponding `\eval`
 calls.  This is quite analogous to how \TeX2page would have processed the
-`\eval`s, except that \TeX\ requires you to explicitly call Scheme to
+`\eval`s, except that \TeX\ requires you to explicitly call Lisp to
 create the aux files which it can use on its second run, whereas
-\TeX2page, being written in Scheme, creates and loads the aux files
+\TeX2page, being written in Lisp, creates and loads the aux files
 immediately.
 
 For complete details on using `\eval` with
@@ -3344,26 +3324,302 @@ on both standard output and in the log file.
 Judicious use of these commands
 should help pinpoint any error.
 
-\beginchapter A  Auxiliary files
+
+\beginchapter A Also in Scheme
+
+The \TeX2page distribution comes with two scripts,
+`tex2page.lisp` and `tex2page.rkt`. Each works without any
+further configuration, the first in Common Lisp, the second in
+Scheme, specifically Racket.
+You should be able to run either script on any document, and for
+the most part you will get identical results. We will now mention
+the few situations where the Scheme script differs from the
+Common Lisp version.
+
+See Appendix C for details on how to obtain a script that works
+on Schemes other than Racket.
+
+When you get the script of your choice configured, you may copy or link it to
+`tex2page` and put it in your `PATH`. 
+
+\beginsection Calling \TeX2page from Scheme
+
+\index{running \TeX2page!from Scheme}
+\index{tex2page (Scheme p)@\q{tex2page} (Scheme procedure)}
+\index{tex2page (Scheme f)@`tex2page` (Scheme file)}
+%
+As with the CL version, you can load the Scheme script into your
+Scheme and call the \q{tex2page} procedure. The difference is
+that there is no package qualification to refer to the procedure
+name, e.g.,
+
+\begintts
+(load "tex2page") ;use appropriate pathname
+
+(tex2page |meta[filename])
+\endtt
+
+\beginsection  eval
+
+`\eval` works for Scheme versions of \TeX2page too. The
+difference of course is that the `\eval`-enclosed code must be in
+Scheme rather than Common Lisp. (You can also use the
+Scheme names (procedures and other, global values) added by the
+script, and for the most part these names are identical across
+Scheme and Common Lisp.) 
+
+E.g., the \q{all-blanks-p} procedure
+defined in Chapter 10 would look like this in the Scheme
+situation:
+
+\begintts
+(define all-blanks?
+  (lambda (s)
+    (let loop ((L (string->list s)))
+      (if (null? L) #t
+          (let ((c (car L)))
+            (if (char-whitespace? c) (loop (cdr L))
+                #f))))))
+\endtt
+
+It is of course possible to keep your TeX document
+language-proof by using a conditional on the flag
+`\TZPcommonlisp`. This is set to 1 in Common Lisp and 0 in Scheme:
+Use `\ifx` to create two branches, e.g., 
+
+\begintt
+\ifx\TZPcommonlisp 1
+\eval{
+  ... |meta[Common Lisp code] ...
+}\else
+\eval{
+  ... |meta[Scheme version of the same code] ...
+}\fi
+\endtt
+That is what this manual did to keep it processable in both versions
+of \TeX2page.
+
+\beginchapter  B Bibliography
+
+%\ifx\shipout\UnDeFiNeD\else\vskip-\lastskip\fi
+
+\bibliographystyle{plain}
+\bibliography{tex2page}
+
+\beginchapter  C Configuring \TeX2page
+
+\xrdef{download}
+\index{installing \TeX2page}
+%
+\TeX2page is available on
+\urlp{GitHub}{https://github.com/ds26gte/tex2page}.
+
+\begintt
+git clone https://github.com/ds26gte/tex2page
+\endtt
+%
+produces a directory
+called `tex2page`, which contains, among other files:
+the Racket file `tex2page.rkt`, the Common Lisp file `tex2page.lisp`, the plain \TeX\ file
+`tex2page.tex`, and the \LaTeX\ package
+`tex2page.sty`.
+
+Put copies of (or links to) the files
+`tex2page.tex` and `tex2page.sty`  in a directory
+that is mentioned in your `TEXINPUTS` environment
+variable.
+
+\beginsection \TeX2page out of the box (Common Lisp)
+
+If you run a Common Lisp on a Unix, you can use the supplied script
+`tex2page.lisp` after setting the environment variable `LISP` to the
+name of your Lisp implementation.  Put `tex2page.lisp` in your
+`PATH`. You may rename it to
+`tex2page`.
+
+Set `LISP` to
+`abcl` for ABCL~\cite{abcl},
+`allegro` for Allegro~\cite{allegro},
+`clisp` for CLISP~\cite{clisp},
+`clozure` for Clozure~\cite{clozure},
+`cmucl` for CMUCL~\cite{cmucl},
+`ecl` for ECL~\cite{ecl},
+`mkcl` for MKCL~\cite{mkcl},
+and `sbcl` for SBCL~\cite{sbcl}.
+
+The top few lines in `tex2page.lisp` contain the lines
+that invoke Lisp —  if they don’t already address your
+particular Lisp
+implementation, you may need to add a line based on your
+Lisp’s command line options.
+
+\beginsection \TeX2page out of the box (Racket)
+
+\index{Racket}
+%
+If you run Racket~\cite{racket} on a Unix (including Mac OS X and
+Cygwin~\cite{cygwin}), setup is minimal.  Simply put a copy of (or link to) the Scheme
+file `tex2page.rkt` in a directory in your `PATH` environment
+variable. You may rename it to `tex2page`.
+
+If you run Racket on Windows,
+copy the supplied batchfile `tex2page.bat`
+to your `PATH`, and edit its contents so it contains
+the correct pathnames to your Racket executable and
+`tex2page.rkt` file.
+
+%Note also that the Racket distribution (as also its
+%superset DrScheme) already bundle a
+%pre-configured `tex2page` script.
+
+\beginsection When explicit configuration is needed
+
+In general, you need to {\em
+configure}
+\TeX2page so it runs on your system.  Even in cases where the supplied
+script runs “out of the box” for your setup, it may still be a good
+idea to do an explicit configuration.
+
+%fmrly subsub
+%\subsection{Using \p{./configure --dialect=|meta[D]}}
+\beginsection Using {./configure}
+
+This method may not always work but is so easy that
+it’s worth a try.  It should work for most
+dialects on Unix.
+
+\item(i) Type `./configure --help` at your OS command line
+to get the list of dialects supported.
+If your dialect \p{|meta[D]} is one of them,
+
+\item(ii) Type  \p{./configure --dialect=|meta[D]}
+
+\n If all goes well, this will create
+`tex2page`, a version of \TeX2page that’s suited to \p{|meta[D]}.
+Put it in your `PATH`.
+
+\TeX2page is known to configure for the Scheme dialects
+Chez~\cite{chez},
+Chicken~\cite{chicken},
+Gambit~\cite{gambit},
+Gauche~\cite{gauche},
+Guile~\cite{guile},
+and Racket~\cite{racket}; and the Common Lisp
+implementations ABCL, Allegro, CLISP, Clozure, CMUCL, ECL, and SBCL.
+\iffalse how about bigloo mitscheme pocketscheme s48 scm scsh
+stklos sxm \fi
+
+%fmrly subsub
+\beginsection  Using Scmxlate directly
+
+\index{Scmxlate}
+The \p{./configure --dialect=|meta[D]} approach above
+essentially takes care to call Scmxlate (if needed) as described in
+this section, but unfortunately it may not work for
+some dialects or operating systems.  In such cases, you
+can manually call Scmxlate, which isn’t really all that
+tedious.
+
+First ensure that
+\urlp{Scmxlate}{https://github.com/ds26gte/scmxlate}
+is installed on your system.  Note down the pathname of
+the file `scmxlate.scm` in the unpacked `scmxlate`
+directory.
+
+Optionally, edit the file `scmxlate-tex2page.rkt` in the
+`tex2page` directory. (Leaving it as is is just fine.)
+Possible insertions are:
+
+\begintts
+(scmxlate-compile #t)
+
+(define *ghostscript* "pathname-of-your-ghostscript-program")
+\endtt
+%
+The first produces a compiled version of
+\TeX2page.   The second lets you supply the
+correct pathname for the Ghostscript executable.
+(\TeX2page will guess the Ghostscript pathname,
+but there is a possibility it guesses wrong on
+Windows.)
+
+Start your Scheme (or Common Lisp) in the
+`tex2page` directory.   Load the file
+`scmxlate.scm` from the
+`scmxlate` distribution, using the correct relative
+or full pathname of `scmxlate.scm`.  For example,
+
+\begintts
+(load "/home/dorai/share/scmxlate/scmxlate.scm")
+\endtt
+%
+(assuming you unpacked Scmxlate in
+`/home/dorai/share`).  You will be asked a couple
+of questions about your setup.  A choice of answers
+will be provided, so you don’t need to be too creative.
+When Scmxlate finishes, you will be left with a
+`tex2page` that is tailormade for your system.
+
+On Windows, a batch file called `tex2page.bat`
+is also created.  Move it to a directory in your
+`PATH`.  Edit the contents of `tex2page.bat` so
+that the pathnames it refers to are correct.
+
+\iffalse
+\beginsection Can’t create or don’t want a {tex2page
+script?}
+
+If the configuration process cannot create an
+appropriate script file for you to put in your
+`PATH`, or if you prefer working within Scheme
+anyway instead of at the OS command-line,
+you can still use \TeX2page.  Simply load
+your `tex2page` Scheme file
+(whether the given script or your configured version)
+directly into
+your Scheme, and then call the Scheme
+procedure \q{tex2page} on your source document.  E.g.,
+
+\begintts
+(load "tex2page")
+(tex2page "filename.tex")
+\endtt
+Once loaded, the procedure \q{tex2page} can be called several times from
+the same Scheme session, on the same file (to resolve cross-references)
+or on different files.
+
+If using the Common Lisp of \TeX2page, the \q{load}ing process is the same, but note that
+the Common Lisp version of \TeX2page encloses all \TeX2page-related code
+inside a Lisp package named \q{tex2page}.  Thus, you should call the
+function \q{tex2page} by its package-qualified name, \q{tex2page:tex2page}:
+
+\begintts
+(tex2page:tex2page "tex2page-doc")
+\endtt
+
+%\section{Editor-friendly hypertext}
+%\label{hisfir}
+%
+%\input hisfir
+\fi
+
+
+\beginchapter D Details for the curious
 
 \xrdef{auxfile}
 \index{auxiliary files}
 %
+Running \TeX2page creates in your working directory  a bunch of files
+with the infix `-Z-`. 
+Here’s the whole story on what they are for:
+
 Given an input \TeX\ document whose main file is
 `story.tex`, the
-\ifx\inpltdist\Undefined
 command
 
 \begintt
 tex2page story
 \endtt
-\else
-call
-
-\begintts
-(tex2page "story")
-\endtt
-\fi
 %
 typically produces at least one
 output HTML file `story.html`, and possibly some
@@ -3474,214 +3730,7 @@ The `.hdir` file may contain the \TeX\ control
 sequence `\jobname`, which expands to the basename of
 the input \TeX\ document.
 
-\beginchapter  B Bibliography
-
-%\ifx\shipout\UnDeFiNeD\else\vskip-\lastskip\fi
-
-\bibliographystyle{plain}
-\bibliography{tex2page}
-
-\ifx\inpltdist\Undefined
-
-\beginchapter  C Configuring \TeX2page
-
-\xrdef{download}
-\index{installing \TeX2page}
-%
-\TeX2page is available on
-\urlp{GitHub}{https://github.com/ds26gte/tex2page}.
-
-\begintt
-git clone https://github.com/ds26gte/tex2page
-\endtt
-%
-produces a directory
-called `tex2page`, which contains, among other files:
-the Racket file `tex2page.rkt`, the Common Lisp file `tex2page.lisp`, the plain \TeX\ file
-`tex2page.tex`, and the \LaTeX\ package
-`tex2page.sty`.
-
-Put copies of (or links to) the files
-`tex2page.tex` and `tex2page.sty`  in a directory
-that is mentioned in your `TEXINPUTS` environment
-variable.
-
-\beginsection \TeX2page out of the box (Racket)
-
-\index{Racket}
-%
-If you run Racket~\cite{racket} on a Unix (including Mac OS X and
-Cygwin~\cite{cygwin}), setup is minimal.  Simply put a copy of (or link to) the Scheme
-file `tex2page.rkt` in a directory in your `PATH` environment
-variable. You may rename it to `tex2page`.
-
-If you run Racket on Windows,
-copy the supplied batchfile `tex2page.bat`
-to your `PATH`, and edit its contents so it contains
-the correct pathnames to your Racket executable and
-`tex2page.rkt` file.
-
-%Note also that the Racket distribution (as also its
-%superset DrScheme) already bundle a
-%pre-configured `tex2page` script.
-
-\beginsection \TeX2page out of the box (Common Lisp)
-
-If you run a Common Lisp on a Unix, you can use the supplied script
-`tex2page.lisp` after setting the environment variable `LISP` to the
-name of your Lisp implementation.  Put `tex2page.lisp` in your
-`PATH`. You may rename it to
-`tex2page`.
-
-Set `LISP` to
-`abcl` for ABCL~\cite{abcl},
-`allegro` for Allegro~\cite{allegro},
-`clisp` for CLISP~\cite{clisp},
-`clozure` for Clozure~\cite{clozure},
-`cmucl` for CMUCL~\cite{cmucl},
-`ecl` for ECL~\cite{ecl},
-`mkcl` for MKCL~\cite{mkcl},
-and `sbcl` for SBCL~\cite{sbcl}.
-
-The top few lines in `tex2page.lisp` contain the lines
-that invoke Lisp —  if they don’t already address your
-particular Lisp
-implementation, you may need to add a line based on your
-Lisp’s command line options.
-
-\beginsection When explicit configuration is needed
-
-%
-In general, you need to {\em
-configure}
-\TeX2page so it runs on your system.  Even in cases where the supplied
-script runs “out of the box” for your setup, it may still be a good
-idea to do an explicit configuration.
-
-%fmrly subsub
-%\subsection{Using \p{./configure --dialect=|meta[D]}}
-\beginsection Using {./configure}
-
-This method may not always work but is so easy that
-it’s worth a try.  It should work for most
-dialects on Unix.
-
-\item(i) Type `./configure --help` at your OS command line
-to get the list of dialects supported.
-If your dialect \p{|meta[D]} is one of them,
-
-\item(ii) Type  \p{./configure --dialect=|meta[D]}
-
-\n If all goes well, this will create
-`tex2page`, a version of \TeX2page that’s suited to \p{|meta[D]}.
-Put it in your `PATH`.
-
-\TeX2page is known to configure for the Scheme dialects
-Chez~\cite{chez},
-Chicken~\cite{chicken},
-Gambit~\cite{gambit},
-Gauche~\cite{gauche},
-Guile~\cite{guile},
-and Racket~\cite{racket}; and the Common Lisp
-implementations ABCL, Allegro, CLISP, Clozure, CMUCL, ECL, and SBCL.
-\iffalse how about bigloo mitscheme pocketscheme s48 scm scsh
-stklos sxm \fi
-
-%fmrly subsub
-\beginsection  Using Scmxlate directly
-
-\index{Scmxlate}
-The \p{./configure --dialect=|meta[D]} approach above
-essentially takes care to call Scmxlate (if needed) as described in
-this section, but unfortunately it may not work for
-some dialects or operating systems.  In such cases, you
-can manually call Scmxlate, which isn’t really all that
-tedious.
-
-First ensure that
-\urlp{Scmxlate}{https::/github.com/ds26gte/scmxlate}
-is installed on your system.  Note down the pathname of
-the file `scmxlate.scm` in the unpacked `scmxlate`
-directory.
-
-Optionally, edit the file `scmxlate-tex2page.rkt` in the
-`tex2page` directory. (Leaving it as is is just fine.)
-Possible insertions are:
-
-\begintts
-(scmxlate-compile #t)
-
-(define *ghostscript* "pathname-of-your-ghostscript-program")
-\endtt
-%
-The first produces a compiled version of
-\TeX2page.   The second lets you supply the
-correct pathname for the Ghostscript executable.
-(\TeX2page will guess the Ghostscript pathname,
-but there is a possibility it guesses wrong on
-Windows.)
-
-Start your Scheme (or Common Lisp) in the
-`tex2page` directory.   Load the file
-`scmxlate.scm` from the
-`scmxlate` distribution, using the correct relative
-or full pathname of `scmxlate.scm`.  For example,
-
-\begintts
-(load "/home/dorai/share/scmxlate/scmxlate.scm")
-\endtt
-%
-(assuming you unpacked Scmxlate in
-`/home/dorai/share`).  You will be asked a couple
-of questions about your setup.  A choice of answers
-will be provided, so you don’t need to be too creative.
-When Scmxlate finishes, you will be left with a
-`tex2page` that is tailormade for your system.
-
-On Windows, a batch file called `tex2page.bat`
-is also created.  Move it to a directory in your
-`PATH`.  Edit the contents of `tex2page.bat` so
-that the pathnames it refers to are correct.
-
-\beginsection Can’t create or don’t want a {tex2page
-script?}
-
-If the configuration process cannot create an
-appropriate script file for you to put in your
-`PATH`, or if you prefer working within Scheme
-anyway instead of at the OS command-line,
-you can still use \TeX2page.  Simply load
-your `tex2page` Scheme file
-(whether the given script or your configured version)
-directly into
-your Scheme, and then call the Scheme
-procedure \q{tex2page} on your source document.  E.g.,
-
-\begintts
-(load "tex2page")
-(tex2page "filename.tex")
-\endtt
-Once loaded, the procedure \q{tex2page} can be called several times from
-the same Scheme session, on the same file (to resolve cross-references)
-or on different files.
-
-If using the Common Lisp of \TeX2page, the \q{load}ing process is the same, but note that
-the Common Lisp version of \TeX2page encloses all \TeX2page-related code
-inside a Lisp package named \q{tex2page}.  Thus, you should call the
-function \q{tex2page} by its package-qualified name, \q{tex2page:tex2page}:
-
-\begintts
-(tex2page:tex2page "tex2page-doc")
-\endtt
-
-%\section{Editor-friendly hypertext}
-%\label{hisfir}
-%
-%\input hisfir
-
-\fi
-
-\beginchapter  D Diminutive Index
+\beginchapter  E Extremely tiny index
 
 \xrdef{Index}
 

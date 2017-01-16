@@ -1,4 +1,4 @@
-;last modified 2017-01-15
+;last modified 2017-01-16
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -m -- \"$@\"
@@ -39,14 +39,6 @@
 (cliiscm-ignore-def
 
   *tex2page-file-arg*
-  close-output-port
-  current-output-port
-  define
-  display
-  file-exists?
-  integer->char
-  newline
-  open-output-file
 
   )
 

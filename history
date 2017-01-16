@@ -1,4 +1,51 @@
-Last change 2017-01-04
+Last change 2017-01-16
+
+2017 Jan 16
+
+eval4tex.tex: Changed aux file name to jobname-Z-E.lisp (from
+jobname.eval4tex), in keeping with TeX2page's other aux files. Made it loadable
+in both CL and Scheme, so flag \TZPcommonlisp no longer needed.
+
+Added \evalq: like \eval but doesn't insert into document. (q = quiet. Useful
+for adding definitions. \eval that has nothing to insert has the same behavior,
+but \evalq is slightly more efficient.)
+
+2017 Jan 15
+
+Rewrote catcodes to be more like TeX. They are now associated with texframes
+(groups) and are closed by definitions, so a macro body is expanded with the
+defining texframe's catcodes rather than the calling texframe's. In other
+words, catcodes are lexically scoped.
+
+Pseudo-characters :eof-object, *invisible-space* dropped. Use Lispy nil for the
+former and trust CLiiScm to translate appropriately for Scheme. #\nul (catcode
+9) is fine as invisible space; even TeX allows this.
+
+2017 Jan 14
+
+
+\global assignment shouldn't just add the new def to the global texframe but
+also purge any existing def from local frames.
+
+
+2017 Jan 9
+
+\activettchar should read arg of form \<c> correctly.
+
+Expand 0-ary defs even inside false world as they could contain a \fi that ends
+the falseness.
+
+(Re)allow \let's RHS to be math prim.
+
+Support \cal (math font switch).
+
+Clean up Texinfo translation a bit, but more needs to be done.
+
+2017 Jan 7
+
+get-ctl-seq shouldn't read spaces past one newline. Leave it to read-macro-args
+to pick up such space. Have read-macro-args pick up this space even if macro
+has no parameters.
 
 2017 Jan 4
 

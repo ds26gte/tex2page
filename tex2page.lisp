@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170115") ;last change
+(defparameter *tex2page-version* "20170116") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -144,6 +144,7 @@
 (defparameter *aux-file-suffix* "-Z-A")
 (defparameter *bib-aux-file-suffix* "-Z-B")
 (defparameter *css-file-suffix* "-Z-S.css")
+(defparameter *eval4tex-file-suffix* "-Z-E.lisp")
 ;(defparameter *html-node-prefix* "node_")
 (defparameter *html-node-prefix* "TAG:__tex2page_")
 (defparameter *html-page-suffix* "-Z-H-")
@@ -7404,29 +7405,6 @@
         (tex2page-file
          (actual-tex-filename f (check-input-file-timestamp-p f)))))))
 
-;just enough Scheme to process eval4tex aux file
-
-(defmacro define (lhs &rest body)
-  (if (consp lhs)
-      `(defun ,(car lhs) ,(cdr lhs) ,@body)
-      `(defvar ,lhs ,@body)))
-
-(defun current-output-port (&optional p)
-  (if p (setq *standard-output* p) *standard-output*))
-
-(defun file-exists? (f) (probe-file f))
-
-(defun open-output-file (f)
-  (open f :direction :output :if-exists :supersede))
-
-(defun close-output-port (p) (close p))
-
-(defun display (x) (princ x))
-
-(defun newline () (terpri))
-
-(defun integer->char (n) (code-char n))
-
 ;
 
 (defun eval-for-tex-only ()
@@ -7506,7 +7484,7 @@
         (write-log " ... failed; try manually"))
       (write-log :separation-newline))
     ;eval4tex
-    (load (concatenate 'string *jobname* ".eval4tex") :if-does-not-exist nil)
+    (load (concatenate 'string *jobname* *eval4tex-file-suffix*) :if-does-not-exist nil)
     ;metapost
     (mapc
      (lambda (f)

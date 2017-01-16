@@ -390,7 +390,7 @@
 
 (define *verbatim-visible-space* "<span style=\"color: red\">&#xb7;</span>")
 
-(define *aux-file-suffix* "-Z-A")
+(define *aux-file-suffix* "-Z-A.lisp")
 
 (define *bib-aux-file-suffix* "-Z-B")
 
@@ -408,7 +408,7 @@
 
 (define *index-file-suffix* "-Z-I")
 
-(define *label-file-suffix* "-Z-L")
+(define *label-file-suffix* "-Z-L.lisp")
 
 (define *mfpic-tex-file-suffix* ".Z-M-tex")
 
@@ -853,7 +853,7 @@
   ((not *aux-port*)
    (let ((f
           (let ((%type 'string)
-                (%ee (list *aux-dir/* *jobname* *aux-file-suffix* ".scm")))
+                (%ee (list *aux-dir/* *jobname* *aux-file-suffix*)))
             (let ((%res
                    (if (eq? %type 'string)
                        ""
@@ -903,7 +903,7 @@
   ((not *label-port*)
    (let ((f
           (let ((%type 'string)
-                (%ee (list *aux-dir/* *jobname* *label-file-suffix* ".scm")))
+                (%ee (list *aux-dir/* *jobname* *label-file-suffix*)))
             (let ((%res
                    (if (eq? %type 'string)
                        ""
@@ -5704,7 +5704,7 @@
                           (%concatenate-loop (cdr %ee)))))
                   %res)))))
      (let ((ext-label-file
-            (let ((%type 'string) (%ee (list fq-f *label-file-suffix* ".scm")))
+            (let ((%type 'string) (%ee (list fq-f *label-file-suffix*)))
               (let ((%res
                      (if (eq? %type 'string)
                          ""
@@ -5775,7 +5775,7 @@
                                                      %a)))))
                                   (%concatenate-loop (cdr %ee)))))
                           %res)))
-                  *label-file-suffix* ".scm")))
+                  *label-file-suffix*)))
             (let ((%res
                    (if (eq? %type 'string)
                        ""
@@ -15064,7 +15064,7 @@
 (define (load-aux-file) (set-start-time)
  (let ((label-file
         (let ((%type 'string)
-              (%ee (list *aux-dir/* *jobname* *label-file-suffix* ".scm")))
+              (%ee (list *aux-dir/* *jobname* *label-file-suffix*)))
           (let ((%res
                  (if (eq? %type 'string)
                      ""
@@ -15094,7 +15094,7 @@
  (cond
   ((not (string=? *jobname* "texput"))
    (let ((texput-aux
-          (let ((%type 'string) (%ee (list "texput" *aux-file-suffix* ".scm")))
+          (let ((%type 'string) (%ee (list "texput" *aux-file-suffix*)))
             (let ((%res
                    (if (eq? %type 'string)
                        ""
@@ -15121,7 +15121,7 @@
   (else false))
  (let ((aux-file
         (let ((%type 'string)
-              (%ee (list *aux-dir/* *jobname* *aux-file-suffix* ".scm")))
+              (%ee (list *aux-dir/* *jobname* *aux-file-suffix*)))
           (let ((%res
                  (if (eq? %type 'string)
                      ""

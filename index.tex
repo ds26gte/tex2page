@@ -3662,10 +3662,10 @@ If `story.tex` contains `\index` commands, \TeX2page
 will dump the unsorted index into `story-Z-I.idx` and
 get from MakeIndex the sorted index `story-Z-I.ind`.
 
-\TeX2page uses the auxiliary files `story-Z-L.scm` and
-`story-Z-A.scm` to keep track of labels and other
+\TeX2page uses the auxiliary files `story-Z-L.lisp` and
+`story-Z-A.lisp` to keep track of labels and other
 internal cross-references.  Each run of \TeX2page loads
-the `story-Z-L.scm` and `story-Z-A.scm`
+the `story-Z-L.lisp` and `story-Z-A.lisp`
 created by the previous run.  If `story.tex` contains
 {\em forward} cross-references, \TeX2page must be rerun
 at least once.

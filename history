@@ -2,6 +2,11 @@ Last change 2017-01-16
 
 2017 Jan 16
 
+Renamed aux files to jobname-Z-L.lisp and jobname-Z-A.lisp. (Previously these
+were *.scm.)
+
+2017 Jan 16
+
 eval4tex.tex: Changed aux file name to jobname-Z-E.lisp (from
 jobname.eval4tex), in keeping with TeX2page's other aux files. Made it loadable
 in both CL and Scheme, so flag \TZPcommonlisp no longer needed.

@@ -141,7 +141,7 @@
   ;"<span style=\"vertical-align: -0.5ex\">&#x2334;</span>"
   )
 
-(defparameter *aux-file-suffix* "-Z-A")
+(defparameter *aux-file-suffix* "-Z-A.lisp")
 (defparameter *bib-aux-file-suffix* "-Z-B")
 (defparameter *css-file-suffix* "-Z-S.css")
 (defparameter *eval4tex-file-suffix* "-Z-E.lisp")
@@ -151,7 +151,7 @@
 (defparameter *img-file-suffix* "-Z-G-")
 (defparameter *imgdef-file-suffix* "D-")
 (defparameter *index-file-suffix* "-Z-I")
-(defparameter *label-file-suffix* "-Z-L")
+(defparameter *label-file-suffix* "-Z-L.lisp")
 (defparameter *mfpic-tex-file-suffix* ".Z-M-tex")
 (defparameter *toc-file-suffix* "-Z-C")
 
@@ -433,13 +433,13 @@
 
 (defun write-aux (e)
   (unless *aux-port*
-    (let ((f (concatenate 'string *aux-dir/* *jobname* *aux-file-suffix* ".scm")))
+    (let ((f (concatenate 'string *aux-dir/* *jobname* *aux-file-suffix*)))
       (setq *aux-port* (open f :direction :output :if-exists :supersede))))
   (prin1 e *aux-port*) (terpri *aux-port*))
 
 (defun write-label (e)
   (unless *label-port*
-    (let ((f (concatenate 'string *aux-dir/* *jobname* *label-file-suffix* ".scm")))
+    (let ((f (concatenate 'string *aux-dir/* *jobname* *label-file-suffix*)))
       (setq *label-port* (open f :direction :output :if-exists :supersede))))
   (prin1 e *label-port*)
   (terpri *label-port*))
@@ -3035,7 +3035,7 @@
 (defun do-inputexternallabels ()
   (let* ((f (get-filename-possibly-braced))
          (fq-f (if (fully-qualified-pathname-p f) f (concatenate 'string *aux-dir/* f)))
-         (ext-label-file (concatenate 'string fq-f *label-file-suffix* ".scm"))
+         (ext-label-file (concatenate 'string fq-f *label-file-suffix*))
          (ext-label-table (gethash f *external-label-tables*)))
     (unless ext-label-table
       (setq ext-label-table (make-hash-table :test #'equal))
@@ -3050,7 +3050,7 @@
           (concatenate 'string
             (if (fully-qualified-pathname-p jobname) jobname
               (concatenate 'string *aux-dir/* jobname))
-            *label-file-suffix* ".scm")))
+            *label-file-suffix*)))
     (when (probe-file ext-label-file)
       (let ((*label-source* jobname))
         (load-tex2page-data-file ext-label-file)))))
@@ -7870,15 +7870,15 @@
 (defun load-aux-file ()
   (set-start-time)
   (let ((label-file
-         (concatenate 'string *aux-dir/* *jobname* *label-file-suffix* ".scm")))
+         (concatenate 'string *aux-dir/* *jobname* *label-file-suffix*)))
     (when (probe-file label-file)
       (load-tex2page-data-file label-file)
       (delete-file label-file)))
   (unless (string= *jobname* "texput")
-    (let ((texput-aux (concatenate 'string "texput" *aux-file-suffix* ".scm")))
+    (let ((texput-aux (concatenate 'string "texput" *aux-file-suffix*)))
       (when (probe-file texput-aux) (delete-file texput-aux))))
   (let ((aux-file
-         (concatenate 'string *aux-dir/* *jobname* *aux-file-suffix* ".scm")))
+         (concatenate 'string *aux-dir/* *jobname* *aux-file-suffix*)))
     (when (probe-file aux-file)
       (load-tex2page-data-file aux-file)
       (delete-file aux-file)))

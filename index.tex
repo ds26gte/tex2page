@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2017-01-16} %last change
+\c{2017-01-17} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -131,10 +131,13 @@ tex |meta[wherever-it-is/jobname].|meta[ext]
 %
 at the operating-system command line.\f{The executable `tex` expects
 its input file to be marked up in plain \TeX.  For a \LaTeX\ document, the
-executable to use is `latex`.}  You do not need to mention the extension
+executable to use is `latex`. Modern \TeX\ engines such as
+pdf\TeX, \XeTeX~\cite{xetex}, and lua\TeX~\cite{luatex} have
+executables named `pdftex`, `xetex`, `luatex` for the plain
+format, and `pdflatex`, `xelatex`, and `lualatex` for \LaTeX.}  You do not need to mention the extension
 \p{.|meta[ext]} if it is `.tex`.  This creates the output DVI file,
-\p{|meta[jobname].dvi}, in the working directory.\f{Modern \TeX\ engines
-such as pdf\TeX, \XeTeX~\cite{xetex}, and
+\p{|meta[jobname].dvi}, in the working directory.\f{The modern \TeX s
+pdf\TeX, \XeTeX, and
 lua\TeX~\cite{luatex} produce PDF rather than DVI.  In the rest of this manual,
 whenever we refer to the output DVI file, the reader using the PDF versions
 of \TeX\ should read PDF for DVI.}
@@ -1544,9 +1547,9 @@ not require complicated notation.
 \index{NetPBM}
 \index{ImageMagick}
 \index{image!format}
-\index{png@`png` (image format)}
-\index{jpeg@`jpeg` (image format)}
 \index{gif@`gif` (image format)}
+\index{jpeg@`jpeg` (image format)}
+\index{png@`png` (image format)}
 %
 These flags specify the conversion tactics used
 for generating HTML-suitable images from the user’s graphics
@@ -1560,7 +1563,7 @@ HTML-suitable image.
 \index{TZPimageconverter@`\TZPimageconverter`}
 \index{TZPimageformat@`\TZPimageformat`}
 The defaults are: NetPBM
-to convert, and GIF to convert to.
+to convert, and PNG to convert to.
 You may set the flags `\TZPimageconverter` and `\TZPimageformat` to
 change this, e.g,
 
@@ -1568,9 +1571,9 @@ change this, e.g,
 \def\TZPimageconverter{imagemagick}  % use ImageMagick
 \def\TZPimageconverter{netpbm}       % use NetPBM (default)
 
-\def\TZPimageformat{png}  % for PNG images
+\def\TZPimageformat{gif}  % for GIF images
 \def\TZPimageformat{jpeg} % for JPEG images
-\def\TZPimageformat{gif}  % for GIF images (default)
+\def\TZPimageformat{png}  % for PNG images (default)
 \endtt
 
 \beginsection \TeX\ executable used for image generation
@@ -2179,7 +2182,7 @@ You can insert files verbatim with the command
 `\listing`.  Usage:
 
 \begintt
-\verbatiminput{program.scm}
+\verbatiminput{program.lisp}
 \endtt
 
 \beginsection Writing to files
@@ -2264,7 +2267,7 @@ code in the HTML file.  E.g.,
 \begintt
 \scm{
 (defun factorial (n)
-  (when *debug* 
+  (when *debug*
     (format t "Calling factorial ~a~%" n))
   (if (= n 0) 1 ;the base case
       (* n (factorial (1- n)))))
@@ -2275,7 +2278,7 @@ produces
 
 \begintts
 (defun factorial (n)
-  (when *debug* 
+  (when *debug*
     (format t "Calling factorial ~a~%" n))
   (if (= n 0) 1 ;the base case
       (* n (factorial (1- n)))))
@@ -2951,7 +2954,7 @@ the old image files.
 The command `\eval` allows you to use arbitrary
 Lisp
 expressions, as opposed to just \TeX\ macros, to
-guide the course of the typesetter.  
+guide the course of the typesetter.
 
 The text written
 to standard output by the Lisp code is substituted
@@ -2978,7 +2981,7 @@ the following HTML output:
 \quote
 The square root of 2 is
 \eval{
-(if 'nil 
+(if 'nil
     (display (sqrt 2))
     (princ (sqrt 2)))
 }.
@@ -3323,7 +3326,6 @@ on both standard output and in the log file.
 Judicious use of these commands
 should help pinpoint any error.
 
-
 \beginchapter A Also in Scheme
 
 The \TeX2page distribution comes with two scripts,
@@ -3339,7 +3341,7 @@ See Appendix C for details on how to obtain a script that works
 on Schemes other than Racket.
 
 When you get the script of your choice configured, you may copy or link it to
-`tex2page` and put it in your `PATH`. 
+`tex2page` and put it in your `PATH`.
 
 \beginsection Calling \TeX2page from Scheme
 
@@ -3365,7 +3367,7 @@ difference of course is that the `\eval`-enclosed code must be in
 Scheme rather than Common Lisp. (You can also use the
 Scheme names (procedures and other, global values) added by the
 script, and for the most part these names are identical across
-Scheme and Common Lisp.) 
+Scheme and Common Lisp.)
 
 E.g., the \q{all-blanks-p} procedure
 defined in Chapter 10 would look like this in the Scheme
@@ -3384,7 +3386,7 @@ situation:
 It is of course possible to keep your TeX document
 language-proof by using a conditional on the flag
 `\TZPcommonlisp`. This is set to 1 in Common Lisp and 0 in Scheme:
-Use `\ifx` to create two branches, e.g., 
+Use `\ifx` to create two branches, e.g.,
 
 \begintt
 \ifx\TZPcommonlisp 1
@@ -3602,28 +3604,27 @@ function \q{tex2page} by its package-qualified name, \q{tex2page:tex2page}:
 %\input hisfir
 \fi
 
-
 \beginchapter D Details for the curious
 
 \xrdef{auxfile}
 \index{auxiliary files}
 %
 Running \TeX2page creates in your working directory  a bunch of files
-with the infix `-Z-`. 
+with the infix `-Z-`.
 Here’s the whole story on what they are for:
 
 Given an input \TeX\ document whose main file is
-`story.tex`, the
+`jobname.tex`, the
 command
 
 \begintt
-tex2page story
+tex2page jobname
 \endtt
 %
 typically produces at least one
-output HTML file `story.html`, and possibly some
+output HTML file `jobname.html`, and possibly some
 additional HTML files, which are named
-`story-Z-H-1.html`, `story-Z-H-2.html`, and
+`jobname-Z-H-1.html`, `jobname-Z-H-2.html`, and
 so on.  Additional HTML files are created whenever the
 input document has commands requesting page
 breaks in the HTML output.
@@ -3638,71 +3639,63 @@ closely, either out of curiosity or for debugging your
 document.
 
 \TeX2page displays on standard output the log of
-its progress with `story.tex`.  A copy of this
+its progress with `jobname.tex`.  A copy of this
 log is kept in the log
-file `story.hlog`.
+file `jobname.hlog`.
 
 \TeX2page generates a style sheet in
-`story-Z-S.css`.  This contains some default style
+`jobname-Z-S.css`.  This contains some default style
 information that \TeX2page generates for every document,
 plus any style info supplied by the user via
 `\cssblock` statements in the document.
 
 \index{BibTeX@\BibTeX}
 
-If `story.tex` uses the external program \BibTeX\ for
+If `jobname.tex` uses the external program \BibTeX\ for
 its bibliography, \TeX2page sends information to \BibTeX\
-in the file `story-Z-B.aux` and receives information
-from \BibTeX\ in the file `story-Z-B.bbl`.
+in the file `jobname-Z-B.aux` and receives information
+from \BibTeX\ in the file `jobname-Z-B.bbl`.
 
 \index{MakeIndex}
 
-If `story.tex` contains `\index` commands, \TeX2page
-will dump the unsorted index into `story-Z-I.idx` and
-get from MakeIndex the sorted index `story-Z-I.ind`.
+If `jobname.tex` contains `\index` commands, \TeX2page
+will dump the unsorted index into `jobname-Z-I.idx` and
+get from MakeIndex the sorted index `jobname-Z-I.ind`.
 
-\TeX2page uses the auxiliary files `story-Z-L.lisp` and
-`story-Z-A.lisp` to keep track of labels and other
+\TeX2page uses the auxiliary files `jobname-Z-L.lisp` and
+`jobname-Z-A.lisp` to keep track of labels and other
 internal cross-references.  Each run of \TeX2page loads
-the `story-Z-L.lisp` and `story-Z-A.lisp`
-created by the previous run.  If `story.tex` contains
+the `jobname-Z-L.lisp` and `jobname-Z-A.lisp`
+created by the previous run.  If `jobname.tex` contains
 {\em forward} cross-references, \TeX2page must be rerun
 at least once.
 
-For the image portions of `story.tex`, \TeX2page creates the auxiliary \TeX\
-files `story-Z-G-1.tex`, etc, and uses external programs (as described on
+For the image portions of `jobname.tex`, \TeX2page creates the auxiliary \TeX\
+files `jobname-Z-G-1.tex`, etc, and uses external programs (as described on
 p.~\ref{imageconv}) to convert them to the corresponding image files
-`story-Z-G-1.gif`, etc.  (This assumes you are using the GIF format for
-images.  If you had requested the PNG or JPEG format for images, the
+`jobname-Z-G-1.png`, etc.  (This assumes you are using the default PNG format for
+images.  If you had requested the GIF or JPEG format for images, the
 extensions of these aux files would be correspondingly different.)
 
 The above are “single-use” images.
-`story.tex` may reuse some image files within itself.
+`jobname.tex` may reuse some image files within itself.
 Such image files have slightly different names and are
-numbered separately: `story-Z-G-D-1.gif`, etc.
+numbered separately: `jobname-Z-G-D-1.png`, etc.
 
 \index{eval@`\eval`}
 
-Occurrences of `\eval` in `story.tex` typically
-create the auxiliary Scheme files `story-Z-E-1.scm`,
-etc.  These are converted (by Scheme) into the
-corresponding auxiliary \TeX\ files `story-Z-E-1.tex`,
-etc, which are loaded back into `story.tex` on a
-subsequent run.  Only the `\eval`s that will be
-processed by \TeX\ (i.e., those that are not in
-HTML-only regions, p.~\ref{htmlonly})
-produce such numbered auxiliary files,
-since the numbering allows successive runs of \TeX\ to
-access the correct file.  Such `\eval`s and their
-files can also be shared by \TeX2page and \TeX, without
-the `\eval`s that occur in the HTML-only portions
-throwing the numbering off.  `\eval`s in
-HTML-only
-regions of the document are processed
-without any memorable aux files, because \TeX\ won’t use
-them, and \TeX2page (which, unlike \TeX, can call Scheme
-immediately in the
-current run) doesn’t need them.
+Occurrences of `\eval` in `jobname.tex` don’t create auxiliary
+files when processed by \TeX2page. However, if the document is
+processed by \TeX, they’re accumulated in an auxiliary Lisp file
+called `jobname-Z-E.lisp`. This file is loadable in either Common
+Lisp or Scheme, thanks to another aux file called
+`jobname-Z-E-D.lisp`. When loaded in Lisp, `jobname-Z-E.lisp`
+will create a series of aux \TeX\ files `jobname-Z-E-1.tex`,
+etc., which are inserted back into `jobmame.tex` on a
+subsequent run of \TeX. (As a convenience, running \TeX2page on
+`jobname.tex` will also process any `jobname-Z-E.lisp` if it
+exists, although the `jobname-Z-E-*.tex` aren’t needed by
+\TeX2page itself.)
 
 \index{hdir file@`.hdir` file}
 
@@ -3713,8 +3706,8 @@ using one of the following three files:
 
 \item(i) \p{|meta[jobname].hdir} in the working directory, i.e.,
 a file with the same basename as the input document but with
-extension `.hdir`.  For `story.tex`, this would
-be `story.hdir`.
+extension `.hdir`.  For `jobname.tex`, this would
+be `jobname.hdir`.
 
 \item(ii) `.tex2page.hdir` in the working directory.
 

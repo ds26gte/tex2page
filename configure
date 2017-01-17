@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Last modified: 2017-01-02
+# Last modified: 2017-01-17
 
 # Set scmxlate to the pathname of scmxlate/scmxlate.scm
 # on your system, if you know it.  Otherwise let
@@ -124,12 +124,16 @@ makeit() {
 echodialectsuggestions() {
   test "`which abcl 2>/dev/null|grep -v ' '`"  &&\
     abclpresent=yes
+  test "`which scheme 2>/dev/null|grep -v ' '`"  &&\
+    chezpresent=yes
   test "`which clisp 2>/dev/null|grep -v ' '`"  &&\
     clisppresent=yes
   test "`which csi 2>/dev/null|grep -v ' '`"  &&\
     chickenpresent=yes
   test "`which ccl 2>/dev/null|grep -v ' '`"  &&\
     clozurepresent=yes
+  test "`which lisp 2>/dev/null|grep -v ' '`"  &&\
+    cmuclpresent=yes
   test "`which ecl 2>/dev/null|grep -v ' '`" &&\
     eclpresent=yes
   test "`which gosh 2>/dev/null|grep -v ' '`"  &&\
@@ -138,6 +142,8 @@ echodialectsuggestions() {
     guilepresent=yes
   test "`which mkcl 2>/dev/null|grep -v ' '`" &&\
     mkclpresent=yes
+  test "`which petite 2>/dev/null|grep -v ' '`" &&\
+    petitepresent=yes
   test "`which racket 2>/dev/null|grep -v ' '`" &&\
     racketpresent=yes
   test "`which sbcl 2>/dev/null|grep -v ' '`"  &&\
@@ -145,10 +151,26 @@ echodialectsuggestions() {
   echo
   echo Note: The following look promising on your system:
   echo
+  echo Common Lisps:
+  echo
+  test "$abclpresent" &&\
+    echo \ \ ./configure --dialect=abcl
+  test "$clisppresent" &&\
+    echo \ \ ./configure --dialect=clisp
+  test "$clozurepresent" &&\
+    echo \ \ ./configure --dialect=clozure
+  test "$cmuclpresent" &&\
+    echo \ \ ./configure --dialect=cmucl
+  test "$eclpresent" &&\
+    echo \ \ ./configure --dialect=ecl
+  test "$mkclpresent" &&\
+    echo \ \ ./configure --dialect=mkcl
+  test "$sbclpresent" &&\
+    echo \ \ ./configure --dialect=sbcl &&\
+    echo \ \ ./configure --dialect=sbcl-compiled
+  echo
   echo Schemes:
   echo
-  test "$racketpresent" &&\
-    echo \ \ ./configure --dialect=racket
   test "$chezpresent" &&\
     echo \ \ ./configure --dialect=chez
   test "$chickenpresent" &&\
@@ -161,22 +183,8 @@ echodialectsuggestions() {
     echo \ \ ./configure --dialect=guile
   test "$petitepresent" &&\
     echo \ \ ./configure --dialect=petite
-  echo
-  echo Common Lisps:
-  echo
-  test "$sbclpresent" &&\
-    echo \ \ ./configure --dialect=sbcl &&\
-    echo \ \ ./configure --dialect=sbcl-compiled
-  test "$abclpresent" &&\
-    echo \ \ ./configure --dialect=abcl
-  test "$clisppresent" &&\
-    echo \ \ ./configure --dialect=clisp
-  test "$clozurepresent" &&\
-    echo \ \ ./configure --dialect=clozure
-  test "$eclpresent" &&\
-    echo \ \ ./configure --dialect=ecl
-  test "$mkclpresent" &&\
-    echo \ \ ./configure --dialect=mkcl
+  test "$racketpresent" &&\
+    echo \ \ ./configure --dialect=racket
 }
 
 echohelp() {

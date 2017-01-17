@@ -1,4 +1,4 @@
-; last change 2017-01-02
+; last change 2017-01-17
 abcl ;v 1.5; WORKS!
 allegro ;v 9.0; WORKS!
 ;bigloo
@@ -17,7 +17,7 @@ guile ;v 2.0.11; WORKS!
 ;mitscheme
 mkcl ;v 1.1.10; WORKS!
 petite ;v 9.4; WORKS!
-plt ;lib version for PLT: not quite yet
+;plt ;lib version for PLT: not quite yet
 ;pscheme
 racket ;v 6.7; WORKS!
 ;rscheme

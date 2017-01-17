@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170116") ;last change
+(defparameter *tex2page-version* "20170117") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -180,7 +180,7 @@
 (defparameter *tex-files-to-ignore*
   '("btxmac" "eplain" "epsf" "lmfonts" "mfpic" "supp-pdf"))
 
-(defparameter *esc-char-initex* #\\)
+;(defparameter *esc-char-initex* #\\)
 ;(defparameter *esc-char-universal* #\Ǝ)
 
 (defparameter *catcodes*
@@ -223,7 +223,6 @@
 (defvar *bibitem-num* 0)
 
 (defvar *color-names* '())
-(defvar *comment-char* #\%)
 (defvar *css-port* nil)
 (defvar *current-source-file* nil)
 (defvar *current-tex2page-input* nil)
@@ -923,8 +922,7 @@
             (cond ((not c) (return s))
                   ((and (not bracedp)
                         (or (char-whitespace-p c)
-                            (and *comment-char*
-                                 (char= c *comment-char*))
+                            (comment-char-p c)
                             (member c *filename-delims* :test #'char=)))
                    (unless *not-processing-p* (ignorespaces))
                    (return s))
@@ -954,7 +952,7 @@
                 (loop (let ((c (snoop-actual-char)))
                         (cond ((not c) (return s))
                               ((or (char-whitespace-p c)
-                                   (and *comment-char* (char= c *comment-char*))
+                                   (comment-char-p c)
                                    (esc-char-p c))
                                (return s))
                               (t (get-actual-char)
@@ -1088,7 +1086,7 @@
           (loop
             (let ((c (get-actual-char)))
               (when (not c) (terror 'get-url "Missing }"))
-              (cond ((and *comment-char* (char= c *comment-char*))
+              (cond ((comment-char-p c)
                      (let ((c1 (snoop-actual-char)))
                        (if (and (characterp c1)
                                 (char-whitespace-p c1))
@@ -1137,7 +1135,7 @@
   (let ((c (snoop-actual-char)))
     (cond ((not c) c)
           ((esc-char-p c) (get-ctl-seq))
-          ((and *comment-char* (char= c *comment-char*)) (eat-till-eol)
+          ((comment-char-p c) (eat-till-eol)
            (get-raw-token/is))
           (t (concatenate 'string (list (get-actual-char)))))))
 
@@ -1147,7 +1145,7 @@
     (cond ((not c) c)
           ((esc-char-p c) (get-ctl-seq))
           ((char= c #\{) (get-group))
-          ((and *comment-char* (char= c *comment-char*)) (eat-till-eol)
+          ((comment-char-p c) (eat-till-eol)
            (get-token))
           (t (concatenate 'string (list (get-actual-char)))))))
 
@@ -1157,8 +1155,7 @@
     (cond ((not c) c)
           ((esc-char-p c) (get-ctl-seq))
           ((char= c #\{) (get-group))
-          ((and *comment-char* (char= c *comment-char*))
-           (eat-till-eol) (get-token/ps))
+          ((comment-char-p c) (eat-till-eol) (get-token/ps))
           (t (concatenate 'string (list (get-actual-char)))))))
 
 (defun eat-word (word)
@@ -1256,6 +1253,10 @@
 (defun esc-char-p (c)
   (declare (character c))
   (= (catcode c) 0))
+
+(defun comment-char-p (c)
+  (declare (character c))
+  (= (catcode c) 14))
 
 (defun char-tex-alphabetic-p (c)
   (declare (character c))
@@ -4358,8 +4359,7 @@
                             (princ #\} o))
                           (when (and g (string= g env)) (decf env-nesting))))
                        (t (princ x o)))))
-              ((and (char= c *comment-char*)
-                    (not *dumping-nontex-p*))
+              ((and (comment-char-p c) (not *dumping-nontex-p*))
                (do-comment) (write-char #\% o) (terpri o))
               (t (write-char (get-actual-char) o)
                  (cond ((char= c #\{)
@@ -6104,8 +6104,7 @@
           (cond ((and (char= c #\space) (char-whitespace-p d))
                  (ignorespaces)
                  (incf i) (push c s))
-                ((and *comment-char*
-                      (char= d *comment-char*))
+                ((comment-char-p d)
                  (do-comment))
                 ((and (char= c #\newline)
                       (char-whitespace-p d)
@@ -6567,7 +6566,7 @@
           ((esc-char-p c) (get-actual-char)
            (toss-back-char *invisible-space*)
            (toss-back-string "\\TIIPbackslash"))
-          ((char= c *comment-char*) (eat-till-eol) (do-string))
+          ((comment-char-p c) (eat-till-eol) (do-string))
           (t (toss-back-char (get-actual-char))))))
 
 (defun do-verbatim-latex (env)
@@ -7196,7 +7195,7 @@
     (t (emit "<em>") (emit c) (emit "</em>"))))
 
 (defun do-tex-char (c)
-  (cond ((and *comment-char* (char= c *comment-char*)) (do-comment))
+  (cond ((comment-char-p c) (do-comment))
         ((inside-false-world-p) t)
         ((char= c #\{) (bgroup))
         ((char= c #\}) (egroup))
@@ -7386,8 +7385,7 @@
       (ignorespaces)
       (let ((c (snoop-actual-char)))
         (when (not c) (terror 'do-includeonly))
-        (cond ((and *comment-char* (char= c *comment-char*))
-               (eat-till-eol)  )
+        (cond ((comment-char-p c) (eat-till-eol))
               ((char= c #\,) (get-actual-char))
               ((char= c #\}) (get-actual-char) (return))
               ((member c  *filename-delims* :test #'char=)
@@ -10313,7 +10311,6 @@ Try the commands
         ;
         (*catcodes* *catcodes*)
         (*color-names* '())
-        (*comment-char* #\%)
         (*css-port* nil)
         (*current-source-file* nil)
         (*current-tex2page-input* nil)

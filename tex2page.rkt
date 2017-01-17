@@ -314,7 +314,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170110.
 
 
-(define *tex2page-version* "20170116")
+(define *tex2page-version* "20170117")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -458,8 +458,6 @@
 (define *tex-files-to-ignore*
  '("btxmac" "eplain" "epsf" "lmfonts" "mfpic" "supp-pdf"))
 
-(define *esc-char-initex* #\\)
-
 (define *catcodes*
  (list (cons #\\ 0) (cons #\  10) (cons #\% 14) (cons (integer->char 0) 9)
        (cons #\return 5) (cons #\{ 1) (cons #\} 2) (cons #\$ 3) (cons #\& 4)
@@ -482,8 +480,6 @@
 (define *bibitem-num* 0)
 
 (define *color-names* null)
-
-(define *comment-char* #\%)
 
 (define *css-port* false)
 
@@ -2056,9 +2052,7 @@
                   (let ((c (snoop-actual-char)))
                     (cond ((not c) (return s))
                           ((and (not bracedp)
-                                (or (char-whitespace? c)
-                                    (and *comment-char*
-                                         (char=? c *comment-char*))
+                                (or (char-whitespace? c) (comment-char-p c)
                                     (member c *filename-delims*)))
                            (cond ((not *not-processing-p*) (ignorespaces))
                                  (else false))
@@ -2150,8 +2144,7 @@
                 ()
                 (let ((c (snoop-actual-char)))
                   (cond ((not c) (return s))
-                        ((or (char-whitespace? c)
-                             (and *comment-char* (char=? c *comment-char*))
+                        ((or (char-whitespace? c) (comment-char-p c)
                              (esc-char-p c))
                          (return s))
                         (else (get-actual-char) (set! s (cons c s)) s)))
@@ -2389,7 +2382,7 @@
                      (cond ((not c) (terror 'get-url "Missing }"))
                            (else false))
                      (cond
-                      ((and *comment-char* (char=? c *comment-char*))
+                      ((comment-char-p c)
                        (let ((c1 (snoop-actual-char)))
                          (if (and (char? c1) (char-whitespace? c1))
                              (ignore-all-whitespace)
@@ -2512,8 +2505,7 @@
 (define (get-raw-token/is) (ignorespaces)
  (let ((c (snoop-actual-char)))
    (cond ((not c) c) ((esc-char-p c) (get-ctl-seq))
-         ((and *comment-char* (char=? c *comment-char*)) (eat-till-eol)
-          (get-raw-token/is))
+         ((comment-char-p c) (eat-till-eol) (get-raw-token/is))
          (else
           (let ((%type 'string) (%ee (list (list (get-actual-char)))))
             (let ((%res
@@ -2543,8 +2535,7 @@
  (let ((c (snoop-actual-char)))
    (cond ((not c) c) ((esc-char-p c) (get-ctl-seq))
          ((char=? c #\{) (get-group))
-         ((and *comment-char* (char=? c *comment-char*)) (eat-till-eol)
-          (get-token))
+         ((comment-char-p c) (eat-till-eol) (get-token))
          (else
           (let ((%type 'string) (%ee (list (list (get-actual-char)))))
             (let ((%res
@@ -2574,8 +2565,7 @@
  (let ((c (snoop-actual-char)))
    (cond ((not c) c) ((esc-char-p c) (get-ctl-seq))
          ((char=? c #\{) (get-group))
-         ((and *comment-char* (char=? c *comment-char*)) (eat-till-eol)
-          (get-token/ps))
+         ((comment-char-p c) (eat-till-eol) (get-token/ps))
          (else
           (let ((%type 'string) (%ee (list (list (get-actual-char)))))
             (let ((%res
@@ -2784,6 +2774,8 @@
 (define (curr-esc-char) (car (rassoc 0 *catcodes*)))
 
 (define (esc-char-p c) (= (catcode c) 0))
+
+(define (comment-char-p c) (= (catcode c) 14))
 
 (define (char-tex-alphabetic-p c) (= (catcode c) 11))
 
@@ -7968,7 +7960,7 @@
                               (set! env-nesting (- env-nesting 1)) env-nesting)
                              (else false))))
                          (else (display x o)))))
-                     ((and (char=? c *comment-char*) (not *dumping-nontex-p*))
+                     ((and (comment-char-p c) (not *dumping-nontex-p*))
                       (do-comment) (write-char #\% o) (newline o))
                      (else (write-char (get-actual-char) o)
                       (cond
@@ -12207,7 +12199,7 @@
                  (cond
                   ((and (char=? c #\ ) (char-whitespace? d)) (ignorespaces)
                    (set! i (+ i 1)) (set! s (cons c s)) s)
-                  ((and *comment-char* (char=? d *comment-char*)) (do-comment))
+                  ((comment-char-p d) (do-comment))
                   ((and (char=? c #\newline) (char-whitespace? d)
                         (or (munched-a-newline-p)
                             (begin (toss-back-char d) false)))
@@ -12966,7 +12958,7 @@
    (cond ((not c) false)
          ((esc-char-p c) (get-actual-char) (toss-back-char *invisible-space*)
           (toss-back-string "\\TIIPbackslash"))
-         ((char=? c *comment-char*) (eat-till-eol) (do-string))
+         ((comment-char-p c) (eat-till-eol) (do-string))
          (else (toss-back-char (get-actual-char))))))
 
 (define (do-verbatim-latex env) (do-end-para) (bgroup)
@@ -13899,12 +13891,12 @@
    (else (emit "<em>") (emit c) (emit "</em>"))))
 
 (define (do-tex-char c)
- (cond ((and *comment-char* (char=? c *comment-char*)) (do-comment))
-       ((inside-false-world-p) true) ((char=? c #\{) (bgroup))
-       ((char=? c #\}) (egroup)) ((char=? c #\$) (do-math))
-       ((char=? c #\-) (do-hyphen)) ((char=? c #\`) (do-lsquo))
-       ((char=? c #\') (do-rsquo)) ((char=? c #\~) (emit-nbsp 1))
-       ((char=? c #\!) (do-excl)) ((char=? c #\?) (do-quest))
+ (cond ((comment-char-p c) (do-comment)) ((inside-false-world-p) true)
+       ((char=? c #\{) (bgroup)) ((char=? c #\}) (egroup))
+       ((char=? c #\$) (do-math)) ((char=? c #\-) (do-hyphen))
+       ((char=? c #\`) (do-lsquo)) ((char=? c #\') (do-rsquo))
+       ((char=? c #\~) (emit-nbsp 1)) ((char=? c #\!) (do-excl))
+       ((char=? c #\?) (do-quest))
        ((or (char=? c #\<) (char=? c #\>) (char=? c #\")) (emit-html-char c))
        ((char=? c #\&)
         (cond
@@ -14105,7 +14097,7 @@
         (ignorespaces)
         (let ((c (snoop-actual-char)))
           (cond ((not c) (terror 'do-includeonly)) (else false))
-          (cond ((and *comment-char* (char=? c *comment-char*)) (eat-till-eol))
+          (cond ((comment-char-p c) (eat-till-eol))
                 ((char=? c #\,) (get-actual-char))
                 ((char=? c #\}) (get-actual-char) (return))
                 ((member c *filename-delims*) (terror 'do-includeonly))
@@ -19288,7 +19280,6 @@ Try the commands
        (%fluid-var-*bibitem-num* 0)
        (%fluid-var-*catcodes* *catcodes*)
        (%fluid-var-*color-names* null)
-       (%fluid-var-*comment-char* #\%)
        (%fluid-var-*css-port* false)
        (%fluid-var-*current-source-file* false)
        (%fluid-var-*current-tex2page-input* false)
@@ -19515,7 +19506,6 @@ Try the commands
      (*current-tex2page-input* %fluid-var-*current-tex2page-input*)
      (*current-source-file* %fluid-var-*current-source-file*)
      (*css-port* %fluid-var-*css-port*)
-     (*comment-char* %fluid-var-*comment-char*)
      (*color-names* %fluid-var-*color-names*)
      (*catcodes* %fluid-var-*catcodes*)
      (*bibitem-num* %fluid-var-*bibitem-num*)

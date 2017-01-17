@@ -2974,14 +2974,13 @@ The square root of 2 is
 \endtt
 Running \TeX2page on `root2.tex` produces
 the following HTML output:
-\evalq{
-  (if 'nil (define princ display) (not 0))
-}
 
 \quote
 The square root of 2 is
 \eval{
-(princ (sqrt 2))
+(if 'nil 
+    (display (sqrt 2))
+    (princ (sqrt 2)))
 }.
 \endquote
 In effect, \TeX2page processes the `\eval` call

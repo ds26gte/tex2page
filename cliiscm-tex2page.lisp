@@ -1,4 +1,4 @@
-;last modified 2017-01-16
+;last modified 2017-01-18
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -m -- \"$@\"
@@ -12,7 +12,7 @@
 
   defpackage
   in-package
-  sb-alien:define-alien-routine
+;  sb-alien:define-alien-routine
   tex2page
 
   )
@@ -215,8 +215,14 @@
              (lambda (x)
                (and (vector? x) (eq? (vector-ref x 0) ',s)))))))))
 
+#|
 (defmacro cl-with-output-to-string (ignore-wots-arg . body)
   `(with-output-to-string (lambda () ,@body)))
+|#
+
+(defmacro cl-with-output-to-string (ignore-wots-arg . body)
+  (list 'with-output-to-string
+        (list* 'lambda '() body)))
 
 (defstruct table (test eqv?) (alist '()))
 
@@ -371,9 +377,9 @@
          (list-ref args 0))))
 
 (cliiscm-postprocess
-  (system "cp my-tex2page.lisp tex2page.rkt")
-  (system "chmod +x tex2page.rkt")
-  (system "ln -sf tex2page.rkt tex2page")
+  (cliiscm-system "cp my-tex2page.lisp tex2page.rkt")
+  (cliiscm-system "chmod +x tex2page.rkt")
+  (cliiscm-system "ln -sf tex2page.rkt tex2page")
   (format t "tex2page has been successfully configured for Racket.~%")
   (format t "You may put it in your PATH.~%")
   )

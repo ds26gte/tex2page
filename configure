@@ -136,6 +136,8 @@ echodialectsuggestions() {
     cmuclpresent=yes
   test "`which ecl 2>/dev/null|grep -v ' '`" &&\
     eclpresent=yes
+  test "`which gsi 2>/dev/null|grep -v ' '`"  &&\
+    gambitpresent=yes
   test "`which gosh 2>/dev/null|grep -v ' '`"  &&\
     gauchepresent=yes
   test "`which guile 2>/dev/null|grep -v ' '`"  &&\

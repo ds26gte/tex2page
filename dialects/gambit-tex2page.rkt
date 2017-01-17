@@ -1,4 +1,4 @@
-; last change: 2017-01-03
+; last change: 2017-01-17
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -24,7 +24,12 @@
 (scmxlate-rename
  (eof #!eof)
  (getenv gambit-getenv)
+ (substring subseq)
  )
+
+(define (subseq s i . z)
+  (let ((f (if (pair? z) (car z) (string-length s))))
+    (substring s i f)))
 
 (define (remove y xx)
   (let loop ((xx xx) (r '()))

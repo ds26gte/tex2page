@@ -534,7 +534,7 @@
 (defun edit-offending-file ()
   (let ((calling-from-text-editor-p (retrieve-env "VIMRUNTIME")))
     (unless calling-from-text-editor-p
-      (princ "Type e to edit file at point of error; x to quit.")
+      (princ "Type E to edit your file, X to quit.")
       (terpri)
       (princ "? ")
       (force-output)
@@ -1270,8 +1270,7 @@
   (pop *tex-env*)
   (cond ((setq *it* (top-texframe))
          (setq *catcodes* (texframe*-catcodes *it*)))
-        (t (terror 'egroup "deadcode")))
-  ;pop tex-env here instead?
+        (t (terror 'egroup "This can't happen.")))
   )
 
 (defun bgroup-math-hook ()
@@ -2794,8 +2793,11 @@
     (:cc (* 12 (scaled-point-equivalent-of :dd)))
     (:sp 1)
     ;
-    (:em (* 10 (scaled-point-equivalent-of :pt)))
-    (:ex (* 4.5 (scaled-point-equivalent-of :pt)))
+    ;(:em (* 10 (scaled-point-equivalent-of :pt)))
+    ;(:ex (* 4.5 (scaled-point-equivalent-of :pt)))
+    ;
+    (:em (* 16 (scaled-point-equivalent-of :pt)))
+    (:ex (* .45 (scaled-point-equivalent-of :em)))
     ;
     (t (terror 'scaled-point-equivalent-of
                "Illegal unit of measure " unit))))
@@ -6151,7 +6153,7 @@
                                      (cond ((ctl-seq-p x2)
                                             (cond ((string= x "\\the") (expand-the))
                                                   ((string= x "\\number") (get-number))
-                                                  (t "DeAdCoDe")))
+                                                  (t #xdeadc0de)))
                                            (t x))))
                                   ((string= x "\\noexpand")
                                    (let ((x2 (get-raw-token/is)))

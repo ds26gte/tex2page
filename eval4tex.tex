@@ -11,7 +11,7 @@
 \newcount\evalQauxfilecount
 \evalQauxfilecount=0
 
-{\catcode`\^^M=12
+{\catcode`\^^M=12 %
 \gdef\evalfortexQsetup{%
   \expandafter\csname newwrite\endcsname \evalfortexQport %
   %
@@ -38,7 +38,7 @@
 
   (defun integer->char (n) (code-char n))
   }%
-  \immediate\closeout\evalfortexQport
+  \immediate\closeout\evalfortexQport %
   %
   \immediate\openout\evalfortexQport \jobname-Z-E.lisp %
   %\newlinechar=`\^^M%
@@ -59,6 +59,7 @@
     (close-output-port (current-output-port))
     (current-output-port *eval4tex-current-output-port*))
   }%
+  \newlinechar=-1 %
 }%
 }
 
@@ -85,6 +86,7 @@
 \def\evalQii#1{%
   \immediate\write\evalfortexQport{#1}%
   \immediate\write\evalfortexQport{(eval4tex-postamble)}%
+  \newlinechar=-1 %
   \endgroup}
 
 % end of file

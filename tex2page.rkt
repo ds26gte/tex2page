@@ -679,6 +679,8 @@
 
 (define *source-changed-since-last-run-p* false)
 
+(define *start-time* 0)
+
 (define *stylesheets* false)
 
 (define *subjobname* *jobname*)
@@ -10795,12 +10797,9 @@
     (tex-def-count "\\day" d true)
     (tex-def-count "\\month" mo true)
     (tex-def-count "\\year" y true))
-  (decode-universal-time (current-seconds))))
+  (decode-universal-time *start-time*)))
 
-(define (initialize-globals)
- (set! *global-texframe* (make-texframe* ':catcodes *catcodes*))
- (set! *section-counter-dependencies* (make-table))
- (set! *dotted-counters* (make-table ':test equal?))
+(define (initialize-globals) (set-start-time)
  (tex-def-count "\\language" 256 true) (tex-def-count "\\secnumdepth" -2 true)
  (tex-def-count "\\tocdepth" -2 true) (tex-def-count "\\footnotenumber" 0 true)
  (tex-def-count "\\TIIPtabularborder" 1 true)
@@ -10820,9 +10819,8 @@
  (tex-def-count "\\outputpenalty" 0 true) (tex-def-count "\\globaldefs" 0 true)
  (tex-def-count "\\mag" 1000 true) (tex-def-count "\\tracingcommands" 0 true)
  (tex-def-count "\\tracingmacros" 0 true)
- (tex-def-count "\\tracingonline" 0 true) (tex-def-count "\\time" 0 true)
- (tex-def-count "\\day" 0 true) (tex-def-count "\\month" 0 true)
- (tex-def-count "\\year" 0 true) (tex-def-count "\\shellescape" 1 true)
+ (tex-def-count "\\tracingonline" 0 true)
+ (tex-def-count "\\shellescape" 1 true)
  (tex-def-count "\\suppressfontnotfounderror" 1 true)
  (tex-def-dimen "\\TIIPhsize" 0 true)
  (tex-def-dimen "\\hsize" (tex-length 6.5 ':in) true)
@@ -15053,7 +15051,7 @@
       "
     *css-port*)))
 
-(define (load-aux-file) (set-start-time)
+(define (load-aux-file)
  (let ((label-file
         (let ((%type 'string)
               (%ee (list *aux-dir/* *jobname* *label-file-suffix*)))
@@ -19285,7 +19283,7 @@ Try the commands
        (%fluid-var-*current-tex2page-input* false)
        (%fluid-var-*display-justification* "center")
        (%fluid-var-*doctype* *doctype*)
-       (%fluid-var-*dotted-counters* false)
+       (%fluid-var-*dotted-counters* (make-table ':test equal?))
        (%fluid-var-*dumping-nontex-p* false)
        (%fluid-var-*equation-number* false)
        (%fluid-var-*equation-numbered-p* true)
@@ -19295,7 +19293,7 @@ Try the commands
        (%fluid-var-*external-label-tables* (make-table ':test equal?))
        (%fluid-var-*footnote-list* null)
        (%fluid-var-*footnote-sym* 0)
-       (%fluid-var-*global-texframe* false)
+       (%fluid-var-*global-texframe* (make-texframe* ':catcodes *catcodes*))
        (%fluid-var-*graphics-file-extensions* '(".eps"))
        (%fluid-var-*html* false)
        (%fluid-var-*html-head* null)
@@ -19366,10 +19364,11 @@ Try the commands
        (%fluid-var-*scm-special-symbols* false)
        (%fluid-var-*scm-variables* false)
        (%fluid-var-*scripts* null)
-       (%fluid-var-*section-counter-dependencies* false)
+       (%fluid-var-*section-counter-dependencies* (make-table))
        (%fluid-var-*section-counters* (make-table))
        (%fluid-var-*slatex-math-escape* false)
        (%fluid-var-*source-changed-since-last-run-p* false)
+       (%fluid-var-*start-time* (current-seconds))
        (%fluid-var-*stylesheets* null)
        (%fluid-var-*subjobname* false)
        (%fluid-var-*tabular-stack* null)
@@ -19419,6 +19418,7 @@ Try the commands
      (*tabular-stack* %fluid-var-*tabular-stack*)
      (*subjobname* %fluid-var-*subjobname*)
      (*stylesheets* %fluid-var-*stylesheets*)
+     (*start-time* %fluid-var-*start-time*)
      (*source-changed-since-last-run-p*
       %fluid-var-*source-changed-since-last-run-p*)
      (*slatex-math-escape* %fluid-var-*slatex-math-escape*)
@@ -19520,7 +19520,7 @@ Try the commands
     (write-log "This is TeX2page, Version ") (write-log *tex2page-version*)
     (write-log #\ ) (write-log #\() (write-log *scheme-version*)
     (write-log #\)) (write-log #\ )
-    (write-log (seconds-to-human-time (current-seconds)))
+    (write-log (seconds-to-human-time *start-time*))
     (write-log ':separation-newline)
     (cond
      (*main-tex-file* (set! *subjobname* *jobname*)

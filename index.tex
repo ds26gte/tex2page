@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2017-01-17} %last change
+\c{2017-01-19} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1462,6 +1462,18 @@ For \TeX\ to do likewise, the document must include supply an
 appropriate \TeX-only definition for `\title`, e.g., the
 one in `tex2page.tex`.
 
+\beginsection Language
+
+\index{TZPlang@`\TZPlang`}
+%
+By default, the language of the document is assumed to be
+English. To set it to another language, set the control sequence
+`\TZPlang` to the ISO 639-1 code for that language, e.g.,
+
+\begintt
+\def\TZPlang{de} % German
+\endtt
+
 \beginsection Colophon flags
 
 These flags
@@ -1483,6 +1495,7 @@ second line identifying \TeX2page and linking to its website.
 before the text for the second HTML page starts.  Otherwise, the default
 first-page placement of the colophon will have already taken effect.
 \fi
+%
 
 \index{TZPcolophondisabletimestamp@`\TZPcolophondisabletimestamp`}
 \item(ii) To avoid mentioning the timestamp of the document in the

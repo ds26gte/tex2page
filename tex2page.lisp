@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170117") ;last change
+(defparameter *tex2page-version* "20170119") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1288,7 +1288,7 @@
        (let ((res (get-output-stream-string *html*)))
          (setq res
                (concatenate 'string
-                 "<table><tr><td align=center>"
+                 "<table><tr><td class=centerline>"
                  res
                  "</td></tr></table>"))
          (when (or *math-delim-left* *math-delim-right*)
@@ -1739,7 +1739,7 @@
   (output-title "\\TIIPtitle")
   (do-para)
   (do-end-para)
-  (emit "<div align=center>")
+  (emit "<div class=centerline>")
   (emit-newline)
   (tex2page-string "\\TIIPauthor")
   (do-para)
@@ -1915,7 +1915,7 @@
     (emit "<h")
     (emit htmlnum)
     (case seclvl
-      ((-1) (emit " class=part align=center"))
+      ((-1) (emit " class=part class=centerline"))
       ((0) (emit " class=chapter"))
       (t (emit " class=section")))
     (emit ">")
@@ -2116,7 +2116,7 @@
     (get-bracketed-text-if-any)
     (emit "</td></tr>")
     (emit-newline)
-    (emit "<tr><td align=")
+    (emit "<tr><td class=")
     (emit *display-justification*)
     (emit "><b>")
     (tex2page-string caption-title)
@@ -2136,7 +2136,7 @@
 
 (defun do-marginpar ()
   (get-bracketed-text-if-any)
-  (emit "<table align=left border=2><tr><td>")
+  (emit "<table class=leftline border=2><tr><td>")
   (tex2page-string (get-group))
   (emit "</td></tr></table>"))
 
@@ -2147,7 +2147,7 @@
          (and (not (null *tabular-stack*))
               (member (car *tabular-stack*) '(:block :figure :table)))))
     (if in-table-p (emit "</td><td>") (progn (do-para) (do-end-para)))
-    (emit "<div align=left>")
+    (emit "<div class=leftline>")
     (push :minipage *tabular-stack*)))
 
 (defun do-endminipage ()
@@ -2189,7 +2189,7 @@
              (emit-newline)
              (unless (eql type :eqnarray*)
                (setq *equation-number* (bump-dotted-counter "equation")))
-             (emit "<div align=")
+             (emit "<div class=")
              (emit *display-justification*)
              (emit "><table width=100%>")
              (emit-newline)
@@ -2620,8 +2620,8 @@
        (:tt
         (let ((old-ligatures-p *ligatures-p*))
           (setq *ligatures-p* nil)
-          (emit "<tt>")
-          (lambda () (emit "</tt>") (setq *ligatures-p* old-ligatures-p))))
+          (emit "<span style=\"font-family: monospace\">")
+          (lambda () (emit "</span>") (setq *ligatures-p* old-ligatures-p))))
        (:sc
         (let ((old-in-small-caps-p *in-small-caps-p*))
           (setq *in-small-caps-p* t)
@@ -2672,10 +2672,16 @@
          (emit "\">")
          (lambda () (emit "</span>")))
        (:strike (emit "<strike>") (lambda () (emit "</strike>")))
-       (:narrower (emit "<blockquote>") (lambda () (emit "</blockquote>")))
+       (:narrower
+         (do-end-para)
+         (emit "<blockquote>")
+         (lambda ()
+           (do-end-para)
+           (emit "</blockquote>")
+           (do-para)))
        (:raggedleft
         (do-end-para)
-        (emit "<div align=right>")
+        (emit "<div class=rightline>")
         (lambda () (do-end-para) (emit "</div>") (do-para)))
        (:oldstyle
          (emit "<span class=oldstyle>")
@@ -2695,7 +2701,9 @@
   (when (eql (snoop-actual-char) #\newline) (get-actual-char))
   ;(do-noindent)
   (activate-cdef #\newline)
-  (tex-def-char #\newline '() "\\TIIPpar" nil))
+  ;(tex-def-char #\newline '() "\\TIIPpar" nil)
+  (tex-def-char #\newline '() "\\TIIPbr" nil)
+  )
 
 (defun do-obeyspaces ()
   (activate-cdef #\space)
@@ -2706,9 +2714,9 @@
   (do-end-para)
   (emit "<div ")
   (emit (case z
-          (:flushleft "align=left")
-          (:flushright "align=right")
-          (t "align=center")))
+          (:flushleft "class=leftline")
+          (:flushright "class=rightline")
+          (t "class=centerline")))
   (emit ">")
   (push :block *tabular-stack*)
   (emit "<table><tr><td>")
@@ -2727,17 +2735,19 @@
   (let ((*math-mode-p* *math-mode-p*))
     (cond (*outputting-external-title-p* nil)
           ((string= fn "\\emph") (emit "<em>"))
-          ((string= fn "\\leftline") (do-end-para) (emit "<div align=left>"))
+          ((string= fn "\\leftline") (do-end-para) (emit "<div class=leftline>"))
           ((string= fn "\\centerline") (do-end-para)
-           (emit "<div align=center>&#xa0;"))
+           (emit "<div class=centerline>&#xa0;"))
           ((string= fn "\\rightline") (do-end-para)
-           (emit "<div align=right>&#xa0;"))
+           (emit "<div class=rightline>&#xa0;"))
           ((string= fn "\\underline") (emit "<u>"))
           ((string= fn "\\textbf") (setq *math-mode-p* nil) (emit "<b>"))
           ((or (string= fn "\\textit") (string= fn "\\textsl"))
            (setq *math-mode-p* nil) (emit "<i>"))
           ((string= fn "\\textrm") (setq *math-mode-p* nil))
-          ((string= fn "\\texttt") (setq *math-mode-p* nil) (emit "<tt>"))
+          ((string= fn "\\texttt")
+           (setq *math-mode-p* nil)
+           (emit "<span style=\"font-family: monospace\">"))
           (t (terror 'do-function "Unknown function " fn)))
     (bgroup)
     (tex2page-string (get-token))
@@ -2751,7 +2761,7 @@
           ((string= fn "\\textbf") (emit "</b>"))
           ((or (string= fn "\\textsl") (string= fn "\\textit"))
            (emit "</i>"))
-          ((string= fn "\\texttt") (emit "</tt>")))))
+          ((string= fn "\\texttt") (emit "</span>")))))
 
 (defun do-discretionary ()
   (tex2page-string (get-group))
@@ -2979,7 +2989,7 @@
                      (setq whitep nil)))))))))
 
 (defun emit-anchor (lbl)
-  (emit "<a name=\"") (emit lbl) (emit "\"></a>"))
+  (emit "<a id=\"") (emit lbl) (emit "\"></a>"))
 
 (defun emit-link-start (link)
   (emit "<a href=\"") (emit link) (emit "\">"))
@@ -3297,7 +3307,8 @@
          (url (fully-qualify-url (get-url))))
     (emit "<img src=\"")
     (emit url)
-    (emit "\" border=\"0\" ")
+    (emit "\"")
+    (emit " style=\"border: 0\"")
     (when align-info (tex2page-string align-info))
     (emit " alt=\"[")
     (emit url)
@@ -3607,7 +3618,7 @@
               (tex2page-flag-boolean "\\TZPcolophonweblink"))))
     (when (or colophon-mentions-last-mod-time-p colophon-mentions-tex2page-p)
       (do-end-para)
-      (emit "<div align=right class=colophon>")
+      (emit "<div class=\"rightline colophon\">")
       (when (and colophon-mentions-last-mod-time-p *last-modification-time*
                (> *last-modification-time* 0))
         (tex2page-string *last-modified*)
@@ -3615,7 +3626,7 @@
         (emit (seconds-to-human-time *last-modification-time*))
         (emit "<br>"))
       (when colophon-mentions-tex2page-p
-        (emit "<div align=right class=advertisement>")
+        (emit "<div class=\"rightline advertisement\">")
         (tex2page-string *html-conversion-by*)
         (emit " ")
         (when colophon-links-to-tex2page-website-p
@@ -3643,7 +3654,9 @@
 (defun output-head-or-foot-line (head-or-foot)
   (declare (keyword head-or-foot))
   (unless (tex2page-flag-boolean "\\TZPsinglepage")
-    (emit "<div align=right class=navigation>")
+    (do-end-para)
+    ;align=right for lynx
+    (emit "<div class=navigation>")
     (cond ((or *tex-like-layout-p*
                (and (eq head-or-foot :foot)
                     (tex2page-flag-boolean "\\TZPtexlayout")))
@@ -3765,7 +3778,10 @@
     (emit *doctype*)
     (emit ">")
     (emit-newline))
-  (emit "<html>")
+  (emit "<html lang=")
+  (emit (resolve-defs "\\TZPlang"))
+  ;(emit (tdef*-expansion (find-def "\\TZPlang")))
+  (emit ">")
   (emit-newline)
   (emit "<!--")
   (emit-newline)
@@ -3944,6 +3960,7 @@
       (terpri *css-port*))))
 
 (defun note-down-tex2page-flags ()
+  (write-aux `(!lang ,(resolve-defs "\\TZPlang")))
   (write-aux `(!head-line ,(get-toks "\\headline")))
   (write-aux `(!foot-line ,(get-toks "\\footline")))
   (when (setq *it* (find-def "\\TZPtitle"))
@@ -4073,7 +4090,7 @@
         (*tabular-stack* '())
         (*ligatures-p* nil))
     (do-end-para)
-    (emit "<div align=")
+    (emit "<div class=")
     (emit *display-justification*)
     (emit "><table><tr><td>")
     (tex2page-string (get-group))
@@ -4164,16 +4181,16 @@
 
 (defun do-math-fragment (s &optional display-p)
   (when display-p
-    (emit "<div class=mathdisplay align=")
+    (emit "<div class=\"mathdisplay ")
     (emit *display-justification*)
-    (emit ">"))
+    (emit "\">"))
   (let ((old-math-mode-p *math-mode-p*)
         (old-in-display-math-p *in-display-math-p*)
         (old-tabular-stack *tabular-stack*))
     (setq *math-mode-p* t
           *in-display-math-p* display-p
           *tabular-stack* '())
-    (when display-p (emit "<table><tr><td>"))
+    (when display-p (emit "<table style=\"margin-left:auto; margin-right:auto\"><tr><td>"))
     (bgroup)
     (toss-back-char #\})
     (toss-back-string s)
@@ -4193,9 +4210,9 @@
                (tex2page-flag-boolean "\\TZPmathimage"))
            (not *temporarily-use-utf8-for-math-p*))
       (progn
-       (emit "<div class=mathdisplay align=")
+       (emit "<div class=\"mathdisplay ")
        (emit *display-justification*)
-       (emit ">")
+       (emit "\">")
        (call-with-html-image-port
         (lambda (o) (princ "$$" o) (princ tex-string o) (princ "$$" o))
         tex-string)
@@ -4215,7 +4232,7 @@
       (:rbrace (setq top "&#x23ab;" mid "&#x23ac;" bot "&#x23ad;" ext "&#x23ae;"))
       (:rvert (setq ext "&#x239f;" top ext mid ext bot ext)))
     (concatenate 'string
-      "<table cellpadding=0 cellspacing=0><tr><td>" top "</td></tr>"
+      "<table class=mathdelim><tr><td>" top "</td></tr>"
       (cond ((oddp *math-height*)
              (concatenate 'string
                (let ((r ""))
@@ -4859,7 +4876,11 @@
       (when width (emit " width=") (emit width))))
   (emit " src=\"")
   (emit (fully-qualify-url image-file))
-  (emit "\">"))
+  (emit "\" ")
+  (emit " alt=\"")
+  (emit image-file)
+  (emit "\"")
+  (emit ">"))
 
 (defun do-includegraphics ()
   (let* ((starred-p (eat-star))
@@ -4969,7 +4990,7 @@
     (egroup)
     (when display-p
       (do-end-para)
-      (emit "<div align=")
+      (emit "<div class=")
       (emit *display-justification*)
       (emit ">"))
     (call-with-html-image-port
@@ -5026,7 +5047,7 @@
   (emit
     (cond ((or (not *in-display-math-p*) *math-script-mode-p*) "/")
           (t (incf *math-height*)
-             "</td></tr><tr><td style=\"height=1pt; background-color: black\"></td></tr><tr><td align=center>")))
+             "</td></tr><tr><td style=\"height=1pt; background-color: black\"></td></tr><tr><td class=centerline>")))
   (tex2page-string (ungroup (get-token))))
 
 (defun do-tex-frac ()
@@ -5038,7 +5059,7 @@
            (emit "<sup>") (tex2page-string (get-till-char #\/))
            (emit "</sup>/<sub>") (get-actual-char) (ignorespaces)
            (tex2page-string (get-token)) (emit "</sub>"))
-          (t (emit "</td><td><table align=left><tr><td align=center>")
+          (t (emit "</td><td><table class=leftline><tr><td class=centerline>")
              (tex2page-string (get-till-char #\/))
              (get-actual-char) (ignorespaces)
              (emit "<hr noshade>") (tex2page-string (get-token))
@@ -5047,7 +5068,7 @@
 (defun do-eqno ()
   (unless *in-display-math-p*
     (terror 'do-eqno "You can't use \\eqno in math mode"))
-  (emit "</td><td width=10% align=right>"))
+  (emit "</td><td width=10% class=rightline>"))
 
 (defun do-eqalign (type)
   (ignorespaces)
@@ -5079,7 +5100,7 @@
       (do-para))
     (tex2page-string (get-group))
     (cond (split-p (do-end-para) (emit-newline)
-                   (emit "<div align=center><table><tr><td>")
+                   (emit "<div class=centerline><table><tr><td>")
                    (toss-back-char #\{)
                    (do-eqalign type))
           (t (emit "</td></tr>") (emit-newline) (emit "<tr><td>")))))
@@ -5098,7 +5119,7 @@
   (emit
    (cond ((or (not *in-display-math-p*) *math-script-mode-p*) "/")
          (t (incf *math-height*)
-            "</td></tr><tr><td style=\"height=1pt; background-color: black\"></td></tr><tr><td align=center>"))))
+            "</td></tr><tr><td style=\"height=1pt; background-color: black\"></td></tr><tr><td class=centerline>"))))
 
 (defun eat-till-eol ()
   ;move just past the next newline
@@ -5426,7 +5447,6 @@
 
 (defun initialize-globals ()
 
-
   (set-start-time)
 
   ;
@@ -5438,7 +5458,7 @@
   ;closest-to-0 number that is a meaningless depth
   (tex-def-count "\\secnumdepth" -2 t)
   (tex-def-count "\\tocdepth" -2 t)
-  ;
+
   (tex-def-count "\\footnotenumber" 0 t)
   (tex-def-count "\\TIIPtabularborder" 1 t)
   (tex-def-count "\\TIIPnestedtabularborder" 0 t)
@@ -5461,10 +5481,6 @@
   (tex-def-count "\\tracingcommands" 0 t)
   (tex-def-count "\\tracingmacros" 0 t)
   (tex-def-count "\\tracingonline" 0 t)
-  ;(tex-def-count "\\time" 0 t)
-  ;(tex-def-count "\\day" 0 t)
-  ;(tex-def-count "\\month" 0 t)
-  ;(tex-def-count "\\year" 0 t)
   (tex-def-count "\\shellescape" 1 t)
   (tex-def-count "\\suppressfontnotfounderror" 1 t)
   ;
@@ -5495,12 +5511,15 @@
   (tex-def-dimen "\\parskip" 0 t)
   (tex-def-dimen "\\abovedisplayskip" (tex-length 12 :pt) t)
   (tex-def-dimen "\\belowdisplayskip" (tex-length 12 :pt) t)
+
   (tex-def-toks "\\everypar" "" t)
   (tex-def-toks "\\headline" "" t)
   (tex-def-toks "\\footline" "\\folio" t)
+
   (tex-def-dotted-count "figure" nil)
   (tex-def-dotted-count "table" nil)
   (tex-def-dotted-count "equation" nil)
+
   (tex-gdef-0arg "\\TIIPcurrentnodename" "no value yet")
   (tex-gdef-0arg "\\@currentlabel" "no value yet")
   (tex-gdef-0arg "\\TZPcolophontimestamp" "1") ;obsolete
@@ -5511,6 +5530,7 @@
   (tex-gdef-0arg "\\TZPredirectseconds" "0")
   (tex-gdef-0arg "\\TZPtextext" "1")
   (tex-gdef-0arg "\\TZPraggedright" "1")
+  (tex-gdef-0arg "\\TZPlang" "en")
   (tex-gdef-0arg "\\TZPcommonlisp" (if 'nil "0" "1"))
 
   (initialize-scm-words)
@@ -5846,7 +5866,9 @@
     (valid-img-file-p f)
     (emit "<img src=\"")
     (emit img-file)
-    (emit "\" border=\"0\" alt=\"")
+    (emit "\"")
+    (emit " style=\"border: 0\"")
+    (emit " alt=\"")
     (cond (alt (emit alt)) (t (emit "[") (emit img-file) (emit "]")))
     (emit "\">")
     (write-log #\))
@@ -6869,7 +6891,7 @@
      (emit "</td></tr>")
      (emit-newline)
      (setq *equation-position* 0)
-     (emit "<tr><td align=right>"))
+     (emit "<tr><td class=rightline>"))
     (:eqnarray
      (emit "</td>")
      (cond (*equation-numbered-p* (emit "<td>(") (emit *equation-number*)
@@ -6878,7 +6900,7 @@
      (emit "</tr>")
      (emit-newline)
      (setq *equation-position* 0)
-     (emit "<tr><td align=right>"))
+     (emit "<tr><td class=rightline>"))
     (:ruled-table (emit "</td></tr>") (emit-newline) (emit "<tr><td>"))
     ((:minipage :tabbing)
      (get-bracketed-text-if-any)
@@ -6889,7 +6911,7 @@
      (incf *math-height*)
        (emit "</td></tr>")
        (emit-newline)
-       (emit "<tr><td align=center>")
+       (emit "<tr><td class=centerline>")
        (setq *equation-position* 0)
        (emit-newline)))
     (:header (emit #\space))
@@ -7153,16 +7175,16 @@
                 ;(do-end-para) ;??? ;must check why this is needed
                 (case (car *tabular-stack*)
                   ((:pmatrix :eqalign :displaylines :mathbox)
-                   (emit "&#xa0;</td><td align=center>&#xa0;"))
+                   (emit "&#xa0;</td><td class=centerline>&#xa0;"))
                   (:eqalignno
                    (setq *equation-position* (1+ *equation-position*))
                    (emit "</td><td")
-                   (when (= *equation-position* 2) (emit " width=30% align=right"))
+                   (when (= *equation-position* 2) (emit " width=30% class=rightline"))
                    (emit ">"))
                   ((:eqnarray :eqnarray*)
                    (setq *equation-position* (1+ *equation-position*))
                    (emit "</td><td")
-                   (when (= *equation-position* 1) (emit " align=center width=2%"))
+                   (when (= *equation-position* 1) (emit " class=centerline width=2%"))
                    (emit ">"))
                   (:tabular (do-tabular-colsep))
                   (:ruled-table (do-ruledtable-colsep))))
@@ -7737,6 +7759,30 @@
       }
       }
 
+      .centerline {
+      text-align: center;
+      }
+
+      .leftline {
+      text-align: left;
+      }
+
+      .rightline {
+      text-align: right;
+      }
+
+      .bibitem {
+      vertical-align: top;
+      }
+
+      table.mathdelim > td,th {
+      padding: 0;
+      }
+
+      table.mathdelim {
+      border-spacing: 0;
+      }
+
       .disable {
       /* color: #e5e5e5; */
       color: gray;
@@ -7917,6 +7963,9 @@
 
 (defun !doctype (d) (setq *doctype* d))
 
+(defun !lang (lang)
+  (tex-gdef-0arg "\\TZPlang" lang))
+
 (defun !colophon (x)
   (case x
     (:last-page
@@ -8011,6 +8060,7 @@
               (!index-page #'!index-page)
               (!infructuous-calls-to-tex2page #'!infructuous-calls-to-tex2page)
               (!label #'!label)
+              (!lang #'!lang)
               (!last-modification-time #'!last-modification-time)
               (!last-page-number #'!last-page-number)
               (!opmac-iis #'!opmac-iis)
@@ -8810,6 +8860,9 @@ Try the commands
       (emit " style=\"transform: rotate(")
       (emit rotated) (emit "deg)\""))
     (when width (emit " width=") (emit width))
+    (emit " alt=\"")
+    (emit img-file)
+    (emit "\"")
     (emit ">")
     (write-log #\))
     (write-log :separation-space)))
@@ -8832,6 +8885,9 @@ Try the commands
       (emit " style=\"transform: rotate(")
       (emit rotated) (emit "deg)\""))
     (when width (emit " width=") (emit width))
+    (emit " alt=\"")
+    (emit img-file)
+    (emit "\"")
     (emit ">")))
 
 (tex-def-prim "\\XeTeXpicfile" #'do-xetexpicfile)
@@ -8968,7 +9024,7 @@ Try the commands
     (when (string= env "tt")
       (do-tex-ctl-seq-completely "\\tthook")
       (catcode #\\ 12))
-    (emit "<div align=left><pre class=scheme")
+    (emit "<div class=leftline><pre class=scheme")
     (when result-p (emit "response"))
     (emit ">")
     (let ((*ligatures-p* nil) (*verb-display-p* t) (*not-processing-p* t))
@@ -9017,23 +9073,6 @@ Try the commands
 
 (tex-def-prim "\\title" #'do-title)
 (tex-def-prim "\\subject" #'do-subject)
-
-(defun do-thebibliography ()
-  (do-end-para)
-  (get-group)
-  (when (eq *tex-format* :latex)
-    (tex2page-string
-     (if *using-chapters-p* "\\chapter*{\\bibname}" "\\section*{\\refname}")))
-  (bgroup)
-  (setq *bibitem-num* 0)
-  (tex2page-string "\\let\\em\\it")
-  (tex2page-string "\\def\\newblock{ }")
-  (emit "<table>")
-  (emit-newline))
-
-(tex-def-prim "\\beginthebibliography" #'do-thebibliography)
-(tex-def-prim "\\endthebibliography"
- (lambda () (emit "</table>") (egroup) (do-para)))
 
 (tex-def-prim "\\em" (lambda () (do-switch :em)))
 
@@ -9235,13 +9274,31 @@ Try the commands
 
 ;; bibtex
 
+(defun do-thebibliography ()
+  (do-end-para)
+  (get-group)
+  (when (eq *tex-format* :latex)
+    (tex2page-string
+     (if *using-chapters-p* "\\chapter*{\\bibname}" "\\section*{\\refname}")))
+  (bgroup)
+  (setq *bibitem-num* 0)
+  (tex2page-string "\\let\\em\\it")
+  (tex2page-string "\\def\\newblock{ }")
+  (emit "<table>")
+  (munch-newlines)
+  (emit-newline))
+
+(tex-def-prim "\\beginthebibliography" #'do-thebibliography)
+(tex-def-prim "\\endthebibliography"
+ (lambda () (emit "</table>") (egroup) (do-para)))
+
 (defun do-bibitem ()
   (do-end-para)
   (let ((bibmark (get-bracketed-text-if-any)))
     (unless (= *bibitem-num* 0)
       (emit "</td></tr>") (emit-newline))
+    (emit "<tr><td class=\"rightline bibitem\">")
     (incf *bibitem-num*)
-    (emit "<tr><td align=right valign=top>")
     (let* ((bibitem-num-s (write-to-string *bibitem-num*))
            ;wrapping bibitem with cite{...} so label can be used as a regular
            ;non-bib-related label also
@@ -9749,11 +9806,11 @@ Try the commands
     (tex-def-0arg "\\TIIPcurrentnodename" tbl-tag)
     (emit-anchor tbl-tag)
     (emit-newline)
-    (emit "<div class=")
+    (emit "<div class=\"")
     (emit type)
-    (emit " align=")
+    (emit " ")
     (emit *display-justification*)
-    (emit "><table width=100%><tr><td align=")
+    (emit "\"><table width=100%><tr><td class=")
     (emit *display-justification*)
     (emit ">")))
 
@@ -9811,7 +9868,7 @@ Try the commands
 (tex-def-prim "\\latexonly"
  (lambda () (ignore-tex-specific-text "latexonly")))
 (tex-def-prim "\\leftdisplays"
- (lambda () (setq *display-justification* "left")))
+ (lambda () (setq *display-justification* "leftline")))
 (tex-def-prim "\\linebreak"
  (lambda () (get-bracketed-text-if-any) (emit "<br>")))
 (tex-def-prim "\\listing" #'do-verbatiminput)
@@ -10250,7 +10307,7 @@ Try the commands
         (*current-source-file* nil)
         (*current-tex2page-input* nil)
         ;
-        (*display-justification* "center")
+        (*display-justification* "centerline")
         (*doctype* *doctype*)
         (*dotted-counters* (make-hash-table :test #'equal))
         (*dumping-nontex-p* nil)

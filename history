@@ -1,4 +1,11 @@
-Last change 2017-01-16
+Last change 2017-01-19
+
+2017 Jan 19
+
+Added flag \TZPlang.
+
+Make index.tex output satisfy validator.w3.org. Suggested by Paulo Ney de
+Souza.
 
 2017 Jan 16
 

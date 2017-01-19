@@ -1,4 +1,4 @@
-;last modified 2017-01-18
+;last modified 2017-01-19
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -m -- \"$@\"
@@ -39,6 +39,7 @@
 (cliiscm-ignore-def
 
   *tex2page-file-arg*
+  system
 
   )
 

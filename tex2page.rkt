@@ -202,8 +202,6 @@
 
 (define (retrieve-env s) (getenv s))
 
-(define (system cmd) (system cmd))
-
 (define *short-month-names*
  (vector "Jan" "Feb" "March" "April" "May" "June" "July" "Aug" "Sept" "Oct" "Nov" "Dec"))
 

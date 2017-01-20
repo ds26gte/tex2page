@@ -1,4 +1,4 @@
-; last change: 2017-01-07
+; last change: 2017-01-20
 
 (scmxlate-eval
  (define *chez-name*
@@ -27,13 +27,7 @@
 ")))
  )
 
-(scmxlate-cond
- ((eqv? *dialect* 'petite)
-  ;(define *scheme-version* "Petite Chez Scheme")
-  (define *scheme-version* (scheme-version))
-  )
- ((eqv? *dialect* 'chez)
-  (define *scheme-version* "Chez Scheme")))
+(define *scheme-version* (scheme-version))
 
 (scmxlate-uncall
  require

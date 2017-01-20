@@ -1,8 +1,9 @@
-; last change 2017-01-17
+; last change 2017-01-20
 abcl ;v 1.5; WORKS!
 allegro ;v 9.0; WORKS!
 ;bigloo
 chez ;v 9.4; WORKS!
+;chibi
 chicken ;v 4.10; WORKS!
 clisp ;v 2.49; WORKS!
 clozure ;v 1.11; WORKS!

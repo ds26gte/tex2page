@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Last modified: 2017-01-17
+# Last modified: 2017-01-20
 
 # Set scmxlate to the pathname of scmxlate/scmxlate.scm
 # on your system, if you know it.  Otherwise let
@@ -57,7 +57,7 @@ makeit() {
   case "$dialect" in
     abcl|allegro|clisp|clozure|cmucl|ecl|mkcl|sbcl-compiled)
     :;;
-    #bigloo|chez|chicken|gambit|gauche|guile|mitscheme|petite|plt|scm|sxm)
+    #bigloo|chez|chibi|chicken|gambit|gauche|guile|mitscheme|petite|plt|scm|sxm)
     chez|chicken|gambit|gauche|guile|petite|plt)
     findscmxlate;;
     *)
@@ -82,6 +82,9 @@ makeit() {
 
     chez)
     echo chez|scheme $scmxlate;;
+
+    chibi)
+    echo chibi|chibi-scheme -e '(load "$scmxlate")';;
 
     chicken)
     echo chicken|csi $scmxlate;;

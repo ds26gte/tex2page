@@ -1374,7 +1374,8 @@
   (setf (tdef*-thunk lft) (tdef*-thunk rt))
   (setf (tdef*-prim lft) (tdef*-prim rt))
   (setf (tdef*-defer lft) (tdef*-defer rt))
-  (setf (tdef*-catcodes lft) (tdef*-catcodes rt)))
+  (setf (tdef*-catcodes lft) (tdef*-catcodes rt))
+  nil)
 
 (defun kopy-cdef (lft rt)
   (declare (cdef* lft rt))
@@ -1383,6 +1384,7 @@
   (setf (cdef*-optarg lft) (cdef*-optarg rt))
   (setf (cdef*-active lft) (cdef*-active rt))
   (setf (cdef*-catcodes lft) (cdef*-catcodes rt))
+  nil
   )
 
 (defun cleanse-tdef (d)
@@ -1415,9 +1417,15 @@
           (tdef*-catcodes d) *catcodes*))
   (perform-afterassignment))
 
+;(trace tex-def)
+
 (defun tex-def-prim (prim thunk)
   (declare (string prim))
   (tex-def prim '() nil nil thunk prim nil *primitive-texframe*))
+
+(defun tex-def-pat-prim (prim argstr rhs)
+  (declare (string prim argstr rhs))
+  (tex-def prim (concatenate 'list argstr) rhs nil nil nil nil *primitive-texframe*))
 
 (defun tex-defsym-prim (prim str)
   (declare (string prim str))
@@ -1462,6 +1470,7 @@
                  (setf (gethash lft frame-defs) lft-def)
                  lft-def))))
     (cond ((setq *it* (or (find-def rt) (find-math-def rt)))
+           ;(format t "rhs= ~s~%" *it*)
            (let ((rt-def *it*))
              (kopy-tdef lft-def rt-def)))
           (t
@@ -1470,6 +1479,7 @@
              ))))
 
 (defun tex-let-general (lhs rhs frame)
+  ;(format t "tex-let-general ~s ~s~%" lhs rhs)
   (if (ctl-seq-p rhs) (tex-let lhs rhs frame)
       (tex-def lhs '() rhs nil nil nil nil frame)))
 
@@ -1546,7 +1556,7 @@
 (defun do-defcsactive (globalp)
   (let* ((cs (get-token))
          (c (char cs (if (ctl-seq-p cs) 1 0)))
-         (argpat (progn (ignorespaces 1.5) (get-def-arguments c)))
+         (argpat (progn (ignorespaces 1.5) (get-def-parameters)))
          (rhs (ungroup (get-group)))
          (f (and globalp *global-texframe*)))
     (catcode c 13)
@@ -4344,42 +4354,44 @@
          (endenv-prim-th (find-corresp-prim-thunk endenv))
          (*not-processing-p* t)
          (brace-nesting 0)
-         (env-nesting 0))
+         (env-nesting 0)
+         c)
     (loop
-      (let ((c (snoop-actual-char)))
-        (when (not c) (terror 'dump-till-end-env env))
-        (cond ((esc-char-p c)
-               (let ((x (get-ctl-seq)))
-                 (cond ((string= (find-corresp-prim x) endenv-prim) (return))
-                       ((string= x "\\begin") (princ x o)
-                        (let ((g (get-grouped-environment-name-if-any)))
-                          (when g
-                            (princ #\{ o)
-                            (princ g o)
-                            (princ #\} o))
-                          (when (and g (string= g env)) (incf env-nesting))))
-                       ((string= x "\\end")
-                        (let ((g (get-grouped-environment-name-if-any)))
-                          (when (and g
-                                     (or *dumping-nontex-p* (= env-nesting 0))
-                                     (let ((endg (concatenate 'string "\\end" g)))
-                                       (or (string= (find-corresp-prim endg) endenv-prim)
-                                           (eql (find-corresp-prim-thunk endg) endenv-prim-th))))
-                            (return))
-                          (princ x o)
-                          (when g
-                            (princ #\{ o)
-                            (princ g o)
-                            (princ #\} o))
-                          (when (and g (string= g env)) (decf env-nesting))))
-                       (t (princ x o)))))
-              ((and (comment-char-p c) (not *dumping-nontex-p*))
-               (do-comment) (write-char #\% o) (terpri o))
-              (t (write-char (get-actual-char) o)
-                 (cond ((char= c #\{)
-                        (incf brace-nesting))
-                       ((char= c #\})
-                        (decf brace-nesting)))))))))
+      (setq c (snoop-actual-char))
+      (when (not c) (terror 'dump-till-end-env env))
+      (cond ((esc-char-p c)
+             (let ((x (get-ctl-seq)))
+               (cond ((string= (find-corresp-prim x) endenv-prim) (return))
+                     ((string= x "\\begin")
+                      (princ x o)
+                      (let ((g (get-grouped-environment-name-if-any)))
+                        (when g
+                          (princ #\{ o)
+                          (princ g o)
+                          (princ #\} o))
+                        (when (and g (string= g env)) (incf env-nesting))))
+                     ((string= x "\\end")
+                      (let ((g (get-grouped-environment-name-if-any)))
+                        (cond ((and g
+                                    (or *dumping-nontex-p* (= env-nesting 0))
+                                    (let ((endg (concatenate 'string "\\end" g)))
+                                      (or (string= (find-corresp-prim endg) endenv-prim)
+                                          (eql (find-corresp-prim-thunk endg) endenv-prim-th))))
+                               (return))
+                              (t (princ x o)
+                                 (when g
+                                   (princ #\{ o)
+                                   (princ g o)
+                                   (princ #\} o))
+                                 (when (and g (string= g env)) (decf env-nesting))))))
+                     (t (princ x o)))))
+            ((and (comment-char-p c) (not *dumping-nontex-p*))
+             (do-comment) (write-char #\% o) (terpri o))
+            (t (write-char (get-actual-char) o)
+               (cond ((char= c #\{)
+                      (incf brace-nesting))
+                     ((char= c #\})
+                      (decf brace-nesting))))))))
 
 (defun dump-imgdef (f)
   (declare (string f))
@@ -4546,6 +4558,8 @@
 (defun do-iftrue ()
   (push t *tex-if-stack*))
 
+;(trace do-iftrue do-iffalse)
+
 (defun insert-tex-if (test)
   (if test
       (do-iftrue)
@@ -4608,16 +4622,20 @@
 
 (defun do-ifnum ()
   (let* ((one (get-number))
-         (rel (char (get-raw-token/is) 0)))
+         (rel (char (get-raw-token/is) 0))
+         (two (get-number)))
+    ;(format t "one= ~s; two= ~s~%" one two)
     (if (funcall
          (case rel
            (#\< #'<)
            (#\= #'=)
            (#\> #'>)
            (t (terror 'do-ifnum "Missing = for \\ifnum.")))
-         one (get-number))
+         one two)
         (do-iftrue)
       (do-iffalse))))
+
+;(trace do-ifnum)
 
 (defun read-ifcase-clauses ()
   (let* ((*not-processing-p* t)
@@ -4679,6 +4697,8 @@
   (ignorespaces 1.5)
   (when (null *tex-if-stack*) (terror 'do-fi "Extra \\fi."))
   (pop *tex-if-stack*))
+
+;(trace do-fi)
 
 (defun do-newif ()
   (let* ((iffoo (get-ctl-seq))
@@ -5386,6 +5406,7 @@
 ;(trace resolve-chardefs)
 
 (defun resolve-defs (x)
+  ;(format t "resolve-defs ~s~%" x)
   (when (setq *it* (find-def x))
     (let ((y *it*))
       (cond ((setq *it* (tdef*-defer y))
@@ -5412,6 +5433,8 @@
                                   (tdef*-expansion y)
                                   (tdef*-catcodes y))
                 ))))))
+
+;(trace resolve-defs)
 
 (defun do-expandafter ()
   (let* ((first (get-raw-token/is))
@@ -5660,24 +5683,26 @@
 (defun globally-p () (> (get-gcount "\\globaldefs") 0))
 
 (defun do-let (globalp)
-  (unless (inside-false-world-p)
-    (ignorespaces 1.5)
-    (let* ((lhs (get-ctl-seq))
-           (rhs (progn (get-equal-sign) (get-raw-token/is)))
-           (frame (cond (globalp
-                          (mapc (lambda (fr)
-                                  (remhash lhs (texframe*-definitions fr)))
-                                *tex-env*)
-                          *global-texframe*)
-                        (t nil))))
-      (tex-let-general lhs rhs frame))))
+  (ignorespaces 1.5)
+  (let* ((lhs (get-ctl-seq))
+         (rhs (progn (get-equal-sign) (get-raw-token/is))))
+    (unless (inside-false-world-p)
+      (let ((frame (cond (globalp
+                           (mapc (lambda (fr)
+                                   (remhash lhs (texframe*-definitions fr)))
+                                 *tex-env*)
+                           *global-texframe*)
+                         (t nil))))
+        (tex-let-general lhs rhs frame)))))
+
+;(trace do-let)
 
 (defun do-def (globalp expandp)
   (unless (inside-false-world-p)
     (let ((lhs (get-raw-token/is)))
       (when (and (ctl-seq-p lhs) (string= lhs "\\TIIPcsname"))
         (setq lhs (get-peeled-group)))
-      (let* ((argpat (get-def-arguments lhs))
+      (let* ((argpat (get-def-parameters))
              (rhs (ungroup (get-group))))
         (when expandp (setq rhs (expand-edef-macro rhs)))
         (let ((frame (cond (globalp
@@ -5889,29 +5914,32 @@
 (defun reuse-img ()
   (source-img-file (ungroup (get-group))))
 
-(defun get-def-arguments (lhs)
-  (labels ((aux ()
-                (let ((c (snoop-actual-char)))
-                  (when (not c)
-                    (terror 'get-def-arguments
-                            "EOF found while scanning definition of " lhs))
-                  (cond ((esc-char-p c)
-                         (let ((x (get-ctl-seq)))
-                           (if (string= x "\\par")
-                               ;save \par as :par?
-                               (cons #\newline (cons #\newline (aux)))
-                             (append (concatenate 'list x) (aux)))))
-                        ((char= c #\{) '())
-                        (t (cond ((char= c #\newline)
-                                  ;kludge for writing Texinfo-type
-                                  ;macros. Should really be equivalent
-                                  ;to any white space
-                                  (get-actual-char) (ignorespaces 1.5))
-                                 ((char-whitespace-p c)
-                                  (ignorespaces 1.5) (setq c #\space))
-                                 (t (get-actual-char)))
-                           (cons c (aux)))))))
-    (aux)))
+(defun get-def-parameters ()
+  (let ((params '()) c)
+    (loop
+      (setq c (snoop-actual-char))
+      (when (not c)
+        (terror 'get-def-parameters "Runaway definition?"))
+      (cond ((esc-char-p c)
+             (let ((x (get-ctl-seq)))
+               (if (string= x "\\par")
+                   ;save \par as :par?
+                   (progn (push #\newline params)
+                          (push #\newline params))
+                   (setq params (append (nreverse (concatenate 'list x)) params)))))
+            ((char= c #\{) (return))
+            (t (cond ((char= c #\newline)
+                      ;kludge for writing Texinfo-type
+                      ;macros. Should really be equivalent
+                      ;to any white space
+                      (get-actual-char) (ignorespaces 1.5))
+                     ((char-whitespace-p c)
+                      (ignorespaces 1.5) (setq c #\space))
+                     (t (get-actual-char)))
+               (push c params))))
+    (nreverse params)))
+
+;(trace get-def-parameters)
 
 (defun get-till-char (c0)
   (declare (character c0))
@@ -6159,6 +6187,8 @@
                       (when (not d)
                         (terror 'read-macro-args "Eof before macro got enough args"))
                       (cond ((char= c #\space)
+                             ;but if parameter is \ctlseq, argument space
+                             ;be ignored. not yet
                              (unless (char-whitespace-p d)
                                (terror 'read-macro-args
                                        "Use of macro doesn't match its definition.")))
@@ -6556,27 +6586,27 @@
   (let ((*verb-visible-space-p* (eat-star)))
     (when *verb-visible-space-p* (setq env (concatenate 'string env "*")))
     (munched-a-newline-p)
-    (let ((*ligatures-p* nil))
+    (let ((*ligatures-p* nil) c)
       (loop
-        (let ((c (snoop-actual-char)))
-          (when (not c) (terror 'do-verbatim-latex "Eof inside verbatim"))
-          (cond ((char= c #\\)
-                 (let ((cs (get-ctl-seq)))
-                   (if (string= cs "\\end")
-                       (cond ((setq *it* (get-grouped-environment-name-if-any))
-                              (let ((e *it*))
-                                (when (string= *it* env) (return))
-                                (emit-html-string cs)
-                                (emit-html-char #\{)
-                                (emit-html-string e)
-                                (emit-html-char #\})))
-                             (t (emit-html-string cs)))
+        (setq c (snoop-actual-char))
+        (when (not c) (terror 'do-verbatim-latex "Eof inside verbatim"))
+        (cond ((char= c #\\)
+               (let ((cs (get-ctl-seq)))
+                 (if (string= cs "\\end")
+                     (cond ((setq *it* (get-grouped-environment-name-if-any))
+                            (let ((e *it*))
+                              (cond ((string= *it* env) (return))
+                                    (t (emit-html-string cs)
+                                       (emit-html-char #\{)
+                                       (emit-html-string e)
+                                       (emit-html-char #\})))))
+                           (t (emit-html-string cs)))
                      (progn (emit-html-string cs)))))
-                ((char= c #\space)
-                 (get-actual-char)
-                 (emit (if *verb-visible-space-p* *verbatim-visible-space*
-                    #\space)))
-                (t (emit-html-char (get-actual-char))))))))
+              ((char= c #\space)
+               (get-actual-char)
+               (emit (if *verb-visible-space-p* *verbatim-visible-space*
+                         #\space)))
+              (t (emit-html-char (get-actual-char)))))))
   (emit "</pre>")
   (egroup)
   (do-para))
@@ -6589,16 +6619,16 @@
   (bgroup)
   (emit "<pre class=verbatim>")
   (munched-a-newline-p)
-  (let ((*in-alltt-p* t))
+  (let ((*in-alltt-p* t) c)
     (loop
-      (let ((c (snoop-actual-char)))
-        (when (not c) (terror 'do-alltt "Eof inside alltt"))
-        (case c
-          (#\\ (do-tex-ctl-seq (get-ctl-seq)))
-          (#\{ (get-actual-char) (bgroup))
-          (#\} (get-actual-char) (egroup))
-          (t (emit-html-char (get-actual-char))))
-        (unless *in-alltt-p* (return))))))
+      (setq c (snoop-actual-char))
+      (when (not c) (terror 'do-alltt "Eof inside alltt"))
+      (case c
+        (#\\ (do-tex-ctl-seq (get-ctl-seq)))
+        (#\{ (get-actual-char) (bgroup))
+        (#\} (get-actual-char) (egroup))
+        (t (emit-html-char (get-actual-char))))
+      (unless *in-alltt-p* (return)))))
 
 (defun do-end-alltt ()
   (emit "</pre>")
@@ -7242,6 +7272,7 @@
 
 (defun do-tex-ctl-seq (z)
   (declare (string z))
+  ;(format t "do-tex-ctl-seq ~s~%" z)
   ;process ctl seq z.  Return :encountered-bye if z is \bye;
   ;:encountered-endinput if z is \endinput
   (trace-if (> (find-count "\\tracingmacros") 0) z)
@@ -8295,9 +8326,9 @@ Try the commands
 (tex-let-prim "\\textstyle" "\\TIIPrelax")
 (tex-let-prim "\\vbox" "\\hbox")
 
-;;appendix B, plain TeX
+;;app B. plain TeX
 
-;B.1. code tables
+;sec B.1. code tables
 
 (tex-let-prim "\\@ne" (string (code-char 1)))
 (tex-let-prim "\\tw@" (string (code-char 2)))
@@ -8335,7 +8366,7 @@ Try the commands
 (tex-def-prim "\\bf" (lambda () (do-switch :bf)))
 (tex-def-prim "\\tt" (lambda () (do-switch :tt)))
 
-;sec 5, macros for text
+;sec B.5, macros for text
 
 (tex-defsym-math-prim "\\lbrack" "[")
 (tex-defsym-math-prim "\\rbrack" "]")
@@ -8350,6 +8381,14 @@ Try the commands
 
 (tex-def-prim "\\obeyspaces" #'do-obeyspaces)
 (tex-def-prim "\\obeylines" #'do-obeylines)
+
+;loop/repeat
+
+(tex-def-pat-prim "\\loop" "#1\\repeat" "\\def\\body{#1}\\iterate")
+(tex-def-pat-prim "\\iterate" "" "\\body\\let\\next\\iterate\\else\\let\\next\\relax\\fi\\next")
+(tex-let-prim "\\repeat" "\\fi")
+
+;
 
 (tex-def-prim "\\enskip" (lambda () (emit (kern ".5em"))))
 (tex-def-prim "\\quad" (lambda () (emit (kern "1em"))))
@@ -8439,14 +8478,14 @@ Try the commands
 (tex-def-prim "\\\"" (lambda () (do-diacritic :umlaut)))
 (tex-def-prim "\\t" (lambda () (do-diacritic :tieafter)))
 
-;sec 6, macros for math
+;sec B.6, macros for math
 
 (tex-def-math-prim "\\," (lambda () (emit (kern ".16667em"))))
 (tex-def-math-prim "\\!" (lambda () (emit (kern "-.16667em"))))
 (tex-def-math-prim "\\>" (lambda () (emit (kern ".22222em"))))
 (tex-def-math-prim "\\;" (lambda () (emit (kern ".27778em"))))
 
-;F.1. lowercase Greek
+;sec F.1. lowercase Greek
 
 (tex-defsym-math-prim "\\alpha" "&#x3b1;")
 (tex-defsym-math-prim "\\beta" "&#x3b2;")
@@ -8479,7 +8518,7 @@ Try the commands
 (tex-defsym-math-prim "\\psi" "&#x3c8;")
 (tex-defsym-math-prim "\\omega" "&#x3c9;")
 
-;F.2. uppercase Greek
+;sec F.2. uppercase Greek
 
 (tex-defsym-math-prim "\\Gamma" "&#x393;")
 (tex-defsym-math-prim "\\Delta" "&#x394;")
@@ -8493,7 +8532,7 @@ Try the commands
 (tex-defsym-math-prim "\\Psi" "&#x3a8;")
 (tex-defsym-math-prim "\\Omega" "&#x3a9;")
 
-;F.4. misc symbols of type Ord
+;sec F.4. misc symbols of type Ord
 
 (tex-defsym-math-prim "\\aleph" "&#x2135;")
 (tex-defsym-math-prim "\\hbar" "&#x210f;")
@@ -8526,7 +8565,7 @@ Try the commands
 (tex-defsym-math-prim "\\heartsuit" "&#x2661;")
 (tex-defsym-math-prim "\\spadesuit" "&#x2660;")
 
-;F.6. large operators
+;sec F.6. large operators
 
 (tex-defsym-math-prim "\\sum" "&#x2211;")
 (tex-defsym-math-prim "\\prod" "&#x220f;")
@@ -8543,7 +8582,7 @@ Try the commands
 (tex-defsym-math-prim "\\bigoplus" "&#x2295;")
 (tex-defsym-math-prim "\\biguplus" "&#x228e;")
 
-;F.7. binary operations
+;sec F.7. binary operations
 
 (tex-defsym-math-prim "\\pm" "&#xb1;")
 (tex-defsym-math-prim "\\mp" "&#x2213;")
@@ -8574,7 +8613,7 @@ Try the commands
 (tex-defsym-math-prim "\\ddagger" "&#x2021;")
 (tex-defsym-math-prim "\\amalg" "&#x2210;")
 
-;F.8. relations
+;sec F.8. relations
 
 (tex-defsym-math-prim "\\leq" "&#x2264;")
 (tex-defsym-math-prim "\\leqslant" "&#x2a7d;")
@@ -8611,7 +8650,7 @@ Try the commands
 (tex-defsym-math-prim "\\propto" "&#x221d;")
 (tex-defsym-math-prim "\\perp" "&#x22a5;")
 
-;F.9. negated relations
+;sec F.9. negated relations
 
 (defun do-not ()
   (ignorespaces 1.5)
@@ -8649,7 +8688,7 @@ Try the commands
 (tex-def-math-prim "\\not" #'do-not)
 (tex-defsym-math-prim "\\neq" "&#x2260;")
 
-;F.10. arrows
+;sec F.10. arrows
 
 (tex-defsym-math-prim "\\leftarrow" "&#x2190;")
 (tex-defsym-math-prim "\\Leftarrow" "&#x21d0;")
@@ -8676,7 +8715,7 @@ Try the commands
 (tex-defsym-math-prim "\\swarrow" "&#x2199;")
 (tex-defsym-math-prim "\\nwarrow" "&#x2196;")
 
-;F.13. punctuation
+;sec F.13. punctuation
 
 (tex-def-math-prim "\\colon" (lambda () (emit #\:)))
 (tex-def-math-prim "\\ldotp" (lambda () (emit #\.)))
@@ -8689,7 +8728,7 @@ Try the commands
 (tex-defsym-prim "\\vdots" "&#x22ee;")
 (tex-defsym-prim "\\ddots" "&#x22f1;")
 
-;F.11 & 12. delimiters
+;sec F.11 & 12. delimiters
 
 (tex-defsym-math-prim "\\langle" "&#x27e8;")
 (tex-defsym-math-prim "\\rangle" "&#x27e9;")
@@ -8733,7 +8772,7 @@ Try the commands
 (tex-let-prim "\\lnot" "\\neg")
 (tex-let-prim "\\iff" "\\Longleftrightarrow")
 
-;TeXbook, sec 18.2, non-italic letters in formulas
+;sec 18.2, non-italic letters in formulas
 
 (defun texbook-18-2 (x)
   (let (lhs rhs)
@@ -8764,7 +8803,7 @@ Try the commands
 (tex-def-math-prim "\\eqalignno" (lambda () (do-eqalign :eqalignno)))
 (tex-let-prim "\\leqalignno" "\\eqalignno")
 
-;B.7. macros for output
+;sec B.7. macros for output
 
 (tex-def-prim "\\pageno" (lambda () (emit *html-page-count*)))
 (tex-def-prim "\\folio" (lambda () (emit *html-page-count*)))
@@ -8774,7 +8813,7 @@ Try the commands
 
 (tex-let-prim "\\dosupereject" "\\eject")
 
-;B.8. everything else
+;sec B.8. everything else
 
 (tex-def-prim "\\magnification" #'do-magnification)
 
@@ -8783,7 +8822,7 @@ Try the commands
 (tex-defsym-prim "\\fmtname" "TeX2page")
 (tex-defsym-prim "\\fmtversion" *tex2page-version*)
 
-;;appendix E, manmac
+;;app E. manmac
 
 (tex-def-prim "\\beginchapter" #'do-beginchapter)
 
@@ -8816,21 +8855,21 @@ Try the commands
     (catcode #\space 12)
     (emit "<pre class=verbatim>")
     ;(munched-a-newline-p)
-    (let ((*ligatures-p* nil))
+    (let ((*ligatures-p* nil) c)
       (loop
-        (let ((c (snoop-actual-char)))
-          (when (not c) (terror 'do-begintt "Eof inside \\begintt"))
-          (cond ((char= c #\\)
-                 (let ((*catcodes* *catcodes*))
-                   (catcode #\\ 0)
-                   (let ((cs (get-ctl-seq)))
-                     (when (string= cs "\\endtt") (return))
-                     (emit-html-string cs))))
-                ((esc-char-p c) (let ((cs (get-ctl-seq)))
-                                  (let ((*catcodes* *catcodes*))
-                                    (catcode #\\ 0)
-                                    (do-tex-ctl-seq-completely cs))))
-                (t (emit-html-char (get-actual-char)))))))
+        (setq c (snoop-actual-char))
+        (when (not c) (terror 'do-begintt "Eof inside \\begintt"))
+        (cond ((char= c #\\)
+               (let ((*catcodes* *catcodes*))
+                 (catcode #\\ 0)
+                 (let ((cs (get-ctl-seq)))
+                   (if (string= cs "\\endtt") (return)
+                       (emit-html-string cs)))))
+              ((esc-char-p c) (let ((cs (get-ctl-seq)))
+                                (let ((*catcodes* *catcodes*))
+                                  (catcode #\\ 0)
+                                  (do-tex-ctl-seq-completely cs))))
+              (t (emit-html-char (get-actual-char))))))
     (emit "</pre>")
     (egroup))
   (do-noindent))
@@ -9055,37 +9094,39 @@ Try the commands
     (emit "<div class=leftline><pre class=scheme")
     (when result-p (emit "response"))
     (emit ">")
-    (let ((*ligatures-p* nil) (*verb-display-p* t) (*not-processing-p* t))
+    (let ((*ligatures-p* nil) (*verb-display-p* t) (*not-processing-p* t) c)
       (loop
-        (let ((c (snoop-actual-char)))
-          (when (not c)
-            (terror 'do-scm-slatex-lines "Eof inside " env))
-          (cond ((char= c #\newline) (get-actual-char)
-                 (scm-emit-html-char c)
-                 (cond ((not (tex2page-flag-boolean "\\TZPslatexcomments")) nil)
-                       ((char= (snoop-actual-char) #\;) (get-actual-char)
-                        (if (char= (snoop-actual-char) #\;)
-                            (toss-back-char #\;)
+        (setq c (snoop-actual-char))
+        (when (not c)
+          (terror 'do-scm-slatex-lines "Eof inside " env))
+        (cond ((char= c #\newline)
+               (get-actual-char)
+               (scm-emit-html-char c)
+               (cond ((not (tex2page-flag-boolean "\\TZPslatexcomments")) nil)
+                     ((char= (snoop-actual-char) #\;)
+                      (get-actual-char)
+                      (if (char= (snoop-actual-char) #\;)
+                          (toss-back-char #\;)
                           (scm-output-slatex-comment)))))
-                ((char= c #\\)
-                 (let ((x (let ((*catcodes* *catcodes*))
-                            (catcode #\\ 0)
-                            (get-ctl-seq))))
-                   (when (string= x endenv) (return))
-                   (cond ((string= x "\\end")
-                          (let ((g (get-grouped-environment-name-if-any)))
-                            (when (and g (string= g env)) (egroup) (return))
-                            (scm-output-token x)
-                            (when g
-                              (scm-output-token "{")
-                              (scm-output-token g)
-                              (scm-output-token "}"))))
-                         (t (scm-output-token x)))))
-                ((esc-char-p c) (let ((cs (get-ctl-seq)))
-                                  (let ((*catcodes* *catcodes*))
-                                    (catcode #\\ 0)
-                                    (do-tex-ctl-seq-completely cs))))
-                (t (scm-output-next-chunk))))))
+              ((char= c #\\)
+               (let ((x (let ((*catcodes* *catcodes*))
+                          (catcode #\\ 0)
+                          (get-ctl-seq))))
+                 (cond ((string= x endenv) (return))
+                       ((string= x "\\end")
+                        (let ((g (get-grouped-environment-name-if-any)))
+                          (cond ((and g (string= g env)) (egroup) (return))
+                                (t (scm-output-token x)
+                                   (when g
+                                     (scm-output-token "{")
+                                     (scm-output-token g)
+                                     (scm-output-token "}"))))))
+                       (t (scm-output-token x)))))
+              ((esc-char-p c) (let ((cs (get-ctl-seq)))
+                                (let ((*catcodes* *catcodes*))
+                                  (catcode #\\ 0)
+                                  (do-tex-ctl-seq-completely cs))))
+              (t (scm-output-next-chunk)))))
     (emit "</pre></div>")
     (egroup)
     (cond (display-p (do-noindent))

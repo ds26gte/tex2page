@@ -1963,12 +1963,12 @@
  (set!tdef*-optarg lft (tdef*-optarg rt)) (tdef*-optarg lft) (set!tdef*-thunk lft (tdef*-thunk rt))
  (tdef*-thunk lft) (set!tdef*-prim lft (tdef*-prim rt)) (tdef*-prim lft)
  (set!tdef*-defer lft (tdef*-defer rt)) (tdef*-defer lft)
- (set!tdef*-catcodes lft (tdef*-catcodes rt)) (tdef*-catcodes lft))
+ (set!tdef*-catcodes lft (tdef*-catcodes rt)) (tdef*-catcodes lft) false)
 
 (define (kopy-cdef lft rt) (set!cdef*-argpat lft (cdef*-argpat rt)) (cdef*-argpat lft)
  (set!cdef*-expansion lft (cdef*-expansion rt)) (cdef*-expansion lft)
  (set!cdef*-optarg lft (cdef*-optarg rt)) (cdef*-optarg lft) (set!cdef*-active lft (cdef*-active rt))
- (cdef*-active lft) (set!cdef*-catcodes lft (cdef*-catcodes rt)) (cdef*-catcodes lft))
+ (cdef*-active lft) (set!cdef*-catcodes lft (cdef*-catcodes rt)) (cdef*-catcodes lft) false)
 
 (define (cleanse-tdef d) (set!tdef*-argpat d null) (tdef*-argpat d) (set!tdef*-expansion d "")
  (tdef*-expansion d) (set!tdef*-optarg d false) (tdef*-optarg d) (set!tdef*-thunk d false)
@@ -1989,6 +1989,21 @@
 
 (define (tex-def-prim prim thunk)
  (tex-def prim null false false thunk prim false *primitive-texframe*))
+
+(define (tex-def-pat-prim prim argstr rhs)
+ (tex-def prim
+  (let ((%type 'list) (%ee (list argstr)))
+   (let ((%res (if (eq? %type 'string) "" null)))
+    (let %concatenate-loop ((%ee %ee))
+     (if (null? %ee) %res
+      (let ((%a (car %ee)))
+       (unless (not %a)
+        (set! %res
+         (if (eq? %type 'string) (string-append %res (if (string? %a) %a (list->string %a)))
+          (append %res (if (string? %a) (string->list %a) %a)))))
+       (%concatenate-loop (cdr %ee)))))
+    %res))
+  rhs false false false false *primitive-texframe*))
 
 (define (tex-defsym-prim prim str)
  (tex-def prim null false false (lambda () (emit str)) prim false *primitive-texframe*))
@@ -2089,7 +2104,7 @@
 (define (do-defcsactive globalp)
  (let ((cs (get-token)))
   (let ((c (string-ref cs (if (ctl-seq-p cs) 1 0))))
-   (let ((argpat (begin (ignorespaces 1.5) (get-def-arguments c))))
+   (let ((argpat (begin (ignorespaces 1.5) (get-def-parameters))))
     (let ((rhs (ungroup (get-group))))
      (let ((f (and globalp *global-texframe*))) (catcode c 13) (tex-def-char c argpat rhs f)))))))
 
@@ -5132,13 +5147,13 @@
      (fluid-let ((*not-processing-p* %fluid-var-*not-processing-p*))
       (let ((brace-nesting 0))
        (let ((env-nesting 0))
-        (let*
-         ((%loop-returned false) (%loop-result 0)
-          (return
-           (lambda %args (set! %loop-returned true)
-            (set! %loop-result (and (pair? %args) (car %args))))))
-         (let %loop ()
-          (let ((c (snoop-actual-char)))
+        (let ((c false))
+         (let*
+          ((%loop-returned false) (%loop-result 0)
+           (return
+            (lambda %args (set! %loop-returned true)
+             (set! %loop-result (and (pair? %args) (car %args))))))
+          (let %loop () (set! c (snoop-actual-char))
            (cond ((not c) (terror 'dump-till-end-env env)) (else false))
            (cond
             ((esc-char-p c)
@@ -5170,17 +5185,17 @@
                      (or (string=? (find-corresp-prim endg) endenv-prim)
                       (eqv? (find-corresp-prim-thunk endg) endenv-prim-th))))
                    (return))
-                  (else false))
-                 (display x o) (cond (g (display #\{ o) (display g o) (display #\} o)) (else false))
-                 (cond ((and g (string=? g env)) (set! env-nesting (- env-nesting 1)) env-nesting)
-                  (else false))))
+                  (else (display x o)
+                   (cond (g (display #\{ o) (display g o) (display #\} o)) (else false))
+                   (cond ((and g (string=? g env)) (set! env-nesting (- env-nesting 1)) env-nesting)
+                    (else false))))))
                (else (display x o)))))
             ((and (comment-char-p c) (not *dumping-nontex-p*)) (do-comment) (write-char #\% o)
              (newline o))
             (else (write-char (get-actual-char) o)
              (cond ((char=? c #\{) (set! brace-nesting (+ brace-nesting 1)) brace-nesting)
-              ((char=? c #\}) (set! brace-nesting (- brace-nesting 1)) brace-nesting)))))
-          (if %loop-returned %loop-result (%loop))))))))))))
+              ((char=? c #\}) (set! brace-nesting (- brace-nesting 1)) brace-nesting))))
+           (if %loop-returned %loop-result (%loop)))))))))))))
 
 (define (dump-imgdef f)
  (let
@@ -5514,10 +5529,11 @@
 (define (do-ifnum)
  (let ((one (get-number)))
   (let ((rel (string-ref (get-raw-token/is) 0)))
-   (if
-    ((case rel ((#\<) <) ((#\=) =) ((#\>) >) (else (terror 'do-ifnum "Missing = for \\ifnum."))) one
-     (get-number))
-    (do-iftrue) (do-iffalse)))))
+   (let ((two (get-number)))
+    (if
+     ((case rel ((#\<) <) ((#\=) =) ((#\>) >) (else (terror 'do-ifnum "Missing = for \\ifnum."))) one
+      two)
+     (do-iftrue) (do-iffalse))))))
 
 (define (read-ifcase-clauses)
  (let ((%fluid-var-*not-processing-p* true))
@@ -7022,19 +7038,19 @@
 
 (define (globally-p) (> (get-gcount "\\globaldefs") 0))
 
-(define (do-let globalp)
- (cond
-  ((not (inside-false-world-p)) (ignorespaces 1.5)
-   (let ((lhs (get-ctl-seq)))
-    (let ((rhs (begin (get-equal-sign) (get-raw-token/is))))
+(define (do-let globalp) (ignorespaces 1.5)
+ (let ((lhs (get-ctl-seq)))
+  (let ((rhs (begin (get-equal-sign) (get-raw-token/is))))
+   (cond
+    ((not (inside-false-world-p))
      (let
       ((frame
         (cond
          (globalp (for-each (lambda (fr) (table-rem lhs (texframe*-definitions fr))) *tex-env*)
           *global-texframe*)
          (else false))))
-      (tex-let-general lhs rhs frame)))))
-  (else false)))
+      (tex-let-general lhs rhs frame)))
+    (else false)))))
 
 (define (do-def globalp expandp)
  (cond
@@ -7042,7 +7058,7 @@
    (let ((lhs (get-raw-token/is)))
     (cond ((and (ctl-seq-p lhs) (string=? lhs "\\TIIPcsname")) (set! lhs (get-peeled-group)) lhs)
      (else false))
-    (let ((argpat (get-def-arguments lhs)))
+    (let ((argpat (get-def-parameters)))
      (let ((rhs (ungroup (get-group))))
       (cond (expandp (set! rhs (expand-edef-macro rhs)) rhs) (else false))
       (let
@@ -7419,36 +7435,45 @@
 
 (define (reuse-img) (source-img-file (ungroup (get-group))))
 
-(define (get-def-arguments lhs)
- (letrec
-  ((aux
-    (lambda ()
-     (let ((c (snoop-actual-char)))
-      (cond ((not c) (terror 'get-def-arguments "EOF found while scanning definition of " lhs))
-       (else false))
-      (cond
-       ((esc-char-p c)
-        (let ((x (get-ctl-seq)))
-         (if (string=? x "\\par") (cons #\newline (cons #\newline (aux)))
+(define (get-def-parameters)
+ (let ((params null) (c false))
+  (let*
+   ((%loop-returned false) (%loop-result 0)
+    (return
+     (lambda %args (set! %loop-returned true) (set! %loop-result (and (pair? %args) (car %args))))))
+   (let %loop () (set! c (snoop-actual-char))
+    (cond ((not c) (terror 'get-def-parameters "Runaway definition?")) (else false))
+    (cond
+     ((esc-char-p c)
+      (let ((x (get-ctl-seq)))
+       (if (string=? x "\\par")
+        (begin (begin (set! params (cons #\newline params)) params)
+         (begin (set! params (cons #\newline params)) params))
+        (begin
+         (set! params
           (append
-           (let ((%type 'list) (%ee (list x)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-             (let %concatenate-loop ((%ee %ee))
-              (if (null? %ee) %res
-               (let ((%a (car %ee)))
-                (unless (not %a)
-                 (set! %res
-                  (if (eq? %type 'string) (string-append %res (if (string? %a) %a (list->string %a)))
-                   (append %res (if (string? %a) (string->list %a) %a)))))
-                (%concatenate-loop (cdr %ee)))))
-             %res))
-           (aux)))))
-       ((char=? c #\{) null)
-       (else
-        (cond ((char=? c #\newline) (get-actual-char) (ignorespaces 1.5))
-         ((char-whitespace? c) (ignorespaces 1.5) (set! c #\space) c) (else (get-actual-char)))
-        (cons c (aux))))))))
-  (aux)))
+           (reverse
+            (let ((%type 'list) (%ee (list x)))
+             (let ((%res (if (eq? %type 'string) "" null)))
+              (let %concatenate-loop ((%ee %ee))
+               (if (null? %ee) %res
+                (let ((%a (car %ee)))
+                 (unless (not %a)
+                  (set! %res
+                   (if (eq? %type 'string)
+                    (string-append %res (if (string? %a) %a (list->string %a)))
+                    (append %res (if (string? %a) (string->list %a) %a)))))
+                 (%concatenate-loop (cdr %ee)))))
+              %res)))
+           params))
+         params))))
+     ((char=? c #\{) (return))
+     (else
+      (cond ((char=? c #\newline) (get-actual-char) (ignorespaces 1.5))
+       ((char-whitespace? c) (ignorespaces 1.5) (set! c #\space) c) (else (get-actual-char)))
+      (set! params (cons c params)) params))
+    (if %loop-returned %loop-result (%loop))))
+  (reverse params)))
 
 (define (get-till-char c0)
  (let
@@ -8269,48 +8294,47 @@
      env)
     (else false))
    (munched-a-newline-p)
-   (let ((%fluid-var-*ligatures-p* false))
+   (let ((%fluid-var-*ligatures-p* false) (c false))
     (fluid-let ((*ligatures-p* %fluid-var-*ligatures-p*))
      (let*
       ((%loop-returned false) (%loop-result 0)
        (return
         (lambda %args (set! %loop-returned true)
          (set! %loop-result (and (pair? %args) (car %args))))))
-      (let %loop ()
-       (let ((c (snoop-actual-char)))
-        (cond ((not c) (terror 'do-verbatim-latex "Eof inside verbatim")) (else false))
-        (cond
-         ((char=? c #\\)
-          (let ((cs (get-ctl-seq)))
-           (if (string=? cs "\\end")
-            (cond
-             ((begin (set! *it* (get-grouped-environment-name-if-any)) *it*)
-              (let ((e *it*)) (cond ((string=? *it* env) (return)) (else false))
-               (emit-html-string cs) (emit-html-char #\{) (emit-html-string e) (emit-html-char #\})))
-             (else (emit-html-string cs)))
-            (begin (emit-html-string cs)))))
-         ((char=? c #\space) (get-actual-char)
-          (emit (if *verb-visible-space-p* *verbatim-visible-space* #\space)))
-         (else (emit-html-char (get-actual-char)))))
+      (let %loop () (set! c (snoop-actual-char))
+       (cond ((not c) (terror 'do-verbatim-latex "Eof inside verbatim")) (else false))
+       (cond
+        ((char=? c #\\)
+         (let ((cs (get-ctl-seq)))
+          (if (string=? cs "\\end")
+           (cond
+            ((begin (set! *it* (get-grouped-environment-name-if-any)) *it*)
+             (let ((e *it*))
+              (cond ((string=? *it* env) (return))
+               (else (emit-html-string cs) (emit-html-char #\{) (emit-html-string e)
+                (emit-html-char #\})))))
+            (else (emit-html-string cs)))
+           (begin (emit-html-string cs)))))
+        ((char=? c #\space) (get-actual-char)
+         (emit (if *verb-visible-space-p* *verbatim-visible-space* #\space)))
+        (else (emit-html-char (get-actual-char))))
        (if %loop-returned %loop-result (%loop))))))))
  (emit "</pre>") (egroup) (do-para))
 
 (define (do-endverbatim-eplain) (set! *inside-eplain-verbatim-p* false) *inside-eplain-verbatim-p*)
 
 (define (do-alltt) (do-end-para) (bgroup) (emit "<pre class=verbatim>") (munched-a-newline-p)
- (let ((%fluid-var-*in-alltt-p* true))
+ (let ((%fluid-var-*in-alltt-p* true) (c false))
   (fluid-let ((*in-alltt-p* %fluid-var-*in-alltt-p*))
    (let*
     ((%loop-returned false) (%loop-result 0)
      (return
       (lambda %args (set! %loop-returned true) (set! %loop-result (and (pair? %args) (car %args))))))
-    (let %loop ()
-     (let ((c (snoop-actual-char)))
-      (cond ((not c) (terror 'do-alltt "Eof inside alltt")) (else false))
-      (case c ((#\\) (do-tex-ctl-seq (get-ctl-seq))) ((#\{) (get-actual-char) (bgroup))
-       ((#\}) (get-actual-char) (egroup)) (else (emit-html-char (get-actual-char))))
-      (cond ((not *in-alltt-p*) (return)) (else false)))
-     (if %loop-returned %loop-result (%loop)))))))
+    (let %loop () (set! c (snoop-actual-char))
+     (cond ((not c) (terror 'do-alltt "Eof inside alltt")) (else false))
+     (case c ((#\\) (do-tex-ctl-seq (get-ctl-seq))) ((#\{) (get-actual-char) (bgroup))
+      ((#\}) (get-actual-char) (egroup)) (else (emit-html-char (get-actual-char))))
+     (cond ((not *in-alltt-p*) (return)) (else false)) (if %loop-returned %loop-result (%loop)))))))
 
 (define (do-end-alltt) (emit "</pre>") (egroup) (do-para) (set! *in-alltt-p* false) *in-alltt-p*)
 
@@ -10331,6 +10355,12 @@ Try the commands
 
 (tex-def-prim "\\obeylines" do-obeylines)
 
+(tex-def-pat-prim "\\loop" "#1\\repeat" "\\def\\body{#1}\\iterate")
+
+(tex-def-pat-prim "\\iterate" "" "\\body\\let\\next\\iterate\\else\\let\\next\\relax\\fi\\next")
+
+(tex-let-prim "\\repeat" "\\fi")
+
 (tex-def-prim "\\enskip" (lambda () (emit (kern ".5em"))))
 
 (tex-def-prim "\\quad" (lambda () (emit (kern "1em"))))
@@ -11066,28 +11096,26 @@ Try the commands
  (let ((%fluid-var-*catcodes* *catcodes*))
   (fluid-let ((*catcodes* %fluid-var-*catcodes*)) (bgroup) (do-tex-ctl-seq-completely "\\tthook")
    (catcode #\\ 12) (catcode #\space 12) (emit "<pre class=verbatim>")
-   (let ((%fluid-var-*ligatures-p* false))
+   (let ((%fluid-var-*ligatures-p* false) (c false))
     (fluid-let ((*ligatures-p* %fluid-var-*ligatures-p*))
      (let*
       ((%loop-returned false) (%loop-result 0)
        (return
         (lambda %args (set! %loop-returned true)
          (set! %loop-result (and (pair? %args) (car %args))))))
-      (let %loop ()
-       (let ((c (snoop-actual-char)))
-        (cond ((not c) (terror 'do-begintt "Eof inside \\begintt")) (else false))
-        (cond
-         ((char=? c #\\)
+      (let %loop () (set! c (snoop-actual-char))
+       (cond ((not c) (terror 'do-begintt "Eof inside \\begintt")) (else false))
+       (cond
+        ((char=? c #\\)
+         (let ((%fluid-var-*catcodes* *catcodes*))
+          (fluid-let ((*catcodes* %fluid-var-*catcodes*)) (catcode #\\ 0)
+           (let ((cs (get-ctl-seq))) (if (string=? cs "\\endtt") (return) (emit-html-string cs))))))
+        ((esc-char-p c)
+         (let ((cs (get-ctl-seq)))
           (let ((%fluid-var-*catcodes* *catcodes*))
            (fluid-let ((*catcodes* %fluid-var-*catcodes*)) (catcode #\\ 0)
-            (let ((cs (get-ctl-seq))) (cond ((string=? cs "\\endtt") (return)) (else false))
-             (emit-html-string cs)))))
-         ((esc-char-p c)
-          (let ((cs (get-ctl-seq)))
-           (let ((%fluid-var-*catcodes* *catcodes*))
-            (fluid-let ((*catcodes* %fluid-var-*catcodes*)) (catcode #\\ 0)
-             (do-tex-ctl-seq-completely cs)))))
-         (else (emit-html-char (get-actual-char)))))
+            (do-tex-ctl-seq-completely cs)))))
+        (else (emit-html-char (get-actual-char))))
        (if %loop-returned %loop-result (%loop))))))
    (emit "</pre>") (egroup)))
  (do-noindent))
@@ -11333,7 +11361,7 @@ Try the commands
    (emit ">")
    (let
     ((%fluid-var-*ligatures-p* false) (%fluid-var-*verb-display-p* true)
-     (%fluid-var-*not-processing-p* true))
+     (%fluid-var-*not-processing-p* true) (c false))
     (fluid-let
      ((*not-processing-p* %fluid-var-*not-processing-p*)
       (*verb-display-p* %fluid-var-*verb-display-p*) (*ligatures-p* %fluid-var-*ligatures-p*))
@@ -11342,33 +11370,32 @@ Try the commands
        (return
         (lambda %args (set! %loop-returned true)
          (set! %loop-result (and (pair? %args) (car %args))))))
-      (let %loop ()
-       (let ((c (snoop-actual-char)))
-        (cond ((not c) (terror 'do-scm-slatex-lines "Eof inside " env)) (else false))
-        (cond
-         ((char=? c #\newline) (get-actual-char) (scm-emit-html-char c)
-          (cond ((not (tex2page-flag-boolean "\\TZPslatexcomments")) false)
-           ((char=? (snoop-actual-char) #\;) (get-actual-char)
-            (if (char=? (snoop-actual-char) #\;) (toss-back-char #\;) (scm-output-slatex-comment)))))
-         ((char=? c #\\)
-          (let
-           ((x
-             (let ((%fluid-var-*catcodes* *catcodes*))
-              (fluid-let ((*catcodes* %fluid-var-*catcodes*)) (catcode #\\ 0) (get-ctl-seq)))))
-           (cond ((string=? x endenv) (return)) (else false))
-           (cond
-            ((string=? x "\\end")
-             (let ((g (get-grouped-environment-name-if-any)))
-              (cond ((and g (string=? g env)) (egroup) (return)) (else false)) (scm-output-token x)
-              (cond (g (scm-output-token "{") (scm-output-token g) (scm-output-token "}"))
-               (else false))))
-            (else (scm-output-token x)))))
-         ((esc-char-p c)
-          (let ((cs (get-ctl-seq)))
-           (let ((%fluid-var-*catcodes* *catcodes*))
-            (fluid-let ((*catcodes* %fluid-var-*catcodes*)) (catcode #\\ 0)
-             (do-tex-ctl-seq-completely cs)))))
-         (else (scm-output-next-chunk))))
+      (let %loop () (set! c (snoop-actual-char))
+       (cond ((not c) (terror 'do-scm-slatex-lines "Eof inside " env)) (else false))
+       (cond
+        ((char=? c #\newline) (get-actual-char) (scm-emit-html-char c)
+         (cond ((not (tex2page-flag-boolean "\\TZPslatexcomments")) false)
+          ((char=? (snoop-actual-char) #\;) (get-actual-char)
+           (if (char=? (snoop-actual-char) #\;) (toss-back-char #\;) (scm-output-slatex-comment)))))
+        ((char=? c #\\)
+         (let
+          ((x
+            (let ((%fluid-var-*catcodes* *catcodes*))
+             (fluid-let ((*catcodes* %fluid-var-*catcodes*)) (catcode #\\ 0) (get-ctl-seq)))))
+          (cond ((string=? x endenv) (return))
+           ((string=? x "\\end")
+            (let ((g (get-grouped-environment-name-if-any)))
+             (cond ((and g (string=? g env)) (egroup) (return))
+              (else (scm-output-token x)
+               (cond (g (scm-output-token "{") (scm-output-token g) (scm-output-token "}"))
+                (else false))))))
+           (else (scm-output-token x)))))
+        ((esc-char-p c)
+         (let ((cs (get-ctl-seq)))
+          (let ((%fluid-var-*catcodes* *catcodes*))
+           (fluid-let ((*catcodes* %fluid-var-*catcodes*)) (catcode #\\ 0)
+            (do-tex-ctl-seq-completely cs)))))
+        (else (scm-output-next-chunk)))
        (if %loop-returned %loop-result (%loop))))))
    (emit "</pre></div>") (egroup) (cond (display-p (do-noindent)) (in-table-p (emit "</td><td>"))))))
 

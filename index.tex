@@ -117,7 +117,7 @@ specifically mean the “plain” format. We will use “Lisp” to refer
 to the implementation language of the \TeX2page script under
 discussion, although this can be either Common Lisp or Scheme,
 with near-identical behavior. For the minor differences, see
-Appendix A.}
+Appendix A (p.~\ref{scheme}).}
 For instance, given a plain-\TeX\ document file
 \p{|meta[wherever-it-is/jobname].|meta[ext]}, which can
 be either a full pathname or a pathname relative to either the
@@ -1861,7 +1861,8 @@ the document remains processable in both languages.
 
 \TeX2page pre-sets `\TZPcommonlisp` to 1 in Common Lisp and 0 in Scheme.
 
-You may set `\TZPcommonlisp` to specify that the document needs
+You may set `\TZPcommonlisp` to specify that the document {\em
+needs}
 either the Common Lisp or Scheme version of \TeX2page. If
 the incorrect version is used, \TeX2page will display a warning
 message, but will not crash for this reason alone.
@@ -2472,14 +2473,14 @@ $$
 In-text mathematics is also available.  E.g.,
 
 \begintt
-The Euclidean distance between two points is given by
+The Euclidean distance between two points is
 $\sqrt{ (\Delta x)^2 + (\Delta y)^2 }$.
 \endtt
 %
 produces
 
 \quote
-The Euclidean distance between two points is given by
+The Euclidean distance between two points is
 $\sqrt{ (\Delta x)^2 + (\Delta y)^2 }$.
 \endquote
 
@@ -2530,7 +2531,7 @@ result is all-upper-case  (`\Romannumeral 1986` =
 \index{MetaPost}
 %\index{METAFONT@\MF}
 \index{Xfig}
-\index{Gimp, the}
+\index{GIMP}
 \index{Inkscape}
 %\index{MFpic}
 %
@@ -2540,7 +2541,7 @@ documents~\cite{latex-graphics-companion}.
 Users create EPS files with their favorite external
 programs, which can be GUI tools such as
 Inkscape~\cite{inkscape,kirsanov:inkscape,bah:inkscape},
-Gimp~\cite{gimp,gimpbook},
+GIMP~\cite{gimp,gimpbook},
 and Xfig~\cite{xfig},
 or algebraic
 ones like MetaPost~\cite{metapost,mfbook}.
@@ -3341,6 +3342,7 @@ should help pinpoint any error.
 
 \beginchapter A Also in Scheme
 
+\xrdef{scheme}
 The \TeX2page distribution comes with two scripts,
 `tex2page.lisp` and `tex2page.rkt`. Each works without any
 further configuration, the first in Common Lisp, the second in
@@ -3350,7 +3352,7 @@ the most part you will get identical results. We will now mention
 the few situations where the Scheme script differs from the
 Common Lisp version.
 
-See Appendix C for details on how to obtain a script that works
+See Appendix C (p.~\ref{configure}) for details on how to obtain a script that works
 on Schemes other than Racket.
 
 When you get the script of your choice configured, you may copy or link it to
@@ -3488,6 +3490,7 @@ the correct pathnames to your Racket executable and
 
 \beginsection When explicit configuration is needed
 
+\xrdef{configure}
 In general, you need to {\em
 configure}
 \TeX2page so it runs on your system.  Even in cases where the supplied

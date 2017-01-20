@@ -181,7 +181,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170118, clisp.
 
 
-(define *tex2page-version* "20170119")
+(define *tex2page-version* "20170120")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -1102,7 +1102,7 @@
   (cond
    ((not (not (= (catcode #\space) 10)))
     (let
-     ((newline-active-p (not (= (catcode #\newline) 5))) (num-newlines-read 0) (num-spaces-read 0)
+     ((newline-active-p (not (= (catcode #\newline) 5))) (num-newlines-read 0)
       (newline-already-read-p false) (c false))
      (let*
       ((%loop-returned false) (%loop-result 0)
@@ -1123,8 +1123,7 @@
               num-newlines-read)
              (else (toss-back-char #\newline) (return))))
            (else (get-actual-char)))))
-        ((char-whitespace? c) (set! num-spaces-read (+ num-spaces-read 1)) (get-actual-char))
-        (else (return)))
+        ((char-whitespace? c) (get-actual-char)) (else (return)))
        (if %loop-returned %loop-result (%loop))))))
    (else false))))
 
@@ -1158,7 +1157,7 @@
 
 (define (do-relax) true)
 
-(define (get-ctl-seq)
+(define (get-ctl-seq) (ignorespaces 1.5)
  (let ((bs (get-actual-char)))
   (cond ((not (esc-char-p bs)) (terror 'get-ctl-seq "Missing control sequence (" bs ")"))
    (else false))
@@ -3025,9 +3024,9 @@
       ((not fnmark) (set! fnno (add1 (get-gcount "\\footnotenumber")))
        (tex-gdef-count "\\footnotenumber" fnno) (set! fnmark (write-to-string fnno)) fnmark)
       (else false))
-     (emit-anchor fncalltag) (cond (fnno (emit "<sup><small>")) (else false))
-     (emit-page-node-link-start false fntag) (emit fnmark) (emit-link-stop)
-     (cond (fnno (emit "</small></sup>")) (else false))
+     (emit-anchor fncalltag) (emit "<span class=footnotemark>")
+     (cond (fnno (emit "<sup>")) (else false)) (emit-page-node-link-start false fntag) (emit fnmark)
+     (emit-link-stop) (cond (fnno (emit "</sup>")) (else false)) (emit "</span>")
      (do-vfootnote-aux fnmark fncalltag fntag))))))
 
 (define (do-vfootnote)
@@ -3069,16 +3068,16 @@
         (let ((fv (list-ref *footnote-list* i)))
          (let ((fnmark (footnotev*-mark fv)))
           (let ((fnno (string->number fnmark)))
-           (let ((fncalltag (footnotev*-caller fv))) (do-para)
+           (let ((fncalltag (footnotev*-caller fv))) (do-para) (emit "<span class=footnotemark>")
             (cond
-             (fncalltag (emit-anchor (footnotev*-tag fv))
-              (cond (fnno (emit "<sup><small>")) (else false))
+             (fncalltag (emit-anchor (footnotev*-tag fv)) (cond (fnno (emit "<sup>")) (else false))
               (emit-page-node-link-start false fncalltag))
              (else false))
             (emit fnmark)
-            (cond (fncalltag (emit-link-stop) (cond (fnno (emit "</small></sup>")) (else false)))
+            (cond (fncalltag (emit-link-stop) (cond (fnno (emit "</sup>")) (else false)))
              (else false))
-            (emit " ") (emit (footnotev*-text fv)) (do-end-para) (set! i (- i 1)) i)))))
+            (emit "</span>") (emit " ") (emit (footnotev*-text fv)) (do-end-para) (set! i (- i 1))
+            i)))))
        (if %loop-returned %loop-result (%loop)))))
     (emit "</div>") (emit-newline))
    (else false))))
@@ -5466,7 +5465,7 @@
  (let ((one (get-raw-token/is)))
   (let ((two (get-raw-token/is)))
    (let ((one2 one))
-    (let ((two2 two))
+    (let ((two2 two)) (ignorespaces 1.5)
      (if (string=? one two) (do-iftrue)
       (begin
        (cond
@@ -5601,14 +5600,16 @@
 
 (define (do-ifodd) (if (odd? (get-number)) (do-iftrue) (do-iffalse)))
 
-(define (do-else) (cond ((null? *tex-if-stack*) (terror 'do-else "Extra \\else.")) (else false))
+(define (do-else) (ignorespaces 1.5)
+ (cond ((null? *tex-if-stack*) (terror 'do-else "Extra \\else.")) (else false))
  (let
   ((top-if
     (let* ((%pop-old-stack *tex-if-stack*) (%pop-top-value (car %pop-old-stack)))
      (begin (set! *tex-if-stack* (cdr %pop-old-stack)) *tex-if-stack*) %pop-top-value)))
   (set! *tex-if-stack* (cons (not top-if) *tex-if-stack*)) *tex-if-stack*))
 
-(define (do-fi) (cond ((null? *tex-if-stack*) (terror 'do-fi "Extra \\fi.")) (else false))
+(define (do-fi) (ignorespaces 1.5)
+ (cond ((null? *tex-if-stack*) (terror 'do-fi "Extra \\fi.")) (else false))
  (let* ((%pop-old-stack *tex-if-stack*) (%pop-top-value (car %pop-old-stack)))
   (begin (set! *tex-if-stack* (cdr %pop-old-stack)) *tex-if-stack*) %pop-top-value))
 
@@ -6758,7 +6759,7 @@
       (else (get-actual-char))))
     (if %loop-returned %loop-result (%loop))))))
 
-(define (do-rawhtml)
+(define (do-rawhtml) (ignorespaces 1.5)
  (let*
   ((%loop-returned false) (%loop-result 0)
    (return
@@ -6769,7 +6770,7 @@
      ((esc-char-p c)
       (let ((x (get-ctl-seq)))
        (let ((y (find-corresp-prim x)))
-        (cond ((string=? y "\\endrawhtml") (return))
+        (cond ((string=? y "\\endrawhtml") (ignorespaces 1.5) (return))
          ((and (string=? y "\\end") (begin (set! *it* (get-grouped-environment-name-if-any)) *it*))
           (let ((g *it*))
            (let
@@ -6787,7 +6788,8 @@
                        (append %res (if (string? %a) (string->list %a) %a)))))
                     (%concatenate-loop (cdr %ee)))))
                  %res)))))
-            (if (string=? y "\\endrawhtml") (return) (begin (emit "\\end{") (emit g) (emit "}"))))))
+            (cond ((string=? y "\\endrawhtml") (ignorespaces 1.5) (return))
+             (else (emit "\\end{") (emit g) (emit "}"))))))
          ((string=? x "\\\\") (emit c) (toss-back-char c)) (else (emit x))))))
      (else (get-actual-char) (emit c))))
    (if %loop-returned %loop-result (%loop)))))
@@ -8876,7 +8878,7 @@
 
 (define (inside-false-world-p) (or (member false *tex-if-stack*) (member '? *tex-if-stack*)))
 
-(define (do-tex-ctl-seq z) (trace-if (> (find-count "\\tracingcommands") 0) z)
+(define (do-tex-ctl-seq z) (trace-if (> (find-count "\\tracingmacros") 0) z)
  (cond
   ((begin (set! *it* (resolve-defs z)) *it*)
    (let ((s *it*)) (trace-if (> (find-count "\\tracingmacros") 0) "    --> " s)
@@ -9569,7 +9571,7 @@
 
       a:hover {
       text-decoration: none;
-      background-color: yellow;
+      background-color: #f2f288;
       }
 
       .navigation {
@@ -9595,6 +9597,10 @@
 
       .rightline {
       text-align: right;
+      }
+
+      sup {
+      font-size: 61%; /* otherwise footnote numbers are horrible */
       }
 
       .bibitem {
@@ -9630,6 +9636,10 @@
       width: 40%;
       }
       */
+
+      .footnotemark {
+      background-color: #f2f288;
+      }
 
       .footnote {
       font-size: 90%;
@@ -11770,9 +11780,12 @@ Try the commands
 (tex-def-prim "\\color" do-color)
 
 (define (do-colorbox)
- (let ((color (get-group)))
-  (let ((text (get-peeled-group))) (toss-back-char #\}) (toss-back-string text)
-   (toss-back-string color) (toss-back-string "\\bgcolor") (toss-back-char #\{))))
+ (let ((model (get-bracketed-text-if-any)))
+  (let ((color (get-group)))
+   (let ((text (get-peeled-group))) (toss-back-char #\}) (toss-back-string text)
+    (toss-back-string color)
+    (cond (model (toss-back-char #\]) (toss-back-string model) (toss-back-char #\[)) (else false))
+    (toss-back-string "\\bgcolor") (toss-back-char #\{)))))
 
 (tex-def-prim "\\colorbox" do-colorbox)
 

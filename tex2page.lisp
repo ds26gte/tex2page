@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170119") ;last change
+(defparameter *tex2page-version* "20170120") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -709,11 +709,12 @@
   (unless (/= (catcode #\space) 10)
     (let ((newline-active-p (/= (catcode #\newline) 5))
           (num-newlines-read 0)
-          (num-spaces-read 0)
+          ;(num-spaces-read 0)
           (newline-already-read-p nil)
           c)
       (loop
         (setq c (snoop-char))
+        ;(format t "c = ~s~%" c)
         (when (eql c #\return) (setq c (snoop-actual-char)))
         (cond ((not c) (return))
               ((invisible-space-p c)
@@ -730,9 +731,10 @@
                         (t (toss-back-char #\newline) (return))))
                      (t (get-actual-char)))))
               ((char-whitespace-p c)
-               (incf num-spaces-read)
+               ;(incf num-spaces-read)
                (get-actual-char))
               (t (return))))
+      ;(format t "num-spaces-read = ~s~%" num-spaces-read)
       )))
 
 ;(trace ignorespaces)
@@ -760,6 +762,7 @@
 (defun do-relax () t)
 
 (defun get-ctl-seq ()
+  (ignorespaces 1.5)
   (let ((bs (get-actual-char)))
     (unless (esc-char-p bs)
       (terror 'get-ctl-seq "Missing control sequence (" bs ")"))
@@ -2363,11 +2366,13 @@
       (tex-gdef-count "\\footnotenumber" fnno)
       (setq fnmark (write-to-string fnno)))
     (emit-anchor fncalltag)
-    (when fnno (emit "<sup><small>"))
+    (emit "<span class=footnotemark>")
+    (when fnno (emit "<sup>"))
     (emit-page-node-link-start nil fntag)
     (emit fnmark)
     (emit-link-stop)
-    (when fnno (emit "</small></sup>"))
+    (when fnno (emit "</sup>"))
+    (emit "</span>")
     (do-vfootnote-aux fnmark fncalltag fntag)))
 
 (defun do-vfootnote ()
@@ -2405,17 +2410,20 @@
           (when (< i 0) (return))
           (let* ((fv (elt *footnote-list* i))
                  (fnmark (footnotev*-mark fv))
-                 (fnno (read-from-string fnmark))
+                 (fnno (string-to-number fnmark))
                  (fncalltag (footnotev*-caller fv)))
             (do-para)
+            (emit "<span class=footnotemark>")
             (when fncalltag
               (emit-anchor (footnotev*-tag fv))
-              (when fnno (emit "<sup><small>"))
+              (when fnno (emit "<sup>"))
               (emit-page-node-link-start nil fncalltag))
             (emit fnmark)
             (when fncalltag
               (emit-link-stop)
-              (when fnno (emit "</small></sup>")))
+              (when fnno (emit "</sup>"))
+              )
+            (emit "</span>")
             (emit " ")
             (emit (footnotev*-text fv))
             (do-end-para)
@@ -4548,6 +4556,7 @@
          (two (get-raw-token/is))
          (one2 one)
          (two2 two))
+    (ignorespaces 1.5)
     ;NB: doesn't work like tex's \ifx if one of the args is a
     ;"primitive" ctl seq
     (if (string= one two)
@@ -4661,11 +4670,13 @@
     (do-iffalse)))
 
 (defun do-else ()
+  (ignorespaces 1.5)
   (when (null *tex-if-stack*) (terror 'do-else "Extra \\else."))
   (let ((top-if (pop *tex-if-stack*)))
     (push (not top-if) *tex-if-stack*)))
 
 (defun do-fi ()
+  (ignorespaces 1.5)
   (when (null *tex-if-stack*) (terror 'do-fi "Extra \\fi."))
   (pop *tex-if-stack*))
 
@@ -5318,6 +5329,7 @@
               (t (get-actual-char)))))))
 
 (defun do-rawhtml ()
+  (ignorespaces 1.5)
   (loop
     (let ((c (snoop-actual-char)))
       (cond ((not c)
@@ -5325,14 +5337,15 @@
             ((esc-char-p c)
              (let* ((x (get-ctl-seq))
                     (y (find-corresp-prim x)))
-               (cond ((string= y "\\endrawhtml") (return))
+               (cond ((string= y "\\endrawhtml")
+                      (ignorespaces 1.5) (return))
                      ((and (string= y "\\end")
                            (setq *it* (get-grouped-environment-name-if-any)))
                       (let* ((g *it*)
                              (y (find-corresp-prim (concatenate 'string x g))))
-                        (if (string= y "\\endrawhtml") (return)
-                          (progn (emit "\\end{")
-                                 (emit g) (emit "}")))))
+                        (cond ((string= y "\\endrawhtml")
+                               (ignorespaces 1.5) (return))
+                              (t (emit "\\end{") (emit g) (emit "}")))))
                      ((string= x "\\\\")
                       (emit c) (toss-back-char c))
                      (t (emit x)))))
@@ -7231,7 +7244,7 @@
   (declare (string z))
   ;process ctl seq z.  Return :encountered-bye if z is \bye;
   ;:encountered-endinput if z is \endinput
-  (trace-if (> (find-count "\\tracingcommands") 0) z)
+  (trace-if (> (find-count "\\tracingmacros") 0) z)
   (cond ((setq *it* (resolve-defs z))
          ;macro body could contain \fi
          (let ((s *it*))
@@ -7751,7 +7764,7 @@
 
       a:hover {
       text-decoration: none;
-      background-color: yellow;
+      background-color: #f2f288;
       }
 
       .navigation {
@@ -7777,6 +7790,10 @@
 
       .rightline {
       text-align: right;
+      }
+
+      sup {
+      font-size: 61%; /* otherwise footnote numbers are horrible */
       }
 
       .bibitem {
@@ -7812,6 +7829,10 @@
       width: 40%;
       }
       */
+
+      .footnotemark {
+      background-color: #f2f288;
+      }
 
       .footnote {
       font-size: 90%;
@@ -9419,11 +9440,16 @@ Try the commands
 (tex-def-prim "\\color" #'do-color)
 
 (defun do-colorbox ()
-  (let* ((color (get-group))
+  (let* ((model (get-bracketed-text-if-any))
+         (color (get-group))
          (text (get-peeled-group)))
     (toss-back-char #\})
     (toss-back-string text)
     (toss-back-string color)
+    (when model
+      (toss-back-char #\])
+      (toss-back-string model)
+      (toss-back-char #\[))
     (toss-back-string "\\bgcolor")
     (toss-back-char #\{)))
 

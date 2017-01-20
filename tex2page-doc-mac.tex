@@ -1,4 +1,4 @@
-% last change: 2017-01-18
+% last change: 2017-01-20
 % Dorai Sitaram
 %
 %
@@ -106,19 +106,6 @@ $\Vert$\or
 \ddag\ddag
 \fi}
 
-\ifx\shipout\UnDeFiNeD
-\else
-\def\bgcolor#1{}%
-\fi
-
-\def\sfootnote{%
-  \global\advance\footnotenumber by 1
-  \ifnum\footnotenumber>9
-    \global\footnotenumber=1
-  \fi
-  \def\sfootnoteQmark{{\bgcolor{yellow}\fnsymbol{\the\footnotenumber}}}%
-  \footnote\sfootnoteQmark}
-
 %
 \ifx\shipout\UnDeFiNeD\else
 \def\raggedleft{%
@@ -140,7 +127,7 @@ $\Vert$\or
 %\def\xrdef#1{\xrtag{#1}{\folio}}
 
 \let\n\noindent
-\let\f\sfootnote
+\let\f\numberedfootnote
 \let\p\verb
 \let\q\scm
 

@@ -1,8 +1,8 @@
 ":"; if test "$LISP" != sbcl; then export T2PARG=$1; fi
-":"; if test "$LISP" = abcl; then exec abcl --load $0 --eval '(ext::quit)'
+":"; if test "$LISP" = abcl; then exec abcl --load $0 --batch
 ":"; elif test "$LISP" = allegro; then exec alisp -L $0 -kill
-":"; elif test "$LISP" = clisp; then exec clisp -q $0
-":"; elif test "$LISP" = clozure; then exec ccl -l $0 -e '(ccl:quit)'
+":"; elif test "$LISP" = clisp; then exec clisp $0 -q
+":"; elif test "$LISP" = clozure; then exec ccl -l $0 -b
 ":"; elif test "$LISP" = cmucl; then exec lisp -quiet -load $0 -eval '(ext::quit)'
 ":"; elif test "$LISP" = ecl; then exec ecl -shell $0
 ":"; elif test "$LISP" = mkcl; then exec mkcl -shell $0
@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170120") ;last change
+(defparameter *tex2page-version* "20170121") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -377,6 +377,8 @@
 
 (defstruct bport* (port nil) (buffer '()))
 
+(defstruct oport* (port nil) (hbuffer '()))
+
 (defstruct texframe*
   (definitions (make-hash-table :test #'equal))
   (chardefinitions (make-hash-table))
@@ -653,12 +655,6 @@
 (defun toss-back-char (c)
   (push c (bport*-buffer *current-tex2page-input*)))
 
-(defun emit (s)
-  (princ s *html*))
-
-(defun emit-newline ()
-  (terpri *html*))
-
 (defun invisible-space-p (c)
   (= (catcode c) 9))
 
@@ -757,7 +753,7 @@
 (defun do-xspace ()
   (let ((c (snoop-actual-char)))
     (unless (member c '(#\space #\" #\. #\! #\, #\: #\; #\? #\/ #\' #\) #\-))
-      (emit #\space))))
+      (emit-space #\space))))
 
 (defun do-relax () t)
 
@@ -1215,10 +1211,37 @@
                 (t (get-actual-char)
                    (push c s))))))))
 
+(defun make-html-output-stream ()
+  (make-oport* :port (make-string-output-stream)))
+
+(defun close-html-output-stream (op)
+  (mapc #'emit (oport*-hbuffer op))
+  (setf (oport*-hbuffer op) '())
+  (close (oport*-port op)))
+
+(defun html-output-stream-to-string (op)
+  (mapc #'emit (nreverse (oport*-hbuffer op)))
+  (setf (oport*-hbuffer op) '())
+  (get-output-stream-string (oport*-port op)))
+
+(defun emit (s)
+  (let ((p (oport*-port *html*)))
+    (mapc (lambda (x) (princ x p))
+          (nreverse (oport*-hbuffer *html*)))
+    (setf (oport*-hbuffer *html*) '())
+    (princ s p)))
+
+(defun emit-space (s)
+  (push s (oport*-hbuffer *html*)))
+
+(defun emit-newline ()
+  (push #\newline (oport*-hbuffer *html*)))
+
 (defun emit-html-char (c)
   (unless (not c)
     (cond ((char= c #\newline) (emit-newline))
           (*outputting-to-non-html-p* (emit c))
+          ((char-whitespace-p c) (emit-space c))
           (t (emit (case c
                      ((#\<) "&#x3c;")
                      ((#\>) "&#x3e;")
@@ -1230,6 +1253,9 @@
   (declare (string s))
   (dotimes (i (length s))
     (emit-html-char (char s i))))
+
+(defun do-unskip ()
+  (setf (oport*-hbuffer *html*) '()))
 
 (defun catcode (c &optional n globalp)
   (declare (character c))
@@ -1283,14 +1309,14 @@
         (old-math-delim-left *math-delim-left*)
         (old-math-delim-right *math-delim-right*)
         (old-math-height *math-height*))
-    (setq *html* (make-string-output-stream)
+    (setq *html* (make-html-output-stream)
           *math-delim-left* nil
           *math-delim-right* nil
           *math-height* 0)
     (push :mathbox *tabular-stack*)
     (add-postlude-to-top-frame
      (lambda ()
-       (let ((res (get-output-stream-string *html*)))
+       (let ((res (html-output-stream-to-string *html*)))
          (setq res
                (concatenate 'string
                  "<table><tr><td class=centerline>"
@@ -2250,7 +2276,7 @@
             (push c affixes-already-read)
             (get-actual-char)
             (when (= i 0)
-              (emit (kern ".16667em")))
+              (emit-space (kern ".16667em")))
             (let* ((*math-script-mode-p* t)
                    (s  (get-token)))
               (emit "<span style=\"font-size: 85%; position: relative; ")
@@ -2328,18 +2354,16 @@
 
 (defun tex-string-to-html-string (s)
   (declare (string s))
-  (let* ((tmp-port (make-string-output-stream))
-         (*html* tmp-port))
+  (let ((*html* (make-html-output-stream)))
     (tex2page-string s)
-    (get-output-stream-string tmp-port)))
+    (html-output-stream-to-string *html*)))
 
 (defun expand-tex-string (s)
   (declare (string s))
-  (let* ((tmp-port (make-string-output-stream))
-         (*html* tmp-port)
-         (*outputting-to-non-html-p* t))
+  (let ((*html* (make-html-output-stream))
+        (*outputting-to-non-html-p* t))
     (tex2page-string s)
-    (get-output-stream-string tmp-port)))
+    (html-output-stream-to-string *html*)))
 
 (let ((symlist nil)
       (symlist-len 0))
@@ -2395,15 +2419,15 @@
   (ignorespaces 1.5)
   (unless (char= (get-actual-char) #\{) (terror 'do-vfootnote-aux "Missing {"))
   (bgroup)
-  (let ((old-html *html*) (fn-tmp-port (make-string-output-stream)))
-    (setq *html* fn-tmp-port)
+  (let ((old-html *html*))
+    (setq *html* (make-html-output-stream))
     (when fncalltag
       (tex-def-0arg "\\TIIPcurrentnodename" fntag)
       (tex-def-0arg "\\@currentlabel" fnmark))
     (add-aftergroup-to-top-frame
      (lambda ()
        (push (make-footnotev* :mark fnmark :text
-                              (get-output-stream-string fn-tmp-port)
+                              (html-output-stream-to-string *html*)
                               :tag fntag :caller fncalltag)
              *footnote-list*)
        (setq *html* old-html)))))
@@ -2800,7 +2824,7 @@
     (setq *afterassignment* z)))
 
 (defun do-space ()
-  (emit #\space))
+  (emit-space #\space))
 
 (defun do-actual-space ()
   (emit "&#x200b;") (emit #\space) (emit "&#x200b;"))
@@ -2811,7 +2835,7 @@
 (defun emit-nbsp (n)
   (declare (fixnum n))
   (dotimes (i n)
-    (emit "&#xa0;")))
+    (emit-space "&#xa0;")))
 
 (defun scaled-point-equivalent-of (unit)
   ;TeXbook, chapter 10
@@ -2895,10 +2919,10 @@
 
 (defun do-hskip ()
   (let ((n (get-pixels)))
-    (emit "<span style=\"margin-left: ")
-    (emit n)
+    (emit-space "<span style=\"margin-left: ")
+    (emit-space n)
     ;span needs to contain something that can be moved: use zwnj
-    (emit "pt\">&#x200c;</span>")))
+    (emit-space "pt\">&#x200c;</span>")))
 
 (defun do-vskip ()
   (let ((x (get-points)))
@@ -3792,8 +3816,10 @@
                   (concatenate 'string *aux-dir/* *jobname* *html-page-suffix*
                     (write-to-string *html-page-count*)
                     *output-extension*))
-            (setq *html* (open *html-page* :direction :output
-                               :if-exists :supersede))
+            (setq *html*
+                  (make-oport* :port
+                               (open *html-page* :direction :output
+                                     :if-exists :supersede)))
             (do-start)))))
 
 (defun output-html-preamble ()
@@ -3899,7 +3925,7 @@
   (write-log *html-page-count*)
   (write-log #\])
   (write-log :separation-space)
-  (close *html*))
+  (close-html-output-stream *html*))
 
 (defun close-all-open-ports ()
   (when *aux-port* (close *aux-port*))
@@ -4283,13 +4309,12 @@
       "<tr><td>" bot "</td></tr></table>")))
 
 (defun tex-math-string-to-html-string (s)
-  (let* ((tmp-port (make-string-output-stream))
-         (*html* tmp-port))
+  (let ((*html* (make-html-output-stream)))
     (call-with-input-string/buffered ""
       (lambda ()
         (do-math-fragment s nil)
         (generate-html)))
-    (get-output-stream-string tmp-port)))
+    (html-output-stream-to-string *html*)))
 
 (defun do-intext-math (tex-string)
   (declare (string tex-string))
@@ -4464,9 +4489,8 @@
 
 (defun tex-write-output-string (s)
   (declare (string s))
-  (let* ((o (make-string-output-stream))
-         (*outputting-to-non-html-p* t)
-         (*html* o))
+  (let ((*html* (make-html-output-stream))
+         (*outputting-to-non-html-p* t))
     (call-with-input-string/buffered s
       (lambda ()
         (loop
@@ -4475,7 +4499,7 @@
             (case c
               (#\\ (do-tex-ctl-seq (get-ctl-seq)))
               (t (emit-html-char (get-actual-char))))))))
-    (get-output-stream-string o)))
+    (html-output-stream-to-string *html*)))
 
 (defun do-write-aux (o)
   (declare (fixnum o))
@@ -7239,7 +7263,7 @@
          (if (eq (car *tabular-stack*) :ruled-table)
              (do-ruledtable-colsep) (emit c)))
         ((char= c #\newline) (do-newline))
-        ((char= c #\space) (do-space))
+        ((char= c #\space) (emit-space c))
         ((char= c #\tab) (do-tab))
         (t
          (cond (*math-mode-p*
@@ -7424,17 +7448,18 @@
   (ensure-file-deleted *html-page*) ;??
   (setq *main-tex-file* nil)
   (setq *html-page* ".eval4texignore")
-  (setq *html* (open *html-page* :direction :output
-                     :if-exists :supersede)))
+  (setq *html*
+        (make-oport* :port
+                     (open *html-page* :direction :output
+                           :if-exists :supersede))))
 
 (defun expand-ctl-seq-into-string (cs)
-  (let ((tmp-port (make-string-output-stream)))
-    (let ((*html* tmp-port))
+    (let ((*html* (make-html-output-stream)))
       (do-tex-ctl-seq cs))
-    (get-output-stream-string tmp-port)))
+    (html-output-stream-to-string *html*))
 
 (defun call-with-html-output-going-to (p th)
-  (let ((*html* p))
+  (let ((*html* (make-oport* :port p)))
     (funcall th)))
 
 (defun call-external-programs-if-necessary ()
@@ -8313,6 +8338,7 @@ Try the commands
 (tex-def-prim "\\the" #'do-the)
 (tex-def-prim "\\uccode" (lambda () (do-tex-case-code :uccode)))
 (tex-def-prim "\\underline" (lambda () (do-function "\\underline")))
+(tex-def-prim "\\unskip" #'do-unskip)
 (tex-def-prim "\\uppercase" (lambda () (do-flipcase :uccode)))
 (tex-def-prim "\\vskip" #'do-vskip)
 (tex-def-prim "\\write" #'do-write)
@@ -8390,12 +8416,12 @@ Try the commands
 
 ;
 
-(tex-def-prim "\\enskip" (lambda () (emit (kern ".5em"))))
-(tex-def-prim "\\quad" (lambda () (emit (kern "1em"))))
-(tex-def-prim "\\qquad" (lambda () (emit (kern "2em"))))
+(tex-def-prim "\\enskip" (lambda () (emit-space (kern ".5em"))))
+(tex-def-prim "\\quad" (lambda () (emit-space (kern "1em"))))
+(tex-def-prim "\\qquad" (lambda () (emit-space (kern "2em"))))
 (tex-let-prim "\\enspace" "\\enskip")
-(tex-def-prim "\\thinspace" (lambda () (emit (kern ".16667em"))))
-(tex-def-prim "\\negthinspace" (lambda () (emit (kern "-.16667em"))))
+(tex-def-prim "\\thinspace" (lambda () (emit-space (kern ".16667em"))))
+(tex-def-prim "\\negthinspace" (lambda () (emit-space (kern "-.16667em"))))
 
 (tex-def-prim "\\smallskip" (lambda () (do-bigskip :smallskip)))
 (tex-def-prim "\\medskip" (lambda () (do-bigskip :medskip)))
@@ -8480,10 +8506,10 @@ Try the commands
 
 ;sec B.6, macros for math
 
-(tex-def-math-prim "\\," (lambda () (emit (kern ".16667em"))))
-(tex-def-math-prim "\\!" (lambda () (emit (kern "-.16667em"))))
-(tex-def-math-prim "\\>" (lambda () (emit (kern ".22222em"))))
-(tex-def-math-prim "\\;" (lambda () (emit (kern ".27778em"))))
+(tex-def-math-prim "\\," (lambda () (emit-space (kern ".16667em"))))
+(tex-def-math-prim "\\!" (lambda () (emit-space (kern "-.16667em"))))
+(tex-def-math-prim "\\>" (lambda () (emit-space (kern ".22222em"))))
+(tex-def-math-prim "\\;" (lambda () (emit-space (kern ".27778em"))))
 
 ;sec F.1. lowercase Greek
 
@@ -10203,7 +10229,7 @@ Try the commands
 (tex-let-prim "\\endpackages" "\\TIIPrelax")
 (tex-let-prim "\\normalfont" "\\TIIPrelax")
 (tex-let-prim "\\textnormal" "\\TIIPrelax")
-(tex-let-prim "\\unskip" "\\TIIPrelax")
+;(tex-let-prim "\\unskip" "\\TIIPrelax")
 (tex-def-prim "\\cline" #'get-group)
 (tex-def-prim "\\externalref" #'get-group)
 (tex-def-prim "\\GOBBLEARG" #'get-group)
@@ -10526,8 +10552,9 @@ Try the commands
             (setq *subjobname* *jobname*
                   *html-page*
                   (concatenate 'string *aux-dir/* *jobname* *output-extension*))
-            (setq *html* (open *html-page* :direction :output
-                               :if-exists :supersede))
+            (setq *html* (make-oport* :port
+                                      (open *html-page* :direction :output
+                                            :if-exists :supersede)))
             (do-start)
             (let ((*html-only* (1+ *html-only*)))
               (tex2page-file-if-exists (file-in-home ".tex2page.t2p"))

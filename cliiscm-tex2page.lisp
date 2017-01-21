@@ -1,4 +1,4 @@
-;last modified 2017-01-19
+;last modified 2017-01-21
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -m -- \"$@\"
@@ -129,6 +129,7 @@
   (cdef*-expansion set!cdef*-expansion)
   (cdef*-optarg set!cdef*-optarg)
   (counter*-value set!counter*-value)
+  (oport*-hbuffer set!oport*-hbuffer)
   (table-get table-put!)
   (tdef*-active set!tdef*-active)
   (tdef*-argpat set!tdef*-argpat)

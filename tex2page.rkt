@@ -178,10 +178,10 @@
     (else ""))
    htmlcolor)))
 
-;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170118, clisp.
+;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170121, clisp.
 
 
-(define *tex2page-version* "20170120")
+(define *tex2page-version* "20170121")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -576,6 +576,8 @@
 (defstruct tocentry* level number page label header)
 
 (defstruct bport* (port false) (buffer null))
+
+(defstruct oport* (port false) (hbuffer null))
 
 (defstruct texframe* (definitions (make-table ':test equal?)) (chardefinitions (make-table))
  (counts (make-table ':test equal?)) (toks (make-table ':test equal?))
@@ -1035,10 +1037,6 @@
  (set!bport*-buffer *current-tex2page-input* (cons c (bport*-buffer *current-tex2page-input*)))
  (bport*-buffer *current-tex2page-input*))
 
-(define (emit s) (display s *html*))
-
-(define (emit-newline) (newline *html*))
-
 (define (invisible-space-p c) (= (catcode c) 9))
 
 (define (snoop-actual-char)
@@ -1152,7 +1150,8 @@
 
 (define (do-xspace)
  (let ((c (snoop-actual-char)))
-  (cond ((not (member c '(#\space #\" #\. #\! #\, #\: #\; #\? #\/ #\' #\) #\-))) (emit #\space))
+  (cond
+   ((not (member c '(#\space #\" #\. #\! #\, #\: #\; #\? #\/ #\' #\) #\-))) (emit-space #\space))
    (else false))))
 
 (define (do-relax) true)
@@ -1807,10 +1806,32 @@
       (%concatenate-loop (cdr %ee)))))
    %res)))
 
+(define (make-html-output-stream) (make-oport* ':port (open-output-string)))
+
+(define (close-html-output-stream op) (for-each emit (oport*-hbuffer op))
+ (set!oport*-hbuffer op null) (oport*-hbuffer op)
+ (let ((%close-port-arg (oport*-port op)))
+  ((if (input-port? %close-port-arg) close-input-port close-output-port) %close-port-arg)))
+
+(define (html-output-stream-to-string op) (for-each emit (reverse (oport*-hbuffer op)))
+ (set!oport*-hbuffer op null) (oport*-hbuffer op) (get-output-string (oport*-port op)))
+
+(define (emit s)
+ (let ((p (oport*-port *html*)))
+  (for-each (lambda (x) (display x p)) (reverse (oport*-hbuffer *html*)))
+  (set!oport*-hbuffer *html* null) (oport*-hbuffer *html*) (display s p)))
+
+(define (emit-space s) (set!oport*-hbuffer *html* (cons s (oport*-hbuffer *html*)))
+ (oport*-hbuffer *html*))
+
+(define (emit-newline) (set!oport*-hbuffer *html* (cons #\newline (oport*-hbuffer *html*)))
+ (oport*-hbuffer *html*))
+
 (define (emit-html-char c)
  (cond
   ((not (not c))
    (cond ((char=? c #\newline) (emit-newline)) (*outputting-to-non-html-p* (emit c))
+    ((char-whitespace? c) (emit-space c))
     (else
      (emit (case c ((#\<) "&#x3c;") ((#\>) "&#x3e;") ((#\") "&#x22;") ((#\&) "&#x26;") (else c))))))
   (else false)))
@@ -1826,6 +1847,8 @@
    (let %loop () (if (>= i %dotimes-n) (return) false)
     (unless %loop-returned (emit-html-char (string-ref s i)))
     (unless %loop-returned (set! i (+ i 1))) (if %loop-returned %loop-result (%loop))))))
+
+(define (do-unskip) (set!oport*-hbuffer *html* null) (oport*-hbuffer *html*))
 
 (define (catcode c . %lambda-rest-arg)
  (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (n false) (globalp false))
@@ -1865,11 +1888,12 @@
  (let
   ((old-html *html*) (old-math-delim-left *math-delim-left*)
    (old-math-delim-right *math-delim-right*) (old-math-height *math-height*))
-  (set! *html* (open-output-string)) (set! *math-delim-left* false) (set! *math-delim-right* false)
-  (set! *math-height* 0) (set! *tabular-stack* (cons ':mathbox *tabular-stack*))
+  (set! *html* (make-html-output-stream)) (set! *math-delim-left* false)
+  (set! *math-delim-right* false) (set! *math-height* 0)
+  (set! *tabular-stack* (cons ':mathbox *tabular-stack*))
   (add-postlude-to-top-frame
    (lambda ()
-    (let ((res (get-output-string *html*)))
+    (let ((res (html-output-stream-to-string *html*)))
      (set! res
       (let ((%type 'string) (%ee (list "<table><tr><td class=centerline>" res "</td></tr></table>")))
        (let ((%res (if (eq? %type 'string) "" null)))
@@ -2852,7 +2876,7 @@
         (cond
          ((and (member c '(#\_ #\^)) (not (member c affixes-already-read)))
           (set! affixes-already-read (cons c affixes-already-read)) (get-actual-char)
-          (cond ((= i 0) (emit (kern ".16667em"))) (else false))
+          (cond ((= i 0) (emit-space (kern ".16667em"))) (else false))
           (let ((%fluid-var-*math-script-mode-p* true))
            (fluid-let ((*math-script-mode-p* %fluid-var-*math-script-mode-p*))
             (let ((s (get-token))) (emit "<span style=\"font-size: 85%; position: relative; ")
@@ -2974,17 +2998,15 @@
  (do-footnote-aux (number-to-footnote-symbol *footnote-sym*)))
 
 (define (tex-string-to-html-string s)
- (let ((tmp-port (open-output-string)))
-  (let ((%fluid-var-*html* tmp-port))
-   (fluid-let ((*html* %fluid-var-*html*)) (tex2page-string s) (get-output-string tmp-port)))))
+ (let ((%fluid-var-*html* (make-html-output-stream)))
+  (fluid-let ((*html* %fluid-var-*html*)) (tex2page-string s)
+   (html-output-stream-to-string *html*))))
 
 (define (expand-tex-string s)
- (let ((tmp-port (open-output-string)))
-  (let ((%fluid-var-*html* tmp-port))
-   (fluid-let ((*html* %fluid-var-*html*))
-    (let ((%fluid-var-*outputting-to-non-html-p* true))
-     (fluid-let ((*outputting-to-non-html-p* %fluid-var-*outputting-to-non-html-p*))
-      (tex2page-string s) (get-output-string tmp-port)))))))
+ (let ((%fluid-var-*html* (make-html-output-stream)) (%fluid-var-*outputting-to-non-html-p* true))
+  (fluid-let
+   ((*outputting-to-non-html-p* %fluid-var-*outputting-to-non-html-p*) (*html* %fluid-var-*html*))
+   (tex2page-string s) (html-output-stream-to-string *html*))))
 
 (define number-to-footnote-symbol
  (let ((symlist false) (symlist-len 0))
@@ -3054,7 +3076,7 @@
 (define (do-vfootnote-aux fnmark fncalltag fntag) (ignorespaces 1.5)
  (cond ((not (char=? (get-actual-char) #\{)) (terror 'do-vfootnote-aux "Missing {")) (else false))
  (bgroup)
- (let ((old-html *html*) (fn-tmp-port (open-output-string))) (set! *html* fn-tmp-port)
+ (let ((old-html *html*)) (set! *html* (make-html-output-stream))
   (cond
    (fncalltag (tex-def-0arg "\\TIIPcurrentnodename" fntag) (tex-def-0arg "\\@currentlabel" fnmark))
    (else false))
@@ -3062,8 +3084,8 @@
    (lambda ()
     (set! *footnote-list*
      (cons
-      (make-footnotev* ':mark fnmark ':text (get-output-string fn-tmp-port) ':tag fntag ':caller
-       fncalltag)
+      (make-footnotev* ':mark fnmark ':text (html-output-stream-to-string *html*) ':tag fntag
+       ':caller fncalltag)
       *footnote-list*))
     (set! *html* old-html) *html*))))
 
@@ -3508,7 +3530,7 @@
 (define (do-afterassignment) (ignorespaces 1.5)
  (let ((z (get-ctl-seq))) (set! *afterassignment* z) *afterassignment*))
 
-(define (do-space) (emit #\space))
+(define (do-space) (emit-space #\space))
 
 (define (do-actual-space) (emit "&#x200b;") (emit #\space) (emit "&#x200b;"))
 
@@ -3520,7 +3542,7 @@
    ((%loop-returned false) (%loop-result 0)
     (return
      (lambda %args (set! %loop-returned true) (set! %loop-result (and (pair? %args) (car %args))))))
-   (let %loop () (if (>= i %dotimes-n) (return) false) (unless %loop-returned (emit "&#xa0;"))
+   (let %loop () (if (>= i %dotimes-n) (return) false) (unless %loop-returned (emit-space "&#xa0;"))
     (unless %loop-returned (set! i (+ i 1))) (if %loop-returned %loop-result (%loop))))))
 
 (define (scaled-point-equivalent-of unit)
@@ -3569,8 +3591,8 @@
 (define (do-fontdimen) (get-number) (get-ctl-seq) (get-equal-sign) (eat-dimen))
 
 (define (do-hskip)
- (let ((n (get-pixels))) (emit "<span style=\"margin-left: ") (emit n)
-  (emit "pt\">&#x200c;</span>")))
+ (let ((n (get-pixels))) (emit-space "<span style=\"margin-left: ") (emit-space n)
+  (emit-space "pt\">&#x200c;</span>")))
 
 (define (do-vskip)
  (let ((x (get-points))) (eat-skip-fluff false) (emit "<div style=\"height: ") (emit x)
@@ -4529,19 +4551,21 @@
            (%concatenate-loop (cdr %ee)))))
         %res)))
      (set! *html*
-      (let*
-       ((%f *html-page*) (%ee (list ':direction ':output ':if-exists ':supersede))
-        (%direction (memv ':direction %ee)) (%if-exists (memv ':if-exists %ee))
-        (%if-does-not-exist ':error) (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-       (when %direction (set! %direction (cadr %direction)))
-       (when %if-exists (set! %if-exists (cadr %if-exists)))
-       (when %if-does-not-exist-from-user
-        (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-       (cond
-        ((eqv? %direction ':output)
-         (when (and (eqv? %if-exists ':supersede) (file-exists? %f)) (delete-file %f))
-         (open-output-file %f))
-        ((and (not %if-does-not-exist) (not (file-exists? %f))) false) (else (open-input-file %f)))))
+      (make-oport* ':port
+       (let*
+        ((%f *html-page*) (%ee (list ':direction ':output ':if-exists ':supersede))
+         (%direction (memv ':direction %ee)) (%if-exists (memv ':if-exists %ee))
+         (%if-does-not-exist ':error) (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
+        (when %direction (set! %direction (cadr %direction)))
+        (when %if-exists (set! %if-exists (cadr %if-exists)))
+        (when %if-does-not-exist-from-user
+         (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
+        (cond
+         ((eqv? %direction ':output)
+          (when (and (eqv? %if-exists ':supersede) (file-exists? %f)) (delete-file %f))
+          (open-output-file %f))
+         ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
+         (else (open-input-file %f))))))
      (do-start))
     (else false)))))
 
@@ -4588,9 +4612,7 @@
     (output-colophon))
    (else false)))
  (output-html-postamble) (write-log #\[) (write-log *html-page-count*) (write-log #\])
- (write-log ':separation-space)
- (let ((%close-port-arg *html*))
-  ((if (input-port? %close-port-arg) close-input-port close-output-port) %close-port-arg)))
+ (write-log ':separation-space) (close-html-output-stream *html*))
 
 (define (close-all-open-ports)
  (cond
@@ -5061,11 +5083,10 @@
     %res))))
 
 (define (tex-math-string-to-html-string s)
- (let ((tmp-port (open-output-string)))
-  (let ((%fluid-var-*html* tmp-port))
-   (fluid-let ((*html* %fluid-var-*html*))
-    (call-with-input-string/buffered "" (lambda () (do-math-fragment s false) (generate-html)))
-    (get-output-string tmp-port)))))
+ (let ((%fluid-var-*html* (make-html-output-stream)))
+  (fluid-let ((*html* %fluid-var-*html*))
+   (call-with-input-string/buffered "" (lambda () (do-math-fragment s false) (generate-html)))
+   (html-output-stream-to-string *html*))))
 
 (define (do-intext-math tex-string)
  (let ((%fluid-var-*math-needs-image-p* false))
@@ -5332,23 +5353,21 @@
     (table-put! o sl ':free) (table-get o sl)))))
 
 (define (tex-write-output-string s)
- (let ((o (open-output-string)))
-  (let ((%fluid-var-*outputting-to-non-html-p* true))
-   (fluid-let ((*outputting-to-non-html-p* %fluid-var-*outputting-to-non-html-p*))
-    (let ((%fluid-var-*html* o))
-     (fluid-let ((*html* %fluid-var-*html*))
-      (call-with-input-string/buffered s
-       (lambda ()
-        (let*
-         ((%loop-returned false) (%loop-result 0)
-          (return
-           (lambda %args (set! %loop-returned true)
-            (set! %loop-result (and (pair? %args) (car %args))))))
-         (let %loop ()
-          (let ((c (snoop-actual-char))) (cond ((not c) (return)) (else false))
-           (case c ((#\\) (do-tex-ctl-seq (get-ctl-seq))) (else (emit-html-char (get-actual-char)))))
-          (if %loop-returned %loop-result (%loop))))))
-      (get-output-string o)))))))
+ (let ((%fluid-var-*html* (make-html-output-stream)) (%fluid-var-*outputting-to-non-html-p* true))
+  (fluid-let
+   ((*outputting-to-non-html-p* %fluid-var-*outputting-to-non-html-p*) (*html* %fluid-var-*html*))
+   (call-with-input-string/buffered s
+    (lambda ()
+     (let*
+      ((%loop-returned false) (%loop-result 0)
+       (return
+        (lambda %args (set! %loop-returned true)
+         (set! %loop-result (and (pair? %args) (car %args))))))
+      (let %loop ()
+       (let ((c (snoop-actual-char))) (cond ((not c) (return)) (else false))
+        (case c ((#\\) (do-tex-ctl-seq (get-ctl-seq))) (else (emit-html-char (get-actual-char)))))
+       (if %loop-returned %loop-result (%loop))))))
+   (html-output-stream-to-string *html*))))
 
 (define (do-write-aux o)
  (let ((output (tex-write-output-string (get-peeled-group))))
@@ -8883,7 +8902,7 @@
       ((:tabular) (do-tabular-colsep)) ((:ruled-table) (do-ruledtable-colsep))))
     (else (emit-html-char c))))
   ((char=? c #\|) (if (eq? (car *tabular-stack*) ':ruled-table) (do-ruledtable-colsep) (emit c)))
-  ((char=? c #\newline) (do-newline)) ((char=? c #\space) (do-space)) ((char=? c #\tab) (do-tab))
+  ((char=? c #\newline) (do-newline)) ((char=? c #\space) (emit-space c)) ((char=? c #\tab) (do-tab))
   (else
    (cond
     (*math-mode-p*
@@ -9020,27 +9039,28 @@
 (define (eval-for-tex-only) (set! *eval-for-tex-only-p* true) (do-end-page)
  (ensure-file-deleted *html-page*) (set! *main-tex-file* false) (set! *html-page* ".eval4texignore")
  (set! *html*
-  (let*
-   ((%f *html-page*) (%ee (list ':direction ':output ':if-exists ':supersede))
-    (%direction (memv ':direction %ee)) (%if-exists (memv ':if-exists %ee))
-    (%if-does-not-exist ':error) (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-   (when %direction (set! %direction (cadr %direction)))
-   (when %if-exists (set! %if-exists (cadr %if-exists)))
-   (when %if-does-not-exist-from-user (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-   (cond
-    ((eqv? %direction ':output)
-     (when (and (eqv? %if-exists ':supersede) (file-exists? %f)) (delete-file %f))
-     (open-output-file %f))
-    ((and (not %if-does-not-exist) (not (file-exists? %f))) false) (else (open-input-file %f)))))
+  (make-oport* ':port
+   (let*
+    ((%f *html-page*) (%ee (list ':direction ':output ':if-exists ':supersede))
+     (%direction (memv ':direction %ee)) (%if-exists (memv ':if-exists %ee))
+     (%if-does-not-exist ':error) (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
+    (when %direction (set! %direction (cadr %direction)))
+    (when %if-exists (set! %if-exists (cadr %if-exists)))
+    (when %if-does-not-exist-from-user (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
+    (cond
+     ((eqv? %direction ':output)
+      (when (and (eqv? %if-exists ':supersede) (file-exists? %f)) (delete-file %f))
+      (open-output-file %f))
+     ((and (not %if-does-not-exist) (not (file-exists? %f))) false) (else (open-input-file %f))))))
  *html*)
 
 (define (expand-ctl-seq-into-string cs)
- (let ((tmp-port (open-output-string)))
-  (let ((%fluid-var-*html* tmp-port)) (fluid-let ((*html* %fluid-var-*html*)) (do-tex-ctl-seq cs)))
-  (get-output-string tmp-port)))
+ (let ((%fluid-var-*html* (make-html-output-stream)))
+  (fluid-let ((*html* %fluid-var-*html*)) (do-tex-ctl-seq cs)))
+ (html-output-stream-to-string *html*))
 
 (define (call-with-html-output-going-to p th)
- (let ((%fluid-var-*html* p)) (fluid-let ((*html* %fluid-var-*html*)) (th))))
+ (let ((%fluid-var-*html* (make-oport* ':port p))) (fluid-let ((*html* %fluid-var-*html*)) (th))))
 
 (define (call-external-programs-if-necessary)
  (let
@@ -10261,6 +10281,8 @@ Try the commands
 
 (tex-def-prim "\\underline" (lambda () (do-function "\\underline")))
 
+(tex-def-prim "\\unskip" do-unskip)
+
 (tex-def-prim "\\uppercase" (lambda () (do-flipcase ':uccode)))
 
 (tex-def-prim "\\vskip" do-vskip)
@@ -10361,17 +10383,17 @@ Try the commands
 
 (tex-let-prim "\\repeat" "\\fi")
 
-(tex-def-prim "\\enskip" (lambda () (emit (kern ".5em"))))
+(tex-def-prim "\\enskip" (lambda () (emit-space (kern ".5em"))))
 
-(tex-def-prim "\\quad" (lambda () (emit (kern "1em"))))
+(tex-def-prim "\\quad" (lambda () (emit-space (kern "1em"))))
 
-(tex-def-prim "\\qquad" (lambda () (emit (kern "2em"))))
+(tex-def-prim "\\qquad" (lambda () (emit-space (kern "2em"))))
 
 (tex-let-prim "\\enspace" "\\enskip")
 
-(tex-def-prim "\\thinspace" (lambda () (emit (kern ".16667em"))))
+(tex-def-prim "\\thinspace" (lambda () (emit-space (kern ".16667em"))))
 
-(tex-def-prim "\\negthinspace" (lambda () (emit (kern "-.16667em"))))
+(tex-def-prim "\\negthinspace" (lambda () (emit-space (kern "-.16667em"))))
 
 (tex-def-prim "\\smallskip" (lambda () (do-bigskip ':smallskip)))
 
@@ -10501,13 +10523,13 @@ Try the commands
 
 (tex-def-prim "\\t" (lambda () (do-diacritic ':tieafter)))
 
-(tex-def-math-prim "\\," (lambda () (emit (kern ".16667em"))))
+(tex-def-math-prim "\\," (lambda () (emit-space (kern ".16667em"))))
 
-(tex-def-math-prim "\\!" (lambda () (emit (kern "-.16667em"))))
+(tex-def-math-prim "\\!" (lambda () (emit-space (kern "-.16667em"))))
 
-(tex-def-math-prim "\\>" (lambda () (emit (kern ".22222em"))))
+(tex-def-math-prim "\\>" (lambda () (emit-space (kern ".22222em"))))
 
-(tex-def-math-prim "\\;" (lambda () (emit (kern ".27778em"))))
+(tex-def-math-prim "\\;" (lambda () (emit-space (kern ".27778em"))))
 
 (tex-defsym-math-prim "\\alpha" "&#x3b1;")
 
@@ -12821,8 +12843,6 @@ Try the commands
 
 (tex-let-prim "\\textnormal" "\\TIIPrelax")
 
-(tex-let-prim "\\unskip" "\\TIIPrelax")
-
 (tex-def-prim "\\cline" get-group)
 
 (tex-def-prim "\\externalref" get-group)
@@ -13235,19 +13255,21 @@ Try the commands
            (%concatenate-loop (cdr %ee)))))
         %res)))
      (set! *html*
-      (let*
-       ((%f *html-page*) (%ee (list ':direction ':output ':if-exists ':supersede))
-        (%direction (memv ':direction %ee)) (%if-exists (memv ':if-exists %ee))
-        (%if-does-not-exist ':error) (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-       (when %direction (set! %direction (cadr %direction)))
-       (when %if-exists (set! %if-exists (cadr %if-exists)))
-       (when %if-does-not-exist-from-user
-        (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-       (cond
-        ((eqv? %direction ':output)
-         (when (and (eqv? %if-exists ':supersede) (file-exists? %f)) (delete-file %f))
-         (open-output-file %f))
-        ((and (not %if-does-not-exist) (not (file-exists? %f))) false) (else (open-input-file %f)))))
+      (make-oport* ':port
+       (let*
+        ((%f *html-page*) (%ee (list ':direction ':output ':if-exists ':supersede))
+         (%direction (memv ':direction %ee)) (%if-exists (memv ':if-exists %ee))
+         (%if-does-not-exist ':error) (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
+        (when %direction (set! %direction (cadr %direction)))
+        (when %if-exists (set! %if-exists (cadr %if-exists)))
+        (when %if-does-not-exist-from-user
+         (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
+        (cond
+         ((eqv? %direction ':output)
+          (when (and (eqv? %if-exists ':supersede) (file-exists? %f)) (delete-file %f))
+          (open-output-file %f))
+         ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
+         (else (open-input-file %f))))))
      (do-start)
      (let ((%fluid-var-*html-only* (add1 *html-only*)))
       (fluid-let ((*html-only* %fluid-var-*html-only*))

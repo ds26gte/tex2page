@@ -452,7 +452,7 @@
       (setq *bib-aux-port* (open f :direction :output :if-exists :supersede))))
   (princ x *bib-aux-port*))
 
-(defun write-log (x)
+(defun write-log (x &optional log-file-only-p)
   (unless *log-port*
     (setq *log-file* (concatenate 'string *aux-dir/* *jobname* ".hlog")
           *log-port* (open *log-file* :direction :output :if-exists :supersede)))
@@ -461,7 +461,7 @@
     (setq *write-log-possible-break-p* nil))
   (when (and *write-log-possible-break-p* (> *write-log-index* *write-log-max*))
     (terpri *log-port*)
-    (terpri)
+    (unless log-file-only-p (terpri))
     (setq *write-log-possible-break-p* nil
           *write-log-index* 0))
   (unless (and (= *write-log-index* 0)
@@ -471,23 +471,25 @@
        (when *write-log-possible-break-p*
          (setq *write-log-possible-break-p* nil))
        (terpri *log-port*)
-       (terpri)
+       (unless log-file-only-p (terpri))
        (setq *write-log-index* 0))
       (:separation-space (setq *write-log-possible-break-p* t))
       (t (when *write-log-possible-break-p*
            (write-char #\space *log-port*)
-           (write-char #\space)
+           (unless log-file-only-p (write-char #\space))
            (setq *write-log-index* (1+ *write-log-index*))
            (setq *write-log-possible-break-p* nil))
          (princ x *log-port*)
-         (princ x)
-         (force-output)
+         (unless log-file-only-p (princ x)
+           (force-output))
          (incf *write-log-index*
                (typecase x
                  (character 1)
                  (number (length (write-to-string x)))
                  (string (length x))
                  (t 1)))))))
+
+;(trace write-log)
 
 (defun display-error-context-lines ()
   (let ((n (or (find-count "\\errorcontextlines") 0)))
@@ -4516,6 +4518,10 @@
              (princ #\space p)))
           (t (terror 'do-write-aux)))))
 
+(defun do-wlog ()
+  (let ((output (tex-write-output-string (get-peeled-group))))
+    (write-log output t)))
+
 (defun do-write ()
   (do-write-aux (get-number)))
 
@@ -8368,6 +8374,8 @@ Try the commands
 
 ;sec B.2, allocation of registers
 
+(tex-def-prim "\\wlog" #'do-wlog)
+
 (tex-def-prim "\\newcount" (lambda () (do-newcount (globally-p))))
 (tex-def-prim "\\newdimen" (lambda () (do-newdimen (globally-p))))
 (tex-def-prim "\\newtoks" (lambda () (do-newtoks (globally-p))))
@@ -10545,8 +10553,8 @@ Try the commands
     (write-log #\()
     (write-log *common-lisp-version*)
     (write-log #\))
-    (write-log #\space)
-    (write-log (seconds-to-human-time *start-time*))
+    (write-log #\space t)
+    (write-log (seconds-to-human-time *start-time*) t)
     (write-log :separation-newline)
     (cond (*main-tex-file*
             (setq *subjobname* *jobname*

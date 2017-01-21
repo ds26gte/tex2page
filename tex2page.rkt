@@ -736,74 +736,79 @@
   (else false))
  (display x *bib-aux-port*))
 
-(define (write-log x)
- (cond
-  ((not *log-port*)
-   (set! *log-file*
-    (let ((%type 'string) (%ee (list *aux-dir/* *jobname* ".hlog")))
-     (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop ((%ee %ee))
-       (if (null? %ee) %res
-        (let ((%a (car %ee)))
-         (unless (not %a)
-          (set! %res
-           (if (eq? %type 'string) (string-append %res (if (string? %a) %a (list->string %a)))
-            (append %res (if (string? %a) (string->list %a) %a)))))
-         (%concatenate-loop (cdr %ee)))))
-      %res)))
-   (set! *log-port*
-    (let*
-     ((%f *log-file*) (%ee (list ':direction ':output ':if-exists ':supersede))
-      (%direction (memv ':direction %ee)) (%if-exists (memv ':if-exists %ee))
-      (%if-does-not-exist ':error) (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-     (when %direction (set! %direction (cadr %direction)))
-     (when %if-exists (set! %if-exists (cadr %if-exists)))
-     (when %if-does-not-exist-from-user
-      (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-     (cond
-      ((eqv? %direction ':output)
-       (when (and (eqv? %if-exists ':supersede) (file-exists? %f)) (delete-file %f))
-       (open-output-file %f))
-      ((and (not %if-does-not-exist) (not (file-exists? %f))) false) (else (open-input-file %f)))))
-   *log-port*)
-  (else false))
- (cond
-  ((and *write-log-possible-break-p* (char? x) (member x '(#\) #\] #\} #\,)))
-   (set! *write-log-possible-break-p* false) *write-log-possible-break-p*)
-  (else false))
- (cond
-  ((and *write-log-possible-break-p* (> *write-log-index* *write-log-max*)) (newline *log-port*)
-   (newline) (set! *write-log-possible-break-p* false) (set! *write-log-index* 0) *write-log-index*)
-  (else false))
- (cond
-  ((not (and (= *write-log-index* 0) (member x '(:separation-newline :separation-space))))
-   (case x
-    ((#\newline :separation-newline)
-     (cond
-      (*write-log-possible-break-p* (set! *write-log-possible-break-p* false)
-       *write-log-possible-break-p*)
-      (else false))
-     (newline *log-port*) (newline) (set! *write-log-index* 0) *write-log-index*)
-    ((:separation-space) (set! *write-log-possible-break-p* true) *write-log-possible-break-p*)
-    (else
-     (cond
-      (*write-log-possible-break-p* (write-char #\space *log-port*) (write-char #\space)
-       (set! *write-log-index* (add1 *write-log-index*)) (set! *write-log-possible-break-p* false)
-       *write-log-possible-break-p*)
-      (else false))
-     (display x *log-port*) (display x) (flush-output)
-     (set! *write-log-index*
-      (+ *write-log-index*
-       (let ((%tag x))
-        (cond ((char? %tag) 1)
-         ((number? %tag)
-          (let ((%length-arg (write-to-string x)))
-           ((if (string? %length-arg) string-length length) %length-arg)))
-         ((string? %tag)
-          (let ((%length-arg x)) ((if (string? %length-arg) string-length length) %length-arg)))
-         (else 1)))))
-     *write-log-index*)))
-  (else false)))
+(define (write-log x . %lambda-rest-arg)
+ (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (log-file-only-p false))
+  (when (< 0 %lambda-rest-arg-len) (set! log-file-only-p (list-ref %lambda-rest-arg 0)))
+  (cond
+   ((not *log-port*)
+    (set! *log-file*
+     (let ((%type 'string) (%ee (list *aux-dir/* *jobname* ".hlog")))
+      (let ((%res (if (eq? %type 'string) "" null)))
+       (let %concatenate-loop ((%ee %ee))
+        (if (null? %ee) %res
+         (let ((%a (car %ee)))
+          (unless (not %a)
+           (set! %res
+            (if (eq? %type 'string) (string-append %res (if (string? %a) %a (list->string %a)))
+             (append %res (if (string? %a) (string->list %a) %a)))))
+          (%concatenate-loop (cdr %ee)))))
+       %res)))
+    (set! *log-port*
+     (let*
+      ((%f *log-file*) (%ee (list ':direction ':output ':if-exists ':supersede))
+       (%direction (memv ':direction %ee)) (%if-exists (memv ':if-exists %ee))
+       (%if-does-not-exist ':error) (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
+      (when %direction (set! %direction (cadr %direction)))
+      (when %if-exists (set! %if-exists (cadr %if-exists)))
+      (when %if-does-not-exist-from-user
+       (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
+      (cond
+       ((eqv? %direction ':output)
+        (when (and (eqv? %if-exists ':supersede) (file-exists? %f)) (delete-file %f))
+        (open-output-file %f))
+       ((and (not %if-does-not-exist) (not (file-exists? %f))) false) (else (open-input-file %f)))))
+    *log-port*)
+   (else false))
+  (cond
+   ((and *write-log-possible-break-p* (char? x) (member x '(#\) #\] #\} #\,)))
+    (set! *write-log-possible-break-p* false) *write-log-possible-break-p*)
+   (else false))
+  (cond
+   ((and *write-log-possible-break-p* (> *write-log-index* *write-log-max*)) (newline *log-port*)
+    (cond ((not log-file-only-p) (newline)) (else false)) (set! *write-log-possible-break-p* false)
+    (set! *write-log-index* 0) *write-log-index*)
+   (else false))
+  (cond
+   ((not (and (= *write-log-index* 0) (member x '(:separation-newline :separation-space))))
+    (case x
+     ((#\newline :separation-newline)
+      (cond
+       (*write-log-possible-break-p* (set! *write-log-possible-break-p* false)
+        *write-log-possible-break-p*)
+       (else false))
+      (newline *log-port*) (cond ((not log-file-only-p) (newline)) (else false))
+      (set! *write-log-index* 0) *write-log-index*)
+     ((:separation-space) (set! *write-log-possible-break-p* true) *write-log-possible-break-p*)
+     (else
+      (cond
+       (*write-log-possible-break-p* (write-char #\space *log-port*)
+        (cond ((not log-file-only-p) (write-char #\space)) (else false))
+        (set! *write-log-index* (add1 *write-log-index*)) (set! *write-log-possible-break-p* false)
+        *write-log-possible-break-p*)
+       (else false))
+      (display x *log-port*) (cond ((not log-file-only-p) (display x) (flush-output)) (else false))
+      (set! *write-log-index*
+       (+ *write-log-index*
+        (let ((%tag x))
+         (cond ((char? %tag) 1)
+          ((number? %tag)
+           (let ((%length-arg (write-to-string x)))
+            ((if (string? %length-arg) string-length length) %length-arg)))
+          ((string? %tag)
+           (let ((%length-arg x)) ((if (string? %length-arg) string-length length) %length-arg)))
+          (else 1)))))
+      *write-log-index*)))
+   (else false))))
 
 (define (display-error-context-lines)
  (let ((n (or (find-count "\\errorcontextlines") 0)))
@@ -5377,6 +5382,9 @@
     (let ((p *it*)) (cond ((eq? p ':free) (terror 'do-write-aux)) (else false)) (display output p)
      (display #\space p)))
    (else (terror 'do-write-aux)))))
+
+(define (do-wlog)
+ (let ((output (tex-write-output-string (get-peeled-group)))) (write-log output true)))
 
 (define (do-write) (do-write-aux (get-number)))
 
@@ -10325,6 +10333,8 @@ Try the commands
 
 (tex-let-prim "\\@MM" (string (integer->char 20000)))
 
+(tex-def-prim "\\wlog" do-wlog)
+
 (tex-def-prim "\\newcount" (lambda () (do-newcount (globally-p))))
 
 (tex-def-prim "\\newdimen" (lambda () (do-newdimen (globally-p))))
@@ -13238,8 +13248,8 @@ Try the commands
    (initialize-globals)
    (set! *main-tex-file* (actual-tex-filename tex-file (check-input-file-timestamp-p tex-file)))
    (write-log "This is TeX2page, Version ") (write-log *tex2page-version*) (write-log #\space)
-   (write-log #\() (write-log *scheme-version*) (write-log #\)) (write-log #\space)
-   (write-log (seconds-to-human-time *start-time*)) (write-log ':separation-newline)
+   (write-log #\() (write-log *scheme-version*) (write-log #\)) (write-log #\space true)
+   (write-log (seconds-to-human-time *start-time*) true) (write-log ':separation-newline)
    (cond
     (*main-tex-file* (set! *subjobname* *jobname*)
      (set! *html-page*

@@ -1,8 +1,51 @@
-Last change 2017-01-19
+Last change 2017-01-22
+
+2017 Jan 22
+
+do-para: Use output-port's spacing buffer to avoid most of the empty <p></p>'s.
+
+2017 Jan 21
+
+Add \wlog, which writes only to log file, not to console.
+
+Like TeX, write current time on startup only to log file, not to console.
+
+When outputting to HTML, use a buffered stream. Buffer stores only spaces,
+which user can nix with \unskip.
+
+2017 Jan 20
+
+tex-def-pat-prim added to facilitate adding standard defs with parameters.
+
+\loop, \iterate, \repeat added.
+
+do-let inside false world should take care that both lhs and rhs are skipped
+completely.
+
+get-def-parameters (better name than get-def-arguments) is now a properly
+tail-recursive loop.
+
+Since get-ctl-seq doesn't read newline, it's now on primitive control sequences
+to read past such newlines if necessary.
+
+\colorbox takes optional model argument.
+
+Use CSS for <sup> as otherwise numbered footnotes break leading. GIMP should be
+all-uppercase.
 
 2017 Jan 19
 
-Added flag \TZPlang.
+Consecutive \space, '\ ' shouldn't collapse: Use U+200B (zero-width space) to
+this end.
+
+Clean up ignorespaces: Four scenarios:
+1. Eat space upto first newline (exclusive).
+2. Eat upto first newline (inclusive).
+3. Eat upto second newline (exclusive): indeed double it if second
+newline encountered.
+4. Eat all space.
+
+Added flag \TZPlang (default 'en').
 
 Make index.tex output satisfy validator.w3.org. Suggested by Paulo Ney de
 Souza.
@@ -35,10 +78,8 @@ former and trust CLiiScm to translate appropriately for Scheme. #\nul (catcode
 
 2017 Jan 14
 
-
 \global assignment shouldn't just add the new def to the global texframe but
 also purge any existing def from local frames.
-
 
 2017 Jan 9
 

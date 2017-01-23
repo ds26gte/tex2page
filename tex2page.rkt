@@ -181,7 +181,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170121, clisp.
 
 
-(define *tex2page-version* "20170122")
+(define *tex2page-version* "20170123")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -1894,6 +1894,30 @@
 
 (define (curr-esc-char) (car (rassoc 0 *catcodes*)))
 
+(define (kern len)
+ (let ((%type 'string) (%ee (list "<span style=\"margin-left: " len "\"> </span>")))
+  (let ((%res (if (eq? %type 'string) "" null)))
+   (let %concatenate-loop ((%ee %ee))
+    (if (null? %ee) %res
+     (let ((%a (car %ee)))
+      (unless (not %a)
+       (set! %res
+        (if (eq? %type 'string) (string-append %res (if (string? %a) %a (list->string %a)))
+         (append %res (if (string? %a) (string->list %a) %a)))))
+      (%concatenate-loop (cdr %ee)))))
+   %res)))
+
+(define (do-kern)
+ (let ((n (get-pixels))) (emit-space "<span style=\"margin-left: ") (emit-space n)
+  (emit-space "px\"> </span>")))
+
+(define (do-lower . %lambda-rest-arg)
+ (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (raisep false))
+  (when (< 0 %lambda-rest-arg-len) (set! raisep (list-ref %lambda-rest-arg 0)))
+  (let ((n (get-pixels))) (emit "<span style=\"position: relative; top: ")
+   (cond (raisep (emit "-")) (else false)) (emit n) (emit "px\">") (do-box)
+   (add-postlude-to-top-frame (lambda () (emit "</span>"))) false)))
+
 (define *primitive-texframe* (make-texframe*))
 
 (define *math-primitive-texframe* (make-texframe*))
@@ -2875,19 +2899,6 @@
  (emit "</tr>") (emit-newline) (emit "</table></div>") (pop-tabular-stack ':equation)
  (set! *math-mode-p* false) (set! *in-display-math-p* false) (egroup)
  (set! *equation-numbered-p* true) (set! *equation-position* 0) (do-para))
-
-(define (kern len)
- (let ((%type 'string) (%ee (list "<span style=\"margin-left: " len "\"> </span>")))
-  (let ((%res (if (eq? %type 'string) "" null)))
-   (let %concatenate-loop ((%ee %ee))
-    (if (null? %ee) %res
-     (let ((%a (car %ee)))
-      (unless (not %a)
-       (set! %res
-        (if (eq? %type 'string) (string-append %res (if (string? %a) %a (list->string %a)))
-         (append %res (if (string? %a) (string->list %a) %a)))))
-      (%concatenate-loop (cdr %ee)))))
-   %res)))
 
 (define (do-integral)
  (if (or (not *in-display-math-p*) *math-script-mode-p*) (emit "&#x222b;")
@@ -10273,13 +10284,13 @@ Try the commands
 
 (tex-def-prim "\\jobname" (lambda () (tex2page-string *jobname*)))
 
-(tex-def-prim "\\kern" do-hskip)
+(tex-def-prim "\\kern" do-kern)
 
 (tex-def-prim "\\lccode" (lambda () (do-tex-case-code ':lccode)))
 
 (tex-def-prim "\\let" (lambda () (do-let (globally-p))))
 
-(tex-def-prim "\\lower" eat-dimen)
+(tex-def-prim "\\lower" do-lower)
 
 (tex-def-prim "\\lowercase" (lambda () (do-flipcase ':lccode)))
 
@@ -10297,7 +10308,7 @@ Try the commands
 
 (tex-def-prim "\\par" do-para)
 
-(tex-def-prim "\\raise" eat-dimen)
+(tex-def-prim "\\raise" (lambda () (do-lower true)))
 
 (tex-def-prim "\\read" (lambda () (do-read (globally-p))))
 

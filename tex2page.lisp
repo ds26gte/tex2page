@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170122") ;last change
+(defparameter *tex2page-version* "20170123") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -706,11 +706,11 @@
       (not (graphic-char-p c))))
 
 (defun ignorespaces (&optional (newlines :stop-before-par))
-  ;0: stop before 1st newline
-  ;1: stop after 1st newline
-  ;1.5: eat non-newline spaces after 1st newline
-  ;     if newline found, add another to it
-  ;2: eat all whitespace
+  ; :stop-before-first-newline
+  ; :stop-after-first-newline
+  ; :stop-before-par : eat non-newline spaces after 1st newline.
+  ;                    if 2nd newline found, add another to it to retain \par
+  ; :all : eat all whitespace
   ;
   (unless (/= (catcode #\space) 10)
     (let ((newline-active-p (/= (catcode #\newline) 5))
@@ -1282,6 +1282,33 @@
 
 (defun curr-esc-char ()
   (the fixnum (car (rassoc 0 *catcodes*))))
+
+;;
+
+(defun kern (len)
+  (concatenate 'string "<span style=\"margin-left: "
+    ;in following, tried &#x200c; (= zwnj) instead of space,
+    ;but it causes table-row fault
+    len "\"> </span>"))
+
+(defun do-kern ()
+  (let ((n (get-pixels)))
+    (emit-space "<span style=\"margin-left: ")
+    (emit-space n)
+    ;span needs to contain something that can be moved: use zwnj?
+    (emit-space "px\"> </span>")))
+
+(defun do-lower (&optional raisep)
+  (let ((n (get-pixels)))
+    (emit "<span style=\"position: relative; top: ")
+    (when raisep (emit "-"))
+    (emit n)
+    (emit "px\">")
+    (do-box)
+    (add-postlude-to-top-frame
+      (lambda ()
+        (emit "</span>")))
+    nil))
 
 ;;
 
@@ -2262,12 +2289,6 @@
   (setq *equation-numbered-p* t
         *equation-position* 0)
   (do-para))
-
-(defun kern (len)
-  (concatenate 'string "<span style=\"margin-left: "
-    ;in following, tried &#x200c; (= zwnj) instead of space,
-    ;but it causes table-row fault
-    len "\"> </span>"))
 
 (defun do-integral ()
   (if (or (not *in-display-math-p*) *math-script-mode-p*)
@@ -8322,10 +8343,10 @@ Try the commands
 (tex-def-prim "\\indent" #'do-indent)
 (tex-def-prim "\\input" #'do-input)
 (tex-def-prim "\\jobname" (lambda () (tex2page-string *jobname*)))
-(tex-def-prim "\\kern" #'do-hskip)
+(tex-def-prim "\\kern" #'do-kern)
 (tex-def-prim "\\lccode" (lambda () (do-tex-case-code :lccode)))
 (tex-def-prim "\\let" (lambda () (do-let (globally-p))))
-(tex-def-prim "\\lower" #'eat-dimen)
+(tex-def-prim "\\lower" #'do-lower)
 (tex-def-prim "\\lowercase" (lambda () (do-flipcase :lccode)))
 (tex-def-prim "\\message" #'do-message)
 (tex-def-prim "\\multiply" (lambda () (do-multiply (globally-p))))
@@ -8334,7 +8355,7 @@ Try the commands
 (tex-def-prim "\\openin" (lambda () (do-open-stream :in)))
 (tex-def-prim "\\openout" (lambda () (do-open-stream :out)))
 (tex-def-prim "\\par" #'do-para)
-(tex-def-prim "\\raise" #'eat-dimen)
+(tex-def-prim "\\raise" (lambda () (do-lower t)))
 (tex-def-prim "\\read" (lambda () (do-read (globally-p))))
 (tex-def-prim "\\relax" #'do-relax)
 (tex-def-prim "\\romannumeral" (lambda () (do-romannumeral nil)))

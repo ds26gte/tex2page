@@ -1298,16 +1298,27 @@
     ;span needs to contain something that can be moved: use zwnj?
     (emit-space "px\"> </span>")))
 
+(defun get-box ()
+  (ignorespaces)
+  (let ((c (snoop-actual-char)))
+    (cond ((= (catcode c) **escape**)
+           (let* ((box-caller (get-till-char #\{))
+                  (box-content (get-group)))
+             (concatenate 'string box-caller box-content)))
+          (t (terror 'get-box "A <box> was supposed to be here.")))))
+
 (defun do-lower (&optional raisep)
-  (let ((n (get-pixels)))
+  (let* ((n (get-pixels)) (box (get-box)))
     (emit "<span style=\"position: relative; top: ")
     (when raisep (emit "-"))
     (emit n)
     (emit "px\">")
-    (do-box)
+    (bgroup)
     (add-postlude-to-top-frame
       (lambda ()
         (emit "</span>")))
+    (toss-back-char #\})
+    (toss-back-string box)
     nil))
 
 ;;

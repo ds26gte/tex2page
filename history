@@ -2,7 +2,7 @@ Last change 2017-01-23
 
 2017 Jan 23
 
-Added \lower, \raise.
+Added \lower, \raise. These expect a box, and signal error if box not found.
 
 2017 Jan 22
 

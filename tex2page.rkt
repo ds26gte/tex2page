@@ -1911,12 +1911,33 @@
  (let ((n (get-pixels))) (emit-space "<span style=\"margin-left: ") (emit-space n)
   (emit-space "px\"> </span>")))
 
+(define (get-box) (ignorespaces)
+ (let ((c (snoop-actual-char)))
+  (cond
+   ((= (catcode c) **escape**)
+    (let ((box-caller (get-till-char #\{)))
+     (let ((box-content (get-group)))
+      (let ((%type 'string) (%ee (list box-caller box-content)))
+       (let ((%res (if (eq? %type 'string) "" null)))
+        (let %concatenate-loop ((%ee %ee))
+         (if (null? %ee) %res
+          (let ((%a (car %ee)))
+           (unless (not %a)
+            (set! %res
+             (if (eq? %type 'string) (string-append %res (if (string? %a) %a (list->string %a)))
+              (append %res (if (string? %a) (string->list %a) %a)))))
+           (%concatenate-loop (cdr %ee)))))
+        %res)))))
+   (else (terror 'get-box "A <box> was supposed to be here.")))))
+
 (define (do-lower . %lambda-rest-arg)
  (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (raisep false))
   (when (< 0 %lambda-rest-arg-len) (set! raisep (list-ref %lambda-rest-arg 0)))
-  (let ((n (get-pixels))) (emit "<span style=\"position: relative; top: ")
-   (cond (raisep (emit "-")) (else false)) (emit n) (emit "px\">") (do-box)
-   (add-postlude-to-top-frame (lambda () (emit "</span>"))) false)))
+  (let ((n (get-pixels)))
+   (let ((box (get-box))) (emit "<span style=\"position: relative; top: ")
+    (cond (raisep (emit "-")) (else false)) (emit n) (emit "px\">") (bgroup)
+    (add-postlude-to-top-frame (lambda () (emit "</span>"))) (toss-back-char #\})
+    (toss-back-string box) false))))
 
 (define *primitive-texframe* (make-texframe*))
 

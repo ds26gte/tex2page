@@ -181,7 +181,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170121, clisp.
 
 
-(define *tex2page-version* "20170123")
+(define *tex2page-version* "20170124")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -604,10 +604,11 @@
 
 (defstruct oport* (port false) (hbuffer null))
 
-(defstruct texframe* (definitions (make-table ':test equal?)) (chardefinitions (make-table))
- (counts (make-table ':test equal?)) (toks (make-table ':test equal?))
- (dimens (make-table ':test equal?)) (postludes null) (uccodes (make-table ':test eqv?))
- (lccodes (make-table ':test eqv?)) (catcodes null) (aftergroups null))
+(defstruct texframe* (definitions (make-table ':test equal?)) (boxes (make-table ':test equal?))
+ (chardefinitions (make-table)) (counts (make-table ':test equal?))
+ (tokses (make-table ':test equal?)) (dimens (make-table ':test equal?)) (postludes null)
+ (uccodes (make-table ':test eqv?)) (lccodes (make-table ':test eqv?)) (catcodes null)
+ (aftergroups null))
 
 (defstruct tdef* (argpat null) (expansion "") (optarg false) (thunk false) (prim false) (defer false)
  (catcodes false))
@@ -1127,9 +1128,7 @@
   (when (< 0 %lambda-rest-arg-len) (set! newlines (list-ref %lambda-rest-arg 0)))
   (cond
    ((not (not (= (catcode #\space) 10)))
-    (let
-     ((newline-active-p (not (= (catcode #\newline) 5))) (num-newlines-read 0)
-      (newline-already-read-p false) (c false))
+    (let ((newline-active-p (not (= (catcode #\newline) 5))) (num-newlines-read 0) (c false))
      (let*
       ((%loop-returned false) (%loop-result 0)
        (return
@@ -1911,30 +1910,38 @@
  (let ((n (get-pixels))) (emit-space "<span style=\"margin-left: ") (emit-space n)
   (emit-space "px\"> </span>")))
 
-(define (get-box) (ignorespaces)
- (let ((c (snoop-actual-char)))
+(define (read-box) (ignorespaces)
+ (let ((c (snoop-actual-char)) (s false))
   (cond
    ((= (catcode c) **escape**)
-    (let ((box-caller (get-till-char #\{)))
-     (let ((box-content (get-group)))
-      (let ((%type 'string) (%ee (list box-caller box-content)))
-       (let ((%res (if (eq? %type 'string) "" null)))
-        (let %concatenate-loop ((%ee %ee))
-         (if (null? %ee) %res
-          (let ((%a (car %ee)))
-           (unless (not %a)
-            (set! %res
-             (if (eq? %type 'string) (string-append %res (if (string? %a) %a (list->string %a)))
-              (append %res (if (string? %a) (string->list %a) %a)))))
-           (%concatenate-loop (cdr %ee)))))
-        %res)))))
-   (else (terror 'get-box "A <box> was supposed to be here.")))))
+    (let ((cs (get-ctl-seq)))
+     (cond
+      ((member cs '("\\hbox" "\\vbox" "\\vtop"))
+       (let ((box-caller (get-till-char #\{)))
+        (let ((box-content (get-group)))
+         (set! s
+          (let ((%type 'string) (%ee (list cs box-caller box-content)))
+           (let ((%res (if (eq? %type 'string) "" null)))
+            (let %concatenate-loop ((%ee %ee))
+             (if (null? %ee) %res
+              (let ((%a (car %ee)))
+               (unless (not %a)
+                (set! %res
+                 (if (eq? %type 'string) (string-append %res (if (string? %a) %a (list->string %a)))
+                  (append %res (if (string? %a) (string->list %a) %a)))))
+               (%concatenate-loop (cdr %ee)))))
+            %res)))
+         s)))
+      ((string=? cs "\\box") (set! s (read-box-string (get-token))) s)
+      ((string=? cs "\\copy") (set! s (read-box-string (get-token) true)) s))))
+   (else false))
+  (or s (terror 'read-box "A <box> was supposed to be here."))))
 
 (define (do-lower . %lambda-rest-arg)
  (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (raisep false))
   (when (< 0 %lambda-rest-arg-len) (set! raisep (list-ref %lambda-rest-arg 0)))
   (let ((n (get-pixels)))
-   (let ((box (get-box))) (emit "<span style=\"position: relative; top: ")
+   (let ((box (read-box))) (emit "<span style=\"position: relative; top: ")
     (cond (raisep (emit "-")) (else false)) (emit n) (emit "px\">") (bgroup)
     (add-postlude-to-top-frame (lambda () (emit "</span>"))) (toss-back-char #\})
     (toss-back-string box) false))))
@@ -2138,6 +2145,32 @@
  (cond ((not (inside-false-world-p)) (tex-def name null false false thunk name false frame))
   (else false)))
 
+(define (tex-def-box name box globalp)
+ (let
+  ((frame
+    (cond
+     (globalp (printf "doing global frame~%")
+      (for-each (lambda (fr) (table-rem name (texframe*-boxes fr))) *tex-env*) *global-texframe*)
+     (else (top-texframe)))))
+  (table-put! name (texframe*-boxes frame) box) (table-get name (texframe*-boxes frame)))
+ (perform-afterassignment))
+
+(define (find-box ctlseq)
+ (or (ormap (lambda (fr) (table-get ctlseq (texframe*-boxes fr))) *tex-env*)
+  (table-get ctlseq (texframe*-boxes *global-texframe*))
+  (table-get ctlseq (texframe*-boxes *primitive-texframe*))))
+
+(define (read-box-string ctlseq . %lambda-rest-arg)
+ (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (retainp false))
+  (when (< 0 %lambda-rest-arg-len) (set! retainp (list-ref %lambda-rest-arg 0)))
+  (let ((b (find-box ctlseq))) (cond ((not b) (terror 'read-box-string)) (else false))
+   (cond ((not retainp) (tex-def-box ctlseq "" false)) (else false)) b)))
+
+(define (do-box . %lambda-rest-arg)
+ (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (retainp false))
+  (when (< 0 %lambda-rest-arg-len) (set! retainp (list-ref %lambda-rest-arg 0)))
+  (let ((bname (get-ctl-seq))) (let ((b (read-box-string bname retainp))) (toss-back-string b)))))
+
 (define (tex-def-count name num globalp)
  (let
   ((frame
@@ -2152,10 +2185,10 @@
  (let
   ((frame
     (cond
-     (globalp (for-each (lambda (fr) (table-rem name (texframe*-toks fr))) *tex-env*)
+     (globalp (for-each (lambda (fr) (table-rem name (texframe*-tokses fr))) *tex-env*)
       *global-texframe*)
      (else (top-texframe)))))
-  (table-put! name (texframe*-toks frame) tokens) (table-get name (texframe*-toks frame))))
+  (table-put! name (texframe*-tokses frame) tokens) (table-get name (texframe*-tokses frame))))
 
 (define (tex-def-dimen name len globalp)
  (let
@@ -2243,10 +2276,11 @@
 (define (do-global) (ignorespaces)
  (let ((next (get-ctl-seq)))
   (cond ((string=? next "\\def") (do-def true false)) ((string=? next "\\edef") (do-def true true))
-   ((string=? next "\\let") (do-let true)) ((string=? next "\\newcount") (do-newcount true))
-   ((string=? next "\\newtoks") (do-newtoks true)) ((string=? next "\\newdimen") (do-newdimen true))
-   ((string=? next "\\advance") (do-advance true)) ((string=? next "\\multiply") (do-multiply true))
-   ((string=? next "\\divide") (do-divide true)) ((string=? next "\\read") (do-read true))
+   ((string=? next "\\let") (do-let true)) ((string=? next "\\newbox") (do-newbox true))
+   ((string=? next "\\newcount") (do-newcount true)) ((string=? next "\\newtoks") (do-newtoks true))
+   ((string=? next "\\newdimen") (do-newdimen true)) ((string=? next "\\advance") (do-advance true))
+   ((string=? next "\\multiply") (do-multiply true)) ((string=? next "\\divide") (do-divide true))
+   ((string=? next "\\read") (do-read true))
    ((or (string=? next "\\imgdef") (string=? next "\\gifdef")) (make-reusable-img true))
    ((find-count next) (do-count= next true)) ((find-toks next) (do-toks= next true))
    (else (toss-back-string next)))))
@@ -4313,10 +4347,9 @@
  (let ((other-entry (get-group))) (get-group) (emit "<em>see also</em> ")
   (tex2page-string other-entry)))
 
-(define (do-setbox) (get-raw-token/is) (get-equal-sign)
- (let ((cs (get-raw-token/is)))
-  (cond ((member cs '("\\hbox" "\\vbox")) (get-to) (eat-dimen) (get-token-or-peeled-group))
-   (else false))))
+(define (do-setbox)
+ (let ((bname (let ((%prog1-first-value (get-raw-token/is))) (get-equal-sign) %prog1-first-value)))
+  (let ((box (read-box))) (tex-def-box bname box (globally-p)))))
 
 (define (html-length s)
  (let
@@ -6492,7 +6525,7 @@
     (display "\\end{" o) (display env2 o) (display "}" o) (newline o)))
   (cond (display-p (emit "</div>") (do-para)) (else false))))
 
-(define (do-box) (ignorespaces) (get-to) (eat-dimen) (ignorespaces)
+(define (do-hbox) (ignorespaces) (get-to) (eat-dimen) (ignorespaces)
  (let ((c (snoop-actual-char))) (case c ((#\{) true) ((#\\) (get-ctl-seq)))) (get-actual-char)
  (bgroup)
  (add-postlude-to-top-frame
@@ -7043,32 +7076,32 @@
   (table-get ctlseq (texframe*-counts *global-texframe*))
   (table-get ctlseq (texframe*-counts *primitive-texframe*))))
 
+(define (the-count dracula) (or (find-count dracula) (terror 'the-count)))
+
+(define (do-count= z globalp) (get-equal-sign) (tex-def-count z (get-number) globalp))
+
+(define (get-gcount ctlseq) (table-get ctlseq (texframe*-counts *global-texframe*) 0))
+
+(define (tex-gdef-count ctlseq v) (tex-def-count ctlseq v true))
+
 (define (find-toks ctlseq)
- (or (ormap (lambda (fr) (table-get ctlseq (texframe*-toks fr))) *tex-env*)
-  (table-get ctlseq (texframe*-toks *global-texframe*))
-  (table-get ctlseq (texframe*-toks *primitive-texframe*))))
+ (or (ormap (lambda (fr) (table-get ctlseq (texframe*-tokses fr))) *tex-env*)
+  (table-get ctlseq (texframe*-tokses *global-texframe*))
+  (table-get ctlseq (texframe*-tokses *primitive-texframe*))))
+
+(define (get-toks ctlseq) (or (find-toks ctlseq) (terror 'get-toks)))
+
+(define (do-toks= z globalp) (get-equal-sign) (tex-def-toks z (get-group) globalp))
 
 (define (find-dimen ctlseq)
  (or (ormap (lambda (fr) (table-get ctlseq (texframe*-dimens fr))) *tex-env*)
   (table-get ctlseq (texframe*-dimens *global-texframe*))
   (table-get ctlseq (texframe*-dimens *primitive-texframe*))))
 
-(define (get-toks ctlseq) (or (find-toks ctlseq) (terror 'get-toks)))
-
 (define (get-dimen ctlseq) (cond ((find-dimen ctlseq)) (else (tex-length 6.5 ':in))))
-
-(define (the-count dracula) (or (find-count dracula) (terror 'the-count)))
-
-(define (do-count= z globalp) (get-equal-sign) (tex-def-count z (get-number) globalp))
-
-(define (do-toks= z globalp) (get-equal-sign) (tex-def-toks z (get-group) globalp))
 
 (define (do-dimen= z globalp) (get-equal-sign) (tex-def-dimen z (get-scaled-points) globalp)
  (ignorespaces))
-
-(define (get-gcount ctlseq) (table-get ctlseq (texframe*-counts *global-texframe*) 0))
-
-(define (tex-gdef-count ctlseq v) (tex-def-count ctlseq v true))
 
 (define (do-number) (emit (get-number)))
 
@@ -7155,6 +7188,8 @@
        (cond ((ctl-seq-p lhs) (tex-def lhs argpat rhs false false false false frame))
         (else (tex-def-char (string-ref lhs 0) argpat rhs frame))))))))
   (else false)))
+
+(define (do-newbox globalp) (tex-def-box (get-ctl-seq) "" globalp))
 
 (define (do-newcount globalp) (tex-def-count (get-ctl-seq) 0 globalp))
 
@@ -10217,6 +10252,8 @@ Try the commands
 
 (tex-def-prim "\\aftergroup" do-aftergroup)
 
+(tex-def-prim "\\box" do-box)
+
 (tex-def-prim "\\catcode" do-catcode)
 
 (tex-def-prim "\\char" do-char)
@@ -10226,6 +10263,8 @@ Try the commands
 (tex-def-prim "\\closein" (lambda () (do-close-stream ':in)))
 
 (tex-def-prim "\\closeout" (lambda () (do-close-stream ':out)))
+
+(tex-def-prim "\\copy" (lambda () (do-box true)))
 
 (tex-def-prim "\\countdef" (lambda () (do-newcount true) (eat-integer)))
 
@@ -10265,7 +10304,7 @@ Try the commands
 
 (tex-def-prim "\\halign" do-halign)
 
-(tex-def-prim "\\hbox" do-box)
+(tex-def-prim "\\hbox" do-hbox)
 
 (tex-def-prim "\\hfill" (lambda () (emit-nbsp 5)))
 
@@ -10347,11 +10386,17 @@ Try the commands
 
 (tex-def-prim "\\underline" (lambda () (do-function "\\underline")))
 
+(tex-def-prim "\\unkern" do-unskip)
+
 (tex-def-prim "\\unskip" do-unskip)
 
 (tex-def-prim "\\uppercase" (lambda () (do-flipcase ':uccode)))
 
+(tex-def-prim "\\vbox" do-hbox)
+
 (tex-def-prim "\\vskip" do-vskip)
+
+(tex-def-prim "\\vtop" do-hbox)
 
 (tex-def-prim "\\write" do-write)
 
@@ -10370,8 +10415,6 @@ Try the commands
 (tex-let-prim "\\leqno" "\\eqno")
 
 (tex-let-prim "\\textstyle" "\\TIIPrelax")
-
-(tex-let-prim "\\vbox" "\\hbox")
 
 (tex-let-prim "\\@ne" (string (integer->char 1)))
 

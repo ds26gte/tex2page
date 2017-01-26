@@ -1,4 +1,8 @@
-Last change 2017-01-25
+Last change 2017-01-26
+
+2017 Jan 26
+
+Convert HSB, gray, and wave colors to HSL rather than RGB.
 
 2017 Jan 25
 

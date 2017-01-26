@@ -1,4 +1,5 @@
 ":"; export T2PARG=$1
+":"; if test -z "$LISP"; then export LISP=ecl; fi
 ":"; if test "$LISP" = abcl; then exec abcl --load $0 --batch "$@"
 ":"; elif test "$LISP" = allegro; then exec alisp -L $0 -kill
 ":"; elif test "$LISP" = clisp; then exec clisp $0 -q "$@"
@@ -6,7 +7,7 @@
 ":"; elif test "$LISP" = cmucl; then exec lisp -quiet -load $0 -eval '(ext:quit)' "$@"
 ":"; elif test "$LISP" = ecl; then exec ecl -shell $0 "$@"
 ":"; elif test "$LISP" = mkcl; then exec mkcl -shell $0 -- "$@"
-":"; else exec sbcl --script $0 "$@"
+":"; elif test "$LISP" = sbcl; then exec sbcl --script $0 "$@"
 ":"; fi
 
 ;Common Lisp version of
@@ -2918,7 +2919,7 @@
       (write-to-string (* s2 100)) "%,"
       (write-to-string (* L 100)) "%)")))
 
-(defun wavelength-to-rrggbb (w)
+(defun wavelength-to-hsl (w)
   (declare (number w))
   (let ((hue (* 1/6
                 (cond ((<= w 362.857) 5)
@@ -2936,7 +2937,7 @@
                 (t 0))))
     (hsb360-to-hsl (* 360 hue) 1 brightness)))
 
-(defun read-color-as-rrggbb (model)
+(defun read-color (model)
   (declare (keyword model))
   (case model
     (:cmy (bgroup)
@@ -2985,12 +2986,12 @@
       (with-input-from-string (i (tex-string-to-html-string (get-token)))
         (let ((g (read i nil)))
           (ignorespaces)
-          (cmyk-to-rrggbb 0 0 0 (- 1 g)))))
+          (hsb360-to-hsl 0 0 g))))
     (:gray15
       (with-input-from-string (i (tex-string-to-html-string (get-token)))
         (let ((g (read i nil)))
           (ignorespaces)
-          (cmyk-to-rrggbb 0 0 0 (- 1 (/ g 15))))))
+          (hsb360-to-hsl 0 0 (/ g 15)))))
     (:html
       (with-input-from-string (i (tex-string-to-html-string (get-token)))
         (let ((rrggbb (read-6hex i)))
@@ -3005,8 +3006,7 @@
                (s (read i nil))
                (b (read i nil)))
           (ignorespaces)
-          (hsb360-to-hsl (* 360 h) s b)
-          )))
+          (hsb360-to-hsl (* 360 h) s b))))
     (:hsb360
       (bgroup)
       (with-input-from-string (i (tex-string-to-html-string
@@ -3016,8 +3016,7 @@
                (s (read i nil))
                (b (read i nil)))
           (ignorespaces)
-          (hsb360-to-hsl h s b)
-          )))
+          (hsb360-to-hsl h s b))))
     (:hsb240
       (bgroup)
       (with-input-from-string (i (tex-string-to-html-string
@@ -3027,13 +3026,12 @@
                (s (read i nil))
                (b (read i nil)))
           (ignorespaces)
-          (hsb360-to-hsl (* h #.360/240) (/ s 240) (/ b 240))
-          )))
+          (hsb360-to-hsl (* h #.360/240) (/ s 240) (/ b 240)))))
     (:wave
       (with-input-from-string (i (tex-string-to-html-string (get-token)))
         (let ((w (read i nil)))
           (ignorespaces)
-          (wavelength-to-rrggbb w))))
+          (wavelength-to-hsl w))))
     (t (let* ((name (get-peeled-group))
               (c (assoc name *color-names* :test #'string=)))
          (ignorespaces)
@@ -3124,13 +3122,13 @@
         (lambda () (emit "</span>")))
        ((:cmy :cmyk :rgb :rgb255 :gray :gray15 :html :hsb :hsb360 :hsb240 :wave :colornamed)
          (emit "<span style=\"color: ")
-         (emit (read-color-as-rrggbb sw))
+         (emit (read-color sw))
          (emit "\">")
          (lambda () (emit "</span>")))
        (:bgcolor
          (emit "<span style=\"background-color: ")
          (let ((model (color-model-to-keyword (get-bracketed-text-if-any))))
-           (emit (read-color-as-rrggbb model)))
+           (emit (read-color model)))
          (emit "\">")
          (lambda () (emit "</span>")))
        (:strike (emit "<strike>") (lambda () (emit "</strike>")))
@@ -9880,7 +9878,7 @@ Try the commands
 (defun do-pagecolor ()
   ; Does it for *all* pages instead of just subsequent pages though.
   (let* ((model (color-model-to-keyword (get-bracketed-text-if-any)))
-         (color (read-color-as-rrggbb model)))
+         (color (read-color model)))
     (princ "body { background-color: " *css-stream*)
     (princ color *css-stream*)
     (princ "; }" *css-stream*)
@@ -9893,7 +9891,7 @@ Try the commands
 (defun do-definecolor ()
   (let* ((name (get-peeled-group))
          (model (color-model-to-keyword (get-peeled-group))))
-    (push (cons name (read-color-as-rrggbb model))
+    (push (cons name (read-color model))
           *color-names*)))
 
 (tex-def-prim "\\definecolor" #'do-definecolor)

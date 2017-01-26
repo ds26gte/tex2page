@@ -10,7 +10,7 @@
   \let\maybeendinput\endinput\fi
 \maybeendinput
 
-\message{version 20170104} % last change
+\message{version 20170125} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -899,6 +899,12 @@
   \footnote{$^{\the\footnotenumber}$}\bgroup
     \edef\@currentlabel{\the\footnotenumber}%
     \let\dummy=}
+
+% uppercase version of \romannumeral
+
+\def\Romannumeral{\afterassignment\RomannumeralQii\count255=}
+
+\def\RomannumeralQii{\uppercase\expandafter{\romannumeral\the\count255 }}
 
 %
 

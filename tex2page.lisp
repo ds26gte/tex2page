@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170124") ;last change
+(defparameter *tex2page-version* "20170125") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -89,6 +89,10 @@
                #+sunos "Solaris"
                #+(and unix (not (or linux cygwin darwin sunos))) "Unix"
                #+windows "Windows"))
+
+(defparameter *month-names*
+  (vector "January" "February" "March" "April" "May" "June" "July" "August"
+          "September" "October" "November" "December"))
 
 (defparameter *short-month-names*
   (vector "Jan" "Feb" "March" "April" "May" "June"
@@ -166,10 +170,6 @@
 ;Not using #. because some Schemes choke on #\nul.
 (defparameter *invisible-space* (code-char 0))
 
-(defparameter *month-names*
-  (vector "January" "February" "March" "April" "May" "June" "July" "August"
-          "September" "October" "November" "December"))
-
 (defparameter *if-aware-ctl-seqs*
   '("\\csname" "\\else" "\\end" "\\eval" "\\fi" "\\let"))
 
@@ -234,13 +234,13 @@
 (defvar *afterbye* '())
 (defvar *aux-dir* nil)
 (defvar *aux-dir/* "")
-(defvar *aux-port* nil)
+(defvar *aux-stream* nil)
 
-(defvar *bib-aux-port* nil)
+(defvar *bib-aux-stream* nil)
 (defvar *bibitem-num* 0)
 
 (defvar *color-names* '())
-(defvar *css-port* nil)
+(defvar *css-stream* nil)
 (defvar *current-source-file* nil)
 (defvar *current-tex2page-input* nil)
 
@@ -283,7 +283,7 @@
 (defvar *index-count* nil)
 (defvar *index-page* nil)
 (defvar *index-page-mention-alist* nil)
-(defvar *index-port* nil)
+(defvar *index-stream* nil)
 (defvar *index-table* nil)
 (defvar *infructuous-calls-to-tex2page* nil)
 (defvar *input-line-no* 0)
@@ -295,7 +295,7 @@
 
 (defvar *jobname* nil)
 
-(defvar *label-port* nil)
+(defvar *label-stream* nil)
 (defvar *label-source* nil)
 (defvar *label-table* nil)
 (defvar *last-modification-time* nil)
@@ -304,7 +304,7 @@
 (defvar *ligatures-p* nil)
 (defvar *loading-external-labels-p* nil)
 (defvar *log-file* nil)
-(defvar *log-port* nil)
+(defvar *log-stream* nil)
 
 (defvar *main-tex-file* nil)
 (defvar *math-delim-left* nil)
@@ -316,7 +316,7 @@
 (defvar *math-script-mode-p* nil)
 (defvar *mfpic-file-num* nil)
 (defvar *mfpic-file-stem* nil)
-(defvar *mfpic-port* nil)
+(defvar *mfpic-stream* nil)
 (defvar *missing-eps-files* nil)
 (defvar *missing-pieces* nil)
 (defvar *mp-files* nil)
@@ -341,6 +341,7 @@
 (defvar *remember-index-number* nil)
 (defvar *redirect-delay* nil)
 (defvar *redirect-url* nil)
+(defvar *reg-num-count* 0)
 
 (defvar *scm-builtins* nil)
 (defvar *scm-dribbling-p* nil)
@@ -376,7 +377,7 @@
 (defvar *using-index-p* nil)
 
 (defvar *verb-display-p* nil)
-(defvar *verb-port* nil)
+(defvar *verb-stream* nil)
 (defvar *verb-visible-space-p* nil)
 (defvar *verb-written-files* '())
 
@@ -391,20 +392,26 @@
 
 (defstruct tocentry* level number page label header)
 
-(defstruct bport* (port nil) (buffer '()))
+(defstruct istream* (stream nil) (buffer '()))
 
-(defstruct oport* (port nil) (hbuffer '()))
+(defstruct ostream* (stream nil) (hbuffer '()))
 
 (defstruct texframe*
   (definitions (make-hash-table :test #'equal))
+  (cdefinitions (make-hash-table))
+  (chardefs (make-hash-table :test #'equal))
+  (countdefs (make-hash-table :test #'equal))
+  (counts (make-hash-table))
+  (dimendefs (make-hash-table :test #'equal))
+  (dimens (make-hash-table))
+  (toksdefs (make-hash-table :test #'equal))
+  (tokses (make-hash-table))
   (boxes (make-hash-table :test #'equal))
-  (chardefinitions (make-hash-table))
-  (counts (make-hash-table :test #'equal))
-  (tokses (make-hash-table :test #'equal))
-  (dimens (make-hash-table :test #'equal))
+  (istreams (make-hash-table))
+  (ostreams (make-hash-table))
   (postludes '())
-  (uccodes (make-hash-table :test #'eql))
-  (lccodes (make-hash-table :test #'eql))
+  (uccodes (make-hash-table))
+  (lccodes (make-hash-table))
   (catcodes '())
   (aftergroups '()))
 
@@ -451,33 +458,33 @@
   (when (probe-file f) (delete-file f)))
 
 (defun write-aux (e)
-  (unless *aux-port*
+  (unless *aux-stream*
     (let ((f (concatenate 'string *aux-dir/* *jobname* *aux-file-suffix*)))
-      (setq *aux-port* (open f :direction :output :if-exists :supersede))))
-  (prin1 e *aux-port*) (terpri *aux-port*))
+      (setq *aux-stream* (open f :direction :output :if-exists :supersede))))
+  (prin1 e *aux-stream*) (terpri *aux-stream*))
 
 (defun write-label (e)
-  (unless *label-port*
+  (unless *label-stream*
     (let ((f (concatenate 'string *aux-dir/* *jobname* *label-file-suffix*)))
-      (setq *label-port* (open f :direction :output :if-exists :supersede))))
-  (prin1 e *label-port*)
-  (terpri *label-port*))
+      (setq *label-stream* (open f :direction :output :if-exists :supersede))))
+  (prin1 e *label-stream*)
+  (terpri *label-stream*))
 
 (defun write-bib-aux (x)
-  (unless *bib-aux-port*
+  (unless *bib-aux-stream*
     (let ((f (concatenate 'string *aux-dir/* *jobname* *bib-aux-file-suffix* ".aux")))
-      (setq *bib-aux-port* (open f :direction :output :if-exists :supersede))))
-  (princ x *bib-aux-port*))
+      (setq *bib-aux-stream* (open f :direction :output :if-exists :supersede))))
+  (princ x *bib-aux-stream*))
 
 (defun write-log (x &optional log-file-only-p)
-  (unless *log-port*
+  (unless *log-stream*
     (setq *log-file* (concatenate 'string *aux-dir/* *jobname* ".hlog")
-          *log-port* (open *log-file* :direction :output :if-exists :supersede)))
+          *log-stream* (open *log-file* :direction :output :if-exists :supersede)))
   (when (and *write-log-possible-break-p* (characterp x)
              (member x '(#\) #\] #\} #\,) :test #'char=))
     (setq *write-log-possible-break-p* nil))
   (when (and *write-log-possible-break-p* (> *write-log-index* *write-log-max*))
-    (terpri *log-port*)
+    (terpri *log-stream*)
     (unless log-file-only-p (terpri))
     (setq *write-log-possible-break-p* nil
           *write-log-index* 0))
@@ -487,16 +494,16 @@
       ((#\newline :separation-newline)
        (when *write-log-possible-break-p*
          (setq *write-log-possible-break-p* nil))
-       (terpri *log-port*)
+       (terpri *log-stream*)
        (unless log-file-only-p (terpri))
        (setq *write-log-index* 0))
       (:separation-space (setq *write-log-possible-break-p* t))
       (t (when *write-log-possible-break-p*
-           (write-char #\space *log-port*)
+           (write-char #\space *log-stream*)
            (unless log-file-only-p (write-char #\space))
            (setq *write-log-index* (1+ *write-log-index*))
            (setq *write-log-possible-break-p* nil))
-         (princ x *log-port*)
+         (princ x *log-stream*)
          (unless log-file-only-p (princ x)
            (force-output))
          (incf *write-log-index*
@@ -614,7 +621,7 @@
   (write-log " failed.")
   (write-log :separation-newline)
   (display-error-context-lines)
-  (close-all-open-ports)
+  (close-all-open-streams)
   (output-stats)
   (edit-offending-file)
   (error "TeX2page fatal error"))
@@ -627,22 +634,22 @@
   (terror 'do-errmessage))
 
 (defun do-tracingall ()
-  (tex-def-count "\\tracingcommands" 1 nil)
-  (tex-def-count "\\tracingmacros" 1 nil))
+  (plain-count "\\tracingcommands" 1 nil)
+  (plain-count "\\tracingmacros" 1 nil))
 
 (defun call-with-input-file/buffered (f th)
   (declare (string f) (function th))
   (unless (probe-file f)
     (terror 'call-with-input-file/buffered "I can't find file " f))
   (with-open-file (i f :direction :input)
-    (let ((*current-tex2page-input* (make-bport* :port i))
+    (let ((*current-tex2page-input* (make-istream* :stream i))
           (*current-source-file* f)
           (*input-line-no* 1))
       (funcall th))))
 
 (defun call-with-input-string/buffered (s th)
   (declare (string s) (function th))
-  (let ((*current-tex2page-input* (make-bport* :buffer (concatenate 'list s)))
+  (let ((*current-tex2page-input* (make-istream* :buffer (concatenate 'list s)))
         (*input-line-no* *input-line-no*))
     (funcall th)))
 
@@ -652,9 +659,9 @@
     c))
 
 (defun get-char ()
-  (let ((b (bport*-buffer *current-tex2page-input*)))
+  (let ((b (istream*-buffer *current-tex2page-input*)))
     (if (null b)
-        (let ((p (bport*-port *current-tex2page-input*)))
+        (let ((p (istream*-stream *current-tex2page-input*)))
           (if (not p) nil
               (let ((c (read-char p nil)))
                 (cond ((not c) c)
@@ -662,17 +669,17 @@
                        (incf *input-line-no*) c)
                       (t c)))))
         (let ((c (car b)))
-          (setf (bport*-buffer *current-tex2page-input*) (cdr b))
+          (setf (istream*-buffer *current-tex2page-input*) (cdr b))
           c))))
 
 (defun toss-back-string (s)
   (declare (string s))
-  (setf (bport*-buffer *current-tex2page-input*)
+  (setf (istream*-buffer *current-tex2page-input*)
         (nconc (concatenate 'list s)
-               (bport*-buffer *current-tex2page-input*))))
+               (istream*-buffer *current-tex2page-input*))))
 
 (defun toss-back-char (c)
-  (push c (bport*-buffer *current-tex2page-input*)))
+  (push c (istream*-buffer *current-tex2page-input*)))
 
 (defun snoop-actual-char ()
   (let ((c (snoop-char)))
@@ -1033,7 +1040,8 @@
 (defun get-number-corresp-to-ctl-seq (x)
   (declare (string x))
   (cond ((string= x "\\the") (get-number-corresp-to-ctl-seq (get-ctl-seq)))
-        ((string= x "\\active") 13) ((string= x "\\pageno") *html-page-count*)
+        ((string= x "\\active") 13)
+        ;((string= x "\\pageno") *html-page-count*)
         ((string= x "\\inputlineno") *input-line-no*)
         ((string= x "\\footnotenumber") (get-gcount "\\footnotenumber"))
         ((string= x "\\figurenumber")
@@ -1043,7 +1051,11 @@
                   *section-counters*
                   0))
         ((string= x "\\magstep") (get-number-or-false))
-        ((find-count x)) ((find-dimen x))
+        ((find-chardef x))
+        ((setq *it* (find-countdef x)) (find-count *it*))
+        ((setq *it* (find-dimendef x)) (find-dimen *it*))
+        ((find-count x))
+        ((find-dimen x))
         ;not sure about following
         ((setq *it* (resolve-defs x)) (char-code (char *it* 0)))
         ((= (length x) 2) (char-code (char x 1)))
@@ -1065,6 +1077,8 @@
              (and n (- n))))
           ((digit-char-p c) (get-integer 10))
           (t nil))))
+
+;(trace get-number-or-false get-number-corresp-to-ctl-seq)
 
 (defun get-number ()
   (or (get-number-or-false) (terror 'get-number "Missing number.")))
@@ -1230,30 +1244,30 @@
                    (push c s))))))))
 
 (defun make-html-output-stream ()
-  (make-oport* :port (make-string-output-stream)))
+  (make-ostream* :stream (make-string-output-stream)))
 
 (defun close-html-output-stream (op)
-  (mapc #'emit (nreverse (oport*-hbuffer op)))
-  (setf (oport*-hbuffer op) '())
-  (close (oport*-port op)))
+  (mapc #'emit (nreverse (ostream*-hbuffer op)))
+  (setf (ostream*-hbuffer op) '())
+  (close (ostream*-stream op)))
 
 (defun html-output-stream-to-string (op)
-  (mapc #'emit (nreverse (oport*-hbuffer op)))
-  (setf (oport*-hbuffer op) '())
-  (get-output-stream-string (oport*-port op)))
+  (mapc #'emit (nreverse (ostream*-hbuffer op)))
+  (setf (ostream*-hbuffer op) '())
+  (get-output-stream-string (ostream*-stream op)))
 
 (defun emit (s)
-  (let ((p (oport*-port *html*)))
+  (let ((p (ostream*-stream *html*)))
     (mapc (lambda (x) (princ x p))
-          (nreverse (oport*-hbuffer *html*)))
-    (setf (oport*-hbuffer *html*) '())
+          (nreverse (ostream*-hbuffer *html*)))
+    (setf (ostream*-hbuffer *html*) '())
     (princ s p)))
 
 (defun emit-space (s)
-  (push s (oport*-hbuffer *html*)))
+  (push s (ostream*-hbuffer *html*)))
 
 (defun emit-newline ()
-  (push #\newline (oport*-hbuffer *html*)))
+  (push #\newline (ostream*-hbuffer *html*)))
 
 (defun emit-html-char (c)
   (unless (not c)
@@ -1273,7 +1287,7 @@
     (emit-html-char (char s i))))
 
 (defun do-unskip ()
-  (setf (oport*-hbuffer *html*) '()))
+  (setf (ostream*-hbuffer *html*) '()))
 
 (defun catcode (c &optional n globalp)
   (declare (character c) (ignore globalp))
@@ -1313,11 +1327,13 @@
                       (box-content (get-group)))
                  (setq s (concatenate 'string cs box-caller box-content))))
               ((string= cs "\\box")
-               (setq s (read-box-string (get-token))))
+               (setq s (read-box-string (get-number))))
               ((string= cs "\\copy")
-               (setq s (read-box-string (get-token) t))))))
+               (setq s (read-box-string (get-number) t))))))
     (or s
         (terror 'read-box "A <box> was supposed to be here."))))
+
+;(trace read-box)
 
 (defun do-lower (&optional raisep)
   (let* ((n (get-pixels)) (box (read-box)))
@@ -1538,6 +1554,8 @@
   (declare (string cs))
   (not (member (char (get-0arg-expn cs) 0) '(#\0 #\f #\F #\n #\N))))
 
+;(trace tex2page-flag-boolean)
+
 (defun tex-let (lft rt frame)
   (unless frame (setq frame (top-texframe)))
   (let* ((frame-defs (texframe*-definitions frame))
@@ -1570,75 +1588,393 @@
   (unless (inside-false-world-p)
     (tex-def name '() nil nil thunk name nil frame)))
 
+;;
+
+;chardef really should be numdef but TeX prefers this name
+
+(defun tex-def-chardef (ctlseq num &optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((frame (top-texframe)))
+    (setf (gethash ctlseq (texframe*-chardefs frame)) num))
+  (when (and globalp (consp *tex-env*))
+    (setf (gethash ctlseq (texframe*-chardefs *global-texframe*)) num)))
+
+(defun do-chardef ()
+  (let ((cltseq (get-raw-token/is)))
+    (get-equal-sign)
+    (let ((num (get-number-or-false)))
+      (unless num (terror 'do-chardef))
+      (tex-def-chardef cltseq num (globally-p)))))
+
+(defun find-chardef (ctlseq)
+  ;finds the num that \ctlseq is bound to
+  (or (some (lambda (frame) (gethash ctlseq (texframe*-chardefs frame))) *tex-env*)
+      (gethash ctlseq (texframe*-chardefs *global-texframe*))))
+
+;(trace find-chardef)
+
 ;
 
-(defun tex-def-box (name box globalp)
-  (declare (string name box))
-  (let ((frame (cond (globalp
-                       (format t "doing global frame~%")
-                       (mapc (lambda (fr)
-                               (remhash name (texframe*-boxes fr)))
-                             *tex-env*)
-                       *global-texframe*)
-                     (t (top-texframe)))))
-    (setf (gethash name (texframe*-boxes frame)) box)
-    )
+(defun gen-regno (c &optional (avoid '()))
+  ; return incremented \count10
+  (let ((n (gethash c (texframe*-counts *global-texframe*))))
+    (incf n)
+    (when (member n avoid) (incf n))
+    (setf (gethash c (texframe*-counts *global-texframe*)) n)
+    n))
+
+(defun tex-def-countdef (ctlseq &optional regno num globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (unless regno
+    (setq regno (or (find-countdef ctlseq) (gen-regno 10))))
+  (let ((frame (top-texframe)))
+    (setf (gethash ctlseq (texframe*-countdefs frame)) regno))
+  (when (and globalp (consp *tex-env*))
+    (setf (gethash ctlseq (texframe*-countdefs *global-texframe*)) regno))
+  (when num
+    (tex-def-count regno num globalp)))
+
+(defun plain-count (ctlseq num &optional (globalp t))
+  (unless globalp (setq globalp (globally-p)))
+  (tex-def-countdef ctlseq nil num globalp))
+
+;(trace tex-def-countdef)
+
+(defun find-countdef (ctlseq)
+  (or (some (lambda (frame) (gethash ctlseq (texframe*-countdefs frame))) *tex-env*)
+      (gethash ctlseq (texframe*-countdefs *global-texframe*))))
+
+;(trace find-countdef)
+
+(defun do-count= (regno globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (get-equal-sign)
+  (tex-def-count regno (get-number) globalp)
   (perform-afterassignment))
 
-(defun find-box (ctlseq)
-  (or (some (lambda (fr) (gethash ctlseq (texframe*-boxes fr))) *tex-env*)
-      (gethash ctlseq (texframe*-boxes *global-texframe*))
-      (gethash ctlseq (texframe*-boxes *primitive-texframe*))))
+(defun tex-def-count (regno num globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((frame (top-texframe)))
+    (setf (gethash regno (texframe*-counts frame)) num)
+    (when (and globalp (consp *tex-env*))
+      (setf (gethash regno (texframe*-counts *global-texframe*)) num))))
 
-(defun read-box-string (ctlseq &optional retainp)
-  (let ((b (find-box ctlseq)))
+(defun do-countdef ()
+  (let ((cltseq (get-raw-token/is)))
+    (get-equal-sign)
+    (let ((n (get-number-or-false)))
+      (unless n (terror 'do-countdef "Missing number."))
+      (tex-def-countdef cltseq n 0 (globally-p)))))
+
+(defun do-newcount (globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (tex-def-countdef (get-ctl-seq) (gen-regno 10) 0 globalp))
+
+(defun find-count (num)
+  (or (some (lambda (frame) (gethash num (texframe*-counts frame))) *tex-env*)
+      (gethash num (texframe*-counts *global-texframe*))
+      (gethash num (texframe*-counts *primitive-texframe*))))
+
+(defun the-count (dracula)
+  (cond ((setq *it* (find-countdef dracula)) (find-count *it*))
+        (t (terror 'the-count "Missing count register."))))
+
+(defun get-gcount (ctlseq)
+  (gethash (find-countdef ctlseq) (texframe*-counts *global-texframe*) 0))
+
+(defun tex-gdef-count (ctlseq v)
+  (tex-def-countdef ctlseq nil v t))
+
+(defun do-count (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((regno (get-number)))
+    (get-equal-sign)
+    (tex-def-count regno (get-number) globalp)))
+
+;(trace do-count)
+
+;;
+
+(defun tex-def-dimendef (ctlseq &optional regno num globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (unless regno
+    (setq regno (or (find-dimendef ctlseq) (gen-regno 11))))
+  (let ((frame (top-texframe)))
+    (setf (gethash ctlseq (texframe*-dimendefs frame)) regno))
+  (when (and globalp (consp *tex-env*))
+    (setf (gethash ctlseq (texframe*-dimendefs *global-texframe*)) regno))
+  (when num
+    (tex-def-dimen regno num globalp))
+  regno)
+
+(defun plain-dimen (ctlseq num &optional (globalp t))
+  (unless globalp (setq globalp (globally-p)))
+  (tex-def-dimendef ctlseq nil num globalp))
+
+(defun find-dimendef (ctlseq)
+  (or (some (lambda (frame) (gethash ctlseq (texframe*-dimendefs frame))) *tex-env*)
+      (gethash ctlseq (texframe*-dimendefs *global-texframe*))))
+
+(defun do-dimen= (regno globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (get-equal-sign)
+  (tex-def-dimen regno (get-scaled-points) globalp)
+  (perform-afterassignment))
+
+(defun tex-def-dimen (regno num globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((frame (top-texframe)))
+    (setf (gethash regno (texframe*-dimens frame)) num)
+    (when (and globalp (consp *tex-env*))
+      (setf (gethash regno (texframe*-dimens *global-texframe*)) num))))
+
+(defun do-dimendef ()
+  (let ((cltseq (get-raw-token/is)))
+    (get-equal-sign)
+    (let ((n (get-scaled-points)))
+      (unless n (terror 'do-dimendef "Missing number."))
+      (tex-def-dimendef cltseq n 0 (globally-p)))))
+
+(defun do-newdimen (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (tex-def-dimendef (get-ctl-seq) (gen-regno 11) 0 globalp))
+
+(defun find-dimen (num)
+  (or (some (lambda (frame) (gethash num (texframe*-dimens frame))) *tex-env*)
+      (gethash num (texframe*-dimens *global-texframe*))
+      (gethash num (texframe*-dimens *primitive-texframe*))))
+
+(defun the-dimen (ctlseq)
+  (cond ((setq *it* (find-dimendef ctlseq)) (find-dimen *it*))
+        (t (terror 'the-dimen "Missing dimen register."))))
+
+(defun get-dimen (ctlseq)
+  (cond ((the-dimen ctlseq))
+        (t ;let's just assume the default \hsize
+           (tex-length 6.5 :in))))
+
+(defun do-dimen (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((regno (get-number)))
+    (get-equal-sign)
+    (tex-def-dimen regno (get-scaled-points) globalp)))
+
+;;
+
+(defun do-advance (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((cs (get-ctl-seq)))
+    (get-by)
+    (cond ((setq *it* (find-countdef cs))
+           (let* ((countnum *it*)
+                  (countval (find-count countnum)))
+             (unless countval (terror 'do-advance "Missing count register."))
+             (tex-def-count countnum (+ countval (get-number)) globalp)))
+          ((setq *it* (find-dimendef cs))
+           (let* ((dimennum *it*)
+                  (dimenval (find-dimen dimennum)))
+             (unless dimenval (terror 'do-advance "Missing dimen register."))
+             (tex-def-dimen dimennum (+ dimenval (get-scaled-points)) globalp)))
+          (t (terror 'do-advance "Missing register.")))))
+
+;(trace do-advance)
+
+(defun do-multiply (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((cs (get-ctl-seq)))
+    (get-by)
+    (cond ((setq *it* (find-countdef cs))
+           (let* ((countnum *it*)
+                  (countval (find-count countnum)))
+             (unless countval (terror 'do-multiply "Missing count register."))
+             (tex-def-count countnum (* countval (get-number)) globalp)))
+          ((setq *it* (find-dimendef cs))
+           (let* ((dimennum *it*)
+                  (dimenval (find-dimen dimennum)))
+             (unless dimenval (terror 'do-multiply "Missing dimen register."))
+             (tex-def-dimen dimennum (* dimenval (get-number)) globalp)))
+          (t (terror 'do-multiply "Missing register.")))))
+
+(defun do-divide (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((cs (get-ctl-seq)))
+    (get-by)
+    (cond ((setq *it* (find-countdef cs))
+           (let* ((countnum *it*)
+                  (countval (find-count countnum)))
+             (unless countval (terror 'do-divide "Missing count register."))
+             (tex-def-count countnum (floor countval (get-number)) globalp)))
+          ((setq *it* (find-dimendef cs))
+           (let* ((dimennum *it*)
+                  (dimenval (find-dimen dimennum)))
+             (unless dimenval (terror 'do-divide "Missing dimen register."))
+             (tex-def-dimen dimennum (floor dimenval (get-number)) globalp)))
+          (t (terror 'do-divide "Missing register.")))))
+
+;;
+(defun tex-def-newread (ctlseq &optional regno globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (unless regno (setq regno (gen-regno 16 '(16))))
+  (tex-def-chardef ctlseq regno globalp)
+  (tex-def-istream regno :free globalp))
+
+(defun tex-def-newwrite (ctlseq &optional regno globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (unless regno (setq regno (gen-regno 17 '(16 18))))
+  (tex-def-chardef ctlseq regno globalp)
+  (tex-def-ostream regno :free globalp))
+
+(defun tex-def-istream (regno num globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((frame (top-texframe)))
+    (setf (gethash regno (texframe*-istreams frame)) num)
+    (when (and globalp (consp *tex-env*))
+      (setf (gethash regno (texframe*-istreams *global-texframe*)) num))))
+
+(defun tex-def-ostream (regno num globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((frame (top-texframe)))
+    (setf (gethash regno (texframe*-ostreams frame)) num)
+    (when (and globalp (consp *tex-env*))
+      (setf (gethash regno (texframe*-ostreams *global-texframe*)) num))))
+
+(defun find-istream (num)
+  (or (some (lambda (frame) (gethash num (texframe*-istreams frame))) *tex-env*)
+      (gethash num (texframe*-istreams *global-texframe*))
+      (gethash num (texframe*-istreams *primitive-texframe*))))
+
+(defun find-ostream (num)
+  (or (some (lambda (frame) (gethash num (texframe*-ostreams frame))) *tex-env*)
+      (gethash num (texframe*-ostreams *global-texframe*))
+      (gethash num (texframe*-ostreams *primitive-texframe*))))
+
+(defun do-newread (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (tex-def-newread (get-ctl-seq) (gen-regno 16 '(16)) globalp))
+
+(defun do-newwrite (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (tex-def-newwrite  (get-ctl-seq) (gen-regno 17 '(16 18)) globalp))
+
+;(trace do-newwrite tex-def-newwrite)
+
+;;
+
+(defun tex-def-newbox (ctlseq &optional regno globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (unless regno (setq regno (gen-regno 14)))
+  (tex-def-chardef ctlseq regno globalp)
+  (tex-def-box regno "" globalp))
+
+(defun tex-def-box (regno bcontents &optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((frame (top-texframe)))
+    (setf (gethash regno (texframe*-boxes frame)) bcontents)
+    (when (and globalp (consp *tex-env*))
+      (setf (gethash regno (texframe*-ostreams *global-texframe*)) bcontents))))
+
+(defun find-box (num)
+  (or (some (lambda (frame) (gethash num (texframe*-boxes frame))) *tex-env*)
+      (gethash num (texframe*-boxes *global-texframe*))
+      (gethash num (texframe*-boxes *primitive-texframe*))))
+
+(defun do-setbox ()
+  (let* ((bno (get-number))
+         (bcontents (progn (get-equal-sign) (read-box))))
+    (tex-def-box bno bcontents (globally-p)))
+  (perform-afterassignment))
+
+(defun read-box-string (bno &optional retainp)
+  (let ((b (find-box bno)))
     (unless b (terror 'read-box-string))
-    (unless retainp (tex-def-box ctlseq "" nil))
+    (unless retainp (tex-def-box bno "" nil))
     b))
 
+;(trace read-box-string)
+
 (defun do-box (&optional retainp)
-  (let* ((bname (get-ctl-seq))
-         (b (read-box-string bname retainp)))
+  (let* ((bno (get-number))
+         (b (read-box-string bno retainp)))
     (toss-back-string b)))
+
+(defun do-newbox (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (tex-def-newbox (get-ctl-seq) (gen-regno 14) globalp))
+
+;;
+
+(defun tex-def-toksdef (ctlseq &optional regno str globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (unless regno
+    (setq regno (or (find-toksdef ctlseq) (gen-regno 15))))
+  (let ((frame (top-texframe)))
+    (setf (gethash ctlseq (texframe*-toksdefs frame)) regno))
+  (when (and globalp (consp *tex-env*))
+    (setf (gethash ctlseq (texframe*-toksdefs *global-texframe*)) regno))
+  (when str
+    (tex-def-toks regno str globalp)))
+
+(defun find-toksdef (ctlseq)
+  (or (some (lambda (frame) (gethash ctlseq (texframe*-toksdefs frame))) *tex-env*)
+      (gethash ctlseq (texframe*-toksdefs *global-texframe*))))
+
+(defun do-toks= (regno globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (get-equal-sign)
+  (tex-def-toks regno (get-group) globalp)
+  (perform-afterassignment))
+
+(defun do-toksdef ()
+  (let ((ctlseq (get-ctl-seq)))
+    (get-equal-sign)
+    (tex-def-toksdef ctlseq nil (get-group) (globally-p))))
+
+;(trace do-toks=)
+
+;toks is a single item (one string of tokens); hence the awkward plural tokses
+
+(defun tex-def-toks (regno str globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((frame (top-texframe)))
+    (setf (gethash regno (texframe*-tokses frame)) str)
+    (when (and globalp (consp *tex-env*))
+      (setf (gethash regno (texframe*-tokses *global-texframe*)) str))))
+
+(defun do-newtoks (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (tex-def-toksdef (get-ctl-seq) (gen-regno 15) "" globalp))
+
+(defun find-toks (num)
+  (or (some (lambda (frame) (gethash num (texframe*-tokses frame))) *tex-env*)
+      (gethash num (texframe*-tokses *global-texframe*))
+      (gethash num (texframe*-tokses *primitive-texframe*))))
+
+(defun the-toks (ctlseq)
+  (cond ((setq *it* (find-toksdef ctlseq)) (find-toks *it*))
+        (t (terror 'the-toks "Missing toks register."))))
+
+;(trace the-toks)
+
+(defun plain-toks (ctlseq str &optional (globalp t))
+  (unless globalp (setq globalp (globally-p)))
+  (tex-def-toksdef ctlseq nil str globalp))
+
+(defun do-toks (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
+  (let ((regno (get-number)))
+    (get-equal-sign)
+    (tex-def-toks regno (get-group) globalp)))
+;;
 
 ;
 
-(defun tex-def-count (name num globalp)
-  (declare (string name) (number num))
-  (let ((frame (cond (globalp
-                       (mapc (lambda (fr)
-                               (remhash name (texframe*-counts fr)))
-                             *tex-env*)
-                       *global-texframe*)
-                     (t (top-texframe)))))
-    (setf (gethash name (texframe*-counts frame)) num))
-  (perform-afterassignment))
-
-(defun tex-def-toks (name tokens globalp)
-  (declare (string name tokens))
-  (let ((frame (cond (globalp
-                       (mapc (lambda (fr)
-                               (remhash name (texframe*-tokses fr)))
-                             *tex-env*)
-                       *global-texframe*)
-                     (t (top-texframe)))))
-    (setf (gethash name (texframe*-tokses frame)) tokens)))
-
-(defun tex-def-dimen (name len globalp)
-  (let ((frame (cond (globalp
-                       (mapc (lambda (fr)
-                               (remhash name (texframe*-dimens fr)))
-                             *tex-env*)
-                       *global-texframe*)
-                     (t (top-texframe)))))
-    (setf (gethash name (texframe*-dimens frame)) len)
-    (perform-afterassignment)))
+;
 
 (defun ensure-cdef (c f)
-  (let ((f-chardefs (texframe*-chardefinitions f)))
-    (or (gethash c f-chardefs)
+  (let ((f-cdefs (texframe*-cdefinitions f)))
+    (or (gethash c f-cdefs)
         (let ((d (make-cdef*)))
-          (setf (gethash c f-chardefs) d)
+          (setf (gethash c f-cdefs) d)
           d))))
 
 (defun tex-def-char (c argpat expansion frame)
@@ -1649,21 +1985,22 @@
           (cdef*-catcodes d) *catcodes*))
   (perform-afterassignment))
 
-(defun find-chardef (c)
-  (let ((x (or (some (lambda (f) (gethash c (texframe*-chardefinitions f)))
+(defun find-cdef (c)
+  (let ((x (or (some (lambda (f) (gethash c (texframe*-cdefinitions f)))
                      *tex-env*)
-               (gethash c  (texframe*-chardefinitions *global-texframe*))
-               (gethash c (texframe*-chardefinitions *primitive-texframe*)))))
+               (gethash c  (texframe*-cdefinitions *global-texframe*))
+               (gethash c (texframe*-cdefinitions *primitive-texframe*)))))
     (and x (cdef*-active x) x)))
 
-(defun find-chardef-in-top-frame (c)
+(defun find-cdef-in-top-frame (c)
   (let ((x (if (null *tex-env*)
-               (or (gethash c (texframe*-chardefinitions *global-texframe*))
-                   (gethash c  (texframe*-chardefinitions *primitive-texframe*)))
-             (gethash c  (texframe*-chardefinitions (car *tex-env*))))))
+               (or (gethash c (texframe*-cdefinitions *global-texframe*))
+                   (gethash c  (texframe*-cdefinitions *primitive-texframe*)))
+             (gethash c  (texframe*-cdefinitions (car *tex-env*))))))
     (and x (cdef*-active x) x)))
 
-(defun do-defcsactive (globalp)
+(defun do-defcsactive (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
   (let* ((cs (get-token))
          (c (char cs (if (ctl-seq-p cs) 1 0)))
          (argpat (progn (ignorespaces) (get-def-parameters)))
@@ -1673,11 +2010,11 @@
     (tex-def-char c argpat rhs f)))
 
 (defun activate-cdef (c)
-  (let ((y (cond ((setq *it* (find-chardef-in-top-frame c))
+  (let ((y (cond ((setq *it* (find-cdef-in-top-frame c))
                   (let ((y *it*))
                     (setf (cdef*-active y) t)
                     y))
-                 (t (let* ((d (find-chardef c))
+                 (t (let* ((d (find-cdef c))
                            (y (ensure-cdef c (top-texframe))))
                       (when d (kopy-cdef y d))
                       (setf (cdef*-active y) t)
@@ -1688,11 +2025,11 @@
 
 (defun deactivate-cdef (c)
   (declare (character c))
-  (cond ((setq *it* (find-chardef-in-top-frame c))
+  (cond ((setq *it* (find-cdef-in-top-frame c))
          ;if c is active in current group, deactivate it
          (let ((y *it*))
            (setf (cdef*-active y) nil)))
-        ((setq *it* (find-chardef c))
+        ((setq *it* (find-cdef c))
          ;if c is active in an enclosing group, create a shadowing
          ;unactive def for it in the current group
          (let ((y *it*))
@@ -1734,16 +2071,21 @@
           ((string= next "\\let") (do-let t))
           ((string= next "\\newbox") (do-newbox t))
           ((string= next "\\newcount") (do-newcount t))
+          ((strnig= next "\\count") (do-count t))
           ((string= next "\\newtoks") (do-newtoks t))
+          ((string= next "\\toks") (do-toks t))
           ((string= next "\\newdimen") (do-newdimen t))
+          ((string= next "\\dimen") (do-dimen t))
           ((string= next "\\advance") (do-advance t))
           ((string= next "\\multiply") (do-multiply t))
           ((string= next "\\divide") (do-divide t))
           ((string= next "\\read") (do-read t))
-          ((or (string= next "\\imgdef") (string= next "\\gifdef"))
-           (make-reusable-img t))
+          ((or (string= next "\\imgdef")
+               (string= next "\\gifdef")) (make-reusable-img t))
           ((find-count next) (do-count= next t))
-          ((find-toks next) (do-toks= next t)) (t (toss-back-string next)))))
+          ((find-dimen next) (do-dimen= next t))
+          ((find-toks next) (do-toks= next t))
+          (t (toss-back-string next)))))
 
 (defun do-externaltitle ()
   (write-aux `(!preferred-title ,(tex-string-to-html-string (get-group)))))
@@ -1831,8 +2173,8 @@
     (setq *in-para-p* nil)))
 
 (defun do-para ()
-  (cond ((and *in-para-p* (consp (oport*-hbuffer *html*)))
-         (setf (oport*-hbuffer *html*) '()))
+  (cond ((and *in-para-p* (consp (ostream*-hbuffer *html*)))
+         (setf (ostream*-hbuffer *html*) '()))
         (t
           (do-end-para)
           (let ((in-table-p (and (consp *tabular-stack*)
@@ -1912,7 +2254,7 @@
 
 (defun do-cssblock ()
   (let ((*dumping-nontex-p* t))
-    (dump-till-end-env "cssblock" *css-port*)))
+    (dump-till-end-env "cssblock" *css-stream*)))
 
 (defun link-stylesheets ()
   (let ((link-it (lambda (css)
@@ -3019,7 +3361,7 @@
 (defun do-newline () (when (>= (munch-newlines) 1) (do-para)) (emit-newline))
 
 (defun do-br ()
-  (if (or (find-chardef #\space) (not (= (the-count "\\TIIPobeylinestrictly") 0)))
+  (if (or (find-cdef #\space) (not (= (the-count "\\TIIPobeylinestrictly") 0)))
       (emit "<br>") (unless (eql (snoop-actual-char) #\newline) (emit "<br>")))
   (emit-newline))
 
@@ -3493,11 +3835,6 @@
     (emit "<em>see also</em> ")
     (tex2page-string other-entry)))
 
-(defun do-setbox ()
-  (let* ((bname (prog1 (get-raw-token/is) (get-equal-sign)))
-         (box (read-box)))
-    (tex-def-box bname box (globally-p))))
-
 (defun html-length (s)
   (declare (string s))
   (let ((n (length s))
@@ -3788,11 +4125,13 @@
            (tex2page-string
              (if (eq head-or-foot :head) "\\the\\headline" "\\the\\footline"))
            (egroup))
-          (t (output-navigation-bar head-or-foot)))
+          (t (output-navbar head-or-foot)))
     (emit "</div>")
     (emit-newline)))
 
-(defun output-navigation-bar (head-or-foot)
+;(trace output-head-or-foot-line)
+
+(defun output-navbar (head-or-foot)
   (declare (keyword head-or-foot))
   (let* ((first-page-p (= *html-page-count* 0))
          (last-page-not-determined-p (< *last-page-number* 0))
@@ -3869,6 +4208,8 @@
       (emit *navigation-sentence-end*)
       (emit "]"))))
 
+;(trace output-navbar)
+
 (defun do-eject ()
   (cond ((tex2page-flag-boolean "\\TZPslides")
          (do-end-para)
@@ -3886,13 +4227,13 @@
             (unless (> *last-page-number* 0)
               (flag-missing-piece :last-modification-time))
             (do-end-page)
-            (incf *html-page-count*)
+            (tex-def-count 0 (incf *html-page-count*) t)
             (setq *html-page*
                   (concatenate 'string *aux-dir/* *jobname* *html-page-suffix*
                     (write-to-string *html-page-count*)
                     *output-extension*))
             (setq *html*
-                  (make-oport* :port
+                  (make-ostream* :stream
                                (open *html-page* :direction :output
                                      :if-exists :supersede)))
             (do-start)))))
@@ -4002,13 +4343,13 @@
   (write-log :separation-space)
   (close-html-output-stream *html*))
 
-(defun close-all-open-ports ()
-  (when *aux-port* (close *aux-port*))
-  (when *css-port* (close *css-port*))
-  (when *index-port* (close *index-port*))
-  (when *label-port* (close *label-port*))
-  (when *bib-aux-port* (close *bib-aux-port*))
-  (when *verb-port* (close *verb-port*))
+(defun close-all-open-streams ()
+  (when *aux-stream* (close *aux-stream*))
+  (when *css-stream* (close *css-stream*))
+  (when *index-stream* (close *index-stream*))
+  (when *label-stream* (close *label-stream*))
+  (when *bib-aux-stream* (close *bib-aux-stream*))
+  (when *verb-stream* (close *verb-stream*))
   (maphash
    (lambda (k v)
      (declare (ignore k))
@@ -4038,7 +4379,7 @@
          (write-log ")."))
         (t (write-log "No pages of output.")))
   (write-log #\newline)
-  (when *log-port* (close *log-port*))
+  (when *log-stream* (close *log-stream*))
   (princ "Transcript written on ")
   (princ *log-file*)
   (princ ".")
@@ -4068,26 +4409,28 @@
     (write-aux `(!last-modification-time ,*last-modification-time* 1900)))
   (mapc (lambda (th) (funcall th)) *afterbye*)
   ;(note-down-tex2page-flags)
-  (close-all-open-ports)
+  (close-all-open-streams)
   (call-external-programs-if-necessary)
   (show-unresolved-xrefs-and-missing-pieces))
 
 (defun set-text-width ()
   (let ((hsize (cond ((setq *it* (find-def "\\TZPhsize"))
                       (tex2page-string (concatenate 'string "\\TIIPhsize=" (tdef*-expansion *it*)))
-                      (find-dimen "\\TIIPhsize"))
-                     (*tex-like-layout-p* (find-dimen "\\hsize"))
+                      (the-dimen "\\TIIPhsize"))
+                     (*tex-like-layout-p* (the-dimen "\\hsize"))
                      (t nil))))
     (when hsize
-      (princ "body { max-width: " *css-port*)
-      (princ (sp-to-pixels hsize) *css-port*)
-      (princ "pt; }" *css-port*)
-      (terpri *css-port*))))
+      (princ "body { max-width: " *css-stream*)
+      (princ (sp-to-pixels hsize) *css-stream*)
+      (princ "pt; }" *css-stream*)
+      (terpri *css-stream*))))
+
+;(trace set-text-width)
 
 (defun note-down-tex2page-flags ()
   (write-aux `(!lang ,(resolve-defs "\\TZPlang")))
-  (write-aux `(!head-line ,(get-toks "\\headline")))
-  (write-aux `(!foot-line ,(get-toks "\\footline")))
+  (write-aux `(!head-line ,(the-toks "\\headline")))
+  (write-aux `(!foot-line ,(the-toks "\\footline")))
   (when (setq *it* (find-def "\\TZPtitle"))
     (let ((d *it*))
       (write-aux
@@ -4129,40 +4472,40 @@
   (when (tex2page-flag-boolean "\\TZPtexlayout")
     (setq *tex-like-layout-p* t)
     (write-aux '(!tex-like-layout))
-    (terpri *css-port*)
-    (princ "body { margin-top: " *css-port*)
+    (terpri *css-stream*)
+    (princ "body { margin-top: " *css-stream*)
     (princ (sp-to-ems (+ (tex-length 0.5 :in) ; 1in is too much!
-                         (find-dimen "\\voffset")))
-           *css-port*)
-    (princ "em; }" *css-port*)
-    (terpri *css-port*)
-    (princ "body { margin-left: " *css-port*)
-    (princ (sp-to-ems (+ (tex-length 0.8 :in) (find-dimen "\\hoffset")))
-           *css-port*)
-    (princ "em; }" *css-port*)
-    (terpri *css-port*)
+                         (the-dimen "\\voffset")))
+           *css-stream*)
+    (princ "em; }" *css-stream*)
+    (terpri *css-stream*)
+    (princ "body { margin-left: " *css-stream*)
+    (princ (sp-to-ems (+ (tex-length 0.8 :in) (the-dimen "\\hoffset")))
+           *css-stream*)
+    (princ "em; }" *css-stream*)
+    (terpri *css-stream*)
     (when (or (tex2page-flag-boolean "\\TZPrightjustify")
               (not (tex2page-flag-boolean "\\TZPraggedright")))
-      (princ "body { text-align: justify; }" *css-port*)
-      (terpri *css-port*))
-    (princ "p { margin-bottom: 0pt; }" *css-port*)
-    (terpri *css-port*)
-    (princ "p { text-indent: " *css-port*)
-    (princ (sp-to-pixels (find-dimen "\\parindent")) *css-port*)
-    (princ "pt; }" *css-port*)
-    (terpri *css-port*)
-    (princ "p { margin-top: " *css-port*)
-    (princ (sp-to-pixels (find-dimen "\\parskip")) *css-port*)
-    (princ "pt; }" *css-port*)
-    (terpri *css-port*)
-    (princ ".mathdisplay { margin-top: " *css-port*)
-    (princ (sp-to-pixels (find-dimen "\\abovedisplayskip")) *css-port*)
-    (princ "pt; margin-bottom: " *css-port*)
-    (princ (sp-to-pixels (find-dimen "\\belowdisplayskip")) *css-port*)
-    (princ "pt; }" *css-port*)
-    (terpri *css-port*)
-    (princ ".navigation { color: black; font-style: normal; }" *css-port*)
-    (terpri *css-port*))
+      (princ "body { text-align: justify; }" *css-stream*)
+      (terpri *css-stream*))
+    (princ "p { margin-bottom: 0pt; }" *css-stream*)
+    (terpri *css-stream*)
+    (princ "p { text-indent: " *css-stream*)
+    (princ (sp-to-pixels (the-dimen "\\parindent")) *css-stream*)
+    (princ "pt; }" *css-stream*)
+    (terpri *css-stream*)
+    (princ "p { margin-top: " *css-stream*)
+    (princ (sp-to-pixels (the-dimen "\\parskip")) *css-stream*)
+    (princ "pt; }" *css-stream*)
+    (terpri *css-stream*)
+    (princ ".mathdisplay { margin-top: " *css-stream*)
+    (princ (sp-to-pixels (the-dimen "\\abovedisplayskip")) *css-stream*)
+    (princ "pt; margin-bottom: " *css-stream*)
+    (princ (sp-to-pixels (the-dimen "\\belowdisplayskip")) *css-stream*)
+    (princ "pt; }" *css-stream*)
+    (terpri *css-stream*)
+    (princ ".navigation { color: black; font-style: normal; }" *css-stream*)
+    (terpri *css-stream*))
   (set-text-width)
   (unless (tex2page-flag-boolean "\\TZPtextext")
     (write-aux `(!tex-text 1)))
@@ -4286,7 +4629,7 @@
   (concatenate 'string *subjobname* *img-file-suffix*
                (write-to-string *img-file-count*)))
 
-(defun call-with-html-image-port (p &optional alt)
+(defun call-with-html-image-stream (p &optional alt)
   (declare (function p))
   (let* ((img-file-stem (next-html-image-file-stem))
          (aux-tex-file (concatenate 'string img-file-stem ".tex")))
@@ -4338,7 +4681,7 @@
        (emit "<div class=\"mathdisplay ")
        (emit *display-justification*)
        (emit "\">")
-       (call-with-html-image-port
+       (call-with-html-image-stream
         (lambda (o) (princ "$$" o) (princ tex-string o) (princ "$$" o))
         tex-string)
        (emit "</div>")
@@ -4399,13 +4742,13 @@
                  (tex2page-flag-boolean "\\TZPmathimage"))
              *math-needs-image-p*
              (not *temporarily-use-utf8-for-math-p*))
-      (call-with-html-image-port
+      (call-with-html-image-stream
         (lambda (o) (princ #\$ o) (princ tex-string o) (princ #\$ o))
         tex-string)
       (emit html-string))))
 
 (defun do-mathp ()
-  (call-with-html-image-port
+  (call-with-html-image-stream
    (lambda (o) (princ #\$ o) (princ (get-group) o) (princ #\$ o))))
 
 (defun do-math ()
@@ -4519,29 +4862,14 @@
                     (t (get-actual-char)
                        (setq r (concatenate 'string r (list c))))))))))
 
-(defun pick-new-stream-number (stream-list)
-  (let ((i 0))
-    (loop
-      (unless (or (gethash i stream-list)
-                  (= i 16) ;reserved for console
-                  (= i 18)) ;reserved for shell escape
-        (return i))
-      (incf i))))
-
-(defun do-new-stream (type)
-  (declare (keyword type))
-  (let* ((x (get-ctl-seq))
-         (sl (if (eq type :out) *output-streams* *input-streams*))
-         (n (pick-new-stream-number sl)))
-    (tex-def-count x n t) ;streams always global?
-    (setf (gethash n sl) :free)))
-
 (defun do-open-stream (type)
   (declare (keyword type))
   (let* ((n (get-number))
          (f (get-filename))
-         (sl (if (eq type :out) *output-streams* *input-streams*))
+         (frame (top-texframe))
+         (sl (if (eq type :out) (texframe*-ostreams frame) (texframe*-istreams frame)))
          (c (gethash n sl)))
+    ;(format t "n = ~s; f = ~s; c = ~s~%" n f c)
     (unless (eq c :free) (terror 'do-open-stream))
     (setf (gethash n sl)
           (ecase type
@@ -4550,17 +4878,20 @@
              (open f :direction :output :if-exists :supersede))
             (:in
              (setq f (actual-tex-filename f))
-             (make-bport* :port (open f :direction :input)))))))
+             (make-istream* :stream (open f :direction :input)))))))
 
 (defun do-close-stream (type)
-  (let* ((sl (if (eql type :out) *output-streams* *input-streams*))
+  (let* ((frame (top-texframe))
+         (sl (if (eql type :out) (texframe*-ostreams frame) (texframe*-istreams frame)))
          (o (get-number))
          (c (gethash o sl)))
     (when (eq c :free) (terror 'do-close-stream))
     (close (ecase type
              (:out c)
-             (:in (bport*-port c))))
+             (:in (istream*-stream c))))
     (setf (gethash o sl) :free)))
+
+;(trace do-open-stream do-close-stream)
 
 (defun tex-write-output-string (s)
   (declare (string s))
@@ -4584,7 +4915,7 @@
           ((member o '(16 18) :test #'=)
            (write-log output)
            (write-log :separation-space))
-          ((setq *it* (gethash o *output-streams*))
+          ((setq *it* (find-ostream o))
            (let ((p *it*))
              (when (eq p :free) (terror 'do-write-aux))
              (princ output p)
@@ -4617,26 +4948,27 @@
              (get-group))))
         (push (get-actual-char) r)))))
 
-(defun do-read (global-p)
+(defun do-read (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
   (let* ((i (get-number))
          (x (progn (get-to) (get-ctl-seq)))
          (p nil))
     (cond ((member i '(-1 16) :test #'=)
-           (setq p (make-bport* :port *standard-input*))
+           (setq p (make-istream* :stream *standard-input*))
            (unless (= i -1)
              (write-log x) (write-log #\=)))
-          ((setq *it* (gethash i *input-streams*))
+          ((setq *it* (find-istream i))
            (setq p *it*)
-           (unless (eq p :free) (terror 'do-read)))
+           (when (eq p :free) (terror 'do-read)))
           (t (terror 'do-read)))
-    (funcall (if global-p #'tex-gdef-0arg #'tex-def-0arg)
+    (funcall (if globalp #'tex-gdef-0arg #'tex-def-0arg)
              x
              (let ((line (read-tex-line p)))
                (if (not line) "" line)))))
 
 (defun do-typein ()
   (let ((ctlseq (get-bracketed-text-if-any))
-        (p (make-bport* :port *standard-input*)))
+        (p (make-istream* :stream *standard-input*)))
     (write-log :separation-newline)
     (write-log (tex-string-to-html-string (get-group)))
     (write-log :separation-newline)
@@ -4807,18 +5139,18 @@
   (let* ((iffoo (get-ctl-seq))
          (foo (concatenate 'string "\\" (subseq iffoo 3)))
          (foo-register (concatenate 'string foo "BOOLEANREGISTER")))
-    (tex-def-count foo-register 0 nil)
+    (plain-count foo-register 0 nil)
     (tex-def-thunk iffoo
                    (lambda ()
                      (push (> (the-count foo-register) 0) *tex-if-stack*))
                    nil)
     (tex-def-thunk (concatenate 'string foo "true")
-                   (lambda () (tex-def-count foo-register 1 nil)) nil)
+                   (lambda () (plain-count foo-register 1 nil)) nil)
     (tex-def-thunk (concatenate 'string foo "false")
-                   (lambda () (tex-def-count foo-register 0 nil)) nil)))
+                   (lambda () (plain-count foo-register 0 nil)) nil)))
 
 (defun do-htmlimg (env)
-  (call-with-html-image-port (lambda (o) (dump-till-end-env env o))))
+  (call-with-html-image-stream (lambda (o) (dump-till-end-env env o))))
 
 (defun find-img-file-extn ()
   (case (tex2page-flag-value "\\TZPimageformat")
@@ -4964,7 +5296,7 @@
       (write-log #\})
       (write-log :separation-space))))
 
-(defun call-with-lazy-image-port (eps-file img-file-stem p)
+(defun call-with-lazy-image-stream (eps-file img-file-stem p)
   (let ((aux-tex-file (concatenate 'string img-file-stem ".tex")))
     (with-open-file (o aux-tex-file :direction :output
                        :if-exists :supersede)
@@ -4981,7 +5313,7 @@
 
 (defun lazily-make-epsf-image-file (eps-file img-file-stem)
   (let ((*imgpreamble-inferred* (cons :epsfbox *imgpreamble-inferred*)))
-    (call-with-lazy-image-port eps-file img-file-stem
+    (call-with-lazy-image-stream eps-file img-file-stem
       (lambda (o)
         (princ "\\epsfbox{" o)
         (princ eps-file o)
@@ -4989,7 +5321,7 @@
 
 (defun do-epsfig ()
   (let ((*imgpreamble-inferred* (cons :epsfbox *imgpreamble-inferred*)))
-    (call-with-html-image-port
+    (call-with-html-image-stream
      (lambda (o) (princ "\\epsfig{" o) (dump-groupoid o) (princ #\} o)))))
 
 (defun do-convertmptopdf ()
@@ -5039,7 +5371,7 @@
           (t (let ((*imgpreamble-inferred*
                      (cons :includegraphics *imgpreamble-inferred*))
                    (img-file-stem (next-html-image-file-stem)))
-               (call-with-lazy-image-port (or ffull f) img-file-stem
+               (call-with-lazy-image-stream (or ffull f) img-file-stem
                  (lambda (o)
                    (princ "\\includegraphics" o)
                    (when starred-p (princ #\* o))
@@ -5062,7 +5394,7 @@
          (arg3 (get-group))
          (*imgpreamble-inferred*
           (cons :includegraphics *imgpreamble-inferred*)))
-    (call-with-html-image-port
+    (call-with-html-image-stream
      (lambda (o)
        (princ "\\resizebox" o)
        (princ arg1 o)
@@ -5071,34 +5403,34 @@
 
 (defun do-mfpic-opengraphsfile ()
   (setq *mfpic-file-stem* (get-filename-possibly-braced))
-  (when *mfpic-port* (close *mfpic-port*))
+  (when *mfpic-stream* (close *mfpic-stream*))
   (let ((f (concatenate 'string *mfpic-file-stem* *mfpic-tex-file-suffix*)))
-    (setq *mfpic-port* (open f :direction :output
+    (setq *mfpic-stream* (open f :direction :output
                              :if-exists :supersede)))
   (setq *mfpic-file-num* 0)
-  (princ "\\input mfpic \\usemetapost " *mfpic-port*)
-  (terpri *mfpic-port*)
-  (princ "\\opengraphsfile{" *mfpic-port*)
-  (princ *mfpic-file-stem* *mfpic-port*)
-  (princ #\} *mfpic-port*)
-  (terpri *mfpic-port*)
+  (princ "\\input mfpic \\usemetapost " *mfpic-stream*)
+  (terpri *mfpic-stream*)
+  (princ "\\opengraphsfile{" *mfpic-stream*)
+  (princ *mfpic-file-stem* *mfpic-stream*)
+  (princ #\} *mfpic-stream*)
+  (terpri *mfpic-stream*)
   (tex-def-prim "\\headshape"
    (lambda ()
        (let* ((g1 (get-group))
               (g2 (get-group))
               (g3 (get-group)))
-             (princ "\\headshape" *mfpic-port*)
-             (princ g1 *mfpic-port*)
-             (princ g2 *mfpic-port*)
-             (princ g3 *mfpic-port*)
-             (terpri *mfpic-port*))))
+             (princ "\\headshape" *mfpic-stream*)
+             (princ g1 *mfpic-stream*)
+             (princ g2 *mfpic-stream*)
+             (princ g3 *mfpic-stream*)
+             (terpri *mfpic-stream*))))
   (tex-def-prim "\\mfpframesep" #'eat-dimen)
   (tex-def-prim "\\mftitle" #'get-group))
 
 (defun do-mfpic-closegraphsfile ()
-  (princ "\\closegraphsfile" *mfpic-port*)
-  (terpri *mfpic-port*)
-  (close *mfpic-port*)
+  (princ "\\closegraphsfile" *mfpic-stream*)
+  (terpri *mfpic-stream*)
+  (close *mfpic-stream*)
   (let ((tex-f (concatenate 'string *mfpic-file-stem* *mfpic-tex-file-suffix*))
         (mp-f (concatenate 'string *mfpic-file-stem* ".mp")))
     (unless (probe-file mp-f)
@@ -5107,10 +5439,10 @@
     (when (probe-file mp-f) (call-mp mp-f))))
 
 (defun do-mfpic ()
-  (princ "\\mfpic" *mfpic-port*)
-  (dump-till-end-env "mfpic" *mfpic-port*)
-  (princ "\\endmfpic" *mfpic-port*)
-  (terpri *mfpic-port*)
+  (princ "\\mfpic" *mfpic-stream*)
+  (dump-till-end-env "mfpic" *mfpic-stream*)
+  (princ "\\endmfpic" *mfpic-stream*)
+  (terpri *mfpic-stream*)
   (setq *mfpic-file-num* (1+ *mfpic-file-num*))
   (let ((f (concatenate 'string *mfpic-file-stem* "."
                         (write-to-string *mfpic-file-num*)))
@@ -5133,7 +5465,7 @@
       (emit "<div class=")
       (emit *display-justification*)
       (emit ">"))
-    (call-with-html-image-port
+    (call-with-html-image-stream
      (lambda (o)
          (princ "\\begin{" o)
          (princ env2 o)
@@ -5497,8 +5829,8 @@
               (t (get-actual-char)
                  (push c s)))))))
 
-(defun resolve-chardefs (c)
-  (when (setq *it* (find-chardef c))
+(defun resolve-cdefs (c)
+  (when (setq *it* (find-cdef c))
     (let ((y *it*))
       (get-actual-char)
       (expand-tex-macro (cdef*-optarg y)
@@ -5506,7 +5838,7 @@
                         (cdef*-expansion y)
                         (cdef*-catcodes y)))))
 
-;(trace resolve-chardefs)
+;(trace resolve-cdefs)
 
 (defun resolve-defs (x)
   ;(format t "resolve-defs ~s~%" x)
@@ -5577,81 +5909,89 @@
       (decode-universal-time *start-time*)
       ;TeX uses local time zone so we don't worry about reporting what it is
     (declare (ignore s))
-    (tex-def-count "\\time" (+ (* 60 h) m) t)
-    (tex-def-count "\\day" d t)
-    (tex-def-count "\\month" mo t)
-    (tex-def-count "\\year" y t)))
+    (plain-count "\\time" (+ (* 60 h) m))
+    (plain-count "\\day" d)
+    (plain-count "\\month" mo)
+    (plain-count "\\year" y)))
 
 (defun initialize-globals ()
+
+  (tex-def-countdef "\\pageno" 0 0 t)
+  (tex-def-count 10 21 t) ;count register count
+  (tex-def-count 11 9 t) ;dimen
+  (tex-def-count 14 9 t) ;box
+  (tex-def-count 15 9 t) ;toks
+  (tex-def-count 16 -1 t) ;input stream
+  (tex-def-count 17 -1 t) ;output stream
 
   (set-start-time)
 
   ;
   ;for TeX, 0 <= \language <= 255; for TeX2page, let's make \language =
   ;256
-  (tex-def-count "\\language" 256 t)
+  (plain-count "\\language" 256)
   ;
   ;the deepest possible section, the part, has depth -1; so -2 is the
   ;closest-to-0 number that is a meaningless depth
-  (tex-def-count "\\secnumdepth" -2 t)
-  (tex-def-count "\\tocdepth" -2 t)
+  (plain-count "\\secnumdepth" -2)
+  (plain-count "\\tocdepth" -2)
 
-  (tex-def-count "\\footnotenumber" 0 t)
-  (tex-def-count "\\TIIPtabularborder" 1 t)
-  (tex-def-count "\\TIIPnestedtabularborder" 0 t)
-  (tex-def-count "\\TIIPobeyspacestrictly" 0 t)
-  (tex-def-count "\\TIIPobeylinestrictly" 0 t)
-  (tex-def-count "\\TIIPsettabscolumns" 0 t)
-  (tex-def-count "\\errorcontextlines" 5 t)
-  (tex-def-count "\\doublehyphendemerits" 10000 t)
-  (tex-def-count "\\finalhyphendemerits" 5000 t)
-  (tex-def-count "\\hyphenpenalty" 50 t)
-  (tex-def-count "\\exhyphenpenalty" 50 t)
-  (tex-def-count "\\pretolerance" 100 t)
-  (tex-def-count "\\tolerance" 200 t)
-  (tex-def-count "\\hbadness" 1000 t)
-  (tex-def-count "\\widowpenalty" 150 t)
-  (tex-def-count "\\showboxdepth" 3 t)
-  (tex-def-count "\\outputpenalty" 0 t)
-  (tex-def-count "\\globaldefs" 0 t)
-  (tex-def-count "\\mag" 1000 t)
-  (tex-def-count "\\tracingcommands" 0 t)
-  (tex-def-count "\\tracingmacros" 0 t)
-  (tex-def-count "\\tracingonline" 0 t)
-  (tex-def-count "\\shellescape" 1 t)
-  (tex-def-count "\\suppressfontnotfounderror" 1 t)
+  (plain-count "\\footnotenumber" 0)
+  (plain-count "\\TIIPtabularborder" 1)
+  (plain-count "\\TIIPnestedtabularborder" 0)
+  (plain-count "\\TIIPobeyspacestrictly" 0)
+  (plain-count "\\TIIPobeylinestrictly" 0)
+  (plain-count "\\TIIPsettabscolumns" 0)
+  (plain-count "\\errorcontextlines" 5)
+  (plain-count "\\doublehyphendemerits" 10000)
+  (plain-count "\\finalhyphendemerits" 5000)
+  (plain-count "\\hyphenpenalty" 50)
+  (plain-count "\\exhyphenpenalty" 50)
+  (plain-count "\\pretolerance" 100)
+  (plain-count "\\tolerance" 200)
+  (plain-count "\\hbadness" 1000)
+  (plain-count "\\widowpenalty" 150)
+  (plain-count "\\showboxdepth" 3)
+  (plain-count "\\outputpenalty" 0)
+  (plain-count "\\globaldefs" 0)
+  (plain-count "\\mag" 1000)
+  (plain-count "\\tracingcommands" 0)
+  (plain-count "\\tracingmacros" 0)
+  (plain-count "\\tracingonline" 0)
+  (plain-count "\\shellescape" 1)
+  (plain-count "\\suppressfontnotfounderror" 1)
   ;
-  (tex-def-dimen "\\TIIPhsize" 0 t)
-  (tex-def-dimen "\\hsize" (tex-length 6.5 :in) t)
-  (tex-def-dimen "\\vsize" (tex-length 8.9 :in) t)
-  (tex-def-dimen "\\maxdepth" (tex-length 4 :pt) t)
-  (tex-def-dimen "\\delimitershortfall" (tex-length 5 :pt) t)
-  (tex-def-dimen "\\nulldelimiterspace" (tex-length 1.2 :pt) t)
-  (tex-def-dimen "\\scriptspace" (tex-length 0.5 :pt) t)
-  (tex-def-dimen "\\hoffset" 0 t)
-  (tex-def-dimen "\\voffset" 0 t)
-  (tex-def-dimen "\\epsfxsize" 0 t)
-  (tex-def-dimen "\\epsfysize" 0 t)
-  (tex-def-dimen "\\emergencystretch" 0 t)
-  (tex-def-dimen "\\hfuzz" (tex-length 0.1 :pt) t)
-  (tex-def-dimen "\\vfuzz" (tex-length 0.1 :pt) t)
-  (tex-def-dimen "\\textwidth" (tex-length 6.5 :in) t)
-  (tex-def-dimen "\\smallskipamount" (tex-length 3 :pt) t)
-  (tex-def-dimen "\\medskipamount" (tex-length 6 :pt) t)
-  (tex-def-dimen "\\bigskipamount" (tex-length 12 :pt) t)
-  (tex-def-dimen "\\lastskip" 0 t)
-  (tex-def-dimen "\\baselineskip" (tex-length 12 :pt) t)
-  (tex-def-dimen "\\overfullrule" (tex-length 5 :pt) t)
-  (tex-def-dimen "\\parindent" (tex-length 20 :pt) t)
-  (tex-def-dimen "\\leftskip" 0 t)
-  (tex-def-dimen "\\parfillskip" 0 t)
-  (tex-def-dimen "\\parskip" 0 t)
-  (tex-def-dimen "\\abovedisplayskip" (tex-length 12 :pt) t)
-  (tex-def-dimen "\\belowdisplayskip" (tex-length 12 :pt) t)
+  (plain-dimen "\\TIIPhsize" 0)
+  (plain-dimen "\\hsize" (tex-length 6.5 :in))
+  (plain-dimen "\\vsize" (tex-length 8.9 :in))
+  (plain-dimen "\\maxdepth" (tex-length 4 :pt))
+  (plain-dimen "\\delimitershortfall" (tex-length 5 :pt))
+  (plain-dimen "\\nulldelimiterspace" (tex-length 1.2 :pt))
+  (plain-dimen "\\scriptspace" (tex-length 0.5 :pt))
+  (plain-dimen "\\hoffset" 0)
+  (plain-dimen "\\voffset" 0)
+  (plain-dimen "\\epsfxsize" 0)
+  (plain-dimen "\\epsfysize" 0)
+  (plain-dimen "\\emergencystretch" 0)
+  (plain-dimen "\\hfuzz" (tex-length 0.1 :pt))
+  (plain-dimen "\\vfuzz" (tex-length 0.1 :pt))
+  (plain-dimen "\\textwidth" (tex-length 6.5 :in))
+  (plain-dimen "\\smallskipamount" (tex-length 3 :pt))
+  (plain-dimen "\\medskipamount" (tex-length 6 :pt))
+  (plain-dimen "\\bigskipamount" (tex-length 12 :pt))
+  (plain-dimen "\\lastskip" 0)
+  (plain-dimen "\\baselineskip" (tex-length 12 :pt))
+  (plain-dimen "\\overfullrule" (tex-length 5 :pt))
+  (plain-dimen "\\parindent" (tex-length 20 :pt))
+  (plain-dimen "\\leftskip" 0)
+  (plain-dimen "\\parfillskip" 0)
+  (plain-dimen "\\parskip" 0)
+  (plain-dimen "\\abovedisplayskip" (tex-length 12 :pt))
+  (plain-dimen "\\belowdisplayskip" (tex-length 12 :pt))
 
-  (tex-def-toks "\\everypar" "" t)
-  (tex-def-toks "\\headline" "" t)
-  (tex-def-toks "\\footline" "\\folio" t)
+  (plain-toks "\\everypar" "")
+  (plain-toks "\\headline" "")
+  (plain-toks "\\footline" "\\folio")
 
   (tex-def-dotted-count "figure" nil)
   (tex-def-dotted-count "table" nil)
@@ -5684,56 +6024,13 @@
 (defun find-math-def (ctlseq)
   (gethash ctlseq (texframe*-definitions *math-primitive-texframe*)))
 
-(defun find-count (ctlseq)
-  (or (some (lambda (fr) (gethash ctlseq (texframe*-counts fr))) *tex-env*)
-      (gethash ctlseq (texframe*-counts *global-texframe*))
-      (gethash ctlseq (texframe*-counts *primitive-texframe*))))
-
-(defun the-count (dracula)
-  (or (find-count dracula) (terror 'the-count)))
-
-(defun do-count= (z globalp)
-  (get-equal-sign) (tex-def-count z (get-number) globalp))
-
-(defun get-gcount (ctlseq)
-  (gethash ctlseq (texframe*-counts *global-texframe*) 0))
-
-(defun tex-gdef-count (ctlseq v)
-  (tex-def-count ctlseq v t))
-
-(defun find-toks (ctlseq)
-  (or (some (lambda (fr) (gethash ctlseq (texframe*-tokses fr))) *tex-env*)
-      (gethash ctlseq (texframe*-tokses *global-texframe*))
-      (gethash ctlseq (texframe*-tokses *primitive-texframe*))))
-
-(defun get-toks (ctlseq)
-  (or (find-toks ctlseq) (terror 'get-toks)))
-
-(defun do-toks= (z globalp)
-  (get-equal-sign) (tex-def-toks z (get-group) globalp))
-
-(defun find-dimen (ctlseq)
-  (or (some (lambda (fr) (gethash ctlseq (texframe*-dimens fr))) *tex-env*)
-      (gethash ctlseq (texframe*-dimens *global-texframe*))
-      (gethash ctlseq  (texframe*-dimens *primitive-texframe*))))
-
-(defun get-dimen (ctlseq)
-  (cond ((find-dimen ctlseq))
-        (t ;let's just assume the default \hsize
-           (tex-length 6.5 :in))))
-
-(defun do-dimen= (z globalp)
-  (get-equal-sign)
-  (tex-def-dimen z (get-scaled-points) globalp)
-  (ignorespaces))
-
 ;;
 
 (defun do-number ()
   (emit (get-number)))
 
 (defun do-magnification ()
-  (tex-def-count "\\mag" (get-number) nil))
+  (plain-count "\\mag" (get-number) nil))
 
 (defun do-magstep ()
   (case (string-to-number (get-token-or-peeled-group))
@@ -5750,23 +6047,23 @@
 
 (defun expand-the ()
   (let ((ctlseq (get-ctl-seq)))
-    (cond ((setq *it* (find-dimen ctlseq))
-           (scaled-point-to-tex-point *it*))
+    (cond ((setq *it* (find-dimendef ctlseq))
+           (scaled-point-to-tex-point (find-dimen *it*)))
           ((setq *it* (get-number-corresp-to-ctl-seq ctlseq))
            *it*)
-          ((find-toks ctlseq))
+          ((setq *it* (find-toksdef ctlseq)) (find-toks *it*))
           (t (trace-if nil "expand-the failed")))))
 
 (defun do-the ()
   ;almost like do-number
   (let ((ctlseq (get-ctl-seq)))
     (ignorespaces)
-    (cond ((setq *it* (find-dimen ctlseq))
-             (emit (scaled-point-to-tex-point *it*)))
+    (cond ((string= ctlseq "\\count")
+           (emit (find-count (get-number))))
           ((setq *it* (get-number-corresp-to-ctl-seq ctlseq))
            (emit *it*))
-          ((setq *it* (find-toks ctlseq))
-           (tex2page-string *it*))
+          ((setq *it* (find-toksdef ctlseq))
+           (tex2page-string (find-toks *it*)))
           (t (trace-if nil "do-the failed")))))
 
 (defun do-arabic ()
@@ -5788,7 +6085,8 @@
 
 (defun globally-p () (> (get-gcount "\\globaldefs") 0))
 
-(defun do-let (globalp)
+(defun do-let (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
   (ignorespaces)
   (let* ((lhs (get-ctl-seq))
          (rhs (progn (get-equal-sign) (get-raw-token/is))))
@@ -5803,7 +6101,8 @@
 
 ;(trace do-let)
 
-(defun do-def (globalp expandp)
+(defun do-def (&optional globalp expandp)
+  (unless globalp (setq globalp (globally-p)))
   (unless (inside-false-world-p)
     (let ((lhs (get-raw-token/is)))
       (when (and (ctl-seq-p lhs) (string= lhs "\\TIIPcsname"))
@@ -5816,38 +6115,14 @@
                                      (remhash lhs
                                               (if (ctl-seq-p lhs)
                                                   (texframe*-definitions fr)
-                                                  (texframe*-chardefinitions fr))))
+                                                  (texframe*-cdefinitions fr))))
                                    *tex-env*)
                              *global-texframe*)
                            (t nil))))
           (cond ((ctl-seq-p lhs) (tex-def lhs argpat rhs nil nil nil nil frame))
                 (t (tex-def-char (char lhs 0) argpat rhs frame))))))))
 
-(defun do-newbox (globalp) (tex-def-box (get-ctl-seq) "" globalp))
-
-(defun do-newcount (globalp) (tex-def-count (get-ctl-seq) 0 globalp))
-
 (defun do-newtoks (globalp) (tex-def-toks (get-ctl-seq) "" globalp))
-
-(defun do-newdimen (globalp) (tex-def-dimen (get-ctl-seq) 0 globalp))
-
-(defun do-advance (globalp)
-  (let* ((ctlseq (get-ctl-seq))
-         (count (find-count ctlseq)))
-    (get-by)
-    (if count (tex-def-count ctlseq (+ count (get-number)) globalp) (eat-dimen))))
-
-(defun do-multiply (globalp)
-  (let* ((ctlseq (get-ctl-seq))
-         (curr-val (find-count ctlseq)))
-    (get-by)
-    (tex-def-count ctlseq (* curr-val (get-number)) globalp)))
-
-(defun do-divide (globalp)
-  (let* ((ctlseq (get-ctl-seq))
-         (curr-val (find-count ctlseq)))
-    (get-by)
-    (tex-def-count ctlseq (floor curr-val (get-number)) globalp)))
 
 (defun do-newcommand (renewp)
   (ignorespaces)
@@ -5864,7 +6139,7 @@
     (tex-def lhs (latex-argnum-to-plain-argpat argc)
              rhs optarg nil nil nil nil)
     (unless ok-to-def-p
-      (trace-if (> (find-count "\\tracingcommands") 0)
+      (trace-if (> (the-count "\\tracingcommands") 0)
                 lhs " already defined"))))
 
 (defun do-newcounter ()
@@ -5975,7 +6250,8 @@
       (push (code-char (+ *int-corresp-to-0* n)) s)
       (push #\# s))))
 
-(defun make-reusable-img (globalp)
+(defun make-reusable-img (&optional globalp)
+  (unless globalp (setq globalp (globally-p)))
   (incf *imgdef-file-count*)
   (ignorespaces)
   (let ((lhs (get-ctl-seq))
@@ -6167,14 +6443,14 @@
                  (concatenate 'string "\\TIIPsettabscolumns=" settabs-spec))
                (return))
               ((string= x "\\cr")
-               (tex-def-count "\\TIIPsettabscolumns" 0 nil)
+               (plain-count "\\TIIPsettabscolumns" 0 nil)
                (return))
               (t (setq settabs-spec (concatenate 'string settabs-spec x))))))))
 
 (defun do-tabalign ()
   (emit-newline)
   (let ((table-width "")
-        (num-cols (find-count "\\TIIPsettabscolumns")))
+        (num-cols (the-count "\\TIIPsettabscolumns")))
     (when (> num-cols 0)
       (setq table-width " width=100%"))
     (emit "<table") (emit table-width) (emit ">") (emit-newline)
@@ -6310,7 +6586,7 @@
 (defun expand-edef-macro (rhs)
   (declare (string rhs))
   (let* ((*not-processing-p* t)
-         (tmp-port (make-string-output-stream)))
+         (tmp-stream (make-string-output-stream)))
     (call-with-input-string/buffered rhs
       (lambda ()
         (loop
@@ -6345,8 +6621,8 @@
                                            (t x))))
                                   (t x))))
                          (t (get-actual-char) c))
-                   tmp-port)))))
-    (get-output-stream-string tmp-port)))
+                   tmp-stream)))))
+    (get-output-stream-string tmp-stream)))
 
 (defun expand-tex-macro (optarg argpat rhs lexical-catcodes)
   (declare (list argpat) (string rhs))
@@ -6624,15 +6900,15 @@
   (let* ((f (get-filename-possibly-braced))
          (e (file-extension f)))
     (unless e (setq e ".tex") (setq f (concatenate 'string f e)))
-    (when *verb-port* (close *verb-port*))
+    (when *verb-stream* (close *verb-stream*))
     (push f *verb-written-files*)
     (when (string-equal e ".mp") (push f *mp-files*))
-    (setq *verb-port* (open f :direction :output :if-exists :supersede))))
+    (setq *verb-stream* (open f :direction :output :if-exists :supersede))))
 
-(defun verb-ensure-output-port ()
-  (unless *verb-port*
+(defun verb-ensure-output-stream ()
+  (unless *verb-stream*
     (let ((output-file (concatenate 'string *jobname* ".txt")))
-      (setq *verb-port* (open output-file :direction :output
+      (setq *verb-stream* (open output-file :direction :output
                               :if-exists :supersede)))))
 
 (defun dump-groupoid (p)
@@ -6671,11 +6947,11 @@
   (ignorespaces)
   (unless (char= (snoop-actual-char) #\{)
     (terror 'do-makehtmlimage "\\makehtmlimage's argument must be a group"))
-  (call-with-html-image-port #'dump-groupoid))
+  (call-with-html-image-stream #'dump-groupoid))
 
 (defun do-verbwrite ()
-  (verb-ensure-output-port)
-  (dump-groupoid *verb-port*))
+  (verb-ensure-output-stream)
+  (dump-groupoid *verb-stream*))
 
 (defun do-string ()
   (let ((c (snoop-actual-char)))
@@ -6759,7 +7035,7 @@
 
 (defun scm-emit-html-char (c)
   (unless (not c)
-    (when *scm-dribbling-p* (write-char c *verb-port*))
+    (when *scm-dribbling-p* (write-char c *verb-stream*))
     (if (and (char= c #\-) (not *verb-display-p*))
         (emit "&#x2011;")
       (emit-html-char c))))
@@ -6804,7 +7080,7 @@
 (defun scm-output-slatex-comment ()
   (let ((s (get-line)))
     (emit "<span class=comment>")
-    (when *scm-dribbling-p* (princ s *verb-port*) (terpri *verb-port*))
+    (when *scm-dribbling-p* (princ s *verb-stream*) (terpri *verb-stream*))
     (let ((*catcodes* *catcodes*))
         (catcode #\\ 11) (catcode *esc-char-verb* 11)
       (tex2page-string s))
@@ -6994,10 +7270,10 @@
   (do-noindent))
 
 (defun do-scmdribble ()
-  (verb-ensure-output-port)
+  (verb-ensure-output-stream)
   (let ((*scm-dribbling-p* t))
     (do-scm nil))
-  (terpri *verb-port*))
+  (terpri *verb-stream*))
 
 (defun string-is-all-dots-p (s)
   (declare (string s))
@@ -7247,7 +7523,7 @@
                       (tdef*-catcodes y)))))
           (*math-mode-p*
             (do-math-ctl-seq z))
-          (t (trace-if (> (find-count "\\tracingcommands") 0)
+          (t (trace-if (> (the-count "\\tracingcommands") 0)
                        "Ignoring " z)))))
 
 ;(trace do-tex-prim)
@@ -7264,14 +7540,6 @@
           (t (emit "&#x")
              (emit (write-to-string n :base 16))
              (emit ";")))))
-
-(defun do-chardef ()
-  (let ((lhs (get-raw-token/is)))
-    (get-equal-sign)
-    (let ((n (get-number-or-false)))
-      (if n
-          (tex-let lhs (string (code-char n)) nil)
-          (terror 'do-chardef "non-number found while scanning definition of " lhs)))))
 
 (defun tex-math-bb (c)
   (case c
@@ -7382,11 +7650,11 @@
   ;(format t "do-tex-ctl-seq ~s~%" z)
   ;process ctl seq z.  Return :encountered-bye if z is \bye;
   ;:encountered-endinput if z is \endinput
-  (trace-if (> (find-count "\\tracingmacros") 0) z)
+  (trace-if (> (the-count "\\tracingmacros") 0) z)
   (cond ((setq *it* (resolve-defs z))
          ;macro body could contain \fi
          (let ((s *it*))
-           (trace-if (> (find-count "\\tracingmacros") 0)
+           (trace-if (> (the-count "\\tracingmacros") 0)
                      "    --> " s)
            (toss-back-char *invisible-space*)
            (toss-back-string s)))
@@ -7404,9 +7672,9 @@
                       (string= next-token "\\fi"))
              (do-fi)))
          :encountered-endinput)
-        ((find-count z) (do-count= z nil))
-        ((find-toks z) (do-toks= z nil))
-        ((find-dimen z) (do-dimen= z nil))
+        ((setq *it* (find-countdef z)) (do-count= *it* nil))
+        ((setq *it* (find-dimendef z)) (do-dimen= *it* nil))
+        ((setq *it* (find-toksdef z)) (do-toks= *it* nil))
         (t (do-tex-prim z))))
 
 ;(trace do-tex-ctl-seq)
@@ -7416,7 +7684,7 @@
     (loop
       (let ((c (snoop-actual-char)))
         (cond ((not c) (return t))
-              ((setq *it* (resolve-chardefs c))
+              ((setq *it* (resolve-cdefs c))
                (let ((s *it*))
                  (toss-back-char *invisible-space*)
                  (toss-back-string s)))
@@ -7449,7 +7717,7 @@
   (write-log #\()
   (write-log f)
   (write-log :separation-space)
-  (trace-if (> (find-count "\\tracingcommands") 0) "Inputting file " f)
+  (trace-if (> (the-count "\\tracingcommands") 0) "Inputting file " f)
   (prog1
       (call-with-input-file/buffered f #'generate-html)
     (write-log #\))
@@ -7532,7 +7800,7 @@
   (setq *main-tex-file* nil)
   (setq *html-page* ".eval4texignore")
   (setq *html*
-        (make-oport* :port
+        (make-ostream* :stream
                      (open *html-page* :direction :output
                            :if-exists :supersede))))
 
@@ -7542,7 +7810,7 @@
     (html-output-stream-to-string *html*))
 
 (defun call-with-html-output-going-to (p th)
-  (let ((*html* (make-oport* :port p)))
+  (let ((*html* (make-ostream* :stream p)))
     (funcall th)))
 
 (defun call-external-programs-if-necessary ()
@@ -7675,7 +7943,7 @@
 
 (defun start-css-file ()
   (let ((css-file (concatenate 'string *aux-dir/* *jobname* *css-file-suffix*)))
-    (setq *css-port* (open css-file :direction :output
+    (setq *css-stream* (open css-file :direction :output
                            :if-exists :supersede))
     (princ
       "body {
@@ -8016,7 +8284,7 @@
       margin-left: 0pt;
       }
       "
-      *css-port*)))
+      *css-stream*)))
 
 (defun load-aux-file ()
   (let ((label-file
@@ -8068,9 +8336,9 @@
 
 (defun !tex-like-layout () (setq *tex-like-layout-p* t))
 
-(defun !head-line (e) (tex-def-toks "\\headline" e t))
+(defun !head-line (e) (tex-def-toksdef "\\headline" nil e t))
 
-(defun !foot-line (e) (tex-def-toks "\\footline" e t))
+(defun !foot-line (e) (tex-def-toksdef "\\footline" nil e t))
 
 (defun !toc-page (p) (setq *toc-page* p))
 
@@ -8311,7 +8579,7 @@ Try the commands
   tex2page --help
   tex2page --version")
                     (write-log :separation-newline)))))
-  (close-all-open-ports))
+  (close-all-open-streams))
 
 (defun non-fatal-error (&rest ss)
   (emit-link-start (concatenate 'string *jobname* ".hlog"))
@@ -8353,7 +8621,7 @@ Try the commands
 (tex-def-math-prim "\\over" #'do-over); (lambda () (emit "/")))
 (tex-def-math-prim "\\right" #'do-math-right)
 (tex-def-prim "\\ " #'do-actual-space)
-(tex-def-prim "\\advance" (lambda () (do-advance (globally-p))))
+(tex-def-prim "\\advance" #'do-advance)
 (tex-def-prim "\\afterassignment" #'do-afterassignment)
 (tex-def-prim "\\aftergroup" #'do-aftergroup)
 (tex-def-prim "\\box" #'do-box)
@@ -8363,19 +8631,22 @@ Try the commands
 (tex-def-prim "\\closein" (lambda () (do-close-stream :in)))
 (tex-def-prim "\\closeout" (lambda () (do-close-stream :out)))
 (tex-def-prim "\\copy" (lambda () (do-box t)))
-(tex-def-prim "\\countdef" (lambda () (do-newcount t) (eat-integer)))
+(tex-def-prim "\\count" #'do-count)
+(tex-def-prim "\\countdef" #'do-countdef)
 (tex-def-prim "\\cr" (lambda () (do-cr "\\cr")))
 (tex-def-prim "\\csname" #'do-csname)
-(tex-def-prim "\\def" (lambda () (do-def (globally-p) nil)))
+(tex-def-prim "\\def" #'do-def)
+(tex-def-prim "\\dimen" #'do-dimen)
+(tex-def-prim "\\dimendef" #'do-dimendef)
 (tex-def-prim "\\discretionary" #'do-discretionary)
-(tex-def-prim "\\divide" (lambda () (do-divide (globally-p))))
-(tex-def-prim "\\edef" (lambda () (do-def (globally-p) t)))
+(tex-def-prim "\\divide" #'do-divide)
+(tex-def-prim "\\edef" (lambda () (do-def nil t)))
 (tex-def-prim "\\else" #'do-else)
 (tex-def-prim "\\end" #'do-end)
 (tex-def-prim "\\endinput" #'do-endinput)
 (tex-def-prim "\\errmessage" #'do-errmessage)
 (tex-def-prim "\\expandafter" #'do-expandafter)
-(tex-def-prim "\\fi" (lambda () (do-fi)))
+(tex-def-prim "\\fi" #'do-fi)
 (tex-def-prim "\\font" #'do-font)
 (tex-def-prim "\\fontdimen" #'do-fontdimen)
 (tex-def-prim "\\futurelet" #'do-futurelet)
@@ -8404,23 +8675,25 @@ Try the commands
 (tex-def-prim "\\jobname" (lambda () (tex2page-string *jobname*)))
 (tex-def-prim "\\kern" #'do-kern)
 (tex-def-prim "\\lccode" (lambda () (do-tex-case-code :lccode)))
-(tex-def-prim "\\let" (lambda () (do-let (globally-p))))
+(tex-def-prim "\\let" #'do-let)
 (tex-def-prim "\\lower" #'do-lower)
 (tex-def-prim "\\lowercase" (lambda () (do-flipcase :lccode)))
 (tex-def-prim "\\message" #'do-message)
-(tex-def-prim "\\multiply" (lambda () (do-multiply (globally-p))))
+(tex-def-prim "\\multiply" #'do-multiply)
 (tex-def-prim "\\noindent" #'do-noindent)
 (tex-def-prim "\\number" #'do-number)
 (tex-def-prim "\\openin" (lambda () (do-open-stream :in)))
 (tex-def-prim "\\openout" (lambda () (do-open-stream :out)))
 (tex-def-prim "\\par" #'do-para)
 (tex-def-prim "\\raise" (lambda () (do-lower t)))
-(tex-def-prim "\\read" (lambda () (do-read (globally-p))))
+(tex-def-prim "\\read" #'do-read)
 (tex-def-prim "\\relax" #'do-relax)
-(tex-def-prim "\\romannumeral" (lambda () (do-romannumeral nil)))
+(tex-def-prim "\\romannumeral" #'do-romannumeral)
 (tex-def-prim "\\setbox" #'do-setbox)
 (tex-def-prim "\\string" #'do-string)
 (tex-def-prim "\\the" #'do-the)
+(tex-def-prim "\\toks" #'do-toks)
+(tex-def-prim "\\toksdef" #'do-toksdef)
 (tex-def-prim "\\uccode" (lambda () (do-tex-case-code :uccode)))
 (tex-def-prim "\\underline" (lambda () (do-function "\\underline")))
 (tex-def-prim "\\unkern" #'do-unskip)
@@ -8457,11 +8730,12 @@ Try the commands
 
 (tex-def-prim "\\wlog" #'do-wlog)
 
-(tex-def-prim "\\newcount" (lambda () (do-newcount (globally-p))))
-(tex-def-prim "\\newdimen" (lambda () (do-newdimen (globally-p))))
-(tex-def-prim "\\newtoks" (lambda () (do-newtoks (globally-p))))
-(tex-def-prim "\\newread" (lambda () (do-new-stream :in)))
-(tex-def-prim "\\newwrite" (lambda () (do-new-stream :out)))
+(tex-def-prim "\\newcount" #'do-newcount)
+(tex-def-prim "\\newdimen" #'do-newdimen)
+(tex-def-prim "\\newbox" #'do-newbox)
+(tex-def-prim "\\newtoks" #'do-newtoks)
+(tex-def-prim "\\newread" #'do-newread)
+(tex-def-prim "\\newwrite" #'do-newwrite)
 
 (tex-def-prim "\\newif" #'do-newif)
 
@@ -8920,7 +9194,7 @@ Try the commands
 
 ;sec B.7. macros for output
 
-(tex-def-prim "\\pageno" (lambda () (emit *html-page-count*)))
+;(tex-def-prim "\\pageno" (lambda () (emit *html-page-count*)))
 (tex-def-prim "\\folio" (lambda () (emit *html-page-count*)))
 
 (tex-def-prim "\\footnote" #'do-footnote)
@@ -9089,7 +9363,7 @@ Try the commands
 (tex-def-prim "\\verbwritefile" #'do-verbwritefile)
 (tex-def-prim "\\verbwrite" #'do-verbwrite)
 
-(tex-def-prim "\\defcsactive" (lambda () (do-defcsactive (globally-p))))
+(tex-def-prim "\\defcsactive" #'do-defcsactive)
 
 (tex-def-prim "\\gobblegroup" #'get-group)
 
@@ -9113,7 +9387,7 @@ Try the commands
 (tex-let-prim "\\lispinput" "\\scminput")
 (tex-def-prim "\\scmdribble" #'do-scmdribble)
 
-(tex-def-prim "\\imgdef" (lambda () (make-reusable-img (globally-p))))
+(tex-def-prim "\\imgdef" #'make-reusable-img)
 (tex-def-prim "\\makehtmlimage" #'do-makehtmlimage)
 (tex-def-prim "\\mathg" #'do-mathg)
 (tex-def-prim "\\mathdg" #'do-mathdg)
@@ -9274,25 +9548,25 @@ Try the commands
   (let ((tag (concatenate 'string *html-node-prefix* "index_"
                (write-to-string *index-count*))))
     (emit-anchor tag)
-    (unless *index-port*
+    (unless *index-stream*
       (let ((idx-file (concatenate 'string *aux-dir/* *jobname*
                         *index-file-suffix* ".idx")))
-        (setq *index-port* (open idx-file :direction :output
+        (setq *index-stream* (open idx-file :direction :output
                                  :if-exists :supersede))))
-    (princ "\\indexentry{" *index-port*)
+    (princ "\\indexentry{" *index-stream*)
     (cond ((or (search "|see{" idx-entry)
                (search "|seealso{" idx-entry))
-           (display-index-entry idx-entry *index-port*))
+           (display-index-entry idx-entry *index-stream*))
           ((setq *it* (search "|(" idx-entry))
            (let ((i *it*))
-             (display-index-entry (subseq idx-entry 0 i) *index-port*)
-             (princ "|expandhtmlindex" *index-port*)))
-          (t (display-index-entry idx-entry *index-port*)
-             (princ "|expandhtmlindex" *index-port*)))
-    (princ "}{" *index-port*)
-    (princ *index-count* *index-port*)
-    (princ "}" *index-port*)
-    (terpri *index-port*)))
+             (display-index-entry (subseq idx-entry 0 i) *index-stream*)
+             (princ "|expandhtmlindex" *index-stream*)))
+          (t (display-index-entry idx-entry *index-stream*)
+             (princ "|expandhtmlindex" *index-stream*)))
+    (princ "}{" *index-stream*)
+    (princ *index-count* *index-stream*)
+    (princ "}" *index-stream*)
+    (terpri *index-stream*)))
 
 (defun do-index ()
   (let ((idx-entry (ungroup (get-group))))
@@ -9398,7 +9672,7 @@ Try the commands
                  (unless (= epsf-y-size 0) (tex2page-string "\\epsfysize=0pt"))
                  (let ((*imgpreamble-inferred*
                         (cons :epsfbox *imgpreamble-inferred*)))
-                   (call-with-html-image-port
+                   (call-with-html-image-stream
                     (lambda (o)
                       (unless (= epsf-x-size 0)
                         (princ "\\epsfxsize=" o)
@@ -9617,10 +9891,10 @@ Try the commands
   ; Does it for *all* pages instead of just subsequent pages though.
   (let* ((model (color-model-to-keyword (get-bracketed-text-if-any)))
          (color (read-color-as-rrggbb model)))
-    (princ "body { background-color: " *css-port*)
-    (princ color *css-port*)
-    (princ "; }" *css-port*)
-    (terpri *css-port*)))
+    (princ "body { background-color: " *css-stream*)
+    (princ color *css-stream*)
+    (princ "; }" *css-stream*)
+    (terpri *css-stream*)))
 
 (tex-def-prim "\\pagecolor" #'do-pagecolor)
 
@@ -9687,15 +9961,15 @@ Try the commands
 (defun do-opmac-begitems ()
   (do-end-para)
   (bgroup)
-  (tex-def-count "\\TIIPopmacliststarted" 0 nil)
+  (plain-count "\\TIIPopmacliststarted" 0 nil)
   (catcode #\* 13)
   (tex-def-char #\* '() "\\TIIPopmacitem" nil))
 
 (tex-def-prim "\\begitems" #'do-opmac-begitems)
 
 (defun do-opmac-item ()
-  (when (= (find-count "\\TIIPopmacliststarted") 0)
-    (tex-def-count "\\TIIPopmacliststarted" 1 nil)
+  (when (= (the-count "\\TIIPopmacliststarted") 0)
+    (plain-count "\\TIIPopmacliststarted" 1 nil)
     (push :opmac-itemize *tabular-stack*)
     (emit "<")
     (emit (case *opmac-list-style*
@@ -10482,14 +10756,14 @@ Try the commands
         (*afterpar* '())
         (*aux-dir* nil)
         (*aux-dir/* "")
-        (*aux-port* nil)
+        (*aux-stream* nil)
         ;
-        (*bib-aux-port* nil)
+        (*bib-aux-stream* nil)
         (*bibitem-num* 0)
         ;
         (*catcodes* *catcodes*)
         (*color-names* '())
-        (*css-port* nil)
+        (*css-stream* nil)
         (*current-source-file* nil)
         (*current-tex2page-input* nil)
         ;
@@ -10529,7 +10803,7 @@ Try the commands
         (*includeonly-list* t)
         (*index-count* 0)
         (*index-page* nil)
-        (*index-port* nil)
+        (*index-stream* nil)
         (*index-table* (make-hash-table))
         (*infructuous-calls-to-tex2page* 0)
         (*input-line-no* 0)
@@ -10539,7 +10813,7 @@ Try the commands
         ;
         (*jobname* "texput")
         ;
-        (*label-port* nil)
+        (*label-stream* nil)
         (*label-source* nil)
         (*label-table* (make-hash-table :test #'equal))
         (*last-modification-time* nil)
@@ -10548,7 +10822,7 @@ Try the commands
         (*ligatures-p* t)
         (*loading-external-labels-p* nil)
         (*log-file* nil)
-        (*log-port* nil)
+        (*log-stream* nil)
         ;
         (*main-tex-file* nil)
         (*math-delim-left* nil)
@@ -10557,7 +10831,7 @@ Try the commands
         (*math-mode-p* nil)
         (*mfpic-file-num* nil)
         (*mfpic-file-stem* nil)
-        (*mfpic-port* nil)
+        (*mfpic-stream* nil)
         (*missing-eps-files* '())
         (*missing-pieces* '())
         (*mp-files* '())
@@ -10583,6 +10857,7 @@ Try the commands
         (*recent-node-name* nil)
         (*redirect-delay* nil)
         (*redirect-url* nil)
+        (*reg-num-count* 255)
         ;
         (*scm-builtins* nil)
         (*scm-dribbling-p* nil)
@@ -10617,7 +10892,7 @@ Try the commands
         (*using-index-p* nil)
         ;
         (*verb-display-p* nil)
-        (*verb-port* nil)
+        (*verb-stream* nil)
         (*verb-visible-space-p* nil)
         (*verb-written-files* '())
         ;
@@ -10641,7 +10916,7 @@ Try the commands
             (setq *subjobname* *jobname*
                   *html-page*
                   (concatenate 'string *aux-dir/* *jobname* *output-extension*))
-            (setq *html* (make-oport* :port
+            (setq *html* (make-ostream* :stream
                                       (open *html-page* :direction :output
                                             :if-exists :supersede)))
             (do-start)
@@ -10656,5 +10931,7 @@ Try the commands
             (do-bye))
           (t (tex2page-help tex-file)))
     (output-stats)))
+
+;(trace get-number-corresp-to-ctl-seq find-dimendef find-dimen)
 
 (tex2page *tex2page-file-arg*)

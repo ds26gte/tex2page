@@ -1,4 +1,4 @@
-;last modified 2017-01-21
+;last modified 2017-01-25
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -m -- \"$@\"
@@ -122,14 +122,14 @@
 
 (cliiscm-defsetf
 
-  (bport*-buffer set!bport*-buffer)
+  (istream*-buffer set!istream*-buffer)
   (cdef*-active set!cdef*-active)
   (cdef*-argpat set!cdef*-argpat)
   (cdef*-catcodes set!cdef*-catcodes)
   (cdef*-expansion set!cdef*-expansion)
   (cdef*-optarg set!cdef*-optarg)
   (counter*-value set!counter*-value)
-  (oport*-hbuffer set!oport*-hbuffer)
+  (ostream*-hbuffer set!ostream*-hbuffer)
   (table-get table-put!)
   (tdef*-active set!tdef*-active)
   (tdef*-argpat set!tdef*-argpat)

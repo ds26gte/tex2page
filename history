@@ -1,4 +1,9 @@
-Last change 2017-01-23
+Last change 2017-01-25
+
+2017 Jan 25
+
+Rewrote count/dimen/box/toks/stream code to use numbered registers (more
+TeX-like). Defining names for these (\countdef, etc) allocates a new register.
 
 2017 Jan 23
 

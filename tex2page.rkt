@@ -181,7 +181,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170121, clisp.
 
 
-(define *tex2page-version* "20170125")
+(define *tex2page-version* "20170126")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -2611,7 +2611,7 @@
  (let ((next (get-ctl-seq)))
   (cond ((string=? next "\\def") (do-def true false)) ((string=? next "\\edef") (do-def true true))
    ((string=? next "\\let") (do-let true)) ((string=? next "\\newbox") (do-newbox true))
-   ((string=? next "\\newcount") (do-newcount true)) ((strnig= next "\\count") (do-count true))
+   ((string=? next "\\newcount") (do-newcount true)) ((string=? next "\\count") (do-count true))
    ((string=? next "\\newtoks") (do-newtoks true)) ((string=? next "\\toks") (do-toks true))
    ((string=? next "\\newdimen") (do-newdimen true)) ((string=? next "\\dimen") (do-dimen true))
    ((string=? next "\\advance") (do-advance true)) ((string=? next "\\multiply") (do-multiply true))
@@ -3587,23 +3587,24 @@
  (let ((f (lambda (x k) (- 1 (min (max (+ x k) 0) 1)))))
   (lambda (c m y k) (rgb-frac-to-rrggbb (f c k) (f m k) (f y k)))))
 
-(define (hsb-to-rrggbb hue saturation brightness)
- (let ((red false))
-  (let ((green false))
-   (let ((blue false))
-    (let ((hue6 (* 6 hue)))
-     (let ((i (inexact->exact (floor hue6))))
-      (let ((f (- hue6 i)))
-       (case i ((0) (set! red 0) (set! green (- 1 f)) (set! blue 1) blue)
-        ((1) (set! red f) (set! green 0) (set! blue 1) blue)
-        ((2) (set! red 1) (set! green 0) (set! blue (- 1 f)) blue)
-        ((3) (set! red 1) (set! green f) (set! blue 0) blue)
-        ((4) (set! red (- 1 f)) (set! green 1) (set! blue 0) blue)
-        ((5) (set! red 0) (set! green 1) (set! blue f) blue)
-        ((6) (set! red 0) (set! green 1) (set! blue 1) blue)
-        (else (terror 'hsb-to-rrggbb "Can't happen.")))
-       (let ((fu (lambda (x) (* brightness (- 1 (* saturation x))))))
-        (rgb-frac-to-rrggbb (fu red) (fu green) (fu blue))))))))))
+(define (hsb360-to-hsl h s b)
+ (let ((l (* 0.5 b (- 2 s))))
+  (let ((s2 (/ (* b s) (- 1 (abs (sub1 (* 2 l)))))))
+   (let
+    ((%type 'string)
+     (%ee
+      (list "hsl(" (write-to-string h) "," (write-to-string (* s2 100)) "%,"
+       (write-to-string (* l 100)) "%)")))
+    (let ((%res (if (eq? %type 'string) "" null)))
+     (let %concatenate-loop ((%ee %ee))
+      (if (null? %ee) %res
+       (let ((%a (car %ee)))
+        (unless (not %a)
+         (set! %res
+          (if (eq? %type 'string) (string-append %res (if (string? %a) %a (list->string %a)))
+           (append %res (if (string? %a) (string->list %a) %a)))))
+        (%concatenate-loop (cdr %ee)))))
+     %res)))))
 
 (define (wavelength-to-rrggbb w)
  (let
@@ -3615,7 +3616,7 @@
    (brightness
     (cond ((<= w 362.857) 0) ((< w 420) (+ 0.3 (* 0.7 (/ (- w 380) 40)))) ((<= w 700) 1)
      ((< w 814.285) (+ 0.3 (* 0.7 (/ (- w 780) -80)))) (else 0))))
-  (hsb-to-rrggbb hue 1 brightness)))
+  (hsb360-to-hsl (* 360 hue) 1 brightness)))
 
 (define (read-color-as-rrggbb model)
  (case model
@@ -3781,7 +3782,7 @@
         ((b
           (let ((%read-res (read i))) (when (eof-object? %read-res) (set! %read-res false))
            %read-res)))
-        (ignorespaces) (hsb-to-rrggbb h s b)))))))
+        (ignorespaces) (hsb360-to-hsl (* 360 h) s b)))))))
   ((:hsb360) (bgroup)
    (call-with-input-string
     (tex-string-to-html-string
@@ -3809,7 +3810,7 @@
         ((b
           (let ((%read-res (read i))) (when (eof-object? %read-res) (set! %read-res false))
            %read-res)))
-        (ignorespaces) (hsb-to-rrggbb (/ h 360) s b)))))))
+        (ignorespaces) (hsb360-to-hsl h s b)))))))
   ((:hsb240) (bgroup)
    (call-with-input-string
     (tex-string-to-html-string
@@ -3837,7 +3838,7 @@
         ((b
           (let ((%read-res (read i))) (when (eof-object? %read-res) (set! %read-res false))
            %read-res)))
-        (ignorespaces) (hsb-to-rrggbb (/ h 240) (/ s 240) (/ b 240))))))))
+        (ignorespaces) (hsb360-to-hsl (* h 3/2) (/ s 240) (/ b 240))))))))
   ((:wave)
    (call-with-input-string (tex-string-to-html-string (get-token))
     (lambda (i)

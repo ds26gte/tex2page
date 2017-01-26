@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170125") ;last change
+(defparameter *tex2page-version* "20170126") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -2071,7 +2071,7 @@
           ((string= next "\\let") (do-let t))
           ((string= next "\\newbox") (do-newbox t))
           ((string= next "\\newcount") (do-newcount t))
-          ((strnig= next "\\count") (do-count t))
+          ((string= next "\\count") (do-count t))
           ((string= next "\\newtoks") (do-newtoks t))
           ((string= next "\\toks") (do-toks t))
           ((string= next "\\newdimen") (do-newdimen t))
@@ -2910,24 +2910,13 @@
     (declare (number c m y k))
     (rgb-frac-to-rrggbb (funcall f c k) (funcall f m k) (funcall f y k))))
 
-(defun hsb-to-rrggbb (hue saturation brightness)
-  (declare (number hue saturation brightness))
-  (let* (red green blue
-             (hue6 (* 6 hue))
-             (i (floor hue6))
-             (f (- hue6 i)))
-    (case i
-      (0 (setq red 0 green (- 1 f) blue 1))
-      (1 (setq red f green 0 blue 1))
-      (2 (setq red 1 green 0 blue (- 1 f)))
-      (3 (setq red 1 green f blue 0))
-      (4 (setq red (- 1 f) green 1 blue 0))
-      (5 (setq red 0 green 1 blue f))
-      (6 (setq red 0 green 1 blue 1))
-      (t (terror 'hsb-to-rrggbb "Can't happen.")))
-    (flet ((fu (x) (* brightness
-                      (- 1 (* saturation x)))))
-      (rgb-frac-to-rrggbb (fu red) (fu green) (fu blue)))))
+(defun hsb360-to-hsl (h s b)
+  (let* ((L (* .5 b (- 2 s)))
+         (s2 (/ (* b s) (- 1 (abs (1- (* 2 L)))))))
+    (concatenate 'string "hsl("
+      (write-to-string h) ","
+      (write-to-string (* s2 100)) "%,"
+      (write-to-string (* L 100)) "%)")))
 
 (defun wavelength-to-rrggbb (w)
   (declare (number w))
@@ -2945,7 +2934,7 @@
                 ((<= w 700) 1)
                 ((< w 814.285) (+ 0.3 (* 0.7 (/ (- w 780) -80))))
                 (t 0))))
-    (hsb-to-rrggbb hue 1 brightness)))
+    (hsb360-to-hsl (* 360 hue) 1 brightness)))
 
 (defun read-color-as-rrggbb (model)
   (declare (keyword model))
@@ -3016,7 +3005,8 @@
                (s (read i nil))
                (b (read i nil)))
           (ignorespaces)
-          (hsb-to-rrggbb h s b))))
+          (hsb360-to-hsl (* 360 h) s b)
+          )))
     (:hsb360
       (bgroup)
       (with-input-from-string (i (tex-string-to-html-string
@@ -3026,7 +3016,8 @@
                (s (read i nil))
                (b (read i nil)))
           (ignorespaces)
-          (hsb-to-rrggbb (/ h 360) s b))))
+          (hsb360-to-hsl h s b)
+          )))
     (:hsb240
       (bgroup)
       (with-input-from-string (i (tex-string-to-html-string
@@ -3036,7 +3027,8 @@
                (s (read i nil))
                (b (read i nil)))
           (ignorespaces)
-          (hsb-to-rrggbb (/ h 240) (/ s 240) (/ b 240)))))
+          (hsb360-to-hsl (* h #.360/240) (/ s 240) (/ b 240))
+          )))
     (:wave
       (with-input-from-string (i (tex-string-to-html-string (get-token)))
         (let ((w (read i nil)))

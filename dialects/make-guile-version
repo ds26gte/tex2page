@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# last modified 2017-01-02
+# last modified 2017-01-26
 
 sed -e 's/	/ /g' tex2page.rkt |\
 sed -e 's/ \ *$//' |\
@@ -41,6 +41,7 @@ with-output-to-port \
 main
 
 rename '(define-syntax' '(almost-define-syntax'
+rename '(list\*' '(cons*'
 
 uncall require trace
 

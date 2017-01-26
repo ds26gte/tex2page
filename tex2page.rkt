@@ -7490,8 +7490,6 @@
          (else (tex-def-char (string-ref lhs 0) argpat rhs frame))))))))
    (else false))))
 
-(define (do-newtoks globalp) (tex-def-toks (get-ctl-seq) "" globalp))
-
 (define (do-newcommand renewp) (ignorespaces)
  (let ((lhs (string-trim (ungroup (get-token)))))
   (let ((optarg false))

@@ -6114,8 +6114,6 @@
           (cond ((ctl-seq-p lhs) (tex-def lhs argpat rhs nil nil nil nil frame))
                 (t (tex-def-char (char lhs 0) argpat rhs frame))))))))
 
-(defun do-newtoks (globalp) (tex-def-toks (get-ctl-seq) "" globalp))
-
 (defun do-newcommand (renewp)
   (ignorespaces)
   (let* ((lhs (string-trim-blanks (ungroup (get-token))))

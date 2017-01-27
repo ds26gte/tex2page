@@ -2,8 +2,6 @@
   
 (require mzlib/process)
 
-(require mzlib/trace)
-
 (require racket/private/more-scheme)
 
 (define *operating-system*
@@ -287,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
 
 
-(define *tex2page-version* "20170126")
+(define *tex2page-version* "20170128")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -311,7 +309,30 @@
              (%concatenate-loop (cdr %ee)))))
      %res)))
 
-(define (retrieve-env s) (getenv s))
+(define (string=split p sepc)
+ (if (not p)
+     null
+     (let ((p p) (r null))
+       (let* ((%loop-returned false)
+              (%loop-result 0)
+              (return
+               (lambda %args
+                 (set! %loop-returned true)
+                 (set! %loop-result (and (pair? %args) (car %args))))))
+         (let %loop
+           ()
+           (let ((i
+                  (let ((%position-v sepc) (%position-s p))
+                    (cond
+                     ((string? %position-s)
+                      (string-index %position-s %position-v))
+                     (else (list-position %position-v %position-s))))))
+             (cond ((not i) (set! r (cons p r)) (return (reverse r)))
+                   (else false))
+             (set! r (cons (substring p 0 i) r))
+             (set! p (substring p (add1 i)))
+             p)
+           (if %loop-returned %loop-result (%loop)))))))
 
 (define *month-names*
  (vector "January"
@@ -1159,7 +1180,7 @@
     (else false))))
 
 (define (edit-offending-file)
- (let ((calling-from-text-editor-p (retrieve-env "VIMRUNTIME")))
+ (let ((calling-from-text-editor-p (getenv "VIMRUNTIME")))
    (cond
     ((not calling-from-text-editor-p)
      (display "Type E to edit your file, X to quit.") (newline) (display "? ")
@@ -1174,7 +1195,7 @@
               %read-char-res)))
        (cond
         ((and c (char-ci=? c #\e))
-         (let ((texedit-string (retrieve-env "TEXEDIT")))
+         (let ((texedit-string (getenv "TEXEDIT")) (ill-formed-texedit-p false))
            (cond
             (texedit-string
              (cond
@@ -1204,7 +1225,8 @@
                               (%concatenate-loop (cdr %ee)))))
                       %res)))
                  texedit-string))
-              (else (set! texedit-string false) texedit-string)))
+              (else (set! ill-formed-texedit-p true)
+               (set! texedit-string false) texedit-string)))
             (else false))
            (cond
             (texedit-string
@@ -1235,13 +1257,17 @@
                               (%concatenate-loop (cdr %ee)))))
                       %res)))
                  texedit-string))
-              (else (set! texedit-string false) texedit-string)))
+              (else (set! ill-formed-texedit-p true)
+               (set! texedit-string false) texedit-string)))
             (else false))
            (cond
-            ((not texedit-string) (display "Ill-formed TEXEDIT; using EDITOR.")
-             (newline)
+            ((not texedit-string)
              (cond
-              ((begin (set! *it* (or (retrieve-env "EDITOR") "vi")) *it*)
+              (ill-formed-texedit-p
+               (display "Ill-formed TEXEDIT; using EDITOR.") (newline))
+              (else false))
+             (cond
+              ((begin (set! *it* (or (getenv "EDITOR") "vi")) *it*)
                (let ((e *it*))
                  (set! texedit-string
                   (let ((%type 'string)
@@ -1268,7 +1294,8 @@
                                                  %a)))))
                               (%concatenate-loop (cdr %ee)))))
                       %res)))
-                 texedit-string))))
+                 texedit-string))
+              (else false)))
             (else false))
            (cond (texedit-string (system texedit-string)) (else false))))
         (else false))))
@@ -8395,7 +8422,7 @@
    (set! *tex-if-stack* (cons (not top-if) *tex-if-stack*))
    *tex-if-stack*))
 
-(define (do-fi) (ignorespaces)
+(define (do-fi) (ignorespaces ':stop-before-first-newline)
  (cond ((null? *tex-if-stack*) (terror 'do-fi "Extra \\fi.")) (else false))
  (let* ((%pop-old-stack *tex-if-stack*) (%pop-top-value (car %pop-old-stack)))
    (begin (set! *tex-if-stack* (cdr %pop-old-stack)) *tex-if-stack*)
@@ -9624,31 +9651,6 @@
  (cond
   ((munched-a-newline-p) (toss-back-char #\newline) (toss-back-char #\newline))
   (else false)))
-
-(define (string=split p sepc)
- (if (not p)
-     null
-     (let ((p p) (r null))
-       (let* ((%loop-returned false)
-              (%loop-result 0)
-              (return
-               (lambda %args
-                 (set! %loop-returned true)
-                 (set! %loop-result (and (pair? %args) (car %args))))))
-         (let %loop
-           ()
-           (let ((i
-                  (let ((%position-v sepc) (%position-s p))
-                    (cond
-                     ((string? %position-s)
-                      (string-index %position-s %position-v))
-                     (else (list-position %position-v %position-s))))))
-             (cond ((not i) (set! r (cons p r)) (return (reverse r)))
-                   (else false))
-             (set! r (cons (substring p 0 i) r))
-             (set! p (substring p (add1 i)))
-             p)
-           (if %loop-returned %loop-result (%loop)))))))
 
 (define (string=join ss sepc)
  (let ((res ""))
@@ -13374,7 +13376,7 @@
        (if %loop-returned %loop-result (%loop))))))
 
 (define (file-in-home f)
- (let ((home (retrieve-env "HOME")))
+ (let ((home (getenv "HOME")))
    (and home
         (let ((slash-already-p
                (let ((n
@@ -18065,7 +18067,7 @@ Try the commands
        (%fluid-var-*tex-like-layout-p* *tex-like-layout-p*)
        (%fluid-var-*tex-output-format* false)
        (%fluid-var-*tex2page-inputs*
-        (string=split (retrieve-env "TEX2PAGEINPUTS") *path-separator*))
+        (string=split (getenv "TEX2PAGEINPUTS") *path-separator*))
        (%fluid-var-*title* false)
        (%fluid-var-*toc-list* null)
        (%fluid-var-*toc-page* false)

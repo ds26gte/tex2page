@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170126") ;last change
+(defparameter *tex2page-version* "20170128") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -53,7 +53,7 @@
   #+clozure (ccl:getenv s)
   #+cmucl (cdr (assoc (intern s :keyword)
                       ext:*environment-list* :test #'string=))
-  #+ecl (si:getenv s)
+  #+ecl (ext:getenv s)
   #+mkcl (mkcl:getenv s)
   #+sbcl (sb-ext:posix-getenv s))
 
@@ -68,8 +68,25 @@
   #+clisp (ext:shell cmd)
   #+clozure (ccl::os-command cmd)
   #+cmucl (ext:run-program "sh" (list "-c" cmd) :output t)
-  #+ecl (si:system cmd)
+  #+ecl (ext:system cmd)
   #+mkcl (mkcl:system cmd))
+
+(defun string=split (p sepc)
+  ;convert a Unix path into a Lisp list
+  (if (not p) '()
+    (let ((p p) (r '()))
+      (loop
+        (let ((i (position sepc p :test #'char=)))
+          (unless i (push p r) (return (nreverse r)))
+          (push (subseq p 0 i) r)
+          (setq p (subseq p (1+ i))))))))
+
+(defun system-with-visual (cmd)
+  (cond ((and (not 'nil) (or #+ecl t #+mkcl t))
+         (let ((s (string=split cmd #\space)))
+           (#+ecl ext:run-program #+mkcl mkcl:run-program
+            (car s) (cdr s) :input t :output t)))
+        (t (system cmd))))
 
 (defparameter *tex2page-file-arg*
   (or #+abcl (nth 0 ext:*command-line-argument-list*)
@@ -569,31 +586,34 @@
       (force-output)
       (let ((c (read-char nil nil)))
         (when (and c (char-equal c #\e))
-          (let ((texedit-string (retrieve-env "TEXEDIT")))
+          (let ((texedit-string (retrieve-env "TEXEDIT"))
+                ill-formed-texedit-p)
             (when texedit-string
               (cond ((setq *it* (search "%d" texedit-string))
                      (let ((i *it*))
                        (setq texedit-string (concatenate 'string (subseq texedit-string 0 i)
-                                                         (write-to-string *input-line-no*)
-                                                         (subseq texedit-string (+ i 2))))))
-                    (t (setq texedit-string nil))))
+                                              (write-to-string *input-line-no*)
+                                              (subseq texedit-string (+ i 2))))))
+                    (t (setq ill-formed-texedit-p t texedit-string nil))))
             (when texedit-string
               (cond ((setq *it* (search "%s" texedit-string))
                      (let ((i *it*))
                        (setq texedit-string (concatenate 'string (subseq texedit-string 0 i)
-                                                         *current-source-file*
-                                                         (subseq texedit-string (+ i 2))))))
-                    (t (setq texedit-string nil))))
+                                              *current-source-file*
+                                              (subseq texedit-string (+ i 2))))))
+                    (t (setq ill-formed-texedit-p t texedit-string nil))))
             (unless texedit-string
-              (princ "Ill-formed TEXEDIT; using EDITOR.")
-              (terpri)
-              (cond ((setq *it* (or (retrieve-env "EDITOR") "vi"))
-                     (let ((e *it*))
-                       (setq texedit-string
-                             (concatenate 'string e
-                                          " +" (write-to-string *input-line-no*)
-                                          " " *current-source-file*))))))
-            (when texedit-string (system texedit-string))))))))
+              (when ill-formed-texedit-p
+                (princ "Ill-formed TEXEDIT; using EDITOR.")
+                (terpri))
+              (when (setq *it* (or (retrieve-env "EDITOR") "vi"))
+                (let ((e *it*))
+                  (setq texedit-string
+                        (concatenate 'string e
+                          " +" (write-to-string *input-line-no*)
+                          " " *current-source-file*)))))
+            (when texedit-string
+              (system-with-visual texedit-string))))))))
 
 (defun trace-if (write-p &rest args)
   (when write-p
@@ -720,6 +740,7 @@
       (not (graphic-char-p c))))
 
 (defun ignorespaces (&optional (newlines :stop-before-par))
+  ;(format t "ignorespaces ~s~%" newlines)
   ; :stop-before-first-newline
   ; :stop-after-first-newline
   ; :stop-before-par : eat non-newline spaces after 1st newline.
@@ -2175,6 +2196,7 @@
 
 (defun do-para ()
   (cond ((and *in-para-p* (consp (ostream*-hbuffer *html*)))
+         ;(format t "erasing empty par space~%")
          (setf (ostream*-hbuffer *html*) '()))
         (t
           (do-end-para)
@@ -3348,7 +3370,9 @@
 (defun do-hrule ()
   (do-end-para) (emit "<hr>") (emit-newline) (do-para))
 
-(defun do-newline () (when (>= (munch-newlines) 1) (do-para)) (emit-newline))
+(defun do-newline ()
+  ;(format t "doing do-newline~%")
+  (when (>= (munch-newlines) 1) (do-para)) (emit-newline))
 
 (defun do-br ()
   (if (or (find-cdef #\space) (not (= (the-count "\\TIIPobeylinestrictly") 0)))
@@ -5119,7 +5143,10 @@
     (push (not top-if) *tex-if-stack*)))
 
 (defun do-fi ()
-  (ignorespaces)
+  ;(format t "doing do-fi~%")
+  ;(format t "inside para? ~s~%" *in-para-p*)
+  (ignorespaces :stop-before-first-newline)
+  ;(format t "done do-fi ignorespaces~%")
   (when (null *tex-if-stack*) (terror 'do-fi "Extra \\fi."))
   (pop *tex-if-stack*))
 
@@ -5588,16 +5615,6 @@
   (eat-till-eol)
   (when (munched-a-newline-p)
     (toss-back-char #\newline) (toss-back-char #\newline)))
-
-(defun string=split (p sepc)
-  ;convert a Unix path into a Lisp list
-  (if (not p) '()
-    (let ((p p) (r '()))
-      (loop
-        (let ((i (position sepc p :test #'char=)))
-          (unless i (push p r) (return (nreverse r)))
-          (push (subseq p 0 i) r)
-          (setq p (subseq p (1+ i))))))))
 
 (defun string=join (ss sepc)
   (let ((res ""))
@@ -10920,6 +10937,18 @@ Try the commands
           (t (tex2page-help tex-file)))
     (output-stats)))
 
-;(trace get-number-corresp-to-ctl-seq find-dimendef find-dimen)
+#|
+(trace
+  ;edit-offending-file
+  ;get-number-corresp-to-ctl-seq
+  ;find-dimendef
+  ;find-dimen
+  do-fi
+  do-end-para
+  do-para
+  munch-newlines
+  if-aware-ctl-seq-p
+  )
+|#
 
 (tex2page *tex2page-file-arg*)

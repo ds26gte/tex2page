@@ -1,11 +1,11 @@
-;last modified 2017-01-25
+;last modified 2017-01-28
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -m -- \"$@\"
   ")
 
 (require mzlib/process)
-(require mzlib/trace)
+;(require mzlib/trace)
 (require racket/private/more-scheme)
 
 (cliiscm-uncall
@@ -14,6 +14,7 @@
   in-package
 ;  sb-alien:define-alien-routine
   tex2page
+  trace
 
   )
 
@@ -48,6 +49,8 @@
   (char-whitespace-p char-whitespace?)
   (string-to-number string->number)
   (string-trim-blanks string-trim)
+  (retrieve-env getenv)
+  (system-with-visual system)
 
   )
 

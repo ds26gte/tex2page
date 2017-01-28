@@ -4887,32 +4887,34 @@
  (let ((f (lambda (x k) (- 1 (min (max (+ x k) 0) 1)))))
    (lambda (c m y k) (rgb-frac-to-rrggbb (f c k) (f m k) (f y k)))))
 
+(define (hsl-in-html h s l)
+ (let ((%type 'string)
+       (%ee
+        (list "hsl("
+              (write-to-string h)
+              ","
+              (write-to-string (* s 100))
+              "%,"
+              (write-to-string (* l 100))
+              "%)")))
+   (let ((%res (if (eq? %type 'string) "" null)))
+     (let %concatenate-loop
+       ((%ee %ee))
+       (if (null? %ee)
+           %res
+           (let ((%a (car %ee)))
+             (unless (not %a)
+               (set! %res
+                (if (eq? %type 'string)
+                    (string-append %res (if (string? %a) %a (list->string %a)))
+                    (append %res (if (string? %a) (string->list %a) %a)))))
+             (%concatenate-loop (cdr %ee)))))
+     %res)))
+
 (define (hsb360-to-hsl h s b)
  (let ((l (* 0.5 b (- 2 s))))
    (let ((s2 (/ (* b s) (- 1 (abs (sub1 (* 2 l)))))))
-     (let ((%type 'string)
-           (%ee
-            (list "hsl("
-                  (write-to-string h)
-                  ","
-                  (write-to-string (* s2 100))
-                  "%,"
-                  (write-to-string (* l 100))
-                  "%)")))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res)))))
+     (hsl-in-html h s2 l))))
 
 (define (wavelength-to-hsl w)
  (let ((hue
@@ -5223,6 +5225,78 @@
                 %read-res)))
          (ignorespaces)
          (wavelength-to-hsl w)))))
+   ((:hsl)
+    (bgroup)
+    (call-with-input-string
+     (tex-string-to-html-string
+      (let ((%type 'string) (%ee (list "\\defcsactive\\,{ }" (get-token))))
+        (let ((%res (if (eq? %type 'string) "" null)))
+          (let %concatenate-loop
+            ((%ee %ee))
+            (if (null? %ee)
+                %res
+                (let ((%a (car %ee)))
+                  (unless (not %a)
+                    (set! %res
+                     (if (eq? %type 'string)
+                         (string-append %res
+                          (if (string? %a) %a (list->string %a)))
+                         (append %res
+                                 (if (string? %a) (string->list %a) %a)))))
+                  (%concatenate-loop (cdr %ee)))))
+          %res)))
+     (lambda (i)
+       (egroup)
+       (let ((h
+              (let ((%read-res (read i)))
+                (when (eof-object? %read-res) (set! %read-res false))
+                %read-res)))
+         (let ((s
+                (let ((%read-res (read i)))
+                  (when (eof-object? %read-res) (set! %read-res false))
+                  %read-res)))
+           (let ((l
+                  (let ((%read-res (read i)))
+                    (when (eof-object? %read-res) (set! %read-res false))
+                    %read-res)))
+             (ignorespaces)
+             (hsl-in-html (* 360 h) s l)))))))
+   ((:hsl360)
+    (bgroup)
+    (call-with-input-string
+     (tex-string-to-html-string
+      (let ((%type 'string) (%ee (list "\\defcsactive\\,{ }" (get-token))))
+        (let ((%res (if (eq? %type 'string) "" null)))
+          (let %concatenate-loop
+            ((%ee %ee))
+            (if (null? %ee)
+                %res
+                (let ((%a (car %ee)))
+                  (unless (not %a)
+                    (set! %res
+                     (if (eq? %type 'string)
+                         (string-append %res
+                          (if (string? %a) %a (list->string %a)))
+                         (append %res
+                                 (if (string? %a) (string->list %a) %a)))))
+                  (%concatenate-loop (cdr %ee)))))
+          %res)))
+     (lambda (i)
+       (egroup)
+       (let ((h
+              (let ((%read-res (read i)))
+                (when (eof-object? %read-res) (set! %read-res false))
+                %read-res)))
+         (let ((s
+                (let ((%read-res (read i)))
+                  (when (eof-object? %read-res) (set! %read-res false))
+                  %read-res)))
+           (let ((l
+                  (let ((%read-res (read i)))
+                    (when (eof-object? %read-res) (set! %read-res false))
+                    %read-res)))
+             (ignorespaces)
+             (hsl-in-html h s l)))))))
    (else
     (let ((name (get-peeled-group)))
       (let ((c (assoc name *color-names*)))
@@ -5242,6 +5316,8 @@
        ((string=? model "Hsb") ':hsb360)
        ((string=? model "HSB") ':hsb240)
        ((string=? model "wave") ':wave)
+       ((string=? model "hsl") ':hsl)
+       ((string=? model "Hsl") ':hsl360)
        (else ':colornamed)))
 
 (define (do-switch sw)
@@ -5310,7 +5386,7 @@
       ((:huge) (emit "<span class=huge>") (lambda () (emit "</span>")))
       ((:huge-cap) (emit "<span class=hugecap>") (lambda () (emit "</span>")))
       ((:cmy :cmyk :rgb :rgb255 :gray :gray15 :html :hsb :hsb360 :hsb240 :wave
-        :colornamed)
+        :hsl :hsl360 :colornamed)
        (emit "<span style=\"color: ")
        (emit (read-color sw))
        (emit "\">")

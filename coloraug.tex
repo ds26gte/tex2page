@@ -1,4 +1,5 @@
-% last modified 2016-12-21
+% Last modified 2017-01-28
+% Dorai Sitaram
 
 \let\maybeendinput\relax
 \ifx\shipout\UnDeFiNeD
@@ -8,6 +9,8 @@
     \let\maybeendinput\endinput
   \fi
 \fi\maybeendinput
+
+% Load color.sty, which defines rgb, hsb, cmyk, gray.
 
 \ifx\definecolor\UnDeFiNeD
   \ifx\miniltx\UnDeFiNeD
@@ -41,12 +44,20 @@
 
 \def\colorQconvertmodel{%
   %
+  % Plain-TeX versions of xcolor.sty's cmy, Gray, Hsb, HSB, HTML,
+  % wave.
+  %
   \edef\colorQmodelcmy{cmy}%
   \edef\colorQmodelGray{Gray}%
   \edef\colorQmodelHsb{Hsb}%
   \edef\colorQmodelHSB{HSB}%
   \edef\colorQmodelHTML{HTML}%
   \edef\colorQmodelwave{wave}%
+  %
+  % hsl and Hsl: like CSS, but fractions instead of percentages.
+  %
+  \edef\colorQmodelhsl{hsl}%
+  \edef\colorQmodelHsl{Hsl}%
   %
   \ifx\colorQmodel\colorQmodelcmy
     \expandafter\colorQconvertcmy\colorQvalues\relax
@@ -60,7 +71,11 @@
     \expandafter\colorQconvertHTML\colorQvalues\relax
   \else\ifx\colorQmodel\colorQmodelwave
     \expandafter\colorQconvertwave\colorQvalues\relax
-  \fi\fi\fi\fi\fi\fi}
+  \else\ifx\colorQmodel\colorQmodelhsl
+    \expandafter\colorQconverthsl\colorQvalues\relax
+  \else\ifx\colorQmodel\colorQmodelHsl
+    \expandafter\colorQconvertHsl\colorQvalues\relax
+  \fi\fi\fi\fi\fi\fi\fi\fi}
 
 % cmy
 
@@ -68,17 +83,17 @@
 \gdef\colorQconvertcmy #1,#2,#3\relax{%
   %
   \dimen@=#1\p@
-  \advance\dimen@ -1pt
+  \advance\dimen@ -1\p@
   \multiply\dimen@ -1
   \edef\colorQred{\strip@pt\dimen@}%
   %
   \dimen@=#2\p@
-  \advance\dimen@ -1pt
+  \advance\dimen@ -1\p@
   \multiply\dimen@ -1
   \edef\colorQgreen{\strip@pt\dimen@}%
   %
   \dimen@=#3\p@
-  \advance\dimen@ -1pt
+  \advance\dimen@ -1\p@
   \multiply\dimen@ -1
   \edef\colorQblue{\strip@pt\dimen@}%
   %
@@ -103,13 +118,9 @@
   \dimen@=#1\p@
   \divide\dimen@ 360
   \edef\colorQhue{\strip@pt\dimen@}%
-  \dimen@=#2\p@
-  \edef\colorQsat{\strip@pt\dimen@}%
-  \dimen@=#3\p@
-  \edef\colorQbright{\strip@pt\dimen@}%
   %
   \edef\colorQmodel{hsb}%
-  \edef\colorQvalues{\colorQhue,\colorQsat,\colorQbright}}}
+  \edef\colorQvalues{\colorQhue,#2,#3}}}
 
 % HSB
 
@@ -147,60 +158,100 @@
 \gdef\colorQconvertwave #1\relax{%
   %
   \dimen@=#1\p@
-  \ifdim\dimen@<362.857pt
-    \dimen@=5pt
-  \else\ifdim\dimen@=362.857pt
-    \dimen@=5pt
-  \else\ifdim\dimen@<440pt
-    \advance\dimen@ -440pt
+  \ifdim\dimen@<362.857\p@
+    \dimen@=5\p@
+  \else\ifdim\dimen@=362.857\p@
+    \dimen@=5\p@
+  \else\ifdim\dimen@<440\p@
+    \advance\dimen@ -440\p@
     \divide\dimen@ -60
-    \advance\dimen@ 4pt
-  \else\ifdim\dimen@<490pt
-    \advance\dimen@ -440pt
+    \advance\dimen@ 4\p@
+  \else\ifdim\dimen@<490\p@
+    \advance\dimen@ -440\p@
     \divide\dimen@ 50
     \multiply\dimen@ -1
-    \advance\dimen@ 4pt
-  \else\ifdim\dimen@<510pt
-    \advance\dimen@ 510pt
+    \advance\dimen@ 4\p@
+  \else\ifdim\dimen@<510\p@
+    \advance\dimen@ 510\p@
     \divide\dimen@ -20
-    \advance\dimen@ 2pt
-  \else\ifdim\dimen@<580pt
-    \advance\dimen@ -510pt
+    \advance\dimen@ 2\p@
+  \else\ifdim\dimen@<580\p@
+    \advance\dimen@ -510\p@
     \divide\dimen@ -70
     \multiply\dimen@ -1
-    \advance\dimen@ 2pt
-  \else\ifdim\dimen@<645pt
-    \advance\dimen@ -645pt
+    \advance\dimen@ 2\p@
+  \else\ifdim\dimen@<645\p@
+    \advance\dimen@ -645\p@
     \divide\dimen@ -65
   \else
-    \dimen@=0pt
+    \dimen@=0\p@
   \fi\fi\fi\fi\fi\fi\fi
   \divide\dimen@ 6
   \edef\colorQhue{\strip@pt\dimen@}%
   %
   \dimen@=#1\p@
-  \ifdim\dimen@<362.857pt
-    \dimen@=0pt
-  \else\ifdim\dimen@=362.857pt
-    \dimen@=0pt
-  \else\ifdim\dimen@<420pt
-    \advance\dimen@ 380pt
+  \ifdim\dimen@<362.857\p@
+    \dimen@=0\p@
+  \else\ifdim\dimen@=362.857\p@
+    \dimen@=0\p@
+  \else\ifdim\dimen@<420\p@
+    \advance\dimen@ 380\p@
     \divide\dimen@ 40
     \multiply\dimen@ .7
-    \advance\dimen@ .3pt
-  \else\ifdim\dimen@<700pt
-    \dimen@=1pt
-  \else\ifdim\dimen@=700pt
-    \dimen@=1pt
-  \else\ifdim\dimen@<814.285pt
+    \advance\dimen@ .3\p@
+  \else\ifdim\dimen@<700\p@
+    \dimen@=1\p@
+  \else\ifdim\dimen@=700\p@
+    \dimen@=1\p@
+  \else\ifdim\dimen@<814.285\p@
     \advance\dimen@ -780
     \divide\dimen@ -80
     \multiply\dimen@ .7
-    \advance\dimen@ .3pt
+    \advance\dimen@ .3\p@
   \else
-    \dimen@=0pt
+    \dimen@=0\p@
   \fi\fi\fi\fi\fi\fi
   \edef\colorQbright{\strip@pt\dimen@}%
   %
   \edef\colorQmodel{hsb}%
   \edef\colorQvalues{\colorQhue,1,\colorQbright}}}
+
+% hsl
+
+{\catcode`\@=11
+\gdef\colorQconverthsl #1,#2,#3\relax{%
+  %
+  \dimen@=#3\p@
+  \multiply\dimen@ 2
+  \advance\dimen@ -1\p@
+  \ifdim\dimen@<-1\p@
+    \multiply\dimen@ -1
+  \fi
+  \advance\dimen@ -1\p@
+  \multiply\dimen@ -1
+  \dimen@=#2\dimen@
+  \advance\dimen@ #3\p@
+  \advance\dimen@ #3\p@
+  \divide\dimen@ 2
+  \edef\colorQbright{\strip@pt\dimen@}%
+  %
+  \count@=\dimen@
+  \advance\dimen@ -#3\p@
+  \multiply\dimen@ 2
+  \multiply\dimen@ 4096
+  \divide\dimen@ \count@
+  \multiply\dimen@ 16
+  \edef\colorQsat{\strip@pt\dimen@}%
+  %
+  \edef\colorQmodel{hsb}%
+  \edef\colorQvalues{#1,\colorQsat,\colorQbright}}}
+
+% Hsl
+
+{\catcode`\@=11
+\gdef\colorQconvertHsl #1,#2,#3\relax{%
+  \dimen@=#1\p@
+  \divide\dimen@ 360
+  \edef\colorQhue{\strip@pt\dimen@}%
+  %
+  \colorQconverthsl \colorQhue,#2,#3\relax}}

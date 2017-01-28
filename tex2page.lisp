@@ -2933,13 +2933,16 @@
     (declare (number c m y k))
     (rgb-frac-to-rrggbb (funcall f c k) (funcall f m k) (funcall f y k))))
 
+(defun hsl-in-html (h s L)
+  (concatenate 'string "hsl("
+    (write-to-string h) ","
+    (write-to-string (* s 100)) "%,"
+    (write-to-string (* L 100)) "%)"))
+
 (defun hsb360-to-hsl (h s b)
   (let* ((L (* .5 b (- 2 s)))
          (s2 (/ (* b s) (- 1 (abs (1- (* 2 L)))))))
-    (concatenate 'string "hsl("
-      (write-to-string h) ","
-      (write-to-string (* s2 100)) "%,"
-      (write-to-string (* L 100)) "%)")))
+    (hsl-in-html h s2 L)))
 
 (defun wavelength-to-hsl (w)
   (declare (number w))
@@ -3054,6 +3057,26 @@
         (let ((w (read i nil)))
           (ignorespaces)
           (wavelength-to-hsl w))))
+    (:hsl
+      (bgroup)
+      (with-input-from-string (i (tex-string-to-html-string
+                                   (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+        (egroup)
+        (let* ((h (read i nil))
+               (s (read i nil))
+               (L (read i nil)))
+          (ignorespaces)
+          (hsl-in-html (* 360 h) s L))))
+    (:hsl360
+      (bgroup)
+      (with-input-from-string (i (tex-string-to-html-string
+                                   (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+        (egroup)
+        (let* ((h (read i nil))
+               (s (read i nil))
+               (L (read i nil)))
+          (ignorespaces)
+          (hsl-in-html h s L))))
     (t (let* ((name (get-peeled-group))
               (c (assoc name *color-names* :test #'string=)))
          (ignorespaces)
@@ -3072,6 +3095,8 @@
         ((string= model "Hsb") :hsb360)
         ((string= model "HSB") :hsb240)
         ((string= model "wave") :wave)
+        ((string= model "hsl") :hsl)
+        ((string= model "Hsl") :hsl360)
         (t :colornamed)))
 
 (defun read-6hex (i)
@@ -3142,7 +3167,8 @@
        (:huge-cap
         (emit "<span class=hugecap>")
         (lambda () (emit "</span>")))
-       ((:cmy :cmyk :rgb :rgb255 :gray :gray15 :html :hsb :hsb360 :hsb240 :wave :colornamed)
+       ((:cmy :cmyk :rgb :rgb255 :gray :gray15 :html :hsb :hsb360 :hsb240
+              :wave :hsl :hsl360 :colornamed)
          (emit "<span style=\"color: ")
          (emit (read-color sw))
          (emit "\">")

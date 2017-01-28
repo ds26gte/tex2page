@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2017-01-25} %last change
+\c{2017-01-28} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -625,7 +625,7 @@ HTML-only definition of `\bull`:
 \begintt
 \ifx\shipout\UnDeFiNeD % HTML only
   \def\bull{{\bf
-  \rawhtml<span style="color: #990000">&spades;</span>\endrawhtml
+  \rawhtml<span style="color: hsl(0,100%,30%)">&spades;</span>\endrawhtml
   }}
 \fi
 \endtt
@@ -1120,10 +1120,11 @@ behaves differently than a \LaTeX-like `\ref`.}
 \TeX2page recognizes the macros `\color`, `\colorbox`, and
 `\definecolor`~\cite{grfguide} provided by the \LaTeX\ package
 `color.sty`. It also recognizes the {\em color models}
-`cmyk`, `gray`, `hsb`, `rgb`, and `RGB`, also provided by
-`color.sty`); and `cmy`, `Gray`, `Hsb`, `HSB`, `HTML`,
+`cmyk`, `gray`, `hsb`, `rgb`, and `RGB` provided by
+`color.sty`. It also supports the color models `cmy`, `Gray`, `Hsb`, `HSB`, `HTML`,
 and `wave`, provided by the \LaTeX\ package `xcolor.sty`, which
-is a superset of `color.sty`.
+is a superset of `color.sty`. Furthermore, it supports the
+models `hsl` and `Hsl`.
 
 \begintt
 {\color[cmy]{.46, .8, .86} burnt umber},
@@ -1136,6 +1137,8 @@ is a superset of `color.sty`.
 {\color[rgb]{.69, .19, .38} maroon},
 {\color[RGB]{220, 20, 60} crimson},
 {\color[wave]{455.528} cesium blue},
+{\color[hsl]{.0389, .78, .62} burnt sienna},
+{\color[Hsl]{10, .36, .37} venetian red},
 and {\color{magenta} magenta}.
 \endtt
 produces
@@ -1151,6 +1154,8 @@ produces
 {\color[rgb]{.69, .19, .38} maroon},
 {\color[RGB]{220, 20, 60} crimson},
 {\color[wave]{455.528} cesium blue},
+{\color[hsl]{14, .78, .62} burnt sienna},
+{\color[Hsl]{10, .36, .37} venetian red},
 and {\color{magenta} magenta}.
 \endquote
 %
@@ -1162,32 +1167,33 @@ can be loaded into plain \TeX (after loading `miniltx`),
 `xcolor.sty` cannot. The \TeX2page distribution does provide a
 plain-\TeX-loadable macro file
 `coloraug.tex` that provides some of the functionality of
-`xcolor.sty`.
+`xcolor.sty`, and also the color models `hsl` and `Hsl`.
 
 `\definecolor` defines new color names, e.g.,
 
 \begintt
-\definecolor{dodgerblue}{rgb}{.116, .565, 1}
-\definecolor{orangered}{rgb}{1, .27, 0}
-\definecolor{thistle}{cmyk}{.12, .59, 0, 0}
+\definecolor{dodgerblue}{Hsl}{210, 1, .56}
+\definecolor{orangered}{Hsl}{16, 1, .5}
+\definecolor{thistle}{Hsl}{288, 1, .71}
 
 Poor Mr Norrell could only watch on helplessly as the gentleman
-with the {\color{thistle}thistle-down hair} seized his
-copies of \colorbox{dodgerblue}{\color{white}The \TeX book} and
+with the \colorbox{gray}{\color{thistle}thistle hair} seized his
+copies of \colorbox{dodgerblue}{\color{white} The \TeX book} and
 \colorbox{orangered}{\color{white} The \MF book}.
 \endtt
 produces
 
-\definecolor{dodgerblue}{rgb}{.116, .565, 1}
-\definecolor{orangered}{rgb}{1, .27, 0}
-\definecolor{thistle}{cmyk}{.12, .59, 0, 0}
+\definecolor{dodgerblue}{Hsl}{210, 1, .56}
+\definecolor{orangered}{Hsl}{16, 1, .5}
+\definecolor{thistle}{Hsl}{288, 1, .71}
 \quote
 Poor Mr Norrell could only watch on helplessly as the gentleman
-with the {\color{thistle}thistle-down hair} seized his
-copies of \colorbox{dodgerblue}{\color{white}The \TeX book} and
+with the {\color{thistle}thistle hair} seized his
+copies of \colorbox{dodgerblue}{\color{white} The \TeX book} and
 \colorbox{orangered}{\color{white} The \MF book}.
 \endquote
 
+\iffalse
 \index{x11rgb.tex@`x11rgb.tex`}
 Most color-capable browsers support the very large list
 of named colors in the X11 file `rgb.txt`.  In order
@@ -1195,6 +1201,7 @@ for your printed document to have access to these same
 color names, definitions for them are provided in the
 \TeX\ macro file `x11rgb.tex`, included in the \TeX2page
 distribution.
+\fi
 
 \index{dvipsnam.def@`dvipsnam.def` (\LaTeX\ file)}
 
@@ -2259,10 +2266,10 @@ of your verbatim text by defining a style for
 `verbatim` in a style sheet (p.~\ref{css}).  E.g.,
 
 \begintt
-.verbatim        {color: rgb(0,49,83)}
+.verbatim        {color: hsl(205,100%,16%)}
 \endtt
 %
-sets {\color[RGB]{0,49,83} `all verbatim text
+sets {\color[Hsl]{205,1,.16} `all verbatim text
 in Prussian blue`}.
 
 \beginsection Syntax-highlighting of program code
@@ -2326,13 +2333,13 @@ other properties like `font-weight` and
 sheet (p.~\ref{css}).  The default settings are:
 
 \begintt
-.scheme             {color: #993333} /* background punctuation */
-.scheme  .selfeval  {color: #006600}
-.scheme  .keyword   {color: #660000; font-weight: bold}
-.scheme  .builtin   {color: #660000}
-.scheme  .global    {color: #660066}
-.scheme  .variable  {color: #000066}
-.scheme  .comment   {color: #006666; font-style: oblique}
+.scheme             {color: hsl(280,33%,30%)} /* background punctuation */
+.scheme  .selfeval  {color: hsl(120,100%,20%)}
+.scheme  .keyword   {color: hsl(0,100%,20%); font-weight: bold}
+.scheme  .builtin   {color: hsl(0,100%,20%)}
+.scheme  .global    {color: hsl(300,100%,20%)}
+.scheme  .variable  {color: hsl(240,100%,20%)}
+.scheme  .comment   {color: hsl(180,100%,20%); font-style: oblique}
 \endtt
 %
 \index{scmkeyword@`\scmkeyword`}
@@ -2356,7 +2363,7 @@ other variables should give the style class `.global` the
 same properties as `.variable`, e.g.,
 
 \begintt
-.scheme .global {color: #000066}
+.scheme .global {color: hsl(240,100%,20%}
 \endtt
 
 Users can add their own keywords with `\scmkeyword`.

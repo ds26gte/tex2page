@@ -7979,9 +7979,9 @@
     (princ
       "body {
       color: black;
-      /*   background-color: #e5e5e5;*/
-      background-color: #ffffff;
-      /*background-color: beige;*/
+      /* background-color: hsl(0,0%,90%); beige */
+      background-color: white;
+      /* background-color: hsl(60,56%,91%); */
       margin-top: 2em;
       margin-bottom: 2em;
       /* margin-left: 8%;
@@ -8090,11 +8090,11 @@
       pre {
       overflow: auto;
       margin-left: 2em;
-      /* background-color: #f5f5f5; */ /* Scheme version uncomment? */
+      /* background-color: hsl(0,0%,96%); */ /* Scheme version uncomment? */
       }
 
       blockquote {
-      /* background-color: #f0e0e0; */
+      /* background-color: hsl(0,35%,91%); */
       margin-top: 2pt;
       margin-bottom: 2pt;
       margin-left: 2em;
@@ -8175,12 +8175,12 @@
 
       /*
       .verbatim {
-      color: #4d0000;
+      color: hsl(0,100%,15%);
       }
       */
 
       .verbatim {
-      background-color: #f5f5f5;
+      background-color: hsl(0,0%,96%);
       }
 
       .scheme em {
@@ -8188,25 +8188,25 @@
       font-family: serif;
       }
 
-      .scheme             {color: #553366} /* background punctuation, was 993333 */
-      .scheme  .selfeval  {color: #006600}
-      .scheme  .keyword   {color: #660000; font-weight: bold}
-      .scheme  .builtin   {color: #660000}
-      .scheme  .global    {color: #660066}
-      .scheme  .variable  {color: #000066}
-      .scheme  .comment   {color: #006666; font-style: oblique}
+      .scheme             {color: hsl(280,33%,30%)} /* background punctuation, was hsl(0,50%,40%) */
+      .scheme  .selfeval  {color: hsl(120,100%,20%)}
+      .scheme  .keyword   {color: hsl(0,100%,20%); font-weight: bold}
+      .scheme  .builtin   {color: hsl(0,100%,20%)}
+      .scheme  .global    {color: hsl(300,100%,20%)}
+      .scheme  .variable  {color: hsl(240,100%,20%)}
+      .scheme  .comment   {color: hsl(180,100%,20%); font-style: oblique}
 
       .schemeresponse {
-      color: #006600;
+      color: hsl(120,100%,20%);
       }
 
       a:hover {
       text-decoration: none;
-      background-color: #f2f288;
+      background-color: hsl(60,80%,74%);
       }
 
       .navigation {
-      color: #993300;
+      color: hsl(20,100%,30%);
       text-align: right;
       font-size: medium;
       font-style: italic;
@@ -8247,8 +8247,8 @@
       }
 
       .disable {
-      /* color: #e5e5e5; */
-      color: gray;
+      /* color: hsl(0,0%,90%); */
+      color: hsl(0,0%,50%);
       }
 
       .smallcaps {
@@ -8256,7 +8256,7 @@
       }
 
       .smallprint {
-      color: gray;
+      color: hsl(0,0%,50%);
       font-size: 75%;
       text-align: right;
       }
@@ -8269,7 +8269,7 @@
       */
 
       .footnotemark {
-      background-color: #f2f288;
+      background-color: hsl(60,80%,74%);
       }
 
       .footnote {
@@ -8288,7 +8288,7 @@
       }
 
       .colophon {
-      color: gray;
+      color: hsl(0,0%,50%);
       font-size: 80%;
       font-style: italic;
       text-align: right;
@@ -8302,7 +8302,7 @@
       }
 
       .colophon a {
-      color: gray;
+      color: hsl(0,0%,50%);
       text-decoration: none;
       }
 

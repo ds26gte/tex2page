@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170128") ;last change
+(defparameter *tex2page-version* "20170129") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1688,7 +1688,7 @@
       (unless n (terror 'do-countdef "Missing number."))
       (tex-def-countdef cltseq n 0 (globally-p)))))
 
-(defun do-newcount (globalp)
+(defun do-newcount (&optional globalp)
   (unless globalp (setq globalp (globally-p)))
   (tex-def-countdef (get-ctl-seq) (gen-regno 10) 0 globalp))
 
@@ -4251,6 +4251,7 @@
 ;(trace output-navbar)
 
 (defun do-eject ()
+  (ignorespaces)
   (cond ((tex2page-flag-boolean "\\TZPslides")
          (do-end-para)
          (emit "</div>")
@@ -4259,7 +4260,7 @@
          (do-para))
         ((tex2page-flag-boolean "\\TZPsinglepage") t)
         (t (unless (and (not (snoop-actual-char))
-                       (eql *current-source-file* *main-tex-file*))
+                        (eql *current-source-file* *main-tex-file*))
             ;kludge: don't start a new page if \eject is the last thing in the
             ;main file.  This is mostly to placate story.tex, which although
             ;horrid as an example file, happens to be viewed as canonical by
@@ -4277,6 +4278,8 @@
                                (open *html-page* :direction :output
                                      :if-exists :supersede)))
             (do-start)))))
+
+;(trace do-eject)
 
 (defun output-html-preamble ()
   (when (stringp *doctype*)
@@ -10962,19 +10965,5 @@ Try the commands
             (do-bye))
           (t (tex2page-help tex-file)))
     (output-stats)))
-
-#|
-(trace
-  ;edit-offending-file
-  ;get-number-corresp-to-ctl-seq
-  ;find-dimendef
-  ;find-dimen
-  do-fi
-  do-end-para
-  do-para
-  munch-newlines
-  if-aware-ctl-seq-p
-  )
-|#
 
 (tex2page *tex2page-file-arg*)

@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2017-01-28} %last change
+\c{2017-01-29} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -2701,8 +2701,7 @@ mpost lambda.mp
 epstopdf lambda-1.eps
 \endtt
 
-\write18{if test ! -f lambda-1.pdf -a -f lambda.mp; then mpost lambda.mp; epstopdf
-lambda-1.eps; fi}
+\write18{if test ! -f lambda-1.pdf -a -f lambda.mp; then mpost lambda.mp; epstopdf lambda-1.eps; fi}
 This creates a PDF file `lambda-1.pdf`, which is inserted in
 the source document via
 

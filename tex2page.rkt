@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
 
 
-(define *tex2page-version* "20170128")
+(define *tex2page-version* "20170129")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -3022,9 +3022,12 @@
      (cond ((not n) (terror 'do-countdef "Missing number.")) (else false))
      (tex-def-countdef cltseq n 0 (globally-p)))))
 
-(define (do-newcount globalp)
- (cond ((not globalp) (set! globalp (globally-p)) globalp) (else false))
- (tex-def-countdef (get-ctl-seq) (gen-regno 10) 0 globalp))
+(define (do-newcount . %lambda-rest-arg)
+ (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (globalp false))
+   (when (< 0 %lambda-rest-arg-len)
+     (set! globalp (list-ref %lambda-rest-arg 0)))
+   (cond ((not globalp) (set! globalp (globally-p)) globalp) (else false))
+   (tex-def-countdef (get-ctl-seq) (gen-regno 10) 0 globalp)))
 
 (define (find-count num)
  (or
@@ -6868,7 +6871,7 @@
                  (emit *navigation-sentence-end*) (emit "]"))
                 (else false))))))))))
 
-(define (do-eject)
+(define (do-eject) (ignorespaces)
  (cond
   ((tex2page-flag-boolean "\\TZPslides") (do-end-para) (emit "</div>")
    (emit-newline) (emit "<div class=slide>") (do-para))

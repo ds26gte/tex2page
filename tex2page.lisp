@@ -10,7 +10,6 @@
 ":"; elif test "$LISP" = sbcl; then exec sbcl --script $0 "$@"
 ":"; fi
 
-;Common Lisp version of
 ;tex2page
 ;Dorai Sitaram
 ;For details, see
@@ -35,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170129") ;last change
+(defparameter *tex2page-version* "20170131") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -7982,9 +7981,7 @@
     (princ
       "body {
       color: black;
-      /* background-color: hsl(0,0%,90%); beige */
       background-color: white;
-      /* background-color: hsl(60,56%,91%); */
       margin-top: 2em;
       margin-bottom: 2em;
       /* margin-left: 8%;
@@ -8166,22 +8163,6 @@
       list-style-type: circle;
       }
 
-      /*
-      tt i {
-      font-family: serif;
-      }
-
-      .verbatim em {
-      font-family: serif;
-      }
-      */
-
-      /*
-      .verbatim {
-      color: hsl(0,100%,15%);
-      }
-      */
-
       .verbatim {
       background-color: hsl(0,0%,96%);
       }
@@ -8201,11 +8182,6 @@
 
       .schemeresponse {
       color: hsl(120,100%,20%);
-      }
-
-      a:hover {
-      text-decoration: none;
-      background-color: hsl(60,80%,74%);
       }
 
       .navigation {
@@ -8257,19 +8233,6 @@
       .smallcaps {
       font-size: 75%;
       }
-
-      .smallprint {
-      color: hsl(0,0%,50%);
-      font-size: 75%;
-      text-align: right;
-      }
-
-      /*
-      .smallprint hr {
-      text-align: left;
-      width: 40%;
-      }
-      */
 
       .footnotemark {
       background-color: hsl(60,80%,74%);

@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
 
 
-(define *tex2page-version* "20170129")
+(define *tex2page-version* "20170131")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -13705,9 +13705,7 @@
        (else (open-input-file %f)))))
    (display "body {
       color: black;
-      /* background-color: hsl(0,0%,90%); beige */
       background-color: white;
-      /* background-color: hsl(60,56%,91%); */
       margin-top: 2em;
       margin-bottom: 2em;
       /* margin-left: 8%;
@@ -13889,22 +13887,6 @@
       list-style-type: circle;
       }
 
-      /*
-      tt i {
-      font-family: serif;
-      }
-
-      .verbatim em {
-      font-family: serif;
-      }
-      */
-
-      /*
-      .verbatim {
-      color: hsl(0,100%,15%);
-      }
-      */
-
       .verbatim {
       background-color: hsl(0,0%,96%);
       }
@@ -13924,11 +13906,6 @@
 
       .schemeresponse {
       color: hsl(120,100%,20%);
-      }
-
-      a:hover {
-      text-decoration: none;
-      background-color: hsl(60,80%,74%);
       }
 
       .navigation {
@@ -13980,19 +13957,6 @@
       .smallcaps {
       font-size: 75%;
       }
-
-      .smallprint {
-      color: hsl(0,0%,50%);
-      font-size: 75%;
-      text-align: right;
-      }
-
-      /*
-      .smallprint hr {
-      text-align: left;
-      width: 40%;
-      }
-      */
 
       .footnotemark {
       background-color: hsl(60,80%,74%);

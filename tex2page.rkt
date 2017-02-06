@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
 
 
-(define *tex2page-version* "20170131")
+(define *tex2page-version* "20170206")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -12350,7 +12350,7 @@
    (cond (*scm-dribbling-p* (display s *verb-stream*) (newline *verb-stream*))
          (else false))
    (let ((%fluid-var-*catcodes* *catcodes*))
-     (fluid-let ((*catcodes* %fluid-var-*catcodes*)) (catcode #\\ 11)
+     (fluid-let ((*catcodes* %fluid-var-*catcodes*)) (catcode #\\ 0)
       (catcode *esc-char-verb* 11) (tex2page-string s)))
    (do-end-para)
    (emit "</span>")
@@ -13896,12 +13896,14 @@
       font-family: serif;
       }
 
-      .scheme             {color: hsl(280,33%,30%)} /* background punctuation, was hsl(0,50%,40%) */
-      .scheme  .selfeval  {color: hsl(120,100%,20%)}
-      .scheme  .keyword   {color: hsl(0,100%,20%); font-weight: bold}
-      .scheme  .builtin   {color: hsl(0,100%,20%)}
-      .scheme  .global    {color: hsl(300,100%,20%)}
-      .scheme  .variable  {color: hsl(240,100%,20%)}
+      /* scheme background punctuation was hsl(0,50%,40%) */
+
+      .scheme             {color: hsl(280,33%,30%)} /* background punctuation */
+      .scheme  .selfeval  {color: hsl(120,100%,20%); font-style: normal}
+      .scheme  .keyword   {color: hsl(0,100%,20%);   font-style: normal; font-weight: bold}
+      .scheme  .builtin   {color: hsl(0,100%,20%);   font-style: normal}
+      .scheme  .global    {color: hsl(300,100%,20%); font-style: normal}
+      .scheme  .variable  {color: hsl(240,100%,20%); font-style: normal}
       .scheme  .comment   {color: hsl(180,100%,20%); font-style: oblique}
 
       .schemeresponse {

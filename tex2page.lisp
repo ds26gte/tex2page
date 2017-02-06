@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170131") ;last change
+(defparameter *tex2page-version* "20170206") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -7115,7 +7115,7 @@
     (emit "<span class=comment>")
     (when *scm-dribbling-p* (princ s *verb-stream*) (terpri *verb-stream*))
     (let ((*catcodes* *catcodes*))
-        (catcode #\\ 11) (catcode *esc-char-verb* 11)
+      (catcode #\\ 0) (catcode *esc-char-verb* 11)
       (tex2page-string s))
     (do-end-para)
     (emit "</span>")
@@ -8172,12 +8172,14 @@
       font-family: serif;
       }
 
-      .scheme             {color: hsl(280,33%,30%)} /* background punctuation, was hsl(0,50%,40%) */
-      .scheme  .selfeval  {color: hsl(120,100%,20%)}
-      .scheme  .keyword   {color: hsl(0,100%,20%); font-weight: bold}
-      .scheme  .builtin   {color: hsl(0,100%,20%)}
-      .scheme  .global    {color: hsl(300,100%,20%)}
-      .scheme  .variable  {color: hsl(240,100%,20%)}
+      /* scheme background punctuation was hsl(0,50%,40%) */
+
+      .scheme             {color: hsl(280,33%,30%)} /* background punctuation */
+      .scheme  .selfeval  {color: hsl(120,100%,20%); font-style: normal}
+      .scheme  .keyword   {color: hsl(0,100%,20%);   font-style: normal; font-weight: bold}
+      .scheme  .builtin   {color: hsl(0,100%,20%);   font-style: normal}
+      .scheme  .global    {color: hsl(300,100%,20%); font-style: normal}
+      .scheme  .variable  {color: hsl(240,100%,20%); font-style: normal}
       .scheme  .comment   {color: hsl(180,100%,20%); font-style: oblique}
 
       .schemeresponse {

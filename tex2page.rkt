@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
 
 
-(define *tex2page-version* "20170206")
+(define *tex2page-version* "20170207")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -735,8 +735,6 @@
 (define *tex-format* false)
 
 (define *tex-if-stack* null)
-
-(define *tex-like-layout-p* false)
 
 (define *tex-output-format* false)
 
@@ -3977,8 +3975,12 @@
      (do-eject))
     (else (tex-gdef-0arg "\\TIIPtitleused" "1") (do-para))))
   (else false))
- (cond ((and (= seclvl 1) (tex2page-flag-boolean "\\TZPslides")) (do-eject))
-       (else false))
+ (cond
+  ((and (= seclvl 1)
+        (or (tex2page-flag-boolean "\\TIIPslides")
+            (tex2page-flag-boolean "\\TZPslides")))
+   (do-eject))
+  (else false))
  (increment-section-counter seclvl nonum-p)
  (cond (lbl-val (set! nonum-p false) nonum-p) (else false))
  (cond
@@ -4616,7 +4618,11 @@
                                           (> tocdepth 1)))))))
                    (cond
                     (subentries-p
-                     (if *tex-like-layout-p* (do-bigskip ':medskip) (do-para))
+                     (if
+                      (or (tex2page-flag-boolean "\\TIIPtexlayout")
+                          (tex2page-flag-boolean "\\TZPtexlayout"))
+                      (do-bigskip ':medskip)
+                      (do-para))
                      (do-noindent) (emit "<b>") (emit-newline))
                     (else false))
                    (indent-n-levels lvl)
@@ -6594,8 +6600,11 @@
 
 (define (do-itemize) (do-end-para)
  (set! *tabular-stack* (cons ':itemize *tabular-stack*)) (emit "<ul")
- (cond ((tex2page-flag-boolean "\\TZPslides") (emit " class=incremental"))
-       (else false))
+ (cond
+  ((or (tex2page-flag-boolean "\\TIIPslides")
+       (tex2page-flag-boolean "\\TZPslides"))
+   (emit " class=incremental"))
+  (else false))
  (emit ">") (emit-newline))
 
 (define (do-enditemize) (do-end-para) (pop-tabular-stack ':itemize)
@@ -6603,8 +6612,11 @@
 
 (define (do-enumerate) (do-end-para)
  (set! *tabular-stack* (cons ':enumerate *tabular-stack*)) (emit "<ol")
- (cond ((tex2page-flag-boolean "\\TZPslides") (emit " class=incremental"))
-       (else false))
+ (cond
+  ((or (tex2page-flag-boolean "\\TIIPslides")
+       (tex2page-flag-boolean "\\TZPslides"))
+   (emit " class=incremental"))
+  (else false))
  (emit ">") (emit-newline))
 
 (define (do-endenumerate) (pop-tabular-stack ':enumerate) (do-end-para)
@@ -6733,12 +6745,13 @@
 
 (define (output-head-or-foot-line head-or-foot)
  (cond
-  ((not (tex2page-flag-boolean "\\TZPsinglepage")) (do-end-para)
-   (emit "<div class=navigation>")
+  ((not
+    (or (tex2page-flag-boolean "\\TIIPsinglepage")
+        (tex2page-flag-boolean "\\TZPsinglepage")))
+   (do-end-para) (emit "<div class=navigation>")
    (cond
-    ((or *tex-like-layout-p*
-         (and (eq? head-or-foot ':foot)
-              (tex2page-flag-boolean "\\TZPtexlayout")))
+    ((or (tex2page-flag-boolean "\\TIIPtexlayout")
+         (tex2page-flag-boolean "\\TZPtexlayout"))
      (bgroup) (tex-let "\\folio" "\\TIIPfolio" false)
      (tex2page-string
       (if (eq? head-or-foot ':head) "\\the\\headline" "\\the\\footline"))
@@ -6873,9 +6886,13 @@
 
 (define (do-eject) (ignorespaces)
  (cond
-  ((tex2page-flag-boolean "\\TZPslides") (do-end-para) (emit "</div>")
-   (emit-newline) (emit "<div class=slide>") (do-para))
-  ((tex2page-flag-boolean "\\TZPsinglepage") true)
+  ((or (tex2page-flag-boolean "\\TIIPslides")
+       (tex2page-flag-boolean "\\TZPslides"))
+   (do-end-para) (emit "</div>") (emit-newline) (emit "<div class=slide>")
+   (do-para))
+  ((or (tex2page-flag-boolean "\\TIIPsinglepage")
+       (tex2page-flag-boolean "\\TZPsinglepage"))
+   true)
   (else
    (cond
     ((not
@@ -6952,8 +6969,11 @@
  (emit "<meta name=robots content=\"index,follow\">") (emit-newline)
  (for-each emit *html-head*) (emit "</head>") (emit-newline) (emit "<body>")
  (emit-newline) (emit "<div")
- (cond ((tex2page-flag-boolean "\\TZPslides") (emit " class=slide"))
-       (else false))
+ (cond
+  ((or (tex2page-flag-boolean "\\TIIPslides")
+       (tex2page-flag-boolean "\\TZPslides"))
+   (emit " class=slide"))
+  (else false))
  (emit ">") (emit-newline))
 
 (define (output-html-postamble) (do-end-para) (emit "</div>") (emit-newline)
@@ -7133,7 +7153,9 @@
                        (%concatenate-loop (cdr %ee)))))
                %res)))
           (the-dimen "\\TIIPhsize"))
-         (*tex-like-layout-p* (the-dimen "\\hsize"))
+         ((or (tex2page-flag-boolean "\\TIIPtexlayout")
+              (tex2page-flag-boolean "\\TZPtexlayout"))
+          (the-dimen "\\hsize"))
          (else false))))
    (cond
     (hsize (display "body { max-width: " *css-stream*)
@@ -7206,9 +7228,8 @@
  (cond ((tex2page-flag-boolean "\\TZPsinglepage") (write-aux '(!single-page)))
        (else false))
  (cond
-  ((tex2page-flag-boolean "\\TZPtexlayout") (set! *tex-like-layout-p* true)
-   (write-aux '(!tex-like-layout)) (newline *css-stream*)
-   (display "body { margin-top: " *css-stream*)
+  ((tex2page-flag-boolean "\\TZPtexlayout") (write-aux '(!tex-like-layout))
+   (newline *css-stream*) (display "body { margin-top: " *css-stream*)
    (display (sp-to-ems (+ (tex-length 0.5 ':in) (the-dimen "\\voffset")))
     *css-stream*)
    (display "em; }" *css-stream*) (newline *css-stream*)
@@ -12491,7 +12512,8 @@
    (bgroup)
    (let ((%fluid-var-*catcodes* *catcodes*)
          (%fluid-var-*verb-display-p* display-p)
-         (nesting 0))
+         (nesting 0)
+         (c false))
      (fluid-let
       ((*verb-display-p* %fluid-var-*verb-display-p*)
        (*catcodes* %fluid-var-*catcodes*))
@@ -12504,28 +12526,33 @@
                 (set! %loop-result (and (pair? %args) (car %args))))))
         (let %loop
           ()
-          (let ((c (snoop-actual-char)))
-            (cond ((not c) (terror 'do-scm-braced "Eof inside verbatim"))
-                  (else false))
-            (cond
-             ((= (catcode c) **escape**)
-              (let ((x (get-ctl-seq)))
-                (cond
-                 ((member x '("\\ " "\\{" "\\}"))
-                  (scm-emit-html-char (string-ref x 1)))
-                 (else
-                  (let ((%fluid-var-*catcodes* *catcodes*))
-                    (fluid-let ((*catcodes* %fluid-var-*catcodes*))
-                     (catcode #\\ 0) (do-tex-ctl-seq-completely x)))))))
-             ((char=? c #\{) (get-actual-char) (scm-emit-html-char c)
-              (set! nesting (+ nesting 1)) nesting)
-             ((char=? c #\}) (get-actual-char)
-              (cond ((= nesting 0) (return)) (else false))
-              (scm-emit-html-char c) (set! nesting (- nesting 1)) nesting)
-             (else (scm-output-next-chunk))))
+          (set! c (snoop-actual-char))
+          (cond ((not c) (terror 'do-scm-braced "Eof inside verbatim"))
+                (else false))
+          (cond
+           ((= (catcode c) **escape**)
+            (let ((x (get-ctl-seq)))
+              (cond
+               ((member x '("\\ " "\\{" "\\}"))
+                (scm-emit-html-char (string-ref x 1)))
+               (else
+                (let ((%fluid-var-*catcodes* *catcodes*))
+                  (fluid-let ((*catcodes* %fluid-var-*catcodes*))
+                   (catcode #\\ 0) (do-tex-ctl-seq-completely x)))))))
+           ((char=? c #\{) (get-actual-char) (scm-emit-html-char c)
+            (set! nesting (+ nesting 1)) nesting)
+           ((char=? c #\}) (get-actual-char)
+            (case nesting
+              ((0) (return))
+              (else
+               (scm-emit-html-char c)
+               (set! nesting (- nesting 1))
+               nesting)))
+           (else (scm-output-next-chunk)))
           (if %loop-returned %loop-result (%loop))))))
    (egroup)
-   (if (not display-p) (emit "</code>") (begin (emit "</pre>") (do-noindent)))))
+   (cond ((not display-p) (emit "</code>"))
+         (else (emit "</pre>") (do-noindent)))))
 
 (define (do-scm-delimed result-p)
  (let ((d (get-actual-char)))
@@ -12535,7 +12562,8 @@
        (cond (result-p (emit "response")) (else false)) (emit ">"))
       (else (do-end-para) (emit "<pre class=scheme>")))
      (let ((%fluid-var-*verb-display-p* display-p)
-           (%fluid-var-*scm-token-delims* (cons d *scm-token-delims*)))
+           (%fluid-var-*scm-token-delims* (cons d *scm-token-delims*))
+           (c false))
        (fluid-let
         ((*scm-token-delims* %fluid-var-*scm-token-delims*)
          (*verb-display-p* %fluid-var-*verb-display-p*))
@@ -12547,11 +12575,11 @@
                   (set! %loop-result (and (pair? %args) (car %args))))))
           (let %loop
             ()
-            (let ((c (snoop-actual-char)))
-              (cond ((not c) (terror 'do-scm-delimed "Eof inside verbatim"))
-                    (else false))
-              (cond ((char=? c d) (get-actual-char) (return)) (else false))
-              (scm-output-next-chunk))
+            (set! c (snoop-actual-char))
+            (cond ((not c) (terror 'do-scm-delimed "Eof inside verbatim"))
+                  (else false))
+            (cond ((char=? c d) (get-actual-char) (return)) (else false))
+            (unless %loop-returned (scm-output-next-chunk))
             (if %loop-returned %loop-result (%loop))))))
      (cond ((not display-p) (emit "</code>"))
            (else (emit "</pre>") (do-noindent))))))
@@ -12573,7 +12601,8 @@
 (define (do-scminput) (ignorespaces) (do-end-para) (bgroup)
  (emit "<pre class=scheme>")
  (let ((f
-        (add-dot-tex-if-no-extension-provided (get-filename-possibly-braced))))
+        (add-dot-tex-if-no-extension-provided (get-filename-possibly-braced)))
+       (c false))
    (call-with-input-file/buffered f
     (lambda ()
       (let* ((%loop-returned false)
@@ -12584,9 +12613,9 @@
                 (set! %loop-result (and (pair? %args) (car %args))))))
         (let %loop
           ()
-          (let ((c (snoop-actual-char)))
-            (cond ((not c) (return)) (else false))
-            (scm-output-next-chunk))
+          (set! c (snoop-actual-char))
+          (cond ((not c) (return)) (else false))
+          (unless %loop-returned (scm-output-next-chunk))
           (if %loop-returned %loop-result (%loop)))))))
  (emit "</pre>") (egroup) (do-noindent))
 
@@ -14118,7 +14147,7 @@
        (write-aux '(!definitely-latex)))
       (else false)))))
 
-(define (!tex-like-layout) (set! *tex-like-layout-p* true) *tex-like-layout-p*)
+(define (!tex-like-layout) (tex-def-0arg "\\TIIPtexlayout" "1"))
 
 (define (!head-line e) (tex-def-toksdef "\\headline" false e true))
 
@@ -14158,9 +14187,9 @@
 
 (define (!last-page-number n) (set! *last-page-number* n) *last-page-number*)
 
-(define (!single-page) (tex-def-0arg "\\TZPsinglepage" "1"))
+(define (!single-page) (tex-def-0arg "\\TIIPsinglepage" "1"))
 
-(define (!slides) (tex-def-0arg "\\TZPslides" "1"))
+(define (!slides) (tex-def-0arg "\\TIIPslides" "1"))
 
 (define (!script jsf)
  (cond
@@ -15780,7 +15809,7 @@ Try the commands
 
 (tex-let-prim "\\path" "\\verb")
 
-(tex-def-prim "\\scm" (lambda () (do-scm false)))
+(tex-def-prim "\\scm" do-scm)
 
 (tex-def-prim "\\scminput" do-scminput)
 
@@ -18109,7 +18138,6 @@ Try the commands
        (%fluid-var-*tex-env* null)
        (%fluid-var-*tex-format* ':plain)
        (%fluid-var-*tex-if-stack* null)
-       (%fluid-var-*tex-like-layout-p* *tex-like-layout-p*)
        (%fluid-var-*tex-output-format* false)
        (%fluid-var-*tex2page-inputs*
         (string=split (getenv "TEX2PAGEINPUTS") *path-separator*))
@@ -18141,7 +18169,6 @@ Try the commands
      (*title* %fluid-var-*title*)
      (*tex2page-inputs* %fluid-var-*tex2page-inputs*)
      (*tex-output-format* %fluid-var-*tex-output-format*)
-     (*tex-like-layout-p* %fluid-var-*tex-like-layout-p*)
      (*tex-if-stack* %fluid-var-*tex-if-stack*)
      (*tex-format* %fluid-var-*tex-format*) (*tex-env* %fluid-var-*tex-env*)
      (*temporarily-use-utf8-for-math-p*

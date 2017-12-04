@@ -1,4 +1,9 @@
-Last change 2017-12-03
+Last change 2017-12-04
+
+2017 Dec 4
+
+\hbox, \mbox can be followed by a single character token, i.e., not necessarily
+a group.
 
 2017 Dec 3
 

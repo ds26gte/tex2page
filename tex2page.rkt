@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
 
 
-(define *tex2page-version* "20171203")
+(define *tex2page-version* "20171204")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -4306,7 +4306,8 @@
           %pop-top-value)))
    (cond
     ((not (eq? type-in-stack type))
-     (terror 'pop-tabular-stack "Bad environment closer: " type type-in-stack))
+     (terror 'pop-tabular-stack "Bad environment closer: " type " "
+      type-in-stack))
     (else false))))
 
 (define (do-end-table/figure type)
@@ -9769,8 +9770,11 @@
 
 (define (do-hbox) (ignorespaces) (get-to) (eat-dimen) (ignorespaces)
  (let ((c (snoop-actual-char)))
-   (case c ((#\{) true) ((#\\) (get-ctl-seq))))
- (get-actual-char) (bgroup)
+   (case c
+     ((#\{) (get-actual-char))
+     ((#\\) (get-ctl-seq))
+     (else (get-actual-char) (toss-back-char #\}) (toss-back-char c))))
+ (bgroup)
  (add-postlude-to-top-frame
   (let ((old-math-mode-p *math-mode-p*)
         (old-in-display-math-p *in-display-math-p*)

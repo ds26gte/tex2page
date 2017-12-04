@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20171203") ;last change
+(defparameter *tex2page-version* "20171204") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -2576,7 +2576,7 @@
   (declare (keyword type))
   (let ((type-in-stack (pop *tabular-stack*)))
     (unless (eq type-in-stack type)
-      (terror 'pop-tabular-stack "Bad environment closer: " type type-in-stack))))
+      (terror 'pop-tabular-stack "Bad environment closer: " type " " type-in-stack))))
 
 ;(trace pop-tabular-stack)
 
@@ -5580,9 +5580,10 @@
   (ignorespaces)
   (let ((c (snoop-actual-char)))
     (case c
-      (#\{ t)
-      (#\\ (get-ctl-seq))))
-  (get-actual-char)
+      (#\{ (get-actual-char))
+      (#\\ (get-ctl-seq)) ;FIXME, may not be \bgroup
+      (t (get-actual-char) (toss-back-char #\})
+         (toss-back-char c))))
   (bgroup)
   (add-postlude-to-top-frame
     (let ((old-math-mode-p *math-mode-p*)

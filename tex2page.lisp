@@ -2383,6 +2383,7 @@
          (nonum-p (or starred-p too-deep-p))
          (header
           (let ((*tabular-stack* (list :header)))
+            (get-bracketed-text-if-any) ;FIXME
             (tex-string-to-html-string (get-group)))))
     (do-heading-help seclvl starred-p nonum-p nil nil header)))
 
@@ -5244,6 +5245,8 @@
     (tex-def-thunk (concatenate 'string foo "false")
                    (lambda () (plain-count foo-register 0 nil)) nil)))
 
+;(trace do-newif)
+
 (defun do-htmlimg (env)
   (call-with-html-image-stream (lambda (o) (dump-till-end-env env o))))
 
@@ -5672,6 +5675,8 @@
     (bgroup)
     (setq *math-delim-left* :lparen
           *math-delim-right* :rparen)))
+
+;(trace do-pmatrix)
 
 (defun do-over ()
   (emit
@@ -9253,6 +9258,7 @@ Try the commands
 (tex-def-math-prim "\\matrix" #'do-relax)
 
 (tex-def-math-prim "\\pmatrix" #'do-pmatrix)
+(tex-def-math-prim "\\bordermatrix" #'do-pmatrix) ;FIXME
 
 (tex-def-math-prim "\\eqalign" (lambda () (do-eqalign :eqalign)))
 (tex-def-math-prim "\\displaylines" (lambda () (do-eqalign :displaylines)))

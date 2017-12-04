@@ -3970,6 +3970,7 @@
        (let ((header
               (let ((%fluid-var-*tabular-stack* (list ':header)))
                 (fluid-let ((*tabular-stack* %fluid-var-*tabular-stack*))
+                 (get-bracketed-text-if-any)
                  (tex-string-to-html-string (get-group))))))
          (do-heading-help seclvl starred-p nonum-p false false header))))))
 
@@ -15690,6 +15691,8 @@ Try the commands
 (tex-def-math-prim "\\matrix" do-relax)
 
 (tex-def-math-prim "\\pmatrix" do-pmatrix)
+
+(tex-def-math-prim "\\bordermatrix" do-pmatrix)
 
 (tex-def-math-prim "\\eqalign" (lambda () (do-eqalign ':eqalign)))
 

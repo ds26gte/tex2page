@@ -2,6 +2,10 @@ Last change 2017-12-04
 
 2017 Dec 4
 
+\bordermatrix = \pmatrix, for now.
+
+Ignore \chapter etc.'s optional arg for now.
+
 \hbox, \mbox can be followed by a single character token, i.e., not necessarily
 a group.
 

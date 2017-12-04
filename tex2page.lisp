@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20170207") ;last change
+(defparameter *tex2page-version* "20171203") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -253,6 +253,7 @@
 (defvar *aux-dir/* "")
 (defvar *aux-stream* nil)
 
+(defvar *basic-style* "")
 (defvar *bib-aux-stream* nil)
 (defvar *bibitem-num* 0)
 
@@ -895,6 +896,8 @@
                             (toss-back-char #\{)
                             (return nil))))))))))
 
+;(trace get-grouped-environment-name-if-any)
+
 (defun get-bracketed-text-if-any ()
   (ignorespaces)
   (let ((c (snoop-actual-char)))
@@ -1443,6 +1446,7 @@
             ((string= s "[") (setq *math-delim-left* :lbrack))
             ((string= s "\\{") (setq *math-delim-left* :lbrace))
             ((string= s "|") (setq *math-delim-left* :lvert))
+            ((string= s ".") (setq *math-delim-left* :nulldelim))
             (t (terror 'do-math-left))))))
 
 (defun do-math-right ()
@@ -1453,6 +1457,7 @@
             ((string= s "]") (setq *math-delim-right* :rbrack))
             ((string= s "\\}") (setq *math-delim-right* :rbrace))
             ((string= s "|") (setq *math-delim-right* :rvert))
+            ((string= s ".") (setq *math-delim-right* :nulldelim))
             (t (terror 'do-math-right)))
       (egroup))))
 
@@ -2212,7 +2217,7 @@
   (setq *in-para-p* t))
 
 (defun do-indent ()
-  (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
+  (let ((parindent (sp-to-pixels (the-dimen "\\parindent"))))
     (emit "<span style=\"margin-left: ")
     (emit parindent)
     (emit "pt\"></span>")))
@@ -2284,6 +2289,11 @@
                    (emit "\" />")
                    (emit-newline))))
     (mapc link-it *stylesheets*)
+    (when (or (tex2page-flag-boolean "\\TIIPsinglepage")
+              (tex2page-flag-boolean "\\TZPsinglepage"))
+      (emit "<style>") (emit-newline)
+      (emit *basic-style*)
+      (emit "</style>") (emit-newline))
     (funcall link-it (concatenate 'string *jobname* *css-file-suffix*))))
 
 (defun link-scripts ()
@@ -2564,8 +2574,11 @@
 
 (defun pop-tabular-stack (type)
   (declare (keyword type))
-  (unless (eq (pop *tabular-stack*) type)
-    (terror 'pop-tabular-stack "Bad environment closer: " type)))
+  (let ((type-in-stack (pop *tabular-stack*)))
+    (unless (eq type-in-stack type)
+      (terror 'pop-tabular-stack "Bad environment closer: " type type-in-stack))))
+
+;(trace pop-tabular-stack)
 
 (defun do-end-table/figure (type)
   (declare (keyword type))
@@ -2693,7 +2706,8 @@
              (emit (if (eql type :equation) "center" "right"))
              (emit ">")))))
 
-(defun do-end-equation ()
+(defun do-end-equation (type)
+  (when (and (eql type :eqnarray) (eat-star)) (setq type :eqnarray*))
   (do-end-para)
   (emit "</td>")
   (unless (or (eq (car *tabular-stack*) :eqnarray*)
@@ -2704,7 +2718,7 @@
   (emit "</tr>")
   (emit-newline)
   (emit "</table></div>")
-  (pop-tabular-stack :equation)
+  (pop-tabular-stack type)
   (setq *math-mode-p* nil
         *in-display-math-p* nil)
   (egroup)
@@ -3333,6 +3347,8 @@
   (declare (number sp))
   (floor (/ sp 65536)))
 
+;(trace sp-to-pixels)
+
 (defun get-scaled-points ()
   (let ((n (or (get-real) 1)))
     (ignorespaces)
@@ -3814,11 +3830,26 @@
 
 (defun do-hlend () (egroup) (emit-link-stop))
 
+(defun do-img-src (f)
+  (cond ((or (tex2page-flag-boolean "\\TIIPsinglepage")
+             (tex2page-flag-boolean "\\TZPsinglepage"))
+         (let ((tmpf (concatenate 'string *aux-dir/* *jobname* "-Z-Z.temp")))
+           (system (concatenate 'string "echo -n data: > " tmpf))
+           (system (concatenate 'string "file -bN --mime-type " f " >> " tmpf))
+           (system (concatenate 'string "echo -n \\;base64, >> " tmpf))
+           (system (concatenate 'string "base64 -w0 < " f " >> " tmpf))
+           (with-open-file (i tmpf :direction :input)
+             (loop
+               (let ((c (read-char i nil)))
+                 (if c (emit c) (return)))))
+           (ensure-file-deleted tmpf)))
+        (t (emit f))))
+
 (defun do-htmladdimg ()
   (let* ((align-info (get-bracketed-text-if-any))
          (url (fully-qualify-url (get-url))))
     (emit "<img src=\"")
-    (emit url)
+    (do-img-src url)
     (emit "\"")
     (emit " style=\"border: 0\"")
     (when align-info (tex2page-string align-info))
@@ -3837,7 +3868,7 @@
     (when height (emit " height=") (emit height))
     (when width (emit " width=") (emit width))
     (emit " src=\"")
-    (emit (fully-qualify-url (get-filename-possibly-braced)))
+    (do-img-src (fully-qualify-url (get-filename-possibly-braced)))
     (emit "\">")
     (ignorespaces)
     (get-ctl-seq)
@@ -3933,11 +3964,13 @@
       (emit "</b>")
       (emit-nbsp 2))))
 
+;(trace do-regular-item)
+
 (defun do-plain-item (n)
   (declare (fixnum n))
   (do-end-para)
   (emit-newline)
-  (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
+  (let ((parindent (sp-to-pixels (the-dimen "\\parindent"))))
     (emit "<p style=\"margin-left: ")
     (emit (* n parindent))
     (emit "pt; text-indent: 0pt\">")
@@ -3953,8 +3986,10 @@
     (emit-nbsp 2)
     (emit "</span></span>")))
 
+;(trace do-plain-item)
+
 (defun do-textindent ()
-  (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
+  (let ((parindent (sp-to-pixels (the-dimen "\\parindent"))))
     (do-noindent)
     (emit "<span style=\"margin-left: ")
     (emit parindent)
@@ -3990,6 +4025,8 @@
     (:description (do-description-item))
     ((:itemize :enumerate) (do-regular-item))
     (t (do-plain-item 1))))
+
+;(trace do-item)
 
 (defun do-itemize ()
   (do-end-para)
@@ -4747,6 +4784,7 @@
       (:lbrack (setq top "&#x23a1;" bot "&#x23a3;" ext "&#x23a2;" mid ext))
       (:lbrace (setq top "&#x23a7;" mid "&#x23a8;" bot "&#x23a9;" ext "&#x23aa;"))
       (:lvert (setq ext "&#x239c;" top ext mid ext bot ext))
+      (:nulldelim (setq ext "" top ext mid ext bot ext))
       (:rparen (setq top "&#x239e;" bot "&#x23a0;" ext "&#x239f;" mid ext))
       (:rbrack (setq top "&#x23a4;" bot "&#x23a6;" ext "&#x23a5;" mid ext))
       (:rbrace (setq top "&#x23ab;" mid "&#x23ac;" bot "&#x23ad;" ext "&#x23ae;"))
@@ -4807,11 +4845,13 @@
   (let ((display-p nil))
     (when (eql (snoop-actual-char) #\$) (setq display-p t) (get-actual-char))
     (let ((o (make-string-output-stream)))
-      (dump-till-char #\$ o)
-      (when display-p
-        (let ((c (get-actual-char)))
-          (when (or (not c) (not (char= c #\$)))
-            (terror 'do-math "Display math should end with $$."))))
+      (loop
+        (dump-till-char #\$ o)
+        (cond ((not display-p) (return))
+              (t (let ((c (get-actual-char)))
+                   (cond ((not c) (terror 'do-math "Display math should end with $$."))
+                         ((char= c #\$) (return))
+                         (t (princ #\$ o) (princ c o)))))))
       (funcall (if display-p #'do-display-math #'do-intext-math)
                (get-output-stream-string o)))))
 
@@ -5402,7 +5442,7 @@
       (when height (emit " height=") (emit height))
       (when width (emit " width=") (emit width))))
   (emit " src=\"")
-  (emit (fully-qualify-url image-file))
+  (do-img-src (fully-qualify-url image-file))
   (emit "\" ")
   (emit " alt=\"")
   (emit image-file)
@@ -6211,6 +6251,8 @@
     (unless ok-to-def-p
       (trace-if t "{" envname "} already defined"))))
 
+;(trace do-newenvironment)
+
 (defun tex-def-dotted-count (counter-name sec-num)
   (declare (string counter-name))
   (when sec-num
@@ -6273,6 +6315,8 @@
       (toss-back-string "\\begingroup")
       (do-end-para))))
 
+;(trace do-begin)
+
 (defun do-end ()
   (cond ((setq *it* (get-grouped-environment-name-if-any))
          (let ((env *it*))
@@ -6283,6 +6327,8 @@
            (toss-back-string (concatenate 'string "\\end" env))))
         (t (toss-back-char *invisible-space*)
            (toss-back-string "\\TIIPbye"))))
+
+;(trace do-end)
 
 (defun latex-argnum-to-plain-argpat (n)
   (declare (number n))
@@ -6328,7 +6374,7 @@
     (write-log :separation-space)
     (valid-img-file-p f)
     (emit "<img src=\"")
-    (emit img-file)
+    (do-img-src img-file)
     (emit "\"")
     (emit " style=\"border: 0\"")
     (emit " alt=\"")
@@ -7988,315 +8034,322 @@
         (system (concatenate 'string "del " f ".*"))))))
 
 (defun start-css-file ()
-  (let ((css-file (concatenate 'string *aux-dir/* *jobname* *css-file-suffix*)))
-    (setq *css-stream* (open css-file :direction :output
-                           :if-exists :supersede))
-    (princ
-      "body {
-      color: black;
-      background-color: white;
-      margin-top: 2em;
-      margin-bottom: 2em;
-      /* margin-left: 8%;
-      margin-right: 8%; */
-      }
+  (setq *basic-style* "body {
+        color: black;
+        background-color: white;
+        margin-top: 2em;
+        margin-bottom: 2em;
+        /* margin-left: 8%;
+        margin-right: 8%; */
+        }
 
-      @media screen {
-      body {
-      margin-left: 8%;
-      margin-right: 8%;
-      }
-      }
+        @media screen {
+        body {
+        margin-left: 8%;
+        margin-right: 8%;
+        }
+        }
 
-      @media print {
-      body {
-      text-align: justify;
-      }
-      }
+        @media amzn-kf8 {
+        body {
+        text-align: left;
+        }
+        }
 
-      @media print {
-      a:link, a:visited {
-      text-decoration: none;
-      color: black;
-      }
-      }
+        @media print {
+        body {
+        text-align: justify;
+        }
+        }
 
-      /* @media print {
-      p {
-      text-indent: 2em;
-      margin-top: 1ex;
-      margin-bottom: 0;
-      }
+        @media print {
+        a:link, a:visited {
+        text-decoration: none;
+        color: black;
+        }
+        }
 
-      } */
+        /* @media print {
+        p {
+        text-indent: 2em;
+        margin-top: 1ex;
+        margin-bottom: 0;
+        }
 
-      h1,h2,h3,h4,h5,h6 {
-      margin-top: .8em;
-      margin-bottom: .2em;  /* ?? */
-      }
+        } */
 
-      .title {
-      font-size: 200%;
-      font-weight: normal;
-      margin-top: 2.8em;
-      text-align: center;
-      }
+        h1,h2,h3,h4,h5,h6 {
+        margin-top: .8em;
+        margin-bottom: .2em;  /* ?? */
+        }
 
-      .partheading {
-      font-size: 100%;
-      }
+        .title {
+        font-size: 200%;
+        font-weight: normal;
+        margin-top: 2.8em;
+        text-align: center;
+        }
 
-      .chapterheading {
-      font-size: 100%;
-      }
+        .partheading {
+        font-size: 100%;
+        }
 
-      .tiny {
-      font-size: 40%;
-      }
+        .chapterheading {
+        font-size: 100%;
+        }
 
-      .scriptsize {
-      font-size: 60%;
-      }
+        .tiny {
+        font-size: 40%;
+        }
 
-      .footnotesize {
-      font-size: 75%;
-      }
+        .scriptsize {
+        font-size: 60%;
+        }
 
-      .small {
-      font-size: 90%;
-      }
+        .footnotesize {
+        font-size: 75%;
+        }
 
-      .normalsize {
-      font-size: 100%;
-      }
+        .small {
+        font-size: 90%;
+        }
 
-      .large {
-      font-size: 120%;
-      }
+        .normalsize {
+        font-size: 100%;
+        }
 
-      .largecap {
-      font-size: 150%;
-      }
+        .large {
+        font-size: 120%;
+        }
 
-      .largeup {
-      font-size: 200%;
-      }
+        .largecap {
+        font-size: 150%;
+        }
 
-      .huge {
-      font-size: 300%;
-      }
+        .largeup {
+        font-size: 200%;
+        }
 
-      .hugecap {
-      font-size: 350%;
-      }
+        .huge {
+        font-size: 300%;
+        }
 
-      p.noindent {
-      text-indent: 0;
-      margin-top: 0;
-      }
+        .hugecap {
+        font-size: 350%;
+        }
 
-      p.nopadding {
-      margin-top: 0;
-      margin-bottom: 0;
-      }
+        p.noindent {
+        text-indent: 0;
+        margin-top: 0;
+        }
 
-      pre {
-      overflow: auto;
-      margin-left: 2em;
-      /* background-color: hsl(0,0%,96%); */ /* Scheme version uncomment? */
-      }
+        p.nopadding {
+        margin-top: 0;
+        margin-bottom: 0;
+        }
 
-      blockquote {
-      /* background-color: hsl(0,35%,91%); */
-      margin-top: 2pt;
-      margin-bottom: 2pt;
-      margin-left: 2em;
-      }
+        pre {
+        overflow: auto;
+        margin-left: 2em;
+        /* background-color: hsl(0,0%,96%); */ /* Scheme version uncomment? */
+        }
 
-      .smallskip {
-      margin-top: 2pt;
-      margin-bottom: 2pt;
-      min-height: 4pt;
-      }
+        blockquote {
+        /* background-color: hsl(0,35%,91%); */
+        margin-top: 2pt;
+        margin-bottom: 2pt;
+        margin-left: 2em;
+        }
 
-      .medskip {
-      margin-top: 3pt;
-      margin-bottom: 3pt;
-      min-height: 7pt;
-      /*margin-top: 1.6em;
-      margin-bottom: 2.4em;
-      margin-top: 1em;
-      margin-bottom: 1.5em; */
-      /* top and bottom have to be different so successive \\...skips cause more spacing? */
-      }
+        .smallskip {
+        margin-top: 2pt;
+        margin-bottom: 2pt;
+        min-height: 4pt;
+        }
 
-      .bigskip {
-      margin-top: 4pt;
-      margin-bottom: 4pt;
-      min-height: 13pt;
-      /*margin-top: 2.8em;
-      margin-bottom: 3.4em;
-      margin-top: 2.4em;
-      margin-bottom: 1.6em; */
-      }
+        .medskip {
+        margin-top: 3pt;
+        margin-bottom: 3pt;
+        min-height: 7pt;
+        /*margin-top: 1.6em;
+        margin-bottom: 2.4em;
+        margin-top: 1em;
+        margin-bottom: 1.5em; */
+        /* top and bottom have to be different so successive \\...skips cause more spacing? */
+        }
 
-      .item {
-      font-style: oblique;
-      }
+        .bigskip {
+        margin-top: 4pt;
+        margin-bottom: 4pt;
+        min-height: 13pt;
+        /*margin-top: 2.8em;
+        margin-bottom: 3.4em;
+        margin-top: 2.4em;
+        margin-bottom: 1.6em; */
+        }
 
-      ol {
-      list-style-type: decimal;
-      }
+        .item {
+        font-style: oblique;
+        }
 
-      ol ol {
-      list-style-type: lower-alpha;
-      }
+        ol {
+        list-style-type: decimal;
+        }
 
-      ol ol ol {
-      list-style-type: lower-roman;
-      }
+        ol ol {
+        list-style-type: lower-alpha;
+        }
 
-      ol ol ol ol {
-      list-style-type: upper-alpha;
-      }
+        ol ol ol {
+        list-style-type: lower-roman;
+        }
 
-      ul {
-      list-style-type: disc;
-      }
+        ol ol ol ol {
+        list-style-type: upper-alpha;
+        }
 
-      ul ul {
-      list-style-type: circle;
-      }
+        ul {
+        list-style-type: disc;
+        }
 
-      ul ul ul {
-      list-style-type: square;
-      }
+        ul ul {
+        list-style-type: circle;
+        }
 
-      ul ul ul ul {
-      list-style-type: circle;
-      }
+        ul ul ul {
+        list-style-type: square;
+        }
 
-      .verbatim {
-      background-color: hsl(0,0%,96%);
-      }
+        ul ul ul ul {
+        list-style-type: circle;
+        }
 
-      .scheme em {
-      color: black;
-      font-family: serif;
-      }
+        .verbatim {
+        background-color: hsl(0,0%,96%);
+        }
 
-      /* scheme background punctuation was hsl(0,50%,40%) */
+        .scheme em {
+        color: black;
+        font-family: serif;
+        }
 
-      .scheme             {color: hsl(280,33%,30%)} /* background punctuation */
-      .scheme  .selfeval  {color: hsl(120,100%,20%); font-style: normal}
-      .scheme  .keyword   {color: hsl(0,100%,20%);   font-style: normal; font-weight: bold}
-      .scheme  .builtin   {color: hsl(0,100%,20%);   font-style: normal}
-      .scheme  .global    {color: hsl(300,100%,20%); font-style: normal}
-      .scheme  .variable  {color: hsl(240,100%,20%); font-style: normal}
-      .scheme  .comment   {color: hsl(180,100%,20%); font-style: oblique}
+        /* scheme background punctuation was hsl(0,50%,40%) */
 
-      .schemeresponse {
-      color: hsl(120,100%,20%);
-      }
+        .scheme             {color: hsl(280,33%,30%)} /* background punctuation */
+        .scheme  .selfeval  {color: hsl(120,100%,20%); font-style: normal}
+        .scheme  .keyword   {color: hsl(0,100%,20%);   font-style: normal; font-weight: bold}
+        .scheme  .builtin   {color: hsl(0,100%,20%);   font-style: normal}
+        .scheme  .global    {color: hsl(300,100%,20%); font-style: normal}
+        .scheme  .variable  {color: hsl(240,100%,20%); font-style: normal}
+        .scheme  .comment   {color: hsl(180,100%,20%); font-style: oblique}
 
-      .navigation {
-      color: hsl(20,100%,30%);
-      text-align: right;
-      font-size: medium;
-      font-style: italic;
-      }
+        .schemeresponse {
+        color: hsl(120,100%,20%);
+        }
 
-      @media print {
-      .navigation {
-      display: none;
-      }
-      }
+        .navigation {
+        color: hsl(20,100%,30%);
+        text-align: right;
+        font-size: medium;
+        font-style: italic;
+        }
 
-      .centerline {
-      text-align: center;
-      }
+        @media print {
+        .navigation {
+        display: none;
+        }
+        }
 
-      .leftline {
-      text-align: left;
-      }
+        .centerline {
+        text-align: center;
+        }
 
-      .rightline {
-      text-align: right;
-      }
+        .leftline {
+        text-align: left;
+        }
 
-      sup {
-      font-size: 61%; /* otherwise footnote numbers are horrible */
-      }
+        .rightline {
+        text-align: right;
+        }
 
-      .bibitem {
-      vertical-align: top;
-      }
+        sup {
+        font-size: 61%; /* otherwise footnote numbers are horrible */
+        }
 
-      table.mathdelim > td,th {
-      padding: 0;
-      }
+        .bibitem {
+        vertical-align: top;
+        }
 
-      table.mathdelim {
-      border-spacing: 0;
-      }
+        table.mathdelim > td,th {
+        padding: 0;
+        }
 
-      .disable {
-      /* color: hsl(0,0%,90%); */
-      color: hsl(0,0%,50%);
-      }
+        table.mathdelim {
+        border-spacing: 0;
+        }
 
-      .smallcaps {
-      font-size: 75%;
-      }
+        .disable {
+        /* color: hsl(0,0%,90%); */
+        color: hsl(0,0%,50%);
+        }
 
-      .footnotemark {
-      background-color: hsl(60,80%,74%);
-      }
+        .smallcaps {
+        font-size: 75%;
+        }
 
-      .footnote {
-      font-size: 90%;
-      }
+        .footnotemark {
+        background-color: hsl(60,80%,74%);
+        }
 
-      .footnoterule {
-      text-align: left;
-      width: 40%;
-      }
+        .footnote {
+        font-size: 90%;
+        }
 
-      @media print {
-      .footnoterule {
-      margin-top: 2em;
-      }
-      }
+        .footnoterule {
+        text-align: left;
+        width: 40%;
+        }
 
-      .colophon {
-      color: hsl(0,0%,50%);
-      font-size: 80%;
-      font-style: italic;
-      text-align: right;
-      margin-top: 1em;
-      }
+        @media print {
+        .footnoterule {
+        margin-top: 2em;
+        }
+        }
 
-      @media print {
-      .colophon .advertisement {
-      display: none;
-      }
-      }
+        .colophon {
+        color: hsl(0,0%,50%);
+        font-size: 80%;
+        font-style: italic;
+        text-align: right;
+        margin-top: 1em;
+        }
 
-      .colophon a {
-      color: hsl(0,0%,50%);
-      text-decoration: none;
-      }
+        @media print {
+        .colophon .advertisement {
+        display: none;
+        }
+        }
 
-      .slide h1.title {
-      font-weight: bold;
-      text-align: left;
-      }
+        .colophon a {
+        color: hsl(0,0%,50%);
+        text-decoration: none;
+        }
 
-      .slide h2.section {
-      margin-left: 0pt;
-      }
-      "
-      *css-stream*)))
+        .slide h1.title {
+        font-weight: bold;
+        text-align: left;
+        }
+
+        .slide h2.section {
+        margin-left: 0pt;
+        }
+        ")
+          (let ((css-file (concatenate 'string *aux-dir/* *jobname* *css-file-suffix*)))
+            (setq *css-stream* (open css-file :direction :output
+                                     :if-exists :supersede))
+            (unless (or (tex2page-flag-boolean "\\TIIPsinglepage")
+                        (tex2page-flag-boolean "\\TZPsinglepage"))
+              (princ *basic-style* *css-stream*))))
 
 (defun load-aux-file ()
   (let ((label-file
@@ -9321,7 +9374,7 @@ Try the commands
     (write-log img-file)
     (write-log :separation-space)
     (emit "<img src=\"")
-    (emit img-file)
+    (do-img-src img-file)
     (emit "\"")
     (when height (emit " height=") (emit height))
     (when rotated
@@ -9346,7 +9399,7 @@ Try the commands
                 ((eat-word "width") (setq width (get-pixels)))
                 (t (return))))
     (emit "<img src=\"")
-    (emit img-file)
+    (do-img-src img-file)
     (emit "\"")
     (when height (emit " height=") (emit height))
     (when rotated
@@ -10227,7 +10280,7 @@ Try the commands
 (tex-def-prim "\\dontuseimgforhtmlmathintext" (lambda () t)) ;obsolete
 
 (tex-def-prim "\\emph" (lambda () (do-function "\\emph")))
-(tex-def-prim "\\endalign" #'do-end-equation)
+(tex-def-prim "\\endalign" (lambda () (do-end-equation :align)))
 (tex-def-prim "\\endalltt" #'do-end-alltt)
 (tex-def-prim "\\endarray" #'do-end-tabular)
 (tex-def-prim "\\endcenter" #'do-end-block)
@@ -10237,8 +10290,8 @@ Try the commands
      (do-end-para)
      (emit "</dd></dl>")
      (do-noindent)))
-(tex-def-prim "\\endeqnarray" #'do-end-equation)
-(tex-def-prim "\\endequation" #'do-end-equation)
+(tex-def-prim "\\endeqnarray" (lambda () (do-end-equation :eqnarray)))
+(tex-def-prim "\\endequation" (lambda () (do-end-equation :equation)))
 (tex-def-prim "\\endenumerate" #'do-endenumerate)
 (tex-def-prim "\\endfigure" (lambda () (do-end-table/figure :figure)))
 (tex-def-prim "\\endflushleft" #'do-end-block)
@@ -10771,6 +10824,7 @@ Try the commands
         (*aux-dir/* "")
         (*aux-stream* nil)
         ;
+        (*basic-style* "")
         (*bib-aux-stream* nil)
         (*bibitem-num* 0)
         ;

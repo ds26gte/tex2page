@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
 
 
-(define *tex2page-version* "20170207")
+(define *tex2page-version* "20171203")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -513,6 +513,8 @@
 (define *aux-dir/* "")
 
 (define *aux-stream* false)
+
+(define *basic-style* "")
 
 (define *bib-aux-stream* false)
 
@@ -2766,6 +2768,7 @@
       ((string=? s "[") (set! *math-delim-left* ':lbrack) *math-delim-left*)
       ((string=? s "\\{") (set! *math-delim-left* ':lbrace) *math-delim-left*)
       ((string=? s "|") (set! *math-delim-left* ':lvert) *math-delim-left*)
+      ((string=? s ".") (set! *math-delim-left* ':nulldelim) *math-delim-left*)
       (else (terror 'do-math-left)))))
   (else false)))
 
@@ -2779,6 +2782,8 @@
       ((string=? s "\\}") (set! *math-delim-right* ':rbrace)
        *math-delim-right*)
       ((string=? s "|") (set! *math-delim-right* ':rvert) *math-delim-right*)
+      ((string=? s ".") (set! *math-delim-right* ':nulldelim)
+       *math-delim-right*)
       (else (terror 'do-math-right)))
      (egroup)))
   (else false)))
@@ -3678,7 +3683,7 @@
  (set! *in-para-p* true) *in-para-p*)
 
 (define (do-indent)
- (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
+ (let ((parindent (sp-to-pixels (the-dimen "\\parindent"))))
    (emit "<span style=\"margin-left: ")
    (emit parindent)
    (emit "pt\"></span>")))
@@ -3781,6 +3786,12 @@
           (emit "\" />")
           (emit-newline))))
    (for-each link-it *stylesheets*)
+   (cond
+    ((or (tex2page-flag-boolean "\\TIIPsinglepage")
+         (tex2page-flag-boolean "\\TZPsinglepage"))
+     (emit "<style>") (emit-newline) (emit *basic-style*) (emit "</style>")
+     (emit-newline))
+    (else false))
    (link-it
     (let ((%type 'string) (%ee (list *jobname* *css-file-suffix*)))
       (let ((%res (if (eq? %type 'string) "" null)))
@@ -4288,16 +4299,15 @@
 (define (do-end-table-plain) (do-end-para) (emit "</td></tr></table>"))
 
 (define (pop-tabular-stack type)
- (cond
-  ((not
-    (eq?
-     (let* ((%pop-old-stack *tabular-stack*)
-            (%pop-top-value (car %pop-old-stack)))
-       (begin (set! *tabular-stack* (cdr %pop-old-stack)) *tabular-stack*)
-       %pop-top-value)
-     type))
-   (terror 'pop-tabular-stack "Bad environment closer: " type))
-  (else false)))
+ (let ((type-in-stack
+        (let* ((%pop-old-stack *tabular-stack*)
+               (%pop-top-value (car %pop-old-stack)))
+          (begin (set! *tabular-stack* (cdr %pop-old-stack)) *tabular-stack*)
+          %pop-top-value)))
+   (cond
+    ((not (eq? type-in-stack type))
+     (terror 'pop-tabular-stack "Bad environment closer: " type type-in-stack))
+    (else false))))
 
 (define (do-end-table/figure type)
  (cond
@@ -4476,16 +4486,18 @@
      (emit (if (eqv? type ':equation) "center" "right"))
      (emit ">")))))
 
-(define (do-end-equation) (do-end-para) (emit "</td>")
+(define (do-end-equation type)
+ (cond ((and (eqv? type ':eqnarray) (eat-star)) (set! type ':eqnarray*) type)
+       (else false))
+ (do-end-para) (emit "</td>")
  (cond
   ((not
     (or (eq? (car *tabular-stack*) ':eqnarray*) (not *equation-numbered-p*)))
    (emit "<td>(") (emit *equation-number*) (emit ")</td>"))
   (else false))
- (emit "</tr>") (emit-newline) (emit "</table></div>")
- (pop-tabular-stack ':equation) (set! *math-mode-p* false)
- (set! *in-display-math-p* false) (egroup) (set! *equation-numbered-p* true)
- (set! *equation-position* 0) (do-para))
+ (emit "</tr>") (emit-newline) (emit "</table></div>") (pop-tabular-stack type)
+ (set! *math-mode-p* false) (set! *in-display-math-p* false) (egroup)
+ (set! *equation-numbered-p* true) (set! *equation-position* 0) (do-para))
 
 (define (do-integral)
  (if (or (not *in-display-math-p*) *math-script-mode-p*)
@@ -6347,11 +6359,127 @@
 
 (define (do-hlend) (egroup) (emit-link-stop))
 
+(define (do-img-src f)
+ (cond
+  ((or (tex2page-flag-boolean "\\TIIPsinglepage")
+       (tex2page-flag-boolean "\\TZPsinglepage"))
+   (let ((tmpf
+          (let ((%type 'string) (%ee (list *aux-dir/* *jobname* "-Z-Z.temp")))
+            (let ((%res (if (eq? %type 'string) "" null)))
+              (let %concatenate-loop
+                ((%ee %ee))
+                (if (null? %ee)
+                    %res
+                    (let ((%a (car %ee)))
+                      (unless (not %a)
+                        (set! %res
+                         (if (eq? %type 'string)
+                             (string-append %res
+                              (if (string? %a) %a (list->string %a)))
+                             (append %res
+                                     (if (string? %a) (string->list %a) %a)))))
+                      (%concatenate-loop (cdr %ee)))))
+              %res))))
+     (system
+      (let ((%type 'string) (%ee (list "echo -n data: > " tmpf)))
+        (let ((%res (if (eq? %type 'string) "" null)))
+          (let %concatenate-loop
+            ((%ee %ee))
+            (if (null? %ee)
+                %res
+                (let ((%a (car %ee)))
+                  (unless (not %a)
+                    (set! %res
+                     (if (eq? %type 'string)
+                         (string-append %res
+                          (if (string? %a) %a (list->string %a)))
+                         (append %res
+                                 (if (string? %a) (string->list %a) %a)))))
+                  (%concatenate-loop (cdr %ee)))))
+          %res)))
+     (system
+      (let ((%type 'string) (%ee (list "file -bN --mime-type " f " >> " tmpf)))
+        (let ((%res (if (eq? %type 'string) "" null)))
+          (let %concatenate-loop
+            ((%ee %ee))
+            (if (null? %ee)
+                %res
+                (let ((%a (car %ee)))
+                  (unless (not %a)
+                    (set! %res
+                     (if (eq? %type 'string)
+                         (string-append %res
+                          (if (string? %a) %a (list->string %a)))
+                         (append %res
+                                 (if (string? %a) (string->list %a) %a)))))
+                  (%concatenate-loop (cdr %ee)))))
+          %res)))
+     (system
+      (let ((%type 'string) (%ee (list "echo -n \\;base64, >> " tmpf)))
+        (let ((%res (if (eq? %type 'string) "" null)))
+          (let %concatenate-loop
+            ((%ee %ee))
+            (if (null? %ee)
+                %res
+                (let ((%a (car %ee)))
+                  (unless (not %a)
+                    (set! %res
+                     (if (eq? %type 'string)
+                         (string-append %res
+                          (if (string? %a) %a (list->string %a)))
+                         (append %res
+                                 (if (string? %a) (string->list %a) %a)))))
+                  (%concatenate-loop (cdr %ee)))))
+          %res)))
+     (system
+      (let ((%type 'string) (%ee (list "base64 -w0 < " f " >> " tmpf)))
+        (let ((%res (if (eq? %type 'string) "" null)))
+          (let %concatenate-loop
+            ((%ee %ee))
+            (if (null? %ee)
+                %res
+                (let ((%a (car %ee)))
+                  (unless (not %a)
+                    (set! %res
+                     (if (eq? %type 'string)
+                         (string-append %res
+                          (if (string? %a) %a (list->string %a)))
+                         (append %res
+                                 (if (string? %a) (string->list %a) %a)))))
+                  (%concatenate-loop (cdr %ee)))))
+          %res)))
+     (let ((i (open-input-file tmpf)))
+       (let ((%with-open-file-res
+              (let* ((%loop-returned false)
+                     (%loop-result 0)
+                     (return
+                      (lambda %args
+                        (set! %loop-returned true)
+                        (set! %loop-result (and (pair? %args) (car %args))))))
+                (let %loop
+                  ()
+                  (let ((c
+                         (let* ((%read-char-port i)
+                                (%read-char-res
+                                 (if %read-char-port
+                                     (read-char %read-char-port)
+                                     (read-char))))
+                           (when (eof-object? %read-char-res)
+                             (set! %read-char-res false))
+                           %read-char-res)))
+                    (if c (emit c) (return)))
+                  (if %loop-returned %loop-result (%loop))))))
+         (cond (i ((if (input-port? i) close-input-port close-output-port) i))
+               (else false))
+         %with-open-file-res))
+     (ensure-file-deleted tmpf)))
+  (else (emit f))))
+
 (define (do-htmladdimg)
  (let ((align-info (get-bracketed-text-if-any)))
    (let ((url (fully-qualify-url (get-url))))
      (emit "<img src=\"")
-     (emit url)
+     (do-img-src url)
      (emit "\"")
      (emit " style=\"border: 0\"")
      (cond (align-info (tex2page-string align-info)) (else false))
@@ -6378,7 +6506,7 @@
    (cond (height (emit " height=") (emit height)) (else false))
    (cond (width (emit " width=") (emit width)) (else false))
    (emit " src=\"")
-   (emit (fully-qualify-url (get-filename-possibly-braced)))
+   (do-img-src (fully-qualify-url (get-filename-possibly-braced)))
    (emit "\">")
    (ignorespaces)
    (get-ctl-seq)
@@ -6543,7 +6671,7 @@
     (else false))))
 
 (define (do-plain-item n) (do-end-para) (emit-newline)
- (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
+ (let ((parindent (sp-to-pixels (the-dimen "\\parindent"))))
    (emit "<p style=\"margin-left: ")
    (emit (* n parindent))
    (emit "pt; text-indent: 0pt\">")
@@ -6560,7 +6688,7 @@
    (emit "</span></span>")))
 
 (define (do-textindent)
- (let ((parindent (sp-to-pixels (find-dimen "\\parindent"))))
+ (let ((parindent (sp-to-pixels (the-dimen "\\parindent"))))
    (do-noindent)
    (emit "<span style=\"margin-left: ")
    (emit parindent)
@@ -7524,6 +7652,12 @@
       (set! mid ext)
       (set! bot ext)
       bot)
+     ((:nulldelim)
+      (set! ext "")
+      (set! top ext)
+      (set! mid ext)
+      (set! bot ext)
+      bot)
      ((:rparen)
       (set! top "&#x239e;")
       (set! bot "&#x23a0;")
@@ -7764,15 +7898,24 @@
     ((eqv? (snoop-actual-char) #\$) (set! display-p true) (get-actual-char))
     (else false))
    (let ((o (open-output-string)))
-     (dump-till-char #\$ o)
-     (cond
-      (display-p
-       (let ((c (get-actual-char)))
-         (cond
-          ((or (not c) (not (char=? c #\$)))
-           (terror 'do-math "Display math should end with $$."))
-          (else false))))
-      (else false))
+     (let* ((%loop-returned false)
+            (%loop-result 0)
+            (return
+             (lambda %args
+               (set! %loop-returned true)
+               (set! %loop-result (and (pair? %args) (car %args))))))
+       (let %loop
+         ()
+         (dump-till-char #\$ o)
+         (cond ((not display-p) (return))
+               (else
+                (let ((c (get-actual-char)))
+                  (cond
+                   ((not c)
+                    (terror 'do-math "Display math should end with $$."))
+                   ((char=? c #\$) (return))
+                   (else (display #\$ o) (display c o))))))
+         (if %loop-returned %loop-result (%loop))))
      ((if display-p do-display-math do-intext-math) (get-output-string o)))))
 
 (define (dump-till-char d o)
@@ -9354,7 +9497,7 @@
      (cond (height (emit " height=") (emit height)) (else false))
      (cond (width (emit " width=") (emit width)) (else false))))
   (else false))
- (emit " src=\"") (emit (fully-qualify-url image-file)) (emit "\" ")
+ (emit " src=\"") (do-img-src (fully-qualify-url image-file)) (emit "\" ")
  (emit " alt=\"") (emit image-file) (emit "\"") (emit ">"))
 
 (define (do-includegraphics)
@@ -10968,7 +11111,7 @@
        (write-log ':separation-space)
        (valid-img-file-p f)
        (emit "<img src=\"")
-       (emit img-file)
+       (do-img-src img-file)
        (emit "\"")
        (emit " style=\"border: 0\"")
        (emit " alt=\"")
@@ -13696,6 +13839,316 @@
   (else false)))
 
 (define (start-css-file)
+ (set! *basic-style* "body {
+        color: black;
+        background-color: white;
+        margin-top: 2em;
+        margin-bottom: 2em;
+        /* margin-left: 8%;
+        margin-right: 8%; */
+        }
+
+        @media screen {
+        body {
+        margin-left: 8%;
+        margin-right: 8%;
+        }
+        }
+
+        @media amzn-kf8 {
+        body {
+        text-align: left;
+        }
+        }
+
+        @media print {
+        body {
+        text-align: justify;
+        }
+        }
+
+        @media print {
+        a:link, a:visited {
+        text-decoration: none;
+        color: black;
+        }
+        }
+
+        /* @media print {
+        p {
+        text-indent: 2em;
+        margin-top: 1ex;
+        margin-bottom: 0;
+        }
+
+        } */
+
+        h1,h2,h3,h4,h5,h6 {
+        margin-top: .8em;
+        margin-bottom: .2em;  /* ?? */
+        }
+
+        .title {
+        font-size: 200%;
+        font-weight: normal;
+        margin-top: 2.8em;
+        text-align: center;
+        }
+
+        .partheading {
+        font-size: 100%;
+        }
+
+        .chapterheading {
+        font-size: 100%;
+        }
+
+        .tiny {
+        font-size: 40%;
+        }
+
+        .scriptsize {
+        font-size: 60%;
+        }
+
+        .footnotesize {
+        font-size: 75%;
+        }
+
+        .small {
+        font-size: 90%;
+        }
+
+        .normalsize {
+        font-size: 100%;
+        }
+
+        .large {
+        font-size: 120%;
+        }
+
+        .largecap {
+        font-size: 150%;
+        }
+
+        .largeup {
+        font-size: 200%;
+        }
+
+        .huge {
+        font-size: 300%;
+        }
+
+        .hugecap {
+        font-size: 350%;
+        }
+
+        p.noindent {
+        text-indent: 0;
+        margin-top: 0;
+        }
+
+        p.nopadding {
+        margin-top: 0;
+        margin-bottom: 0;
+        }
+
+        pre {
+        overflow: auto;
+        margin-left: 2em;
+        /* background-color: hsl(0,0%,96%); */ /* Scheme version uncomment? */
+        }
+
+        blockquote {
+        /* background-color: hsl(0,35%,91%); */
+        margin-top: 2pt;
+        margin-bottom: 2pt;
+        margin-left: 2em;
+        }
+
+        .smallskip {
+        margin-top: 2pt;
+        margin-bottom: 2pt;
+        min-height: 4pt;
+        }
+
+        .medskip {
+        margin-top: 3pt;
+        margin-bottom: 3pt;
+        min-height: 7pt;
+        /*margin-top: 1.6em;
+        margin-bottom: 2.4em;
+        margin-top: 1em;
+        margin-bottom: 1.5em; */
+        /* top and bottom have to be different so successive \\...skips cause more spacing? */
+        }
+
+        .bigskip {
+        margin-top: 4pt;
+        margin-bottom: 4pt;
+        min-height: 13pt;
+        /*margin-top: 2.8em;
+        margin-bottom: 3.4em;
+        margin-top: 2.4em;
+        margin-bottom: 1.6em; */
+        }
+
+        .item {
+        font-style: oblique;
+        }
+
+        ol {
+        list-style-type: decimal;
+        }
+
+        ol ol {
+        list-style-type: lower-alpha;
+        }
+
+        ol ol ol {
+        list-style-type: lower-roman;
+        }
+
+        ol ol ol ol {
+        list-style-type: upper-alpha;
+        }
+
+        ul {
+        list-style-type: disc;
+        }
+
+        ul ul {
+        list-style-type: circle;
+        }
+
+        ul ul ul {
+        list-style-type: square;
+        }
+
+        ul ul ul ul {
+        list-style-type: circle;
+        }
+
+        .verbatim {
+        background-color: hsl(0,0%,96%);
+        }
+
+        .scheme em {
+        color: black;
+        font-family: serif;
+        }
+
+        /* scheme background punctuation was hsl(0,50%,40%) */
+
+        .scheme             {color: hsl(280,33%,30%)} /* background punctuation */
+        .scheme  .selfeval  {color: hsl(120,100%,20%); font-style: normal}
+        .scheme  .keyword   {color: hsl(0,100%,20%);   font-style: normal; font-weight: bold}
+        .scheme  .builtin   {color: hsl(0,100%,20%);   font-style: normal}
+        .scheme  .global    {color: hsl(300,100%,20%); font-style: normal}
+        .scheme  .variable  {color: hsl(240,100%,20%); font-style: normal}
+        .scheme  .comment   {color: hsl(180,100%,20%); font-style: oblique}
+
+        .schemeresponse {
+        color: hsl(120,100%,20%);
+        }
+
+        .navigation {
+        color: hsl(20,100%,30%);
+        text-align: right;
+        font-size: medium;
+        font-style: italic;
+        }
+
+        @media print {
+        .navigation {
+        display: none;
+        }
+        }
+
+        .centerline {
+        text-align: center;
+        }
+
+        .leftline {
+        text-align: left;
+        }
+
+        .rightline {
+        text-align: right;
+        }
+
+        sup {
+        font-size: 61%; /* otherwise footnote numbers are horrible */
+        }
+
+        .bibitem {
+        vertical-align: top;
+        }
+
+        table.mathdelim > td,th {
+        padding: 0;
+        }
+
+        table.mathdelim {
+        border-spacing: 0;
+        }
+
+        .disable {
+        /* color: hsl(0,0%,90%); */
+        color: hsl(0,0%,50%);
+        }
+
+        .smallcaps {
+        font-size: 75%;
+        }
+
+        .footnotemark {
+        background-color: hsl(60,80%,74%);
+        }
+
+        .footnote {
+        font-size: 90%;
+        }
+
+        .footnoterule {
+        text-align: left;
+        width: 40%;
+        }
+
+        @media print {
+        .footnoterule {
+        margin-top: 2em;
+        }
+        }
+
+        .colophon {
+        color: hsl(0,0%,50%);
+        font-size: 80%;
+        font-style: italic;
+        text-align: right;
+        margin-top: 1em;
+        }
+
+        @media print {
+        .colophon .advertisement {
+        display: none;
+        }
+        }
+
+        .colophon a {
+        color: hsl(0,0%,50%);
+        text-decoration: none;
+        }
+
+        .slide h1.title {
+        font-weight: bold;
+        text-align: left;
+        }
+
+        .slide h2.section {
+        margin-left: 0pt;
+        }
+        ")
  (let ((css-file
         (let ((%type 'string)
               (%ee (list *aux-dir/* *jobname* *css-file-suffix*)))
@@ -13732,311 +14185,12 @@
         (open-output-file %f))
        ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
        (else (open-input-file %f)))))
-   (display "body {
-      color: black;
-      background-color: white;
-      margin-top: 2em;
-      margin-bottom: 2em;
-      /* margin-left: 8%;
-      margin-right: 8%; */
-      }
-
-      @media screen {
-      body {
-      margin-left: 8%;
-      margin-right: 8%;
-      }
-      }
-
-      @media print {
-      body {
-      text-align: justify;
-      }
-      }
-
-      @media print {
-      a:link, a:visited {
-      text-decoration: none;
-      color: black;
-      }
-      }
-
-      /* @media print {
-      p {
-      text-indent: 2em;
-      margin-top: 1ex;
-      margin-bottom: 0;
-      }
-
-      } */
-
-      h1,h2,h3,h4,h5,h6 {
-      margin-top: .8em;
-      margin-bottom: .2em;  /* ?? */
-      }
-
-      .title {
-      font-size: 200%;
-      font-weight: normal;
-      margin-top: 2.8em;
-      text-align: center;
-      }
-
-      .partheading {
-      font-size: 100%;
-      }
-
-      .chapterheading {
-      font-size: 100%;
-      }
-
-      .tiny {
-      font-size: 40%;
-      }
-
-      .scriptsize {
-      font-size: 60%;
-      }
-
-      .footnotesize {
-      font-size: 75%;
-      }
-
-      .small {
-      font-size: 90%;
-      }
-
-      .normalsize {
-      font-size: 100%;
-      }
-
-      .large {
-      font-size: 120%;
-      }
-
-      .largecap {
-      font-size: 150%;
-      }
-
-      .largeup {
-      font-size: 200%;
-      }
-
-      .huge {
-      font-size: 300%;
-      }
-
-      .hugecap {
-      font-size: 350%;
-      }
-
-      p.noindent {
-      text-indent: 0;
-      margin-top: 0;
-      }
-
-      p.nopadding {
-      margin-top: 0;
-      margin-bottom: 0;
-      }
-
-      pre {
-      overflow: auto;
-      margin-left: 2em;
-      /* background-color: hsl(0,0%,96%); */ /* Scheme version uncomment? */
-      }
-
-      blockquote {
-      /* background-color: hsl(0,35%,91%); */
-      margin-top: 2pt;
-      margin-bottom: 2pt;
-      margin-left: 2em;
-      }
-
-      .smallskip {
-      margin-top: 2pt;
-      margin-bottom: 2pt;
-      min-height: 4pt;
-      }
-
-      .medskip {
-      margin-top: 3pt;
-      margin-bottom: 3pt;
-      min-height: 7pt;
-      /*margin-top: 1.6em;
-      margin-bottom: 2.4em;
-      margin-top: 1em;
-      margin-bottom: 1.5em; */
-      /* top and bottom have to be different so successive \\...skips cause more spacing? */
-      }
-
-      .bigskip {
-      margin-top: 4pt;
-      margin-bottom: 4pt;
-      min-height: 13pt;
-      /*margin-top: 2.8em;
-      margin-bottom: 3.4em;
-      margin-top: 2.4em;
-      margin-bottom: 1.6em; */
-      }
-
-      .item {
-      font-style: oblique;
-      }
-
-      ol {
-      list-style-type: decimal;
-      }
-
-      ol ol {
-      list-style-type: lower-alpha;
-      }
-
-      ol ol ol {
-      list-style-type: lower-roman;
-      }
-
-      ol ol ol ol {
-      list-style-type: upper-alpha;
-      }
-
-      ul {
-      list-style-type: disc;
-      }
-
-      ul ul {
-      list-style-type: circle;
-      }
-
-      ul ul ul {
-      list-style-type: square;
-      }
-
-      ul ul ul ul {
-      list-style-type: circle;
-      }
-
-      .verbatim {
-      background-color: hsl(0,0%,96%);
-      }
-
-      .scheme em {
-      color: black;
-      font-family: serif;
-      }
-
-      /* scheme background punctuation was hsl(0,50%,40%) */
-
-      .scheme             {color: hsl(280,33%,30%)} /* background punctuation */
-      .scheme  .selfeval  {color: hsl(120,100%,20%); font-style: normal}
-      .scheme  .keyword   {color: hsl(0,100%,20%);   font-style: normal; font-weight: bold}
-      .scheme  .builtin   {color: hsl(0,100%,20%);   font-style: normal}
-      .scheme  .global    {color: hsl(300,100%,20%); font-style: normal}
-      .scheme  .variable  {color: hsl(240,100%,20%); font-style: normal}
-      .scheme  .comment   {color: hsl(180,100%,20%); font-style: oblique}
-
-      .schemeresponse {
-      color: hsl(120,100%,20%);
-      }
-
-      .navigation {
-      color: hsl(20,100%,30%);
-      text-align: right;
-      font-size: medium;
-      font-style: italic;
-      }
-
-      @media print {
-      .navigation {
-      display: none;
-      }
-      }
-
-      .centerline {
-      text-align: center;
-      }
-
-      .leftline {
-      text-align: left;
-      }
-
-      .rightline {
-      text-align: right;
-      }
-
-      sup {
-      font-size: 61%; /* otherwise footnote numbers are horrible */
-      }
-
-      .bibitem {
-      vertical-align: top;
-      }
-
-      table.mathdelim > td,th {
-      padding: 0;
-      }
-
-      table.mathdelim {
-      border-spacing: 0;
-      }
-
-      .disable {
-      /* color: hsl(0,0%,90%); */
-      color: hsl(0,0%,50%);
-      }
-
-      .smallcaps {
-      font-size: 75%;
-      }
-
-      .footnotemark {
-      background-color: hsl(60,80%,74%);
-      }
-
-      .footnote {
-      font-size: 90%;
-      }
-
-      .footnoterule {
-      text-align: left;
-      width: 40%;
-      }
-
-      @media print {
-      .footnoterule {
-      margin-top: 2em;
-      }
-      }
-
-      .colophon {
-      color: hsl(0,0%,50%);
-      font-size: 80%;
-      font-style: italic;
-      text-align: right;
-      margin-top: 1em;
-      }
-
-      @media print {
-      .colophon .advertisement {
-      display: none;
-      }
-      }
-
-      .colophon a {
-      color: hsl(0,0%,50%);
-      text-decoration: none;
-      }
-
-      .slide h1.title {
-      font-weight: bold;
-      text-align: left;
-      }
-
-      .slide h2.section {
-      margin-left: 0pt;
-      }
-      "
-    *css-stream*)))
+   (cond
+    ((not
+      (or (tex2page-flag-boolean "\\TIIPsinglepage")
+          (tex2page-flag-boolean "\\TZPsinglepage")))
+     (display *basic-style* *css-stream*))
+    (else false))))
 
 (define (load-aux-file)
  (let ((label-file
@@ -15720,7 +15874,7 @@ Try the commands
              (write-log img-file)
              (write-log ':separation-space)
              (emit "<img src=\"")
-             (emit img-file)
+             (do-img-src img-file)
              (emit "\"")
              (cond (height (emit " height=") (emit height)) (else false))
              (cond
@@ -15754,7 +15908,7 @@ Try the commands
              (else (return)))
        (if %loop-returned %loop-result (%loop))))
    (emit "<img src=\"")
-   (emit img-file)
+   (do-img-src img-file)
    (emit "\"")
    (cond (height (emit " height=") (emit height)) (else false))
    (cond
@@ -17054,7 +17208,7 @@ Try the commands
 
 (tex-def-prim "\\emph" (lambda () (do-function "\\emph")))
 
-(tex-def-prim "\\endalign" do-end-equation)
+(tex-def-prim "\\endalign" (lambda () (do-end-equation ':align)))
 
 (tex-def-prim "\\endalltt" do-end-alltt)
 
@@ -17069,9 +17223,9 @@ Try the commands
    (emit "</dd></dl>")
    (do-noindent)))
 
-(tex-def-prim "\\endeqnarray" do-end-equation)
+(tex-def-prim "\\endeqnarray" (lambda () (do-end-equation ':eqnarray)))
 
-(tex-def-prim "\\endequation" do-end-equation)
+(tex-def-prim "\\endequation" (lambda () (do-end-equation ':equation)))
 
 (tex-def-prim "\\endenumerate" do-endenumerate)
 
@@ -18034,6 +18188,7 @@ Try the commands
        (%fluid-var-*aux-dir* false)
        (%fluid-var-*aux-dir/* "")
        (%fluid-var-*aux-stream* false)
+       (%fluid-var-*basic-style* "")
        (%fluid-var-*bib-aux-stream* false)
        (%fluid-var-*bibitem-num* 0)
        (%fluid-var-*catcodes* *catcodes*)
@@ -18271,6 +18426,7 @@ Try the commands
      (*catcodes* %fluid-var-*catcodes*)
      (*bibitem-num* %fluid-var-*bibitem-num*)
      (*bib-aux-stream* %fluid-var-*bib-aux-stream*)
+     (*basic-style* %fluid-var-*basic-style*)
      (*aux-stream* %fluid-var-*aux-stream*) (*aux-dir/* %fluid-var-*aux-dir/*)
      (*aux-dir* %fluid-var-*aux-dir*) (*afterpar* %fluid-var-*afterpar*)
      (*afterbye* %fluid-var-*afterbye*)

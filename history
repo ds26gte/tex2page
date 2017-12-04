@@ -1,4 +1,39 @@
-Last change 2017-01-26
+Last change 2017-12-03
+
+2017 Dec 3
+
+Accept \left. and \right. as null delimiters.
+
+When finding \parindent (do-indent, do-plain-item, do-textindent), use
+the-dimen, not find-dimen!
+
+When \TZPsinglepage: (1) Embed basic CSS style within document instead of
+generating CSS file. (2) Embed images as data URIs instead of pointing to
+files. This allows for single-page HTMLs to be self-sufficient when emailing to
+a Kindle.
+
+do-end-equation: Make sure correct environment name is identified and matched.
+
+$$: Allow for single $ to occur even when not nested instead braces. This is
+because {tabular} allows this situation.
+
+2017 Feb 7
+
+Setting \TZPsinglepage and \TZPslides shouldn't be persistent in the aux file.
+
+2017 Jan 29
+
+Keep \write18's arg in one line to satisfy ECL's 'system'.
+
+2017 Jan 28
+
+Added color models 'hsl', 'Hsl', even though standard LaTeX packages don't have
+them.
+
+2017 Jan 27
+
+'system' won't work to open visual editor in ECL, MKCL; use run-program
+instead.
 
 2017 Jan 26
 

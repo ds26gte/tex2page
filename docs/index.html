@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang=en>
+<!--
+Generated from index.tex by tex2page, v. 20171213
+Copyright (C) 1997-2017 Dorai Sitaram
+(running on ECL 16.1.2 Linux)
+http://ds26gte.github.io/tex2page/index.html
+-->
+<head>
+<meta charset="utf-8">
+<title>
+TeX2page
+</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Proza+Libre" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Miltonian" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond" />
+<link rel="stylesheet" href="index-Z-S.css" />
+<meta name=robots content="index,follow">
+
+<meta name=description content="Scheme, Common Lisp script for making Web pages
+from TeX documents">
+
+<meta name=author content="Dorai Sitaram">
+<!-- <link rev=made href="mailto:ds26gte at yahoo dot com"> -->
+
+</head>
+<body>
+<div>
+<div class=navigation>&#x3c;&#xb7;&#xb7;&#xb7;Prev ||<a class=hrefinternal href="index-Z-H-1.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+<h1 class=title>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page</h1>
+<p class=noindent></p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+<div class=centerline>&#xa0;<a href="http://ds26gte.github.io">Dorai Sitaram</a>&#xa0;</div>
+
+<div class=centerline>&#xa0;Download
+<a href="https://github.com/ds26gte/tex2page">Version 20171213</a>&#xa0;</div>
+
+
+<p>
+</p>
+<div class=centerline>&#xa0;<img src="t2p.png" style="border: 0" alt="[t2p.png]">&#xa0;</div>
+
+<p>
+
+</p>
+<div class=rightline><br>
+<span class=small><br>
+<i>Making books is a skilled trade,<br>
+like making clocks.</i><br>
+— Jean de la Bruyère (†1696)<br>
+</span></div><p>
+</p>
+<div class=medskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+makes Web pages
+from T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_28">28</a>] manuscripts.
+It reads an
+input document that is marked up in
+plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;or L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_32">32</a>]
+and
+produces an output document with the functionally
+equivalent HTML markup.
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page uses the same input
+file syntax, calling conventions, and  error-recovery
+mechanisms as T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.  Thus, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page demands no additional
+expertise of a user already familiar with T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page runs on Common Lisp and modern Schemes.
+There are several advantages to keeping the document
+source in T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;and leaving the task of converting to
+HTML to T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page:  There is no need to write and
+maintain two separate documents, one for paper and the
+other for the screen.  Indeed, there is no need to
+learn a <em>new</em> input format, as T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page reuses a
+format already in wide and stable use for printed
+documents&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_45">45</a>,&#xa0;<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_10">10</a>].  Creating T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+source requires no special-purpose software; any text
+editor will do.  Furthermore, an ecology of powerful and
+reliable tools such as B<span style="text-transform: uppercase"><small>ib</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_37">37</a>],
+MakeIndex&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_31">31</a>], and
+MetaPost&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_20">20</a>,&#xa0;<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_27">27</a>] has developed around T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, and
+its benefits can be enjoyed by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page too.</p>
+<p>
+
+Finally, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, unlike HTML, is a <em>programming</em>
+language, which lets the composer of the document
+exercise a fine control over its structure and
+presentation.  A converter such as T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page that can
+convert T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;macro definitions in addition to basic T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+markup enables the format converted to to also benefit
+from T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X’s extensibility.  For the cases where
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page’s implementation of the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;macro system is
+not manipulable enough, the document writer can use the
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page <em>extension language</em>, which is full Common Lisp or
+Scheme
+augmented with all the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page procedure definitions.</p>
+<p>
+
+The rest of this manual is organized as follows:</p>
+<p>
+
+</p>
+<div class=medskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+<a id="TAG:__tex2page_tag_Temp_1"></a>
+<a id="TAG:__tex2page_toc"></a></p>
+
+<p class=noindent>&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_1"></a><a class=hrefinternal href="index-Z-H-1.html#TAG:__tex2page_chap_1">1&#xa0;&#xa0;Running T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page</a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_2"></a><a class=hrefinternal href="index-Z-H-2.html#TAG:__tex2page_chap_2">2&#xa0;&#xa0;T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;commands  </a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_3"></a><a class=hrefinternal href="index-Z-H-3.html#TAG:__tex2page_chap_3">3&#xa0;&#xa0;T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page commands  </a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_4"></a><a class=hrefinternal href="index-Z-H-4.html#TAG:__tex2page_chap_4">4&#xa0;&#xa0;T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;commands with a difference</a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_5"></a><a class=hrefinternal href="index-Z-H-5.html#TAG:__tex2page_chap_5">5&#xa0;&#xa0;Referring to external documents</a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_6"></a><a class=hrefinternal href="index-Z-H-6.html#TAG:__tex2page_chap_6">6&#xa0;&#xa0;Flags</a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_7"></a><a class=hrefinternal href="index-Z-H-7.html#TAG:__tex2page_chap_7">7&#xa0;&#xa0;Style</a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_8"></a><a class=hrefinternal href="index-Z-H-8.html#TAG:__tex2page_chap_8">8&#xa0;&#xa0;Verbatim text  </a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_9"></a><a class=hrefinternal href="index-Z-H-9.html#TAG:__tex2page_chap_9">9&#xa0;&#xa0;Images  </a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_10"></a><a class=hrefinternal href="index-Z-H-10.html#TAG:__tex2page_chap_10">10&#xa0;&#xa0;Extending T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;with Lisp</a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_11"></a><a class=hrefinternal href="index-Z-H-11.html#TAG:__tex2page_chap_11">11&#xa0;&#xa0;Recovery from errors</a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_A"></a><a class=hrefinternal href="index-Z-H-12.html#TAG:__tex2page_chap_A">A&#xa0;&#xa0;Also in Scheme</a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_B"></a><a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_chap_B">B&#xa0;&#xa0;Bibliography</a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_C"></a><a class=hrefinternal href="index-Z-H-14.html#TAG:__tex2page_chap_C">C&#xa0;&#xa0;Configuring T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page</a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_D"></a><a class=hrefinternal href="index-Z-H-15.html#TAG:__tex2page_chap_D">D&#xa0;&#xa0;Details for the curious</a><br>
+&#xa0; &#xa0; <a id="TAG:__tex2page_toc_TAG:__tex2page_chap_E"></a><a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_chap_E">E&#xa0;&#xa0;Extremely tiny index</a><br>
+<a id="TAG:__tex2page_toc_end"></a></p>
+<p>
+
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+<div class=navigation>&#x3c;&#xb7;&#xb7;&#xb7;Prev ||<a class=hrefinternal href="index-Z-H-1.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+<div class="rightline colophon">Last modified: Wed, Dec 13, 2017, 1:00 pm UTC−5<br><div class="rightline advertisement">HTML conversion by <a href="http://ds26gte.github.io/tex2page/index.html">T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page 20171213</a></div></div>
+</div>
+</body>
+</html>
+

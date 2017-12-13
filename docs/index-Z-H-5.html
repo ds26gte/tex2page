@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang=en>
+<!--
+Generated from index.tex by tex2page, v. 20171213
+Copyright (C) 1997-2017 Dorai Sitaram
+(running on ECL 16.1.2 Linux)
+http://ds26gte.github.io/tex2page/index.html
+-->
+<head>
+<meta charset="utf-8">
+<title>
+TeX2page
+</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Proza+Libre" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Miltonian" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond" />
+<link rel="stylesheet" href="index-Z-S.css" />
+<meta name=robots content="index,follow">
+
+<meta name=description content="Scheme, Common Lisp script for making Web pages
+from TeX documents">
+
+<meta name=author content="Dorai Sitaram">
+<!-- <link rev=made href="mailto:ds26gte at yahoo dot com"> -->
+
+</head>
+<body>
+<div>
+<div class=navigation><a class=hrefinternal href="index-Z-H-4.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-6.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+<a id="TAG:__tex2page_chap_5"></a>
+<h1 class=chapter><a class=hrefinternal href="index.html#TAG:__tex2page_toc_TAG:__tex2page_chap_5">5&#xa0;&#xa0;Referring to external documents</a></h1>
+<p class=noindent><a id="TAG:__tex2page_index_184"></a><a id="TAG:__tex2page_index_186"></a><a id="TAG:__tex2page_index_188"></a>The command</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\urlhd{<em> URL</em>}{<em> HTML text</em>}{<em> DVI text</em>}
+</pre>
+<p class=noindent>
+lets
+you link to arbitrary URLs, not just to labels within
+your document (although it can do that too).  In the
+HTML output, a hyperlink to ‘<code class=verbatim><em>URL</em></code>’ is created, with
+the link text being ‘<code class=verbatim><em>HTML text</em></code>’.  In the DVI
+output, the part ‘<code class=verbatim><em>DVI text</em></code>’ is output.  Example:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+For more details, consult
+\urlhd{http://www.ithaka.org/odyssey.html}{the Odyssey}{the
+{\it Odyssey\/} document in the Ithaka repository}.
+</pre>
+<p class=noindent>
+In the DVI output, this becomes</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+For more details, consult the <i>Odyssey</i> document in the
+Ithaka repository.
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+In the HTML output, it would be</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+For more details, consult <em>the Odyssey</em>.
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+where
+“<em>the Odyssey</em>” is an HTML link to the site
+<code class=verbatim>http://www.ithaka.org/odyssey.html</code>.</p>
+<p>
+
+<code class=verbatim>\urlhd</code> is named to be mnemonic for its
+argument sequence, viz., the <em>URL</em>, followed by
+the <em>H</em>tml text, followed by the <em>D</em>vi
+text.</p>
+<p>
+
+Note that you can use <code class=verbatim>\urlhd</code> for cross-referencing
+within the document also.  The URL in such cases will
+be a label as specified by a <code class=verbatim>\label</code> or a
+<code class=verbatim>\xrtag</code> command, but should add a ‘<code class=verbatim>#</code>’ prefix.  E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+See \urlhd{#hairy}{below}{section~\ref{hairy}}
+for further details.
+</pre>
+<p class=noindent>
+where the further details are described in a section
+annotated with <code class=verbatim>\label{hairy}</code>.  Assume this
+section is numbered 21.  Then, the reference typesets
+as “See section 21 &#x2026;” in the DVI output and “See
+<em>below</em> &#x2026;” in the HTML output (with <em>below</em>
+being a link).  In contrast, if we had written</p>
+<p>
+
+</p>
+<pre class=verbatim>
+See section~\ref{hairy} for further details.
+</pre>
+<p class=noindent>
+we would have had “See section 21 &#x2026;” in both
+DVI and HTML.   <code class=verbatim>\urlhd</code> is thus more flexible
+than <code class=verbatim>\ref</code>.</p>
+<p>
+
+Because of page breaks in the HTML output
+(p.&#xa0;<a class=hrefinternal href="index-Z-H-4.html#TAG:__tex2page_tag_Temp_20">4</a>), it is possible that a label’s
+definition and the references to it do not ultimately
+sit on the same <em>physical</em> HTML page.
+Nevertheless, your T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;source can use <code class=verbatim>#tag</code>-style
+URLs to refer to anchors anywhere within it.  T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+will automatically convert a <code class=verbatim>#tag</code>-style URL to its
+correct fully qualified equivalent.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_30"></a>
+<h2 class=section>Common hyperlink abbreviations</h2>
+<p class=noindent><a id="TAG:__tex2page_index_190"></a>In some cases, <code class=verbatim>\urlhd</code>’s second and third arguments may be mere repetitions
+of a preceding argument.  For such cases, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+recognizes some convenient abbreviations, viz.,
+<code class=verbatim>\urlh</code>, <code class=verbatim>\urlp</code>, and <code class=verbatim>\url</code>.  (A version of
+<code class=verbatim>\urlh</code> is provided under the name <code class=verbatim>\href</code> by the L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;package
+<code class=verbatim>hyperref.sty</code>, and <code class=verbatim>\url</code> is provided by the
+L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;package <code class=verbatim>url.sty</code>.  <code class=verbatim>\url.sty</code> is loadable in
+plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;with <code class=verbatim>miniltx</code>.)</p>
+<p>
+
+<a id="TAG:__tex2page_index_192"></a><code class=verbatim>\urlh</code> takes <em>two</em> arguments.  The first argument is the
+URL, and the second is the descriptive text that is used in
+<em>both</em> the HTML and the DVI outputs.  For example:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\TeX\ is available at
+\urlh{http://www.tug.org}{the TUG website}.
+</pre>
+<p class=noindent>
+produces</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;is available at the TUG website.
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+In the HTML output, “the TUG website” is a hyperlink to
+<code class=verbatim>http://www.tug.org</code>.</p>
+<p>
+
+<a id="TAG:__tex2page_index_194"></a>An optional <code class=verbatim>\\</code> may be used inside <code class=verbatim>\urlh</code>’s second argument.  The
+text before the <code class=verbatim>\\</code> is used in both the HTML and the DVI
+outputs.  The text after the <code class=verbatim>\\</code> is used only in
+the DVI output.  This helps you to specify extra information
+for the DVI output, which may be necessary because the DVI
+output lacks the information implicit in the hyperlink.  For example:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\TeX\ is available at
+\urlh{http://www.tug.org}{TUG\\ (\path!tug.org!)}.
+</pre>
+<p class=noindent>
+produces, in the DVI output.</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;is available at TUG (<code class=verbatim>tug.org</code>).
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+The HTML output will not mention the parenthesized domain
+name, since the word “TUG” already hyperlinks to it.</p>
+<p>
+
+<code class=verbatim>\\</code> is useful for internal cross-references too.  For
+example (assuming the label <code class=verbatim>callcc</code> refers to section 2.3):</p>
+<p>
+
+</p>
+<pre class=verbatim>
+More complicated forms of program control are possible
+using \urlh{#callcc}{{\tt callcc}\\ (section~\ref{callcc})}.
+</pre>
+<p class=noindent>
+produces</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+More complicated forms of program control are possible using
+<span style="font-family: monospace">callcc</span> (section&#xa0;2.3).
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+in the DVI output.  In the HTML output, the parenthesized
+section reference will be dropped as redundant, as
+the word “<span style="font-family: monospace">callcc</span>” hyperlinks to the relevant section.</p>
+<p>
+
+An optional <code class=verbatim>\1</code> may be used after <code class=verbatim>\\</code> to refer to
+<code class=verbatim>\urlh</code>’s first argument, i.e.,
+the URL.
+Example:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\TeX\ is available at
+\urlh{http://www.tug.org}{TUG\\ (\1)}.
+</pre>
+<p class=noindent>
+produces</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;is available at TUG (<code class=verbatim>http://www.tug.org</code>).
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+in the DVI output.  In the HTML output, the parenthesized
+URL is dropped as redundant, as the word “TUG”
+hyperlinks to it.</p>
+<p>
+
+Finally, the combination of <code class=verbatim>\xrtag</code> and
+<code class=verbatim>\urlh</code> is useful for inserting
+internal cross-references in the HTML document
+without affecting the print document.  For example,
+the following text</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\xrtag{ex1}{ignore}
+\urlh{#ans1}{\bf Exercise 1.} Statement of a problem ...
+
+... lots of intervening stuff ...
+
+\xrtag{ans1}{ignore}
+\urlh{#ex1}{\bf Answer 1.} Answer to exercise 1 ...
+</pre>
+<p class=noindent>
+prints as</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+<strong>Exercise 1.</strong> Statement of a problem &#x2026;</p>
+<p>
+
+&#x2026;&#x200b; &#x200b;lots of intervening stuff &#x2026;</p>
+<p>
+
+</p>
+
+<p class=noindent><strong>Answer 1.</strong> Answer to exercise 1 &#x2026;
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+in both the DVI and the HTML.  However, in the
+HTML, the proclamations “<strong>Exercise 1.</strong>”&#x200b; &#x200b;and
+“<strong>Answer 1.</strong>”&#x200b; &#x200b;are also helpful hyperlinks to each other.</p>
+<p>
+
+<a id="TAG:__tex2page_index_196"></a><code class=verbatim>\url</code> takes just one argument, the URL.  For the
+descriptive text, both the HTML and the DVI outputs simply
+use the URL itself.   Example:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\TeX\ is available at \url{http://www.tug.org}.
+</pre>
+<p class=noindent></p>
+<p>
+
+<a id="TAG:__tex2page_index_198"></a><code class=verbatim>\urlp</code> takes two arguments.  In the HTML output,
+the first argument is the link text and the second is
+the URL.  In the DVI output, the first argument is
+typeset followed by a space followed by the URL in
+parentheses.  <code class=verbatim>\urlp{<em>text</em>}{<em>URL</em>}</code> abbreviates
+<code class=verbatim>\urlh{<em>URL</em>}{<em>text</em>\\ (\path+<em>URL</em>+)}</code>.</p>
+<p>
+
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+<div class=navigation><a class=hrefinternal href="index-Z-H-4.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-6.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+</div>
+</body>
+</html>
+

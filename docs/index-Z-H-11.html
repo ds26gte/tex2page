@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang=en>
+<!--
+Generated from index.tex by tex2page, v. 20171213
+Copyright (C) 1997-2017 Dorai Sitaram
+(running on ECL 16.1.2 Linux)
+http://ds26gte.github.io/tex2page/index.html
+-->
+<head>
+<meta charset="utf-8">
+<title>
+TeX2page
+</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Proza+Libre" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Miltonian" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond" />
+<link rel="stylesheet" href="index-Z-S.css" />
+<meta name=robots content="index,follow">
+
+<meta name=description content="Scheme, Common Lisp script for making Web pages
+from TeX documents">
+
+<meta name=author content="Dorai Sitaram">
+<!-- <link rev=made href="mailto:ds26gte at yahoo dot com"> -->
+
+</head>
+<body>
+<div>
+<div class=navigation><a class=hrefinternal href="index-Z-H-10.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-12.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+<a id="TAG:__tex2page_chap_11"></a>
+<h1 class=chapter><a class=hrefinternal href="index.html#TAG:__tex2page_toc_TAG:__tex2page_chap_11">11&#xa0;&#xa0;Recovery from errors</a></h1>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_81"></a>
+<a id="TAG:__tex2page_index_454"></a><a id="TAG:__tex2page_index_456"></a><a id="TAG:__tex2page_index_458"></a><a id="TAG:__tex2page_index_460"></a>If T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page reports an error on your document, you may
+be able to deduce the cause from the diagnostic
+information that T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page displays  on standard
+output.  If you failed to look at this information as
+it was being displayed, you can always retrieve it from
+the <em>log file</em> <code class=verbatim><em>jobname</em>.hlog</code>.  This is
+exactly analogous to T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;generating diagnostic
+information on standard output and keeping a copy
+thereof in the file <code class=verbatim><em>jobname</em>.log</code>.</p>
+<p>
+
+<a id="TAG:__tex2page_index_462"></a></p>
+<p>
+
+The  error message typically displays an <em>error
+context</em>, viz., a few consecutive lines from the source
+document that contain the likely cause of the error.
+The number of context lines so displayed is governed by
+the count register <code class=verbatim>\errorcontextlines</code>, which has a default
+value of 5.  Thus, setting <code class=verbatim>\errorcontextlines=7</code> will display
+seven lines.  Note that error contexts are often
+only approximate — be prepared to look a little above
+or below the reported context.</p>
+<p>
+
+<a id="TAG:__tex2page_index_464"></a><a id="TAG:__tex2page_index_466"></a></p>
+<p>
+
+Like T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page also gives you the option of immediately
+editing the file containing the error,
+<em>at</em> the location of the error.  It does so with the
+following prompt:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+Type E to edit your file, X to quit.
+?
+</pre>
+<p class=noindent>
+When you type <code class=verbatim>e</code> at this prompt, a text editor
+is fired up.  What the editor is depends on the
+environment variables <code class=verbatim>TEXEDIT</code> (which is also used
+by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X) and <code class=verbatim>EDITOR</code>.</p>
+<p>
+
+If <code class=verbatim>TEXEDIT</code> is set, its string value (e.g.,
+“<code class=verbatim>vim +%d %s</code>”)
+is chosen as
+the entire editor call, with <code class=verbatim>%s</code> replaced by the offending
+file’s name, and <code class=verbatim>%d</code> replaced by the number of the line
+containing the error.
+If <code class=verbatim>TEXEDIT</code> is not set, or if
+it is mis-set, i.e., without <code class=verbatim>%s</code> or <code class=verbatim>%d</code>, then the
+editor specified in the environment variable <code class=verbatim>EDITOR</code>
+is chosen.  If <code class=verbatim>EDITOR</code> is also not set, then
+the editor name is assumed to be <code class=verbatim>vi</code>.
+When using <code class=verbatim>EDITOR</code> or <code class=verbatim>vi</code>, the file and line number are
+tacked on as arguments to the editor,
+with a <code class=verbatim>+</code> preceding the
+line number.  This argument style works for all <code class=verbatim>vi</code>
+and <code class=verbatim>emacs</code> clones.<a id="TAG:__tex2page_call_footnote_Temp_82"></a><span class=footnotemark><sup><a class=hrefinternal href="#TAG:__tex2page_footnote_Temp_82">1</a></sup></span></p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_83"></a>
+<h2 class=section>Tracing more information</h2>
+<p class=noindent><a id="TAG:__tex2page_index_468"></a><a id="TAG:__tex2page_index_470"></a>Sometimes, the diagnostic information in an error
+message may not be enough to track
+down the error.
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;provides various commands for generating more diagnostics —
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page recognizes the same commands to provide its own diagnostics.
+For instance,
+setting the count registers
+<code class=verbatim>\tracingcommands</code> and <code class=verbatim>\tracingmacros</code> to a positive integer causes
+more log information.</p>
+<p>
+
+(<span class=item>i</span>) Setting  <code class=verbatim>\tracingcommands=1</code> tells T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page to log all calls
+to atomic commands.</p>
+<p>
+
+(<span class=item>ii</span>) Setting  <code class=verbatim>\tracingmacros=1</code> tells
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page to log all macro expansions.</p>
+<p>
+
+You may turn on
+these traces at any point in your document.  You may
+subsequently turn them off by setting <code class=verbatim>\tracingcommands=0</code>
+and <code class=verbatim>\tracingmacros=0</code> respectively.</p>
+<p>
+
+<a id="TAG:__tex2page_index_472"></a></p>
+<p>
+
+(<span class=item>iii</span>) The command <code class=verbatim>\tracingall</code> turns <em>on</em> both
+<code class=verbatim>\tracingcommands</code> and <code class=verbatim>\tracingmacros</code>.</p>
+<p>
+
+<a id="TAG:__tex2page_index_474"></a></p>
+<p>
+
+(<span class=item>iv</span>) The command <code class=verbatim>\errmessage</code> can be used to generate
+meaningful error messages.  T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page, like T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, ceases
+processing the document on encountering
+<code class=verbatim>\errmessage</code>.</p>
+<p>
+
+<a id="TAG:__tex2page_index_476"></a></p>
+<p>
+
+(<span class=item>v</span>) The command <code class=verbatim>\message</code>
+can be used to print helpful information at selected
+points in the document.   L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;users may
+prefer <code class=verbatim>\typeout</code>, which does the same thing.</p>
+<p>
+
+All of these commands display their information
+on both standard output and in the log file.
+Judicious use of these commands
+should help pinpoint any error.</p>
+<p>
+
+</p>
+<div class=footnoterule><hr></div><p>
+</p>
+<div class=footnote><p>
+<span class=footnotemark><a id="TAG:__tex2page_footnote_Temp_82"></a><sup><a class=hrefinternal href="#TAG:__tex2page_call_footnote_Temp_82">1</a></sup></span> T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;itself uses just <code class=verbatim>TEXEDIT</code>.
+It does not fall back to <code class=verbatim>EDITOR</code> or <code class=verbatim>vi</code> if
+<code class=verbatim>TEXEDIT</code> is not set.  But most Unix programs that
+reach for an editor do tend to use <code class=verbatim>EDITOR</code>, and failing that,
+<code class=verbatim>vi</code>, so T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page does the same.</p>
+</div>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+<div class=navigation><a class=hrefinternal href="index-Z-H-10.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-12.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+</div>
+</body>
+</html>
+

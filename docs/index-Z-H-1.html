@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang=en>
+<!--
+Generated from index.tex by tex2page, v. 20171213
+Copyright (C) 1997-2017 Dorai Sitaram
+(running on ECL 16.1.2 Linux)
+http://ds26gte.github.io/tex2page/index.html
+-->
+<head>
+<meta charset="utf-8">
+<title>
+TeX2page
+</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Proza+Libre" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Miltonian" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond" />
+<link rel="stylesheet" href="index-Z-S.css" />
+<meta name=robots content="index,follow">
+
+<meta name=description content="Scheme, Common Lisp script for making Web pages
+from TeX documents">
+
+<meta name=author content="Dorai Sitaram">
+<!-- <link rev=made href="mailto:ds26gte at yahoo dot com"> -->
+
+</head>
+<body>
+<div>
+<div class=navigation><a class=hrefinternal href="index.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-2.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+<a id="TAG:__tex2page_chap_1"></a>
+<h1 class=chapter><a class=hrefinternal href="index.html#TAG:__tex2page_toc_TAG:__tex2page_chap_1">1&#xa0;&#xa0;Running T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page</a></h1>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_2"></a>
+<a id="TAG:__tex2page_index_2"></a>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page is invoked in much the same way as T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.<a id="TAG:__tex2page_call_footnote_Temp_3"></a><span class=footnotemark><sup><a class=hrefinternal href="#TAG:__tex2page_footnote_Temp_3">1</a></sup></span>
+For instance, given a plain-T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document file
+<code class=verbatim><em>wherever-it-is/jobname</em>.<em>ext</em></code>, which can
+be either a full pathname or a pathname relative to either the
+working directory or some directory in <code class=verbatim>TEXINPUTS</code>, where
+<code class=verbatim><em>jobname</em></code> is the <em>basename</em> of the file
+and <code class=verbatim>.<em>ext</em></code> is its extension, you type</p>
+<p>
+
+</p>
+<pre class=verbatim>
+tex <em> wherever-it-is/jobname</em>.<em> ext</em>
+</pre>
+<p class=noindent>
+at the operating-system command line.<a id="TAG:__tex2page_call_footnote_Temp_4"></a><span class=footnotemark><sup><a class=hrefinternal href="#TAG:__tex2page_footnote_Temp_4">2</a></sup></span>  You do not need to mention the extension
+<code class=verbatim>.<em>ext</em></code> if it is <code class=verbatim>.tex</code>.  This creates the output DVI file,
+<code class=verbatim><em>jobname</em>.dvi</code>, in the working directory.<a id="TAG:__tex2page_call_footnote_Temp_5"></a><span class=footnotemark><sup><a class=hrefinternal href="#TAG:__tex2page_footnote_Temp_5">3</a></sup></span></p>
+<p>
+
+<a id="TAG:__tex2page_index_4"></a></p>
+<p>
+
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page is called analogously.  To create the HTML
+version of the same file
+<code class=verbatim><em>wherever-it-is/jobname</em>.<em>ext</em></code>, type</p>
+<p>
+
+</p>
+<pre class=verbatim>
+tex2page <em> wherever-it-is/jobname</em>.<em> ext</em>
+</pre>
+<p class=noindent>
+Again, the <code class=verbatim>.<em>ext</em></code> is optional if it is <code class=verbatim>.tex</code>.  This
+creates <code class=verbatim><em>jobname</em>.html</code> in the working directory.</p>
+<p>
+
+<a id="TAG:__tex2page_index_6"></a></p>
+<p>
+
+To try this out, call T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page on the example file
+<a href="texample.html"><code class=verbatim>story.tex</code></a>
+provided in all T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;distributions:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+tex2page story
+</pre>
+<p class=noindent>
+<a id="TAG:__tex2page_index_8"></a>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will get cracking<a id="TAG:__tex2page_call_footnote_Temp_6"></a><span class=footnotemark><sup><a class=hrefinternal href="#TAG:__tex2page_footnote_Temp_6">4</a></sup></span> on <code class=verbatim>story.tex</code>, providing
+the following commentary, or <em>log</em>, on your console:</p>
+<p>
+
+</p>
+<div class=medskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+
+</p>
+<pre class=verbatim>This is TeX2page, Version 20170129 (ECL 16.1.3 Linux) Sun, Jan 29, 2017, 1:53 am UTC−5
+(story.tex)
+! Missing \end inserted.
+[0]
+Output written on story.html (1 page).
+</pre><p>
+
+</p>
+<div class=medskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page is now done, and the result of its labors
+is the HTML file
+<a href="story.html"><code class=verbatim>story.html</code></a>&#x200b; &#x200b;(click
+to see).</p>
+<p>
+
+<a id="TAG:__tex2page_index_10"></a><a id="TAG:__tex2page_index_12"></a><a id="TAG:__tex2page_index_14"></a><a id="TAG:__tex2page_index_16"></a></p>
+<p>
+
+The <em>log file</em> <code class=verbatim>story.hlog</code>
+contains a copy of the above log, and is useful
+if you didn’t or couldn’t keep track of the console
+(perhaps because the log was too long).
+The log says that <code class=verbatim>story.tex</code> lacked a
+document-ending command such as <code class=verbatim>\end</code> (or <code class=verbatim>\bye</code>)
+and that T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page assumed one anyway.  Also, only
+<em>one</em> HTML page was created, and its name is
+<code class=verbatim>story.html</code>.  T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page could in some cases produce
+auxiliary HTML pages in addition to
+the main HTML page <code class=verbatim><em>jobname</em>.html</code> (especially
+for larger documents).  The auxiliary HTML pages
+are reachable from <code class=verbatim><em>jobname</em>.html</code>
+by navigation links (p.&#xa0;<a class=hrefinternal href="index-Z-H-4.html#TAG:__tex2page_tag_Temp_20">4</a>).  As  each
+auxiliary HTML page is completed, the log will show the
+bracketed numbers <code class=verbatim>[1]</code>, <code class=verbatim>[2]</code>, etc.  The <code class=verbatim>[0]</code>
+in this log refers to the only HTML file created, viz.,
+<code class=verbatim>story.html</code>.</p>
+<p>
+
+All this is of course almost exactly analogous to the
+way you type <code class=verbatim>tex story</code> (or <code class=verbatim>xetex story</code> or <code class=verbatim>pdftex story</code>) to get
+<code class=verbatim>story.dvi</code> (or <code class=verbatim>story.pdf</code>)
+from <code class=verbatim>story.tex</code>, with the log going into
+<code class=verbatim>story.log</code>.</p>
+<p>
+
+</p>
+<div class=medskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+
+</p>
+<pre class=verbatim>This is XeTeX, Version 3.14159265-2.6-0.99996 (TeX Live 2016/Debian) (preloaded format=xetex 2016.11.16)  16 NOV 2016 20:15
+entering extended mode
+ restricted \write18 enabled.
+ %&#x26;-line parsing enabled.
+**story
+(/usr/share/texlive/texmf-dist/tex/plain/knuth-lib/story.tex [1])
+*\end
+Output written on story.pdf (1 page).
+</pre><p>
+
+</p>
+<div class=medskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>The only real difference is
+that T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;will not add the missing <code class=verbatim>\end</code> on its
+own, but instead waits for the user to supply it
+explicitly from the console.<a id="TAG:__tex2page_call_footnote_Temp_7"></a><span class=footnotemark><sup><a class=hrefinternal href="#TAG:__tex2page_footnote_Temp_7">5</a></sup></span>  Note that the bracketed numbers now refer
+to the pages as numbered in the printed document.</p>
+<p>
+
+Thus, from one T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;source file, you can get both a printable <code class=verbatim>.dvi</code> and a
+browsable <code class=verbatim>.html</code> document, using the same calling
+conventions.</p>
+<p>
+<a id="TAG:__tex2page_index_18"></a><a id="TAG:__tex2page_index_20"></a><a id="TAG:__tex2page_index_22"></a></p>
+<p>
+
+When T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;encounters a filename <code class=verbatim><em>f</em></code>, it
+searches for it
+in a standard list of
+directories, which can be modified by the user via the
+environment variable <code class=verbatim>TEXINPUTS</code>.
+The filename <code class=verbatim><em>f</em>.tex</code> is tried before
+<code class=verbatim><em>f</em></code> itself is tried.  In most modern T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>Xs, the
+search is performed using the <code class=verbatim>kpathsea</code> library.</p>
+<p>
+
+By default, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will look for files using the same <code class=verbatim>kpathsea</code>
+mechanism as T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.  However, it is possible to supply a
+different list of search directories via the environment
+variable <code class=verbatim>TEX2PAGEINPUTS</code>.
+It may be useful to have
+files in <code class=verbatim>TEX2PAGEINPUTS</code> shadow files from
+<code class=verbatim>TEXINPUTS</code>, because the latter are not really
+HTML-specific, and can thus be unsuitable for
+HTML-minded parsing by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page.</p>
+<p>
+
+In T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>Xs without the <code class=verbatim>kpathsea</code> library,
+<code class=verbatim>TEX2PAGEINPUTS</code> is the only way to get T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page to
+automatically access files outside the working
+directory.  Note that <code class=verbatim>TEX2PAGEINPUTS</code> should be a
+simple list of directory names, colon-separated in Unix
+and semicolon-separated in Windows.  It cannot use the
+enhanced syntax (viz., <code class=verbatim>*</code> and <code class=verbatim>//</code>) that is
+typically permitted for <code class=verbatim>TEXINPUTS</code>.</p>
+<p>
+
+Error recovery in T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page is also exactly analogous to
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, but we will postpone that discussion to
+p.&#xa0;<a class=hrefinternal href="index-Z-H-11.html#TAG:__tex2page_tag_Temp_81">11</a>.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_8"></a>
+<h2 class=section>Non-file arguments</h2>
+<p class=noindent><a id="TAG:__tex2page_index_24"></a><a id="TAG:__tex2page_index_26"></a>Like most recent versions of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page also
+supports the standard self-identification
+arguments <code class=verbatim>&#x2011;&#x2011;help</code> and <code class=verbatim>&#x2011;&#x2011;version</code>.  These
+arguments elicit help only if there isn’t an input file
+(e.g., <code class=verbatim>&#x2011;&#x2011;help.tex</code>) that could match them.</p>
+<p>
+
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page called without an argument displays a help
+message and exits.  Unlike T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will not try
+to conjure up an input document based purely on console
+chitchat with an increasingly befuddled user.</p>
+<p>
+
+In all these cases, the help displayed on the console
+is also saved in the specially named log file
+<code class=verbatim>texput.hlog</code>.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_9"></a>
+<h2 class=section>Calling T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page from Lisp</h2>
+<p class=noindent><a id="TAG:__tex2page_index_28"></a><a id="TAG:__tex2page_index_30"></a>If, for any reason, it is not possible to call <code class=verbatim>tex2page</code>
+from your operating-system command line, you may load the
+file <code class=verbatim>tex2page</code> into your Lisp
+and call the
+<em>procedure</em> <code class=scheme><span class=variable>tex2page:tex2page</span></code> with the name of the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;file
+as argument:</p>
+<p>
+
+</p>
+<div class=leftline><pre class=scheme>
+(<span class=variable>load</span> <span class=selfeval>&#x22;tex2page&#x22;</span>) <span class=comment>;use appropriate pathname</span>
+
+(<span class=variable>tex2page:tex2page</span> <em>filename</em>)
+</pre></div>
+<p class=noindent>
+You can call the procedure
+<code class=scheme><span class=variable>tex2page:tex2page</span></code> several times from the same Lisp
+session, on the same file or on different files.</p>
+<p>
+
+Note that we’ve used a package-qualified name, as the Common
+Lisp T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page is provided as a Common Lisp package <code class=scheme><span class=variable>tex2page</span></code>
+whose one exported symbol is <code class=scheme><span class=variable>tex2page</span></code>. (But see Appendix A if
+using the Scheme version of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page.)</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_10"></a>
+<h2 class=section>Specifying a target directory  </h2>
+<p class=noindent><a id="TAG:__tex2page_index_32"></a><a id="TAG:__tex2page_index_34"></a>By default, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page generates the output HTML files
+and other auxiliary files (p.&#xa0;<a class=hrefinternal href="index-Z-H-15.html#TAG:__tex2page_tag_Temp_94">15</a>) in the
+current working directory.  You can tell T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+to place its output and auxiliary files in a different
+directory and thus avoid cluttering up your working
+directory.</p>
+<p>
+
+The files used for specifying the target directory are:
+<code class=verbatim><em>jobname</em>.hdir</code> in the working directory,
+<code class=verbatim>.tex2page.hdir</code> in the working directory, and
+<code class=verbatim>.tex2page.hdir</code> in the user’s <code class=verbatim>HOME</code> directory.
+The first line of the first of these files that exists
+is taken to be the name of the target directory.
+If none of the files exists, the current working
+directory is the target directory.</p>
+<p>
+
+For example, if <code class=verbatim>story.hdir</code> contains the filename
+<code class=verbatim>story</code> as its first line, the HTML and aux files are
+created in a subdirectory <code class=verbatim>story</code> of the
+current directory.</p>
+<p>
+
+<a id="TAG:__tex2page_index_36"></a></p>
+<p>
+
+The filename may contain the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;control sequence
+<code class=verbatim>\jobname</code>, which expands to the basename of
+the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document.  To always use an auxiliary
+subdirectory with the same name as the basename of the
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document, have <code class=verbatim>~/.tex2page.hdir</code> contain the
+line “<code class=verbatim>\jobname</code>” (without quotes).</p>
+<p>
+</p>
+<div class=footnoterule><hr></div><p>
+</p>
+<div class=footnote><p>
+<span class=footnotemark><a id="TAG:__tex2page_footnote_Temp_3"></a><sup><a class=hrefinternal href="#TAG:__tex2page_call_footnote_Temp_3">1</a></sup></span> Hereafter,
+we will use “T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X” to mean
+any format of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, and “plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X” when we
+specifically mean the “plain” format. We will use “Lisp” to refer
+to the implementation language of the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page script under
+discussion, although this can be either Common Lisp or Scheme,
+with near-identical behavior. For the minor differences, see
+Appendix A (p.&#xa0;<a class=hrefinternal href="index-Z-H-12.html#TAG:__tex2page_tag_Temp_84">12</a>).</p>
+<p>
+<span class=footnotemark><a id="TAG:__tex2page_footnote_Temp_4"></a><sup><a class=hrefinternal href="#TAG:__tex2page_call_footnote_Temp_4">2</a></sup></span> The executable <code class=verbatim>tex</code> expects
+its input file to be marked up in plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.  For a L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document, the
+executable to use is <code class=verbatim>latex</code>. Modern T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;engines such as
+pdfT<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, X<span style="text-transform: uppercase; position: relative; top: 0.5ex; margin-left: -0.125em; margin-right: -0.1667em">&#x1dd;</span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_50">50</a>], and luaT<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_34">34</a>] have
+executables named <code class=verbatim>pdftex</code>, <code class=verbatim>xetex</code>, <code class=verbatim>luatex</code> for the plain
+format, and <code class=verbatim>pdflatex</code>, <code class=verbatim>xelatex</code>, and <code class=verbatim>lualatex</code> for L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.</p>
+<p>
+<span class=footnotemark><a id="TAG:__tex2page_footnote_Temp_5"></a><sup><a class=hrefinternal href="#TAG:__tex2page_call_footnote_Temp_5">3</a></sup></span> The modern T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>Xs
+pdfT<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, X<span style="text-transform: uppercase; position: relative; top: 0.5ex; margin-left: -0.125em; margin-right: -0.1667em">&#x1dd;</span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, and
+luaT<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_34">34</a>] produce PDF rather than DVI.  In the rest of this manual,
+whenever we refer to the output DVI file, the reader using the PDF versions
+of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;should read PDF for DVI.</p>
+<p>
+<span class=footnotemark><a id="TAG:__tex2page_footnote_Temp_6"></a><sup><a class=hrefinternal href="#TAG:__tex2page_call_footnote_Temp_6">4</a></sup></span> T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page, like T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, will find the
+file <code class=verbatim>story.tex</code> from your distribution as it is in your default <code class=verbatim>TEXINPUTS</code>.
+If it’s too confusing operating on a file that you don’t see in
+your immediate space, copy the file manually to your working
+directory. You can find its location with <code class=verbatim>kpsewhich story</code>.</p>
+<p>
+<span class=footnotemark><a id="TAG:__tex2page_footnote_Temp_7"></a><sup><a class=hrefinternal href="#TAG:__tex2page_call_footnote_Temp_7">5</a></sup></span> The file <code class=verbatim>story.tex</code>
+lacks an <code class=verbatim>\end</code> only to demonstrate some interactive
+capabilities of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, which are not relevant for
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page.</p>
+</div>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+<div class=navigation><a class=hrefinternal href="index.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-2.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+</div>
+</body>
+</html>
+

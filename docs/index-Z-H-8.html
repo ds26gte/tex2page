@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang=en>
+<!--
+Generated from index.tex by tex2page, v. 20171213
+Copyright (C) 1997-2017 Dorai Sitaram
+(running on ECL 16.1.2 Linux)
+http://ds26gte.github.io/tex2page/index.html
+-->
+<head>
+<meta charset="utf-8">
+<title>
+TeX2page
+</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Proza+Libre" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Miltonian" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond" />
+<link rel="stylesheet" href="index-Z-S.css" />
+<meta name=robots content="index,follow">
+
+<meta name=description content="Scheme, Common Lisp script for making Web pages
+from TeX documents">
+
+<meta name=author content="Dorai Sitaram">
+<!-- <link rev=made href="mailto:ds26gte at yahoo dot com"> -->
+
+</head>
+<body>
+<div>
+<div class=navigation><a class=hrefinternal href="index-Z-H-7.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-9.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+<a id="TAG:__tex2page_chap_8"></a>
+<h1 class=chapter><a class=hrefinternal href="index.html#TAG:__tex2page_toc_TAG:__tex2page_chap_8">8&#xa0;&#xa0;Verbatim text  </a></h1>
+<p class=noindent><a id="TAG:__tex2page_index_300"></a>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page recognizes a slightly enhanced version of
+L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X’s <code class=verbatim>\verb</code> command.
+Recall that L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X’s <code class=verbatim>\verb</code>’s argument is enclosed
+within a pair of identical characters (not whitespace
+or <code class=verbatim>*</code>), and this argument is printed verbatim.  This
+is useful for typesetting things like fragments of computer code.
+E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>A \verb|cons|-cell has two components: a \verb+car+ and&#xa0;
+a \verb&#x26;cdr&#x26;.&#xa0;
+</pre>
+<p class=noindent></p>
+<p>
+
+</p>
+
+<p class=noindent>is converted to</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+A <code class=verbatim>cons</code>-cell has two components: a <code class=verbatim>car</code> and
+a <code class=verbatim>cdr</code>.
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+The T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page version of <code class=verbatim>\verb</code> adds a couple more features:</p>
+<p>
+
+(<span class=item>i</span>)
+You can use
+matching braces to enclose its
+argument, provided the latter does not contain unmatched
+braces.  E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+The command \verb{\section{Imagining a Conscious Robot}}
+typesets ‘\verb{Imagining a Conscious Robot}’ as a section
+title.
+</pre>
+<p class=noindent>
+is converted to</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+The command <code class=verbatim>\section{Imagining a Conscious Robot}</code>
+typesets ‘<code class=verbatim>Imagining a Conscious Robot</code>’ as a section
+title.
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent></p>
+<p>
+
+(<span class=item>ii</span>) If <code class=verbatim>\verb</code>’s argument commences with a newline, it is
+set as a display.  E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\verb{
+(define compose
+  (lambda (f g)
+    (lambda aa
+      (f (apply g aa)))))
+}
+</pre>
+<p class=noindent>
+produces</p>
+<p>
+
+</p>
+<pre class=verbatim>
+(define compose
+  (lambda (f g)
+    (lambda aa
+      (f (apply g aa)))))
+</pre>
+<p class=noindent>
+Note that such displays faithfully typeset all the
+whitespace of the text, including linebreaks and
+indentation.</p>
+<p>
+
+<a id="TAG:__tex2page_index_302"></a><a id="TAG:__tex2page_index_304"></a></p>
+<p>
+
+As in L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, if a <code class=verbatim>*</code> immediately follows <code class=verbatim>\verb</code>, any spaces in
+<code class=verbatim>\verb</code>’s argument text are highlighted as something
+that is visible.  This allows you to easily count
+spaces or tell if there is trailing space on a line.</p>
+<p>
+
+</p>
+<pre class=verbatim>
+“\verb*{three   spaces}”
+</pre>
+<p class=noindent>
+produces</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+“<code class=verbatim>three<span style="color: red">&#xb7;</span><span style="color: red">&#xb7;</span><span style="color: red">&#xb7;</span>spaces</code>”
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent></p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_51"></a>
+<h2 class=section>Commands within verbatim</h2>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_52"></a>
+<a id="TAG:__tex2page_index_306"></a>Often you want to use T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;commands in special spots within
+verbatim text, especially displayed verbatim material.  For
+this reason, the character ‘<code class=verbatim>|</code>’ is allowed as an escape
+character <em>if the verbatim text is enclosed within
+braces</em>.</p>
+<p>
+
+<a id="TAG:__tex2page_index_308"></a></p>
+<p>
+
+As an example, let’s say you’ve defined an <code class=verbatim>\evalsto</code>
+macro to use in cases where you want to say a program
+expression <em>evaluates to</em> a result.  A possible
+definition is:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\def\evalsto{::==}
+</pre>
+<p class=noindent>
+
+You could use <code class=verbatim>\evalsto</code> inside a verbatim
+display as follows:</p>
+<p>
+
+</p>
+<pre class=verbatim>\verb{&#xa0;
+(cons 1 2) |evalsto (1 . 2)&#xa0;
+}&#xa0;
+</pre>
+<p class=noindent></p>
+<p>
+
+</p>
+
+<p class=noindent>This will produce</p>
+<p>
+
+</p>
+<pre class=verbatim>
+(cons 1 2) ::== (1 . 2)
+</pre>
+<p class=noindent>
+Some standard commands that can be used inside braced
+verbatim are: <code class=verbatim>||</code> to insert the escape character itself; and
+<code class=verbatim>|{</code> and <code class=verbatim>|}</code> to insert the occasional non-matching brace.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_53"></a>
+<h2 class=section>Changing the verbatim escape character</h2>
+<p class=noindent><a id="TAG:__tex2page_index_310"></a>You can use the Eplain and T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page macro <code class=verbatim>\verbatimescapechar</code> to
+postulate a character other than ‘<code class=verbatim>|</code>’ as the
+verbatim escape.  E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\verbatimescapechar\@
+</pre>
+<p class=noindent>
+makes ‘<code class=verbatim>@</code>’ the verbatim escape.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_54"></a>
+<h2 class=section>Other common verbatim macros</h2>
+<p class=noindent><a id="TAG:__tex2page_index_312"></a><a id="TAG:__tex2page_index_314"></a><a id="TAG:__tex2page_index_316"></a>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page also understands L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X’s <code class=verbatim>{verbatim}</code>
+environment, the <code class=verbatim>\path</code> macro from <code class=verbatim>path.sty</code>,
+Eplain’s <code class=verbatim>\verbatim</code>, and  OPmac’s
+<code class=verbatim>\activettchar</code><a id="TAG:__tex2page_call_footnote_Temp_55"></a><span class=footnotemark><sup><a class=hrefinternal href="#TAG:__tex2page_footnote_Temp_55">1</a></sup></span>.</p>
+<p>
+
+<a id="TAG:__tex2page_index_318"></a><a id="TAG:__tex2page_index_320"></a><a id="TAG:__tex2page_index_322"></a>It also recognizes <code class=verbatim>manmac</code>’s <code class=verbatim>\begintt</code> <code class=verbatim>...</code> <code class=verbatim>\endtt</code>, but note
+that by
+default, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page’s <code class=verbatim>\begintt</code> sets <em>everything</em> within it verbatim. If you
+want it to be truly <code class=verbatim>manmac</code>-like, i.e., with <code class=verbatim>|</code> as the escape
+character and <code class=verbatim>\]</code> producing visible space, you should set
+<code class=verbatim>\tthook</code> to something suitable:</p>
+<p>
+
+</p>
+<pre class=verbatim>\def\tthook{\catcode`\|=0&#xa0;
+  \def\|{char`\|}%&#xa0;
+  \def\ {·}}&#xa0;
+</pre>
+<p class=noindent>
+If you also have <code class=verbatim>\activettchar`</code>, then set <code class=verbatim>\tthook</code> <em>before</em> you set <code class=verbatim>\activettchar</code>.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_56"></a>
+<h2 class=section>Inserting files verbatim</h2>
+<p class=noindent><a id="TAG:__tex2page_index_324"></a><a id="TAG:__tex2page_index_326"></a><a id="TAG:__tex2page_index_328"></a>You can insert files verbatim with the command
+<code class=verbatim>\verbatiminput</code> (from L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X’s <code class=verbatim>verbatim.sty</code>) or with Eplain’s
+<code class=verbatim>\listing</code>.  Usage:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\verbatiminput{program.lisp}
+</pre>
+<p class=noindent></p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_57"></a>
+<h2 class=section>Writing to files</h2>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_58"></a>
+<a id="TAG:__tex2page_index_330"></a>The command <code class=verbatim>\verbwrite</code>, used like <code class=verbatim>\verb</code>, does
+not typeset its enclosed text but outputs it verbatim
+into a text file.  The text file has by default the
+same basename as the document, but with extension
+<code class=verbatim>.txt</code>.</p>
+<p>
+
+<a id="TAG:__tex2page_index_332"></a></p>
+<p>
+
+To specify another text file, use <code class=verbatim>\verbwritefile</code>.
+E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\verbwritefile notes-to-myself.txt    % or
+\verbwritefile{notes-to-myself.txt}
+</pre>
+<p class=noindent>
+This will cause subsequent calls to
+<code class=verbatim>\verbwrite</code> upto the next <code class=verbatim>\verbwritefile</code> or end
+of document (whichever comes first) to send text into
+the file <code class=verbatim>notes&#x2011;to&#x2011;myself.txt</code>.  <code class=verbatim>\verbwritefile</code>
+deletes any pre-existing contents of its argument file.</p>
+<p>
+
+<a id="TAG:__tex2page_index_334"></a>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page also recognizes the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;command
+<code class=verbatim>\write</code>, which takes two arguments: an <em>output
+stream number</em> and a T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;expression to be output.
+Recall that T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;allows only the numbers 0–15 for
+output streams that can be associated with files;
+numbers outside this range are deemed to represent
+standard output.</p>
+<p>
+
+<a id="TAG:__tex2page_tag_Temp_59"></a>
+<a id="TAG:__tex2page_index_336"></a>However: T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page follows modern
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;implementation practice in treating the output
+stream 18 specially.  <code class=verbatim>\write18{<em>oscommand</em>}</code>,
+instead of writing <code class=verbatim><em>oscommand</em></code> to standard
+output, will execute it as an operating-system command!
+This is not standard T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;behavior, but most modern T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>Xs
+enable this feature with a command-line option that is
+either <code class=verbatim>&#x2011;shell&#x2011;escape</code> or
+<code class=verbatim>&#x2011;&#x2011;enable&#x2011;write18</code> (use <code class=verbatim>&#x2011;&#x2011;help</code> on your T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;executable(s) to find
+out).</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_60"></a>
+<h2 class=section>Verbatim style</h2>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_61"></a>
+The verbatim commands (<code class=verbatim>\verb</code>, <code class=verbatim>\path</code>
+and <code class=verbatim>\verbatiminput</code>, etc.)&#x200b; &#x200b;introduced above use a style class
+called <code class=verbatim>verbatim</code>.  You can affect the appearance
+of your verbatim text by defining a style for
+<code class=verbatim>verbatim</code> in a style sheet (p.&#xa0;<a class=hrefinternal href="index-Z-H-7.html#TAG:__tex2page_tag_Temp_49">7</a>).  E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+.verbatim        {color: hsl(205,100%,16%)}
+</pre>
+<p class=noindent>
+sets <span style="color: hsl(205,100%,16.0%)"><code class=verbatim>all verbatim text
+in Prussian blue</code></span>.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_62"></a>
+<h2 class=section>Syntax-highlighting of program code</h2>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_63"></a>
+<a id="TAG:__tex2page_index_338"></a><a id="TAG:__tex2page_index_340"></a><a id="TAG:__tex2page_index_342"></a>The commands <code class=verbatim>\scm</code> and <code class=verbatim>\scminput</code> are variants
+of <code class=verbatim>\verb</code> and <code class=verbatim>\verbatiminput</code>.  They are
+useful for producing syntax-highlighted Lisp
+code in the HTML file.  E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\scm{
+(defun factorial (n)
+  (when *debug*
+    (format t &#x22;Calling factorial ~a~%&#x22; n))
+  (if (= n 0) 1 ;the base case
+      (* n (factorial (1- n)))))
+}
+</pre>
+<p class=noindent>
+produces</p>
+<p>
+
+</p>
+<div class=leftline><pre class=scheme>
+(<span class=keyword>defun</span> <span class=variable>factorial</span> (<span class=variable>n</span>)
+  (<span class=keyword>when</span> <span class=global>*debug*</span>
+    (<span class=variable>format</span> <span class=variable>t</span> <span class=selfeval>&#x22;Calling factorial ~a~%&#x22;</span> <span class=variable>n</span>))
+  (<span class=keyword>if</span> (<span class=variable>=</span> <span class=variable>n</span> <span class=selfeval>0</span>) <span class=selfeval>1</span> <span class=comment>;the base case</span>
+      (<span class=variable>*</span> <span class=variable>n</span> (<span class=variable>factorial</span> (<span class=variable>1-</span> <span class=variable>n</span>)))))
+</pre></div>
+<p class=noindent>
+(Your browser needs to support style sheets for the
+syntax-highlighting to show.)
+Seven categories of code text are distinguished:</p>
+<p>
+
+(<span class=item>i</span>) background punctuation;</p>
+<p>
+
+(<span class=item>ii</span>) self-evaluating atoms (numbers, booleans, characters, strings);</p>
+<p>
+
+(<span class=item>iii</span>) syntactic keywords;</p>
+<p>
+
+(<span class=item>iv</span>) builtin variables;</p>
+<p>
+
+(<span class=item>v</span>) global or special variables, viz., identifiers that begin and end with an asterisk;</p>
+<p>
+
+(<span class=item>vi</span>) other variables; and</p>
+<p>
+
+(<span class=item>vii</span>) comments.</p>
+<p>
+
+To distinguish between the categories of Lisp code
+text, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page uses a style class called <code class=verbatim>scheme</code>
+with six subclasses, viz., <code class=verbatim>selfeval</code>,
+<code class=verbatim>keyword</code>, <code class=verbatim>builtin</code>, <code class=verbatim>global</code>, <code class=verbatim>variable</code>, and
+<code class=verbatim>comment</code>.  You can set the <code class=verbatim>color</code> property (and
+other properties like <code class=verbatim>font&#x2011;weight</code> and
+<code class=verbatim>font&#x2011;style</code>) of these classes in a style
+sheet (p.&#xa0;<a class=hrefinternal href="index-Z-H-7.html#TAG:__tex2page_tag_Temp_49">7</a>).  The default settings are:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+.scheme             {color: hsl(280,33%,30%)} /* background punctuation */
+.scheme  .selfeval  {color: hsl(120,100%,20%); font-style: normal}
+.scheme  .keyword   {color: hsl(0,100%,20%);   font-style: normal; font-weight: bold}
+.scheme  .builtin   {color: hsl(0,100%,20%);   font-style: normal}
+.scheme  .global    {color: hsl(300,100%,20%); font-style: normal}
+.scheme  .variable  {color: hsl(240,100%,20%); font-style: normal}
+.scheme  .comment   {color: hsl(180,100%,20%); font-style: oblique}
+</pre>
+<p class=noindent>
+<a id="TAG:__tex2page_index_344"></a><a id="TAG:__tex2page_index_346"></a><a id="TAG:__tex2page_index_348"></a>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page initially only recognizes some well-known
+syntactic keywords, global variables, and
+self-evaluators.  It does not recognize builtins as
+apart from the general run of variables.  Users who
+want builtins distinguished can use
+<code class=verbatim>\scmbuiltin</code>, e.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\scmbuiltin{cons car cdr}
+</pre>
+<p class=noindent></p>
+<p>
+
+Users who do not want to distinguish Common Lisp–style
+global (“special”) variables as a separate category from
+other variables should give the style class <code class=verbatim>.global</code> the
+same properties as <code class=verbatim>.variable</code>, e.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+.scheme .global {color: hsl(240,100%,20%}
+</pre>
+<p class=noindent></p>
+<p>
+
+Users can add their own keywords with <code class=verbatim>\scmkeyword</code>.
+E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\scmkeyword{define-class unwind-protect}
+</pre>
+<p class=noindent></p>
+<p>
+
+By default, tokens that don’t fall in any of the
+other categories are set as variables.  However,
+<code class=verbatim>\scmvariable</code> can be used to explicitly identify as
+variables those tokens that are currently treated as
+non-variables (e.g., keywords or self-evaluators).  E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\scmvariable{and 42 +i}
+</pre>
+<p class=noindent></p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_64"></a>
+<h2 class=section>Using SL<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;commands</h2>
+<p class=noindent><a id="TAG:__tex2page_index_350"></a><a id="TAG:__tex2page_index_352"></a>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page also syntax-highlights Lisp code introduced
+using the SL<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;commands, chiefly
+<code class=verbatim>\scheme</code> and <code class=verbatim>{schemedisplay}</code>.  SL<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;users know
+that these commands typeset code in the DVI output
+using fonts (rather than color) for highlighting.
+For the HTML, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will use color.</p>
+<p>
+
+A minor point is that SL<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X’s commands allow T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+commands inside Lisp comments.  This is useful
+if you want to highlight mentions of Lisp code inside
+Lisp comments.  To get the same effect with T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page,
+use the <code class=verbatim>\TZPslatexcomments</code> flag (p.&#xa0;<a class=hrefinternal href="index-Z-H-6.html#TAG:__tex2page_tag_Temp_40">6</a>).</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_65"></a>
+<h2 class=section>Documenting your code</h2>
+<p class=noindent><a id="TAG:__tex2page_index_354"></a><a id="TAG:__tex2page_index_356"></a>You can use T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page to do a form of <em>literate
+programming</em>, i.e., combining your documentation with
+your code.  The command <code class=verbatim>\scmdribble</code>, which is used
+like <code class=verbatim>\scm</code>, will not only display the enclosed code,
+but also send it to the external file named by
+the most recent <code class=verbatim>\verbwritefile</code>.</p>
+<p>
+
+To specify code that should go into the external file but
+should not be displayed, simply use
+<code class=verbatim>\verbwrite</code> instead of <code class=verbatim>\scmdribble</code>.</p>
+<p>
+
+</p>
+<div class=footnoterule><hr></div><p>
+</p>
+<div class=footnote><p>
+<span class=footnotemark><a id="TAG:__tex2page_footnote_Temp_55"></a><sup><a class=hrefinternal href="#TAG:__tex2page_call_footnote_Temp_55">1</a></sup></span> Setting <code class=verbatim>\activettchar`</code> lets you write
+<code class=verbatim>\verb`\c@de_fr&#x26;gm%#t$`</code>
+as simply
+<code class=verbatim>`\c@de_fr&#x26;gm%#t$`</code>,
+as in AsciiDoc; and
+<code class=verbatim>\activettchar|</code> lets you write
+<code class=verbatim>|\c@de_fr&#x26;gm%#t$|</code>,
+as in <code class=verbatim>manmac</code>.</p>
+</div>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+<div class=navigation><a class=hrefinternal href="index-Z-H-7.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-9.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+</div>
+</body>
+</html>
+

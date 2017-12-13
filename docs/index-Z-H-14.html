@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang=en>
+<!--
+Generated from index.tex by tex2page, v. 20171213
+Copyright (C) 1997-2017 Dorai Sitaram
+(running on ECL 16.1.2 Linux)
+http://ds26gte.github.io/tex2page/index.html
+-->
+<head>
+<meta charset="utf-8">
+<title>
+TeX2page
+</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Proza+Libre" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Miltonian" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond" />
+<link rel="stylesheet" href="index-Z-S.css" />
+<meta name=robots content="index,follow">
+
+<meta name=description content="Scheme, Common Lisp script for making Web pages
+from TeX documents">
+
+<meta name=author content="Dorai Sitaram">
+<!-- <link rev=made href="mailto:ds26gte at yahoo dot com"> -->
+
+</head>
+<body>
+<div>
+<div class=navigation><a class=hrefinternal href="index-Z-H-13.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-15.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+<a id="TAG:__tex2page_chap_C"></a>
+<h1 class=chapter><a class=hrefinternal href="index.html#TAG:__tex2page_toc_TAG:__tex2page_chap_C">C&#xa0;&#xa0;Configuring T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page</a></h1>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_87"></a>
+<a id="TAG:__tex2page_index_484"></a>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page is available on
+<a href="https://github.com/ds26gte/tex2page">GitHub</a>.</p>
+<p>
+
+</p>
+<pre class=verbatim>
+git clone https://github.com/ds26gte/tex2page
+</pre>
+<p class=noindent>
+produces a directory
+called <code class=verbatim>tex2page</code>, which contains, among other files:
+the Racket file <code class=verbatim>tex2page.rkt</code>, the Common Lisp file <code class=verbatim>tex2page.lisp</code>, the plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;file
+<code class=verbatim>tex2page.tex</code>, and the L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;package
+<code class=verbatim>tex2page.sty</code>.</p>
+<p>
+
+Put copies of (or links to) the files
+<code class=verbatim>tex2page.tex</code> and <code class=verbatim>tex2page.sty</code>  in a directory
+that is mentioned in your <code class=verbatim>TEXINPUTS</code> environment
+variable.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_88"></a>
+<h2 class=section>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page out of the box (Common Lisp)</h2>
+<p class=noindent>If you run a Common Lisp on a Unix, you can use the supplied script
+<code class=verbatim>tex2page.lisp</code> after setting the environment variable <code class=verbatim>LISP</code> to the
+name of your Lisp implementation.  Put <code class=verbatim>tex2page.lisp</code> in your
+<code class=verbatim>PATH</code>. You may rename it to
+<code class=verbatim>tex2page</code>.</p>
+<p>
+
+Set <code class=verbatim>LISP</code> to
+<code class=verbatim>abcl</code> for ABCL&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_1">1</a>],
+<code class=verbatim>allegro</code> for Allegro&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_22">22</a>],
+<code class=verbatim>clisp</code> for CLISP&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_18">18</a>],
+<code class=verbatim>clozure</code> for Clozure&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_8">8</a>],
+<code class=verbatim>cmucl</code> for CMUCL&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_9">9</a>],
+<code class=verbatim>ecl</code> for ECL&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_29">29</a>],
+<code class=verbatim>mkcl</code> for MKCL&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_3">3</a>],
+and <code class=verbatim>sbcl</code> for SBCL&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_43">43</a>].</p>
+<p>
+
+The top few lines in <code class=verbatim>tex2page.lisp</code> contain the lines
+that invoke Lisp —  if they don’t already address your
+particular Lisp
+implementation, you may need to add a line based on your
+Lisp’s command line options.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_89"></a>
+<h2 class=section>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page out of the box (Racket)</h2>
+<p class=noindent><a id="TAG:__tex2page_index_486"></a>If you run Racket&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_39">39</a>] on a Unix (including Mac OS X and
+Cygwin&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_23">23</a>]), setup is minimal.  Simply put a copy of (or link to) the Scheme
+file <code class=verbatim>tex2page.rkt</code> in a directory in your <code class=verbatim>PATH</code> environment
+variable. You may rename it to <code class=verbatim>tex2page</code>.</p>
+<p>
+
+If you run Racket on Windows,
+copy the supplied batchfile <code class=verbatim>tex2page.bat</code>
+to your <code class=verbatim>PATH</code>, and edit its contents so it contains
+the correct pathnames to your Racket executable and
+<code class=verbatim>tex2page.rkt</code> file.</p>
+<p>
+</p>
+<a id="TAG:__tex2page_sec_Temp_90"></a>
+<h2 class=section>When explicit configuration is needed</h2>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_91"></a>
+In general, you need to <em>
+configure</em>
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page so it runs on your system.  Even in cases where the supplied
+script runs “out of the box” for your setup, it may still be a good
+idea to do an explicit configuration.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_92"></a>
+<h2 class=section>Using ./configure</h2>
+<p class=noindent>This method may not always work but is so easy that
+it’s worth a try.  It should work for most
+dialects on Unix.</p>
+<p>
+
+(<span class=item>i</span>) Type <code class=verbatim>./configure &#x2011;&#x2011;help</code> at your OS command line
+to get the list of dialects supported.
+If your dialect <code class=verbatim><em>D</em></code> is one of them,</p>
+<p>
+
+(<span class=item>ii</span>) Type  <code class=verbatim>./configure &#x2011;&#x2011;dialect=<em>D</em></code></p>
+<p>
+
+</p>
+
+<p class=noindent>If all goes well, this will create
+<code class=verbatim>tex2page</code>, a version of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page that’s suited to <code class=verbatim><em>D</em></code>.
+Put it in your <code class=verbatim>PATH</code>.</p>
+<p>
+
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page is known to configure for the Scheme dialects
+Chez&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_44">44</a>],
+Chicken&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_7">7</a>],
+Gambit&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_11">11</a>],
+Gauche&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_25">25</a>],
+Guile&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_12">12</a>],
+and Racket&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_39">39</a>]; and the Common Lisp
+implementations ABCL, Allegro, CLISP, Clozure, CMUCL, ECL, and SBCL.
+</p>
+<a id="TAG:__tex2page_sec_Temp_93"></a>
+<h2 class=section>Using Scmxlate directly</h2>
+<p class=noindent><a id="TAG:__tex2page_index_488"></a>The <code class=verbatim>./configure &#x2011;&#x2011;dialect=<em>D</em></code> approach above
+essentially takes care to call Scmxlate (if needed) as described in
+this section, but unfortunately it may not work for
+some dialects or operating systems.  In such cases, you
+can manually call Scmxlate, which isn’t really all that
+tedious.</p>
+<p>
+
+First ensure that
+<a href="https://github.com/ds26gte/scmxlate">Scmxlate</a>
+is installed on your system.  Note down the pathname of
+the file <code class=verbatim>scmxlate.scm</code> in the unpacked <code class=verbatim>scmxlate</code>
+directory.</p>
+<p>
+
+Optionally, edit the file <code class=verbatim>scmxlate&#x2011;tex2page.rkt</code> in the
+<code class=verbatim>tex2page</code> directory. (Leaving it as is is just fine.)
+Possible insertions are:</p>
+<p>
+
+</p>
+<div class=leftline><pre class=scheme>
+(<span class=variable>scmxlate-compile</span> <span class=selfeval>#t</span>)
+
+(<span class=keyword>define</span> <span class=global>*ghostscript*</span> <span class=selfeval>&#x22;pathname-of-your-ghostscript-program&#x22;</span>)
+</pre></div>
+<p class=noindent>
+The first produces a compiled version of
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page.   The second lets you supply the
+correct pathname for the Ghostscript executable.
+(T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will guess the Ghostscript pathname,
+but there is a possibility it guesses wrong on
+Windows.)</p>
+<p>
+
+Start your Scheme (or Common Lisp) in the
+<code class=verbatim>tex2page</code> directory.   Load the file
+<code class=verbatim>scmxlate.scm</code> from the
+<code class=verbatim>scmxlate</code> distribution, using the correct relative
+or full pathname of <code class=verbatim>scmxlate.scm</code>.  For example,</p>
+<p>
+
+</p>
+<div class=leftline><pre class=scheme>
+(<span class=variable>load</span> <span class=selfeval>&#x22;/home/dorai/share/scmxlate/scmxlate.scm&#x22;</span>)
+</pre></div>
+<p class=noindent>
+(assuming you unpacked Scmxlate in
+<code class=verbatim>/home/dorai/share</code>).  You will be asked a couple
+of questions about your setup.  A choice of answers
+will be provided, so you don’t need to be too creative.
+When Scmxlate finishes, you will be left with a
+<code class=verbatim>tex2page</code> that is tailormade for your system.</p>
+<p>
+
+On Windows, a batch file called <code class=verbatim>tex2page.bat</code>
+is also created.  Move it to a directory in your
+<code class=verbatim>PATH</code>.  Edit the contents of <code class=verbatim>tex2page.bat</code> so
+that the pathnames it refers to are correct.</p>
+<p>
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+<div class=navigation><a class=hrefinternal href="index-Z-H-13.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-15.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+</div>
+</body>
+</html>
+

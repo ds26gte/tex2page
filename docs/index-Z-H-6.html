@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang=en>
+<!--
+Generated from index.tex by tex2page, v. 20171213
+Copyright (C) 1997-2017 Dorai Sitaram
+(running on ECL 16.1.2 Linux)
+http://ds26gte.github.io/tex2page/index.html
+-->
+<head>
+<meta charset="utf-8">
+<title>
+TeX2page
+</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Proza+Libre" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Miltonian" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond" />
+<link rel="stylesheet" href="index-Z-S.css" />
+<meta name=robots content="index,follow">
+
+<meta name=description content="Scheme, Common Lisp script for making Web pages
+from TeX documents">
+
+<meta name=author content="Dorai Sitaram">
+<!-- <link rev=made href="mailto:ds26gte at yahoo dot com"> -->
+
+</head>
+<body>
+<div>
+<div class=navigation><a class=hrefinternal href="index-Z-H-5.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-7.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+<a id="TAG:__tex2page_chap_6"></a>
+<h1 class=chapter><a class=hrefinternal href="index.html#TAG:__tex2page_toc_TAG:__tex2page_chap_6">6&#xa0;&#xa0;Flags</a></h1>
+<p class=noindent><a id="TAG:__tex2page_index_200"></a>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page has a handful of flags that you can set to govern the HTML output.</p>
+<p>
+
+All these T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page flags are named <code class=verbatim>\TZP...</code>, and as long as
+you avoid using these names for other purposes, setting these
+flags should have no effect on the print output.</p>
+<p>
+
+These flags are T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;control sequences
+and are set using <code class=verbatim>\let</code> or <code class=verbatim>\def</code> or even <code class=verbatim>\gdef</code>,
+<code class=verbatim>\edef</code>, or <code class=verbatim>\xdef</code>.
+(If using one of the <code class=verbatim>\def</code>s for a boolean flag, only the
+first character in the <code class=verbatim>\def</code>-body is significant.)</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_31"></a>
+<h2 class=section>External title</h2>
+<p class=noindent><a id="TAG:__tex2page_index_202"></a><a id="TAG:__tex2page_index_204"></a><a id="TAG:__tex2page_index_206"></a>By default, the “external” title of the HTML document —
+i.e., the string that appears on the title bar of the
+browser window — is either the same as the internal title,
+as specified with the <code class=verbatim>\title</code> command, or, the first heading
+(i.e., chapter or section),
+or, if none such is
+available, the basename of the document source file.  If you
+wish the external title to be something else, you can set
+the control sequence <code class=verbatim>\TZPtitle</code>, e.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\def\TZPtitle{The Odyssey}
+</pre>
+<p class=noindent>
+Note that in L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, <code class=verbatim>\title</code> merely
+specifies the title; the command that actually places the
+title is <code class=verbatim>\maketitle</code>.  T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page does the same for L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+documents.  For other formats, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will assume that
+<code class=verbatim>\title</code>  should set its argument as a title immediately.
+For T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;to do likewise, the document must include supply an
+appropriate T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X-only definition for <code class=verbatim>\title</code>, e.g., the
+one in <code class=verbatim>tex2page.tex</code>.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_32"></a>
+<h2 class=section>Language</h2>
+<p class=noindent><a id="TAG:__tex2page_index_208"></a>By default, the language of the document is assumed to be
+English. To change this, set the control sequence
+<code class=verbatim>\TZPlang</code> to the ISO 639-1 code for the preferred language, e.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\def\TZPlang{de} % German
+</pre>
+<p class=noindent></p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_33"></a>
+<h2 class=section>Colophon flags</h2>
+<p class=noindent>These flags
+govern the placement and content of the colophon.
+By default, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page prints a two-line colophon at the
+bottom of the first page, the first line giving
+the time of last change of the source document, and the
+second line identifying T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page and linking to its website.</p>
+<p>
+
+<a id="TAG:__tex2page_index_210"></a>(<span class=item>i</span>) To put the colophon on the last rather than the first page,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\let\TZPcolophonlastpage=1
+</pre>
+<p class=noindent></p>
+<p>
+<a id="TAG:__tex2page_index_212"></a>(<span class=item>ii</span>) To avoid mentioning the timestamp of the document in the
+colophon,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\let\TZPcolophondisabletimestamp=1
+</pre>
+<p class=noindent>
+If the underlying
+Lisp is incapable of determining a file’s write date, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will
+not mention the timestamp, regardless of the <code class=verbatim>\TZPcolophondisabletimestamp</code> setting.</p>
+<p>
+
+<a id="TAG:__tex2page_index_214"></a>(<span class=item>iii</span>) To avoid crediting T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page in the colophon,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\let\TZPcolophondisablecredit=1
+</pre>
+<p class=noindent></p>
+<p>
+
+<a id="TAG:__tex2page_index_216"></a>(<span class=item>iv</span>) To avoid linking to the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page website in the colophon,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\let\TZPcolophondisableweblink=1
+</pre>
+<p class=noindent>
+If <code class=verbatim>\TZPcolophondisablecredit</code> is set, the colophon won’t link to the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+site, regardless of the <code class=verbatim>\TZPcolophondisableweblink</code> setting.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_34"></a>
+<h2 class=section>Math image flag</h2>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_35"></a>
+<a id="TAG:__tex2page_index_218"></a>The <code class=verbatim>\TZPmathtext</code> flag
+specifies whether mathematical fragments in the
+document should be rendered as image or text.  By default, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will
+generate images for displayed math and for “complicated”
+in-text math (i.e., math embedded in running text).   If the
+in-text math is simple according its judgment, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will
+economize by generating its text (UTF-8) equivalent.</p>
+<p>
+
+The assignment</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\let\TZPmathtext=1
+</pre>
+<p class=noindent>
+forces subsequent math to be typeset as text, until the end of the document or
+until you reset to the flag to 0.</p>
+<p>
+
+It is a good idea to set this flag to 1 if the
+mathematical notation in part or all of your document is simple enough to
+not require complicated notation.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_36"></a>
+<h2 class=section>Image conversion flags</h2>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_37"></a>
+<a id="TAG:__tex2page_index_220"></a><a id="TAG:__tex2page_index_222"></a><a id="TAG:__tex2page_index_224"></a><a id="TAG:__tex2page_index_226"></a><a id="TAG:__tex2page_index_228"></a><a id="TAG:__tex2page_index_230"></a><a id="TAG:__tex2page_index_232"></a><a id="TAG:__tex2page_index_234"></a><a id="TAG:__tex2page_index_236"></a>These flags specify the conversion tactics used
+for generating HTML-suitable images from the user’s graphics
+requests.  T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page invokes a combination of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;and
+Dvips&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_41">41</a>] to create a PostScript version of the
+graphic, and then Ghostscript&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_14">14</a>] and either (<span class=item>i</span>) the
+NetPBM library&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_35">35</a>], or (<span class=item>ii</span>) the ImageMagick
+library&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_21">21</a>], to convert the PS into the
+HTML-suitable image.</p>
+<p>
+
+<a id="TAG:__tex2page_index_238"></a><a id="TAG:__tex2page_index_240"></a>The defaults are: NetPBM
+to convert, and PNG to convert to.
+You may set the flags <code class=verbatim>\TZPimageconverter</code> and <code class=verbatim>\TZPimageformat</code> to
+change this, e.g,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\def\TZPimageconverter{imagemagick}  % use ImageMagick
+\def\TZPimageconverter{netpbm}       % use NetPBM (default)
+
+\def\TZPimageformat{gif}  % for GIF images
+\def\TZPimageformat{jpeg} % for JPEG images
+\def\TZPimageformat{png}  % for PNG images (default)
+</pre>
+<p class=noindent></p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_38"></a>
+<h2 class=section>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;executable used for image generation</h2>
+<p class=noindent><a id="TAG:__tex2page_index_242"></a>By default, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page uses <code class=verbatim>xetex</code> to
+generate images. To change this, set the flag <code class=verbatim>\TZPtexprogname</code> to
+contain the name of your preferred T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;executable, e.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\def\TZPtexprogname{pdftex}
+</pre>
+<p class=noindent>
+You only need to set the executable name used for the “plain” format:
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will deduce the appropriate name for the L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;executable,
+which will be used to generate images if the entire document is in the
+L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;format.  (This is so that any image preambles
+(p.&#xa0;<a class=hrefinternal href="index-Z-H-9.html#TAG:__tex2page_tag_Temp_72">9</a>) you use match the
+document’s format.)</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_39"></a>
+<h2 class=section>Flag for Lisp code comments</h2>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_40"></a>
+<a id="TAG:__tex2page_index_244"></a>The flag <code class=verbatim>\TZPslatexcomments</code> governs whether Lisp comments
+should inside verbatim Lisp code should be rendered verbatim or as T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.
+By default, they are rendered verbatim.   To allow T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;commands inside
+Lisp comment text, do</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\let\TZPslatexcomments=1
+</pre>
+<p class=noindent>
+This is the style favored by SL<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.
+With <code class=verbatim>\TZPslatexcomments</code> set, the text</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\scm{
+(open-input-string ; in Scsh, use \scm{string-&#x3e;input-port}
+  s)
+}
+</pre>
+<p class=noindent>
+produces
+</p>
+<pre class=scheme>(<span class=variable>open-input-string</span> <span class=comment>; in Scsh, use <code class=scheme><span class=variable>string&#x2011;&#x3e;input&#x2011;port</span></code></span>
+  <span class=variable>s</span>)
+</pre>
+<p class=noindent>
+
+Note that <code class=verbatim>\TZPslatexcomments=1</code> is not an unmixed blessing, as it
+restricts your Lisp comments to text that is valid T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_41"></a>
+<h2 class=section>Flags for page and paragraph layout</h2>
+<p class=noindent><a id="TAG:__tex2page_index_246"></a><a id="TAG:__tex2page_tag_Temp_42"></a>
+By default, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page produces block paragraphs with about a
+baseline’s worth of vertical space separating paragraphs, and text width
+expands to fill the browser width, allowing for some margins.</p>
+<p>
+
+(<span class=item>i</span>) To produce more T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X-like layout, i.e., with no parskip and
+with some parindent,
+with the page width not exceeding <code class=verbatim>\hsize</code>,
+with left and top margins that are an inch greater than
+<code class=verbatim>\hoffset</code> and <code class=verbatim>\voffset</code> respectively, and with a
+navigation bar that uses <code class=verbatim>\headline</code> and <code class=verbatim>\footline</code>,
+do</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\let\TZPtexlayout=1
+</pre>
+<p class=noindent></p>
+<p>
+
+<a id="TAG:__tex2page_index_248"></a><a id="TAG:__tex2page_index_250"></a><a id="TAG:__tex2page_index_252"></a><a id="TAG:__tex2page_index_254"></a><a id="TAG:__tex2page_index_256"></a><a id="TAG:__tex2page_index_258"></a><a id="TAG:__tex2page_index_260"></a>The HTML page will be set according to the values of the
+lengths <code class=verbatim>\hsize</code>, <code class=verbatim>\hoffset</code>, <code class=verbatim>\voffset</code>,
+<code class=verbatim>\parskip</code>, <code class=verbatim>\parindent</code>, and the tokens <code class=verbatim>\headline</code>
+and <code class=verbatim>\footline</code> as they are at the end (!) of
+the document.</p>
+<p>
+
+The command <code class=verbatim>\folio</code> inside the tokens <code class=verbatim>\headline</code> and <code class=verbatim>\footline</code>
+— and only inside them —
+produces in HTML not the current page number but rather twin links to the
+adjacent pages. <code class=verbatim>\folio</code> thus lets you create navigation
+bars.</p>
+<p>
+
+Note that the plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;default (which
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page reuses) is to have <code class=verbatim>\folio</code> in the
+<code class=verbatim>\footline</code> and nothing in the <code class=verbatim>\headline</code>.  If you wish
+to have a navigation bar in the header, you should set
+<code class=verbatim>\headline</code>.</p>
+<p>
+
+It is not necessary that these values be
+identical to what T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;sees for the same document, as you can
+make HTML-only settings such as</p>
+<p>
+
+<a id="TAG:__tex2page_index_262"></a></p>
+<pre class=verbatim>
+\ifx\shipout\UnDeFiNeD
+  \hsize=36em
+  \headline={\folio, ~~ \urlh{#ToC}{ToC}, ~~ \urlh{#Index}{Index}}
+  \footline={\the\headline}  % i.e., footline same as headline
+\fi
+</pre>
+<p class=noindent>
+where the tags <code class=verbatim>ToC</code> and <code class=verbatim>Index</code> are set near
+the ToC and Index respectively.</p>
+<p>
+
+<a id="TAG:__tex2page_index_264"></a>Paragraphs preceded by <code class=verbatim>\noindent</code> will always have no initial
+indentation, even if <code class=verbatim>\TZPtexlayout=1</code> and <code class=verbatim>\parskip</code> is
+non-zero.</p>
+<p>
+
+<a id="TAG:__tex2page_index_266"></a>(<span class=item>ii</span>) If you don’t really need a full-blown T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X-like layout, but would
+still like to have the HTML page’s text width be no more than,
+say, 6.25 inches, you could have</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\def\TZPhsize{6.25 in}
+</pre>
+<p class=noindent>
+The <code class=verbatim>\TZPhsize</code> value overrides the <code class=verbatim>\hsize</code> value, whether
+or not you set <code class=verbatim>\TZPtexlayout</code>.</p>
+<p>
+
+<a id="TAG:__tex2page_index_268"></a>(<span class=item>iii</span>) Because it is too drastic a change, <code class=verbatim>\TZPtexlayout=1</code> will not cause
+text to be right-justified.  To make that happen,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\let\TZPrightjustify=1
+</pre>
+<p class=noindent>
+Setting <code class=verbatim>\TZPrightjustify</code> has no effect unless <code class=verbatim>\TZPtexlayout</code> is
+also set.</p>
+<p>
+
+<a id="TAG:__tex2page_index_270"></a>(<span class=item>iv</span>) Finally, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;uses pseudo-ligatures to convert
+occurrences of <code class=verbatim>`</code>, <code class=verbatim>'</code>, <code class=verbatim>``</code>, <code class=verbatim>''</code>, <code class=verbatim>&#x2011;&#x2011;</code>, and <code class=verbatim>&#x2011;&#x2011;&#x2011;</code>
+in the source to left quote, right quote, left double quote,
+right double quote, en-dash, and em-dash respectively.
+If you use a Unicode-friendly T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;such as X<span style="text-transform: uppercase; position: relative; top: 0.5ex; margin-left: -0.125em; margin-right: -0.1667em">&#x1dd;</span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;with a Unicode font
+and a text editor that lets you enter these quotes and dashes directly,
+then you may not need the ligatures, and may indeed, want <code class=verbatim>&#x2011;&#x2011;</code> to
+show up as two hyphens, both in the HTML and the DVI.  To
+disable the ligatures,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\let\TZPtextext=0
+</pre>
+<p class=noindent>
+In this case, you also have to ensure that the fonts you use in X<span style="text-transform: uppercase; position: relative; top: 0.5ex; margin-left: -0.125em; margin-right: -0.1667em">&#x1dd;</span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;do not have <code class=verbatim>mapping=tex&#x2011;text</code>.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_43"></a>
+<h2 class=section>Making a slideshow</h2>
+<p class=noindent><a id="TAG:__tex2page_index_272"></a><a id="TAG:__tex2page_index_274"></a><a id="TAG:__tex2page_index_276"></a><a id="TAG:__tex2page_index_278"></a>To produce a Web presentation,
+set the flag <code class=verbatim>\TZPslides</code>:
+</p>
+<pre class=verbatim>
+\let\TZPslides=1
+</pre>
+<p class=noindent>
+This causes T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page to use the style sheet <code class=verbatim>slidy.css</code> and JavaScript file
+<code class=verbatim>slidy.js</code>
+from Slidy&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_40">40</a>] to convert your document into a single
+HTML page containing slides.  T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page looks for these files in
+the working directory, and if they’re not found there, it links
+them from the W3C website. It may be prudent to get these files
+beforehand and place them in your working directory, so the
+presentation doesn’t rely on WiFi.</p>
+<p>
+
+A new slide is started for each
+“chapter” and “section”, i.e., <code class=verbatim>\beginchapter</code>, <code class=verbatim>\chapter</code>,
+<code class=verbatim>\beginsection</code> and <code class=verbatim>\section</code>. (Note of course
+that it doesn’t make sense to convert generic T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;documents
+into presentations. The sections have got to be pretty short!)</p>
+<p>
+
+An HTML page meant for presentation uses larger, bolder fonts by
+default (but you can add your own CSS). There are no navigation
+bars between slides.
+Furthermore, enumerated and itemized lists (<code class=verbatim>\enumerate</code>
+and <code class=verbatim>\itemize</code>) display their items incrementally.</p>
+<p>
+
+Consult the Slidy documentation for the keypresses and clicks you can use
+to progress through or dynamically alter the look of your
+presentation.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_44"></a>
+<h2 class=section>Page redirection</h2>
+<p class=noindent><a id="TAG:__tex2page_index_280"></a><a id="TAG:__tex2page_index_282"></a>(<span class=item>i</span>) If you wish your HTML output to immediately redirect elsewhere,
+set the flag <code class=verbatim>\TZPredirect</code> to contain the target URL.</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\def\TZPredirect{http://newhome.com/path/samedoc.html}
+</pre>
+<p class=noindent>
+This is useful when
+you’ve moved the location of a page but the old URL is still being used.</p>
+<p>
+
+The content of the document is obviously irrelevant.  However, you may
+put in <code class=verbatim>\eject</code>s in your T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;source to create the same number of pages as
+in the original document.  If the user consults any of these pages
+directly, they will get redirected to the new location.</p>
+<p>
+
+Not all browsers support automatic redirection. The (original)
+page therefore includes an informative sentence containing the
+link to the desired page, which the user can explicitly click.</p>
+<p>
+
+(<span class=item>ii</span>) By default, the redirection takes place in 5 seconds. To change
+this, set <code class=verbatim>\TZPredirectseconds</code>, e.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\def\TZPredirectseconds{10}
+</pre>
+<p class=noindent></p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_45"></a>
+<h2 class=section>Single output file</h2>
+<p class=noindent><a id="TAG:__tex2page_index_284"></a><a id="TAG:__tex2page_tag_Temp_46"></a>
+Sometimes it is desirable to generate just a single output HTML file, i.e., to
+not generate a page break as described on p.&#xa0;<a class=hrefinternal href="index-Z-H-4.html#TAG:__tex2page_tag_Temp_20">4</a>, and to have all the
+images embedded as data URIs within the document. To do this, set the
+<code class=verbatim>\TZPsinglepage</code> flag:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\let\TZPsinglepage=1
+</pre>
+<p class=noindent></p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_47"></a>
+<h2 class=section>OPmac</h2>
+<p class=noindent>The flag <code class=verbatim>\TZPopmac</code> can be set to 1 to inform T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page that
+you’re using OPmac macros&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_36">36</a>] in your document.
+Typically this isn’t necessary as T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page can spot if you’ve
+<code class=verbatim>\input opmac</code>. The flag need be set only if somehow the
+loading of <code class=verbatim>opmac</code> occurs in a T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X-only portion of your
+document.</p>
+<p>
+
+This flag, whether explicitly or implicitly set, helps T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+decide which form of the macros <code class=verbatim>\cite</code> and <code class=verbatim>\nocite</code> to use.
+In contrast to most other styles (including L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X), which use
+<code class=verbatim>{}</code> for these macros’ argument, OPmac uses <code class=verbatim>[]</code>.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_48"></a>
+<h2 class=section>Common Lisp or Scheme?</h2>
+<p class=noindent><a id="TAG:__tex2page_index_286"></a>The flag <code class=verbatim>\TZPcommonlisp</code> can be used to decide whether calls to
+<code class=verbatim>\eval</code> (p.&#xa0;<a class=hrefinternal href="index-Z-H-10.html#TAG:__tex2page_tag_Temp_78">10</a>) should contain Common Lisp or Scheme code.
+Typically, the construct <code class=verbatim>\ifx\TZPcommonlisp 1</code> is used to introduce
+the Common Lisp and Scheme versions as the two conditional clauses, so
+the document remains processable in both languages.</p>
+<p>
+
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page pre-sets <code class=verbatim>\TZPcommonlisp</code> to 1 in Common Lisp and 0 in Scheme.</p>
+<p>
+
+You may set <code class=verbatim>\TZPcommonlisp</code> to specify that the document <em>
+needs</em>
+either the Common Lisp or Scheme version of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page. If
+the incorrect version is used, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will display a warning
+message, but will not crash for this reason alone.</p>
+<p>
+
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+<div class=navigation><a class=hrefinternal href="index-Z-H-5.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-7.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+</div>
+</body>
+</html>
+

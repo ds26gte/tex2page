@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20171204") ;last change
+(defparameter *tex2page-version* "20171213") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -5334,7 +5334,7 @@
   (system (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
    (concatenate 'string "ppmtogif -transparent rgb:ff/ff/ff < " img-file ".ppm > "
-                *aux-dir/* img-file))
+                img-file))
   (mapc (lambda (e) (ensure-file-deleted (concatenate 'string img-file e)))
         '(".ppm" ".ppm.tmp" ".ppm.1")))
 
@@ -5347,7 +5347,7 @@
     (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
    (concatenate 'string "pnmtopng -interlace -transparent \"#FFFFFF\" " " < " img-file
-                ".ppm.tmp > " *aux-dir/* img-file))
+                ".ppm.tmp > " img-file))
   (mapc (lambda (e) (ensure-file-deleted (concatenate 'string img-file e)))
         '(".ppm.1" ".ppm.tmp" ".ppm")))
 
@@ -5358,7 +5358,7 @@
   (system (concatenate 'string "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
   (system (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
-   (concatenate 'string "ppmtojpeg --grayscale < " img-file ".ppm > " *aux-dir/* img-file))
+   (concatenate 'string "ppmtojpeg --grayscale < " img-file ".ppm > " img-file))
   (mapc (lambda (e) (ensure-file-deleted (concatenate 'string img-file e)))
         '(".ppm.1" ".ppm.tmp" ".ppm")))
 
@@ -7948,7 +7948,7 @@
                     *bib-aux-file-suffix*))
       (unless
           (probe-file
-           (concatenate 'string *jobname* *bib-aux-file-suffix* ".bbl"))
+           (concatenate 'string *aux-dir/* *jobname* *bib-aux-file-suffix* ".bbl"))
         (write-log " ... failed; try manually"))
       (write-log :separation-newline))
     ;makeindex

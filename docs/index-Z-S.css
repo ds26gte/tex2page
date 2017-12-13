@@ -1,0 +1,356 @@
+body {
+        color: black;
+        background-color: white;
+        margin-top: 2em;
+        margin-bottom: 2em;
+        /* margin-left: 8%;
+        margin-right: 8%; */
+        }
+
+        @media screen {
+        body {
+        margin-left: 8%;
+        margin-right: 8%;
+        }
+        }
+
+        @media amzn-kf8 {
+        body {
+        text-align: left;
+        }
+        }
+
+        @media print {
+        body {
+        text-align: justify;
+        }
+        }
+
+        @media print {
+        a:link, a:visited {
+        text-decoration: none;
+        color: black;
+        }
+        }
+
+        /* @media print {
+        p {
+        text-indent: 2em;
+        margin-top: 1ex;
+        margin-bottom: 0;
+        }
+
+        } */
+
+        h1,h2,h3,h4,h5,h6 {
+        margin-top: .8em;
+        margin-bottom: .2em;  /* ?? */
+        }
+
+        .title {
+        font-size: 200%;
+        font-weight: normal;
+        margin-top: 2.8em;
+        text-align: center;
+        }
+
+        .partheading {
+        font-size: 100%;
+        }
+
+        .chapterheading {
+        font-size: 100%;
+        }
+
+        .tiny {
+        font-size: 40%;
+        }
+
+        .scriptsize {
+        font-size: 60%;
+        }
+
+        .footnotesize {
+        font-size: 75%;
+        }
+
+        .small {
+        font-size: 90%;
+        }
+
+        .normalsize {
+        font-size: 100%;
+        }
+
+        .large {
+        font-size: 120%;
+        }
+
+        .largecap {
+        font-size: 150%;
+        }
+
+        .largeup {
+        font-size: 200%;
+        }
+
+        .huge {
+        font-size: 300%;
+        }
+
+        .hugecap {
+        font-size: 350%;
+        }
+
+        p.noindent {
+        text-indent: 0;
+        margin-top: 0;
+        }
+
+        p.nopadding {
+        margin-top: 0;
+        margin-bottom: 0;
+        }
+
+        pre {
+        overflow: auto;
+        margin-left: 2em;
+        /* background-color: hsl(0,0%,96%); */ /* Scheme version uncomment? */
+        }
+
+        blockquote {
+        /* background-color: hsl(0,35%,91%); */
+        margin-top: 2pt;
+        margin-bottom: 2pt;
+        margin-left: 2em;
+        }
+
+        .smallskip {
+        margin-top: 2pt;
+        margin-bottom: 2pt;
+        min-height: 4pt;
+        }
+
+        .medskip {
+        margin-top: 3pt;
+        margin-bottom: 3pt;
+        min-height: 7pt;
+        /*margin-top: 1.6em;
+        margin-bottom: 2.4em;
+        margin-top: 1em;
+        margin-bottom: 1.5em; */
+        /* top and bottom have to be different so successive \...skips cause more spacing? */
+        }
+
+        .bigskip {
+        margin-top: 4pt;
+        margin-bottom: 4pt;
+        min-height: 13pt;
+        /*margin-top: 2.8em;
+        margin-bottom: 3.4em;
+        margin-top: 2.4em;
+        margin-bottom: 1.6em; */
+        }
+
+        .item {
+        font-style: oblique;
+        }
+
+        ol {
+        list-style-type: decimal;
+        }
+
+        ol ol {
+        list-style-type: lower-alpha;
+        }
+
+        ol ol ol {
+        list-style-type: lower-roman;
+        }
+
+        ol ol ol ol {
+        list-style-type: upper-alpha;
+        }
+
+        ul {
+        list-style-type: disc;
+        }
+
+        ul ul {
+        list-style-type: circle;
+        }
+
+        ul ul ul {
+        list-style-type: square;
+        }
+
+        ul ul ul ul {
+        list-style-type: circle;
+        }
+
+        .verbatim {
+        background-color: hsl(0,0%,96%);
+        }
+
+        .scheme em {
+        color: black;
+        font-family: serif;
+        }
+
+        /* scheme background punctuation was hsl(0,50%,40%) */
+
+        .scheme             {color: hsl(280,33%,30%)} /* background punctuation */
+        .scheme  .selfeval  {color: hsl(120,100%,20%); font-style: normal}
+        .scheme  .keyword   {color: hsl(0,100%,20%);   font-style: normal; font-weight: bold}
+        .scheme  .builtin   {color: hsl(0,100%,20%);   font-style: normal}
+        .scheme  .global    {color: hsl(300,100%,20%); font-style: normal}
+        .scheme  .variable  {color: hsl(240,100%,20%); font-style: normal}
+        .scheme  .comment   {color: hsl(180,100%,20%); font-style: oblique}
+
+        .schemeresponse {
+        color: hsl(120,100%,20%);
+        }
+
+        .navigation {
+        color: hsl(20,100%,30%);
+        text-align: right;
+        font-size: medium;
+        font-style: italic;
+        }
+
+        @media print {
+        .navigation {
+        display: none;
+        }
+        }
+
+        .centerline {
+        text-align: center;
+        }
+
+        .leftline {
+        text-align: left;
+        }
+
+        .rightline {
+        text-align: right;
+        }
+
+        sup {
+        font-size: 61%; /* otherwise footnote numbers are horrible */
+        }
+
+        .bibitem {
+        vertical-align: top;
+        }
+
+        table.mathdelim > td,th {
+        padding: 0;
+        }
+
+        table.mathdelim {
+        border-spacing: 0;
+        }
+
+        .disable {
+        /* color: hsl(0,0%,90%); */
+        color: hsl(0,0%,50%);
+        }
+
+        .smallcaps {
+        font-size: 75%;
+        }
+
+        .footnotemark {
+        background-color: hsl(60,80%,74%);
+        }
+
+        .footnote {
+        font-size: 90%;
+        }
+
+        .footnoterule {
+        text-align: left;
+        width: 40%;
+        }
+
+        @media print {
+        .footnoterule {
+        margin-top: 2em;
+        }
+        }
+
+        .colophon {
+        color: hsl(0,0%,50%);
+        font-size: 80%;
+        font-style: italic;
+        text-align: right;
+        margin-top: 1em;
+        }
+
+        @media print {
+        .colophon .advertisement {
+        display: none;
+        }
+        }
+
+        .colophon a {
+        color: hsl(0,0%,50%);
+        text-decoration: none;
+        }
+
+        .slide h1.title {
+        font-weight: bold;
+        text-align: left;
+        }
+
+        .slide h2.section {
+        margin-left: 0pt;
+        }
+        
+.title,.chapter,.section {
+  font-family: 'proza libre', sans-serif;
+}
+
+.title {
+  color: hsl(0,0%,35%);
+  /* color: hsl(0,44%,42%); /* resene terracotta pink */
+}
+
+.chapter {
+  margin-top: 1.8em;
+  font-size: 150%;
+}
+
+.section {
+  margin-top: 1.5em;
+  font-size: 110%;
+}
+
+a:hover {
+  text-decoration: none;
+  background-color: hsl(60,80%,74%);
+}
+
+.chapter a {
+  text-decoration: none;
+}
+
+.item {
+  font-family: 'miltonian', sans-serif;
+}
+
+.oldstyle {
+  font-family: 'eb garamond', sans-serif;
+  /* font-family: 'sorts mill goudy', sans-serif; */
+  font-size: 120%;
+}
+
+body { margin-top: 3.6134999em; }
+body { margin-left: 9.3951em; }
+p { margin-bottom: 0pt; }
+p { text-indent: 20pt; }
+p { margin-top: 5pt; }
+.mathdisplay { margin-top: 12pt; margin-bottom: 12pt; }
+.navigation { color: black; font-style: normal; }
+body { max-width: 400pt; }

@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
 
 
-(define *tex2page-version* "20171204")
+(define *tex2page-version* "20171213")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -9062,7 +9062,6 @@
          (list "ppmtogif -transparent rgb:ff/ff/ff < "
                img-file
                ".ppm > "
-               *aux-dir/*
                img-file)))
     (let ((%res (if (eq? %type 'string) "" null)))
       (let %concatenate-loop
@@ -9164,7 +9163,6 @@
                " < "
                img-file
                ".ppm.tmp > "
-               *aux-dir/*
                img-file)))
     (let ((%res (if (eq? %type 'string) "" null)))
       (let %concatenate-loop
@@ -9261,12 +9259,7 @@
       %res)))
  (system
   (let ((%type 'string)
-        (%ee
-         (list "ppmtojpeg --grayscale < "
-               img-file
-               ".ppm > "
-               *aux-dir/*
-               img-file)))
+        (%ee (list "ppmtojpeg --grayscale < " img-file ".ppm > " img-file)))
     (let ((%res (if (eq? %type 'string) "" null)))
       (let %concatenate-loop
         ((%ee %ee))
@@ -13511,7 +13504,7 @@
       ((not
         (file-exists?
          (let ((%type 'string)
-               (%ee (list *jobname* *bib-aux-file-suffix* ".bbl")))
+               (%ee (list *aux-dir/* *jobname* *bib-aux-file-suffix* ".bbl")))
            (let ((%res (if (eq? %type 'string) "" null)))
              (let %concatenate-loop
                ((%ee %ee))

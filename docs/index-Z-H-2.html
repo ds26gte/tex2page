@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang=en>
+<!--
+Generated from index.tex by tex2page, v. 20171213
+Copyright (C) 1997-2017 Dorai Sitaram
+(running on ECL 16.1.2 Linux)
+http://ds26gte.github.io/tex2page/index.html
+-->
+<head>
+<meta charset="utf-8">
+<title>
+TeX2page
+</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Proza+Libre" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Miltonian" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond" />
+<link rel="stylesheet" href="index-Z-S.css" />
+<meta name=robots content="index,follow">
+
+<meta name=description content="Scheme, Common Lisp script for making Web pages
+from TeX documents">
+
+<meta name=author content="Dorai Sitaram">
+<!-- <link rev=made href="mailto:ds26gte at yahoo dot com"> -->
+
+</head>
+<body>
+<div>
+<div class=navigation><a class=hrefinternal href="index-Z-H-1.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-3.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+<a id="TAG:__tex2page_chap_2"></a>
+<h1 class=chapter><a class=hrefinternal href="index.html#TAG:__tex2page_toc_TAG:__tex2page_chap_2">2&#xa0;&#xa0;T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;commands  </a></h1>
+<p class=noindent><a id="TAG:__tex2page_index_38"></a><a id="TAG:__tex2page_index_40"></a>A T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document is a text file.  Most of the text
+represents the content of the document, but a few
+characters are used specially to embed <em>markup
+commands</em> within the text.  When
+the program T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;is called on a T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+document, it uses the markup commands in the document
+to create an appropriately typeset version of the
+document in a <em>DVI</em> file, which can then be
+printed.  The T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;program, which
+recognizes a list of primitive commands, is invariably
+called with a <em>format</em>, which is essentially a
+preloaded set of definitions of some additional
+commands.  The two most popular formats
+are plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_28">28</a>] and L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_32">32</a>].</p>
+<p>
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page understands many of the commands of
+plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X,
+L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, Eplain&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_4">4</a>], OPmac&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_36">36</a>], and
+<code class=verbatim>manmac</code>&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_28">28</a>,&#xa0;app.&#xa0;E].<a id="TAG:__tex2page_call_footnote_Temp_11"></a><span class=footnotemark><sup><a class=hrefinternal href="#TAG:__tex2page_footnote_Temp_11">1</a></sup></span>
+It
+uses this understanding to convert a T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document to
+its HTML version, much the same way that T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;converts
+the same  document into its DVI version.
+In addition to the usual smörgåsbord of sectioning, itemization and
+enumeration macros,
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page also recognizes some commonly used commands
+that are not part of the formats but
+are loaded from L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;packages (e.g.,
+<code class=verbatim>color.sty</code>, <code class=verbatim>epsfig.sty</code>, <code class=verbatim>graphicx.sty</code>,
+<code class=verbatim>path.sty</code>,
+<code class=verbatim>verbatim.sty</code>)
+or other external macro
+files (e.g., <code class=verbatim>btxmac.tex</code>, <code class=verbatim>eplain.tex</code>, <code class=verbatim>opmac.tex</code>,
+<code class=verbatim>epsf.tex</code>).</p>
+<p>
+While T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page recognizes many commonly used commands,
+there are plenty of commands in both the format proper
+and the vast arena of macro files and packages that
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page does not know.  If in math mode (assuming
+math is translated as text and not image
+(p.&#xa0;<a class=hrefinternal href="index-Z-H-6.html#TAG:__tex2page_tag_Temp_35">6</a>)), T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+simply types the command’s name without the leading
+escape character.  This is sometimes a good choice, as
+in the following text (where <code class=verbatim>\sin</code> and <code class=verbatim>\cos</code> are not
+explicitly recognized by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page):
+</p>
+<pre class=verbatim>
+$$\sin^2 x + \cos^2 x = 1$$
+</pre>
+<p class=noindent>
+This becomes</p>
+<p>
+
+</p>
+<div class="mathdisplay centerline"><table style="margin-left:auto; margin-right:auto"><tr><td></td><td><table><tr><td class=centerline>sin <sup>2</sup> <em>x</em>  +  cos <sup>2</sup> <em>x</em>  =  1</td></tr></table></td><td></td></tr></table></div>
+<p class=noindent>
+
+which is clear enough.</p>
+<p>
+
+If in non-math mode, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page simply ignores commands
+it doesn’t understand.  This is also usually a good
+thing, as commands like <code class=verbatim>\leavevmode</code>, <code class=verbatim>\/</code>, and
+<code class=verbatim>\&#x2011;</code> are best translated into HTML as nothing at all.</p>
+<p>
+
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page ignores calls to include external L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+packages: These are files with extension <code class=verbatim>.sty</code> and
+are loaded with <code class=verbatim>\usepackage</code> or <code class=verbatim>\input</code>.  If the
+commands offered by these packages are not already
+recognized by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page, they will be ignored too, and
+often this is not a problem.  E.g., you can use a
+package for generating double columns — while this is
+a great
+paper-saver for your printed copy, it is generally not
+important for the HTML version and so is no loss if
+ignored by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page.</p>
+<p>
+
+<a id="TAG:__tex2page_index_44"></a>Modern T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>Xs, e.g., X<span style="text-transform: uppercase; position: relative; top: 0.5ex; margin-left: -0.125em; margin-right: -0.1667em">&#x1dd;</span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_50">50</a>], allow the use of
+Unicode&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_46">46</a>,&#xa0;<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_19">19</a>,&#xa0;<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_30">30</a>,&#xa0;<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_47">47</a>] fonts,
+thereby permitting a vast cornucopia of characters
+such as
+&#x950;, &#x101;, &#x222E;&#x200b; &#x200b;and &#x2388;
+
+to be entered verbatim (i.e.,
+without the aid of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;commands) in the source document.  T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+follows modern practice in typesetting Unicode characters as themselves
+(provided of course they haven’t been deliberately <code class=verbatim>\catcode</code>’d to
+mean something special).</p>
+<p>
+
+<a id="TAG:__tex2page_index_46"></a>In particular, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page, like T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X,
+recognizes the <code class=verbatim>\char</code> command, followed by a T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;number <em>n</em>, as a
+directive to output the character <em>n</em> in the current font — but
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page assumes a Unicode font is meant.
+You may need to use conditionals
+to ensure that the same glyphs are typeset in both the HTML and the
+DVI, if your T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;does not use a Unicode font.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_12"></a>
+<h2 class=section>Defining T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X-only and HTML-only text regions</h2>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_13"></a>
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will attempt gamely to process any T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+definitions that you use in your document or in
+external macro files without the extension <code class=verbatim>.sty</code>,
+but it may be a good idea to have them explicitly
+ignored, if these
+macros that are print-specific, or if
+having T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page try to parse them will cause error.  A way
+to have T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page ignore such fragments in your document
+is  to use
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;conditionals, and indeed to exploit the
+fact that T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page does not know certain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;commands
+such as <code class=verbatim>\shipout</code>:</p>
+<p>
+
+<a id="TAG:__tex2page_index_48"></a><a id="TAG:__tex2page_index_50"></a><a id="TAG:__tex2page_index_52"></a><a id="TAG:__tex2page_index_54"></a></p>
+<pre class=verbatim>
+\ifx\shipout\UnDeFiNeD
+  ... <em> for HTML only</em> ...
+\else
+  ... <em> for DVI only</em> ...
+\fi
+</pre>
+<p class=noindent>
+For example, let’s say you want to have  your document load the macro file
+<code class=verbatim>manmac.tex</code>, but in a way that T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will ignore
+it.  Use:</p>
+<p>
+
+<a id="TAG:__tex2page_index_56"></a></p>
+<pre class=verbatim>
+\ifx\shipout\UnDeFiNeD
+\else
+  \input manmac
+\fi
+</pre>
+<p class=noindent>
+However, there will also be many  commands that
+you do not want ignored in the HTML.  In such
+cases, while you may not be able to use the print-specific
+definition, you should nevertheless furnish a definition that T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+can handle.  For instance, although it may be acceptable
+to ignore the print-specific macros of <code class=verbatim>manmac</code>, the
+<code class=verbatim>\bull</code> macro defined in <code class=verbatim>manmac</code> should be
+translated by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page.  The following is a possible
+definition for T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page:</p>
+<p>
+
+<a id="TAG:__tex2page_index_58"></a></p>
+<pre class=verbatim>
+\def\bull{{\bf *}}
+</pre>
+<p class=noindent>
+Of course, we want this definition to be seen only
+by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page, as we don’t want to override the
+original, more sophisticated <code class=verbatim>\vrule</code>-based definition as seen
+by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.
+We therefore make our
+definition HTML-only
+using a conditional:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\ifx\shipout\UnDeFiNeD % HTML only
+  \def\bull{{\bf *}}
+\fi
+</pre>
+<p class=noindent></p>
+<p>
+
+<a id="TAG:__tex2page_index_60"></a><a id="TAG:__tex2page_index_62"></a>Note that the HTML-only text continues to use T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;syntax.
+To specify some of this text as <em>raw</em> HTML, enclose it
+in <code class=verbatim>\rawhtml</code> <code class=verbatim>...</code> <code class=verbatim>\endrawhtml</code>.   With
+<code class=verbatim>\rawhtml</code>, we can
+spruce up the
+HTML-only definition of <code class=verbatim>\bull</code>:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\ifx\shipout\UnDeFiNeD % HTML only
+  \def\bull{{\bf
+  \rawhtml&#x3c;span style=&#x22;color: hsl(0,100%,30%)&#x22;&#x3e;&#x26;spades;&#x3c;/span&#x3e;\endrawhtml
+  }}
+\fi
+</pre>
+<p class=noindent></p>
+<p>
+
+<a id="TAG:__tex2page_index_64"></a><a id="TAG:__tex2page_index_66"></a>One can put HTML-only definitions in separate files
+that are loaded just like regular T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;macro files.
+Indeed, one such external file, <code class=verbatim>texi2p.tex</code>, is used
+by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page to process Texinfo
+documents.  Texinfo&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_13">13</a>] is another T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+format, and files using this format <code class=verbatim>\input texinfo</code>
+as the first thing they do.  T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page takes that as a
+cue to
+load <code class=verbatim>texi2p.tex</code>, which provides T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page-suitable
+definitions for the Texinfo commands.  <code class=verbatim>texi2p.tex</code>
+is included in the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page distribution.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_14"></a>
+<h2 class=section>Paper and screen</h2>
+<p class=noindent>One could use HTML-only and DVI-only regions to cordon off
+any text at all, not just macro definitions.  E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+The paper book is
+\ifx\shipout\UnDeFiNeD % HTML only
+an antiquated
+\else % DVI only
+a time-tested
+\fi
+technology.
+</pre>
+<p class=noindent>
+Use of these directives may seem to miss the point of
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page.  <code class=verbatim>\ifx\shipout\UnDeFiNeD</code> violates the
+principle of avoiding  writing <em>two</em> texts, one
+for HTML, the other for DVI.  <code class=verbatim>\rawhtml</code> violates the
+principle of avoiding writing raw HTML at all.
+<code class=verbatim>\rawhtml</code> in particular is dangerous because it voids
+the guarantee that the output pages will be valid HTML.
+Nevertheless, these directives are often useful, especially when the
+text will profit from exploiting the presentational differences between
+HTML and DVI.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_15"></a>
+<h2 class=section>The .t2p file</h2>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_16"></a>
+<a id="TAG:__tex2page_index_68"></a>Before processing a T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will
+automatically load a file
+with the same basename as the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;main file but with
+extension <code class=verbatim>.t2p</code>, <em>if</em> this file exists.  This
+is a good place to put HTML-specific definitions for
+the document without making  changes in the document
+itself.</p>
+<p>
+
+<code class=verbatim>.t2p</code> files are especially valuable when HTMLizing
+legacy or third-party documents without compromising
+their authenticity, integrity, and timestamp.</p>
+<p>
+
+Note that the definitions in the <code class=verbatim>.t2p</code> file
+are processed <em>before</em> the main file.  But it often
+makes sense to activate these definitions sometime
+later.  E.g., activating the <code class=verbatim>.t2p</code> definitions <em>
+after</em> the preamble in a L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document allows you to
+redefine the preamble macros in a manner that is
+appropriate for HTML.  Here is a technique for
+accomplishing this:</p>
+<p>
+
+<a id="TAG:__tex2page_index_70"></a><a id="TAG:__tex2page_index_72"></a></p>
+<pre class=verbatim>
+\let\PRIMdocument\document
+
+\def\document{
+  ... <em> HTML-specific definitions</em> ...
+  \PRIMdocument}
+</pre>
+<p class=noindent>
+This code, which goes in the <code class=verbatim>.t2p</code> file,
+redefines the <code class=verbatim>\document</code> command to include a
+hook that loads some <em>HTML-specific definitions</em>.
+Since the <code class=verbatim>\document</code> command is called right after
+the preamble, the definitions introduced by  the hook
+will shadow the preamble macros, as intended.</p>
+<p>
+
+Sample <code class=verbatim>.t2p</code> files may be found in the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+distribution.</p>
+<p>
+
+</p>
+<div class=footnoterule><hr></div><p>
+</p>
+<div class=footnote><p>
+<span class=footnotemark><a id="TAG:__tex2page_footnote_Temp_11"></a><sup><a class=hrefinternal href="#TAG:__tex2page_call_footnote_Temp_11">1</a></sup></span> <a id="TAG:__tex2page_index_42"></a>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page processes both plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+and L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;commands, without the need for a format file
+parameter.  It can even process documents written in a
+mix of plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;and L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X. This is not an uncommon
+scenario, with L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;users frequently using plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+commands, and plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;users frequently implementing
+their own version of sectioning and other commands
+using the L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;names. In the few cases where the same
+command name (e.g., <code class=verbatim>\footnote</code>) is used in both
+formats but with differing behavior, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will
+choose the correct behavior based on which format it
+thinks the overall document is in.  The plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;and
+L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document structures are sufficiently different
+(as human readers can readily testify by reading just a
+few opening lines) to allow this disambiguation.</p>
+</div>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+<div class=navigation><a class=hrefinternal href="index-Z-H-1.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-3.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+</div>
+</body>
+</html>
+

@@ -143,8 +143,9 @@ To get an HTML version of the document, run
 
   tex2page index
 
-a few times. (This also serves as a check that TeX2page is indeed
-correctly installed on your machine.)
+a few times. Since `.tex2page.hdir` is set to `docs`, the HTML is
+created in the `docs` subdirectory. (This also serves as a check
+that TeX2page is indeed correctly installed on your machine.)
 
 As with TeX, multiple runs of `tex2page` are needed to resolve
 cross-references, but each run of `tex2page` will explicitly tell

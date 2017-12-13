@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang=en>
+<!--
+Generated from index.tex by tex2page, v. 20171213
+Copyright (C) 1997-2017 Dorai Sitaram
+(running on ECL 16.1.2 Linux)
+http://ds26gte.github.io/tex2page/index.html
+-->
+<head>
+<meta charset="utf-8">
+<title>
+TeX2page
+</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Proza+Libre" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Miltonian" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond" />
+<link rel="stylesheet" href="index-Z-S.css" />
+<meta name=robots content="index,follow">
+
+<meta name=description content="Scheme, Common Lisp script for making Web pages
+from TeX documents">
+
+<meta name=author content="Dorai Sitaram">
+<!-- <link rev=made href="mailto:ds26gte at yahoo dot com"> -->
+
+</head>
+<body>
+<div>
+<div class=navigation><a class=hrefinternal href="index-Z-H-2.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-4.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+<a id="TAG:__tex2page_chap_3"></a>
+<h1 class=chapter><a class=hrefinternal href="index.html#TAG:__tex2page_toc_TAG:__tex2page_chap_3">3&#xa0;&#xa0;T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page commands  </a></h1>
+<p class=noindent>The previous chapter explained how a document that is
+acceptable to T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;may contain several commands that
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page does not inherently
+understand and for which suitable HTML-only definitions
+must be provided.  The reverse problem also obtains: A
+document that is processed successfully by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+may contain commands that plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;and L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;may not
+recognize.</p>
+<p>
+
+As we have seen, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page recognizes a mix of plain-T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;and L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+commands, and commands from external macro files besides.
+Thus,
+a plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document could very well use L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+commands and pass through T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page without hitch.  When
+running plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;on the document, of course, the L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+commands will fail, unless T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X-only definitions for the
+missing commands are provided.  Examples of common L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+commands recognized by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page include the commands for
+title, chapters and sections, footnotes,  labels for
+cross-referencing, table of contents,  verbatim text,
+itemizations, enumerations,
+index, and bibliography.</p>
+<p>
+
+It is also possible that the
+document uses commands from external macro files
+without actually loading said files.  T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will be
+indulgent, but plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;and L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;won’t.
+In this case,
+simply loading the macro files should be
+enough.    Thus, a plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document using the <code class=verbatim>\cite</code>
+command should load <code class=verbatim>btxmac.tex</code>, and   a L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document that uses
+the <code class=verbatim>\color</code> and <code class=verbatim>\definecolor</code> commands should load the package
+<code class=verbatim>color.sty</code>.</p>
+<p>
+
+<a id="TAG:__tex2page_tag_Temp_17"></a>
+<a id="TAG:__tex2page_index_74"></a>A plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document using macros  provided by a L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+package may also be able to load the package in some cases, with
+the aid of the <code class=verbatim>miniltx.tex</code> macro file.  To load
+<code class=verbatim>color.sty</code>, for instance:</p>
+<p>
+
+<a id="TAG:__tex2page_index_76"></a><a id="TAG:__tex2page_index_78"></a><a id="TAG:__tex2page_index_80"></a></p>
+<pre class=verbatim>
+\expandafter\def\csname Gin@driver\endcsname{pdftex.def}
+% The above may not be needed in newer \TeX\ distributions,
+% which will load the appropriate driver automatically.
+% Replace pdftex.def with dvips.def if output print format
+% is PostScript rather than PDF.
+
+\input miniltx
+\input color.sty
+\resetatcatcode
+</pre>
+<p class=noindent></p>
+<p>
+
+Although the above is only meant for T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X,
+it is not necessary (but not incorrect either) to wrap it inside
+<code class=verbatim>\ifx\shipout\UnDeFiNeD\else</code> <code class=verbatim>...</code> <code class=verbatim>\fi</code>, as
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page knows enough to skip such loads.</p>
+<p>
+
+Other useful L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;packages that can be loaded into plain
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;using <code class=verbatim>miniltx</code> are <code class=verbatim>graphicx.sty</code> and
+<code class=verbatim>url.sty</code>.  (Unfortunately, one has to say
+<code class=verbatim>\expandafter\def\expandafter\+\expandafter{\+}</code>
+before <code class=verbatim>\input</code>ting <code class=verbatim>url.sty</code>.)</p>
+<p>
+
+It is possible to <code class=verbatim>\input</code>
+several <code class=verbatim>.sty</code> files between the calls to <code class=verbatim>\input</code> <code class=verbatim>miniltx</code> and
+<code class=verbatim>\resetatcatcode</code>.  However, <code class=verbatim>miniltx</code> is a bit of a compromise, and it
+causes each <code class=verbatim>.sty</code> file to re-evaluate the supposedly per-document commands
+in the driver file
+(e.g., <code class=verbatim>pdftex.def</code>), which can cause infinite loops.  This is avoided by
+preceding the loading of the second and subsequent <code class=verbatim>.sty</code>
+files with <code class=verbatim>\let\color\@ldc@l@r</code>.  E.g.,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\input miniltx
+\input color.sty
+  \let\color\@ldc@l@r
+\input graphicx.sty
+  \let\color\@ldc@l@r
+  \expandafter\def\expandafter\+\expandafter{\+}
+\input url.sty
+\resetatcatcode
+</pre>
+<p class=noindent></p>
+<p>
+
+The L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;package <code class=verbatim>path.sty</code> can be
+loaded into plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;directly, without <code class=verbatim>miniltx</code>.</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_18"></a>
+<h2 class=section>tex2page.tex and tex2page.sty</h2>
+<p class=noindent><a id="TAG:__tex2page_index_82"></a><a id="TAG:__tex2page_index_84"></a>A collection of workable T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;definitions for T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page commands is
+provided in the macro file <code class=verbatim>tex2page.tex</code> in the
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page distribution.  These allow your document to be
+processed by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, even if they do not (and sometimes
+should not) have the same effect in the DVI output as
+they do in the HTML output.  It
+can be included in your T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document as</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\input tex2page
+</pre>
+<p class=noindent>
+The file is also available
+under the L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X-friendlier name <code class=verbatim>tex2page.sty</code>, and can be
+loaded into L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;with:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\usepackage{tex2page} % if document is in L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+</pre>
+<p class=noindent></p>
+<p>
+
+The macros in <code class=verbatim>tex2page.tex</code> are just sample
+definitions of the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page commands missing in T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.
+You can either choose not to use these commands or to
+override their definitions with your own, better,
+definitions.</p>
+<p>
+
+<a id="TAG:__tex2page_index_86"></a></p>
+<p>
+
+Note that T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page itself does not <em>need</em> the file
+<code class=verbatim>tex2page.tex</code>.  Rather, plain T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;and L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;need the
+<code class=verbatim>tex2page.tex</code> macros in order to process files
+written using the extra commands supported by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page.
+If your document does not use these extra
+commands, then you can do without <code class=verbatim>tex2page.tex</code>.</p>
+<p>
+
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+<div class=navigation><a class=hrefinternal href="index-Z-H-2.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-4.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+</div>
+</body>
+</html>
+

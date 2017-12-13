@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang=en>
+<!--
+Generated from index.tex by tex2page, v. 20171213
+Copyright (C) 1997-2017 Dorai Sitaram
+(running on ECL 16.1.2 Linux)
+http://ds26gte.github.io/tex2page/index.html
+-->
+<head>
+<meta charset="utf-8">
+<title>
+TeX2page
+</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Proza+Libre" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Miltonian" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond" />
+<link rel="stylesheet" href="index-Z-S.css" />
+<meta name=robots content="index,follow">
+
+<meta name=description content="Scheme, Common Lisp script for making Web pages
+from TeX documents">
+
+<meta name=author content="Dorai Sitaram">
+<!-- <link rev=made href="mailto:ds26gte at yahoo dot com"> -->
+
+</head>
+<body>
+<div>
+<div class=navigation><a class=hrefinternal href="index-Z-H-9.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-11.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+<a id="TAG:__tex2page_chap_10"></a>
+<h1 class=chapter><a class=hrefinternal href="index.html#TAG:__tex2page_toc_TAG:__tex2page_chap_10">10&#xa0;&#xa0;Extending T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;with Lisp</a></h1>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_78"></a>
+<a id="TAG:__tex2page_index_448"></a><a id="TAG:__tex2page_index_450"></a>The command <code class=verbatim>\eval</code> allows you to use arbitrary
+Lisp
+expressions, as opposed to just T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;macros, to
+guide the course of the typesetter.</p>
+<p>
+
+The text written
+to standard output by the Lisp code is substituted
+for the <code class=verbatim>\eval</code> statement.  E.g., consider the
+following complete document, <code class=verbatim>root2.tex</code>:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\input tex2page
+
+The square root of 2 is
+\eval{
+</pre>
+<p class=noindent>
+</p>
+<div class=leftline><pre class=scheme>
+(<span class=variable>princ</span> (<span class=variable>sqrt</span> <span class=selfeval>2</span>))
+</pre></div>
+<p class=noindent>
+</p>
+<pre class=verbatim>
+}.
+
+\bye
+</pre>
+<p class=noindent>
+Running T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page on <code class=verbatim>root2.tex</code> produces
+the following HTML output:</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+The square root of 2 is
+1.4142135.
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+In effect, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page processes the <code class=verbatim>\eval</code> call
+using Lisp, producing some output in an auxiliary
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;file, which is then re-inserted into the document at the location of
+the <code class=verbatim>\eval</code>.</p>
+<p>
+
+A definition for <code class=verbatim>\eval</code> that T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;can use
+is provided in the macro file <code class=verbatim>eval4tex.tex</code>.
+<code class=verbatim>tex2page.tex</code> will automatically load <code class=verbatim>eval4tex.tex</code> if it finds it in
+<code class=verbatim>TEXINPUTS</code>.
+Thus, running T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;on
+<code class=verbatim>root2.tex</code> produces a DVI file whose
+content matches the HTML version.</p>
+<p>
+It is clear that Lisp code via <code class=verbatim>\eval</code> can serve as
+a very powerful <em>second extension language</em> for
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, and that its benefits are available to both the
+DVI and the HTML outputs.  As we have seen, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
+implements a subset of the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;macro language, and for
+those cases where this macro language isn’t enough,
+Lisp can be used to fill the breach.  More generally,
+Lisp may be preferable to the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;macro language even
+for just DVI, where no HTML version of the document is
+contemplated.  We’ll explore both of these
+aspects of <code class=verbatim>\eval</code>.</p>
+<p>
+
+<code class=verbatim>\eval</code>’s argument is a balanced-brace
+expression.  At the top-level, i.e., not within the body of a macro,
+<code class=verbatim>\eval</code>’s argument is sent verbatim to Lisp, except that the pipe character
+(‘<code class=verbatim>|</code>’) functions as the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;escape.  Use <code class=verbatim>||</code> to represent a single
+pipe in the Lisp code.  If you need to include an unmatched brace, simply
+put a bogus matching brace inside a Lisp comment.</p>
+<p>
+
+Inside a macro body, it is too late for <code class=verbatim>\eval</code> to set the catcodes
+to make verbatim any character within its argument.  Either define or
+use control sequences to represent special characters, or use
+Lisp
+workarounds (e.g., <code class=scheme><span class=variable>code&#x2011;char</span></code>) to construct those characters.</p>
+<p>
+
+Let us first look at a simple example where
+<code class=verbatim>\eval</code> lets you define an HTML version of an already
+existing T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;macro that is either impossible or at
+least prohibitively difficult  to process using
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page’s  mimicry of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X.  Consider a hypothetical
+<code class=verbatim>\proto</code> macro, used to introduce the description of
+a Lisp operator by presenting a <em>prototypical</em>
+use of it.
+Typical calls to <code class=verbatim>\proto</code> are:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\proto{cons}{a d}{procedure}
+\proto{car}{c}{procedure}
+\proto{cdr}{c}{procedure}
+</pre>
+<p class=noindent>
+which typeset as follows:</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+</p>
+
+<p class=noindent>
+<span style="font-family: monospace">(cons</span>&#x200b; &#x200b;<i>a d</i><span style="font-family: monospace">)</span><span style="margin-left: 2em"> </span>;procedure</p>
+<p>
+
+</p>
+
+<p class=noindent>
+<span style="font-family: monospace">(car</span>&#x200b; &#x200b;<i>c</i><span style="font-family: monospace">)</span><span style="margin-left: 2em"> </span>;procedure</p>
+<p>
+
+</p>
+
+<p class=noindent>
+<span style="font-family: monospace">(cdr</span>&#x200b; &#x200b;<i>c</i><span style="font-family: monospace">)</span><span style="margin-left: 2em"> </span>;procedure</p>
+<p>
+
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+The macro <code class=verbatim>\proto</code> takes three arguments: the
+operator name; the metavariables for its operands;
+and the operator kind.  In particular, it typesets
+the operator and the operands in different fonts,
+surrounding the call in parens.  Note the
+intervening space between operator and operands.</p>
+<p>
+
+In the case where there are no operands, the intervening
+space should not.  Thus,</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\proto{gentemp}{}{procedure}
+</pre>
+<p class=noindent>
+should not produce</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+</p>
+
+<p class=noindent>
+<span style="font-family: monospace">(gentemp</span>&#x200b; &#x200b;<i>&#x200b; &#x200b;</i><span style="font-family: monospace">)</span><span style="margin-left: 2em"> </span>;procedure</p>
+<p>
+
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+but rather</p>
+<p>
+
+</p>
+<blockquote><div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+
+<p class=noindent>
+</p>
+
+<p class=noindent>
+<span style="font-family: monospace">(gentemp</span><i></i><span style="font-family: monospace">)</span><span style="margin-left: 2em"> </span>;procedure</p>
+<p>
+
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+</blockquote><p>
+</p>
+
+<p class=noindent>
+(I.e., no space between <code class=verbatim>gentemp</code> and the
+closing paren.)</p>
+<p>
+
+<a id="TAG:__tex2page_index_452"></a></p>
+<p>
+
+The <code class=verbatim>\proto</code> macro can be written
+in T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;as follows:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\def\proto#1#2#3{\noindent
+  \hbox{{\tt(#1}\spaceifnotempty{#2}{\it#2}{\tt)}%
+    \qquad ;#3}\par}
+</pre>
+<p class=noindent>
+where, <code class=verbatim>\spaceifnotempty</code> is a helper macro
+that expands to a space only if its argument is
+not empty.  T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page can expand this definition
+for <code class=verbatim>\proto</code>, provided it knows how to deal
+with the <code class=verbatim>\spaceifnotempty</code>.</p>
+<p>
+
+One way to write <code class=verbatim>\spaceifnotempty</code> in T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+is:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\newdimen\templen
+\newbox\tempbox
+
+\def\spaceifnotempty#1{%
+  \setbox\tempbox\hbox{#1}%
+  \templen\wd\tempbox
+  \ifdim\templen&#x3e;0pt{\ }\fi}
+</pre>
+<p class=noindent>
+This piece of box-measuring contortion is
+too much for T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page’s mimicry of the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;macro
+system.  However, it’s easy enough to  achieve the
+same effect using the string-processing capabilities
+of Lisp:</p>
+<p>
+
+</p>
+<pre class=verbatim>
+\ifx\shipout\UnDeFiNeD
+\eval{
+</pre>
+<p class=noindent>
+</p>
+<div class=leftline><pre class=scheme>
+(<span class=keyword>defun</span> <span class=variable>all-blanks-p</span> (<span class=variable>s</span>)
+  (<span class=variable>every</span> (<span class=keyword>lambda</span> (<span class=variable>c</span>) (<span class=keyword>or</span> (<span class=variable>char=</span> <span class=variable>c</span> <span class=selfeval>#\space</span>) (<span class=variable>char=</span> <span class=variable>c</span> <span class=selfeval>#\tab</span>)
+                          (<span class=variable>not</span> (<span class=variable>graphic-char-p</span> <span class=variable>c</span>))))
+        <span class=variable>s</span>))
+</pre></div>
+<p class=noindent>
+</p>
+<pre class=verbatim>
+}
+
+\def\spaceifnotempty{\eval{
+</pre>
+<p class=noindent>
+</p>
+<div class=leftline><pre class=scheme>
+(<span class=keyword>let</span> ((<span class=variable>x</span> (<span class=variable>ungroup</span> (<span class=variable>get-token</span>))))
+  (<span class=keyword>unless</span> (<span class=variable>all-blanks-p</span> <span class=variable>x</span>)
+    (<span class=variable>princ</span> (<span class=variable>code-char</span> <span class=selfeval>92</span>))
+    (<span class=variable>princ</span> <span class=selfeval>&#x22;space&#x22;</span>)))
+</pre></div>
+<p class=noindent>
+</p>
+<pre class=verbatim>
+}}
+\fi
+</pre>
+<p class=noindent>
+Note that we had to use <code class=scheme>(<span class=variable>code&#x2011;char</span> <span class=selfeval>92</span>)</code> to refer to the
+backslash character, as the <code class=verbatim>\eval</code> is inside a macro body and ‘<code class=verbatim>\</code>’
+is not and cannot be made a letter.
+(Otherwise we could have simply written <code class=scheme>(<span class=variable>princ</span> <span class=selfeval>&#x22;\\space&#x22;</span>)</code>.)</p>
+<p>
+
+Later <code class=verbatim>\eval</code>s can
+use definitions introduced in previous <code class=verbatim>\eval</code>s,
+as with <code class=scheme><span class=variable>all&#x2011;blanks&#x2011;p</span></code> in our example.</p>
+<p>
+
+If being processed by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page only (as in our example),
+the code inside <code class=verbatim>\eval</code> is allowed to use not just general Lisp
+but also procedures like
+<code class=scheme><span class=variable>ungroup</span></code> and <code class=scheme><span class=variable>get&#x2011;token</span></code>, which are defined by
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page. (There is no need to package-qualify their names, as <code class=verbatim>\eval</code>
+code is evaluated inside the <code class=verbatim>tex2page</code> package.)</p>
+<p>
+
+</p>
+<a id="TAG:__tex2page_sec_Temp_79"></a>
+<h2 class=section>eval without regard to HTML</h2>
+<p class=noindent><a id="TAG:__tex2page_tag_Temp_80"></a>
+The key thing to remember is that
+an <code class=verbatim>\eval</code>-call is replaced by whatever text the
+Lisp code in that <code class=verbatim>\eval</code>-call writes to its
+standard output.  This approach will work whether the
+document is being processed by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page to produce HTML
+or by T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;to produce DVI.</p>
+<p>
+
+For those T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;documents that are not intended for HTML conversion, but
+nevertheless use <code class=verbatim>\eval</code>, this macro is available in the macro file
+<code class=verbatim>eval4tex.tex</code>.  Run T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;(or L<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X) on such a document, say
+<code class=verbatim><em>jobname</em>.tex</code>, and then evaluate
+the resultant <code class=verbatim><em>jobname</em>&#x2011;Z&#x2011;E.lisp</code> in Lisp, to create the
+necessary aux T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;files.  Running T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;on the master document a <em>second</em>
+time will
+insert these aux T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;files at the location of the corresponding <code class=verbatim>\eval</code>
+calls.  This is quite analogous to how T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page would have processed the
+<code class=verbatim>\eval</code>s, except that T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;requires you to explicitly call Lisp to
+create the aux files which it can use on its second run, whereas
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page, being written in Lisp, creates and loads the aux files
+immediately.</p>
+<p>
+
+For complete details on using <code class=verbatim>\eval</code> with
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X, please consult the companion manual,
+<em>An <code class=verbatim>\eval</code> for
+T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X</em>&#xa0;[<a class=hrefinternal href="index-Z-H-13.html#TAG:__tex2page_bib_42">42</a>].</p>
+<p>
+</p>
+<div class=smallskip></div>
+<p style="margin-top: 0pt; margin-bottom: 0pt">
+</p>
+<div class=navigation><a class=hrefinternal href="index-Z-H-9.html">&#x3c;&#xb7;&#xb7;&#xb7;Prev </a>||<a class=hrefinternal href="index-Z-H-11.html"> Next&#xb7;&#xb7;&#xb7;&#x3e;</a>, &#xa0;&#xa0; <a class=hrefinternal href="index.html#TAG:__tex2page_tag_Temp_1">ToC</a>, &#xa0;&#xa0; <a class=hrefinternal href="index-Z-H-16.html#TAG:__tex2page_tag_Temp_95">Index</a></div>
+<p>
+</p>
+</div>
+</body>
+</html>
+

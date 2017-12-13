@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2017-02-06} %last change
+\c{2017-12-13} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1834,9 +1834,10 @@ this, set `\TZPredirectseconds`, e.g.,
 \index{TZPsinglepage@`\TZPsinglepage`}
 \xrdef{singlepage}
 %
-Sometimes it is desirable to generate just a single output HTML
-file, i.e., to not generate a page break as described on
-p.~\ref{eject}. To do this, set the `\TZPsinglepage` flag:
+Sometimes it is desirable to generate just a single output HTML file, i.e., to
+not generate a page break as described on p.~\ref{eject}, and to have all the
+images embedded as data URIs within the document. To do this, set the
+`\TZPsinglepage` flag:
 
 \begintt
 \let\TZPsinglepage=1

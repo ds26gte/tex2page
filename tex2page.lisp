@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20171213") ;last change
+(defparameter *tex2page-version* "20171214") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1144,6 +1144,8 @@
                      (cond ((= nesting 0) (return s))
                            (t (decf nesting) (push c s))))
                     (t (push c s)))))))))))
+
+;(trace get-url)
 
 (defun get-csv (closing-delim)
   ;csv = comma-separated value
@@ -3777,6 +3779,8 @@
           ((fully-qualified-url-p url) url)
           (t (ensure-url-reachable url) url))))
 
+;(trace fully-qualify-url)
+
 (defun do-url ()
   (let ((url (get-url)))
     (let ((durl (doc-internal-url url)))
@@ -3844,19 +3848,23 @@
                (let ((c (read-char i nil)))
                  (if c (emit c) (return)))))
            (ensure-file-deleted tmpf)))
-        (t (emit f))))
+        (t (emit (ensure-url-reachable f)))))
+
+;(trace do-img-src)
 
 (defun do-htmladdimg ()
   (let* ((align-info (get-bracketed-text-if-any))
-         (url (fully-qualify-url (get-url))))
+         (url (get-url)))
     (emit "<img src=\"")
-    (do-img-src url)
+    (do-img-src (fully-qualify-url url))
     (emit "\"")
     (emit " style=\"border: 0\"")
     (when align-info (tex2page-string align-info))
     (emit " alt=\"[")
     (emit url)
     (emit "]\">")))
+
+;(trace do-htmladdimg)
 
 (defun do-pdfximage ()
   (let ((height nil) (width nil))
@@ -5375,8 +5383,9 @@
 
 (defun tex-to-img (f)
   (incf *img-file-tally*)
-  (let ((img-file (concatenate 'string *aux-dir/* f (find-img-file-extn))))
-    (unless (probe-file img-file)
+  (let* ((img-file (concatenate 'string f (find-img-file-extn)))
+         (fq-img-file (concatenate 'string *aux-dir/* img-file)))
+    (unless (probe-file fq-img-file)
       (write-log :separation-space)
       (write-log #\{)
       (write-log (concatenate 'string f ".tex"))
@@ -5385,11 +5394,14 @@
       (write-log :separation-space)
       (cond ((setq *it* (call-tex f))
              (ps-to-img *it* img-file)
+             (ensure-url-reachable img-file :delete)
              (write-log img-file)
-             '(mapc
+             (mapc
                (lambda (e)
                  (ensure-file-deleted (concatenate 'string f e)))
-               '(".aux" ".dvi" ".log" ".pdf" ".ps" ".tex")))
+               '(;".aux" ".dvi"
+                 ".log" ".pdf" ;".ps"
+                 ".tex")))
             (t (write-log "failed, try manually")))
       (write-log #\})
       (write-log :separation-space))))
@@ -6373,14 +6385,13 @@
 
 (defun source-img-file (img-file-stem &rest alt)
   (let* ((alt (if (null alt) nil (car alt)))
-         (img-file (concatenate 'string img-file-stem (find-img-file-extn)))
-         (f (concatenate 'string *aux-dir/* img-file)))
+         (img-file (concatenate 'string img-file-stem (find-img-file-extn))))
     (write-log #\()
-    (write-log f)
+    (write-log img-file)
     (write-log :separation-space)
-    (valid-img-file-p f)
+    (valid-img-file-p img-file)
     (emit "<img src=\"")
-    (do-img-src img-file)
+    (do-img-src (ensure-url-reachable img-file))
     (emit "\"")
     (emit " style=\"border: 0\"")
     (emit " alt=\"")
@@ -6389,6 +6400,8 @@
     (write-log #\))
     (write-log :separation-space)
     t))
+
+;(trace source-img-file)
 
 (defun reuse-img ()
   (source-img-file (ungroup (get-group))))
@@ -8506,16 +8519,17 @@
           (cond ((char= c0 #\/) t) ((= n 1) nil)
                 ((and (alpha-char-p c0) (char= (char f 1) #\:)) t) (t nil))))))
 
-(defun ensure-url-reachable (f)
-  (if (and *aux-dir* (not (fully-qualified-url-p f)) (not (search "/" f)))
+(defun ensure-url-reachable (f &optional deletep)
+  (when (and *aux-dir* (not (fully-qualified-url-p f)) (not (search "/" f)))
     (let ((real-f (concatenate 'string *aux-dir/* f)))
       (when (and (probe-file f) (not (probe-file real-f)))
         #-windows
         (system (concatenate 'string "cp -p " f " " real-f))
         #+windows
-        (system (concatenate 'string "copy/b " f " " *aux-dir*)))
-      real-f)
-    f))
+        (system (concatenate 'string "copy/b " f " " *aux-dir*))))
+    (when deletep
+      (ensure-file-deleted f)))
+  f)
 
 (defun !stylesheet (css)
   (cond ((or (fully-qualified-url-p css)
@@ -9361,12 +9375,13 @@ Try the commands
   (let* ((pdf-file (get-filename))
          height rotated width
          (img-file-stem (next-html-image-file-stem))
-         (img-file (concatenate 'string *aux-dir/* img-file-stem (find-img-file-extn))))
+         (img-file (concatenate 'string img-file-stem (find-img-file-extn)))
+         (fq-img-file (concatenate 'string *aux-dir/* img-file)))
     (loop (cond ((eat-word "height") (setq height (get-pixels)))
                 ((eat-word "rotated") (setq rotated (get-number)))
                 ((eat-word "width") (setq width (get-pixels)))
                 (t (return))))
-    (unless (probe-file img-file)
+    (unless (probe-file fq-img-file)
       (write-log :separation-space)
       (write-log #\{)
       (write-log pdf-file)
@@ -9381,7 +9396,7 @@ Try the commands
     (write-log img-file)
     (write-log :separation-space)
     (emit "<img src=\"")
-    (do-img-src img-file)
+    (do-img-src (ensure-url-reachable img-file :delete))
     (emit "\"")
     (when height (emit " height=") (emit height))
     (when rotated
@@ -9406,7 +9421,7 @@ Try the commands
                 ((eat-word "width") (setq width (get-pixels)))
                 (t (return))))
     (emit "<img src=\"")
-    (do-img-src img-file)
+    (do-img-src (fully-qualify-url img-file))
     (emit "\"")
     (when height (emit " height=") (emit height))
     (when rotated

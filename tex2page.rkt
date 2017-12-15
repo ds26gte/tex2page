@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
 
 
-(define *tex2page-version* "20171213")
+(define *tex2page-version* "20171214")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -6475,13 +6475,13 @@
                (else false))
          %with-open-file-res))
      (ensure-file-deleted tmpf)))
-  (else (emit f))))
+  (else (emit (ensure-url-reachable f)))))
 
 (define (do-htmladdimg)
  (let ((align-info (get-bracketed-text-if-any)))
-   (let ((url (fully-qualify-url (get-url))))
+   (let ((url (get-url)))
      (emit "<img src=\"")
-     (do-img-src url)
+     (do-img-src (fully-qualify-url url))
      (emit "\"")
      (emit " style=\"border: 0\"")
      (cond (align-info (tex2page-string align-info)) (else false))
@@ -9323,7 +9323,7 @@
 
 (define (tex-to-img f) (set! *img-file-tally* (+ *img-file-tally* 1))
  (let ((img-file
-        (let ((%type 'string) (%ee (list *aux-dir/* f (find-img-file-extn))))
+        (let ((%type 'string) (%ee (list f (find-img-file-extn))))
           (let ((%res (if (eq? %type 'string) "" null)))
             (let %concatenate-loop
               ((%ee %ee))
@@ -9339,56 +9339,73 @@
                                    (if (string? %a) (string->list %a) %a)))))
                     (%concatenate-loop (cdr %ee)))))
             %res))))
-   (cond
-    ((not (file-exists? img-file)) (write-log ':separation-space)
-     (write-log #\{)
-     (write-log
-      (let ((%type 'string) (%ee (list f ".tex")))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
-     (write-log ':separation-space) (write-log "->")
-     (write-log ':separation-space)
+   (let ((fq-img-file
+          (let ((%type 'string) (%ee (list *aux-dir/* img-file)))
+            (let ((%res (if (eq? %type 'string) "" null)))
+              (let %concatenate-loop
+                ((%ee %ee))
+                (if (null? %ee)
+                    %res
+                    (let ((%a (car %ee)))
+                      (unless (not %a)
+                        (set! %res
+                         (if (eq? %type 'string)
+                             (string-append %res
+                              (if (string? %a) %a (list->string %a)))
+                             (append %res
+                                     (if (string? %a) (string->list %a) %a)))))
+                      (%concatenate-loop (cdr %ee)))))
+              %res))))
      (cond
-      ((begin (set! *it* (call-tex f)) *it*) (ps-to-img *it* img-file)
-       (write-log img-file)
-       '(for-each
-         (lambda (e)
-           (ensure-file-deleted
-            (let ((%type 'string) (%ee (list f e)))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
-         '(".aux" ".dvi" ".log" ".pdf" ".ps" ".tex")))
-      (else (write-log "failed, try manually")))
-     (write-log #\}) (write-log ':separation-space))
-    (else false))))
+      ((not (file-exists? fq-img-file)) (write-log ':separation-space)
+       (write-log #\{)
+       (write-log
+        (let ((%type 'string) (%ee (list f ".tex")))
+          (let ((%res (if (eq? %type 'string) "" null)))
+            (let %concatenate-loop
+              ((%ee %ee))
+              (if (null? %ee)
+                  %res
+                  (let ((%a (car %ee)))
+                    (unless (not %a)
+                      (set! %res
+                       (if (eq? %type 'string)
+                           (string-append %res
+                            (if (string? %a) %a (list->string %a)))
+                           (append %res
+                                   (if (string? %a) (string->list %a) %a)))))
+                    (%concatenate-loop (cdr %ee)))))
+            %res)))
+       (write-log ':separation-space) (write-log "->")
+       (write-log ':separation-space)
+       (cond
+        ((begin (set! *it* (call-tex f)) *it*) (ps-to-img *it* img-file)
+         (ensure-url-reachable img-file ':delete) (write-log img-file)
+         (for-each
+          (lambda (e)
+            (ensure-file-deleted
+             (let ((%type 'string) (%ee (list f e)))
+               (let ((%res (if (eq? %type 'string) "" null)))
+                 (let %concatenate-loop
+                   ((%ee %ee))
+                   (if (null? %ee)
+                       %res
+                       (let ((%a (car %ee)))
+                         (unless (not %a)
+                           (set! %res
+                            (if (eq? %type 'string)
+                                (string-append %res
+                                 (if (string? %a) %a (list->string %a)))
+                                (append %res
+                                        (if (string? %a)
+                                            (string->list %a)
+                                            %a)))))
+                         (%concatenate-loop (cdr %ee)))))
+                 %res))))
+          '(".log" ".pdf" ".tex")))
+        (else (write-log "failed, try manually")))
+       (write-log #\}) (write-log ':separation-space))
+      (else false)))))
 
 (define (call-with-lazy-image-stream eps-file img-file-stem p)
  (let ((aux-tex-file
@@ -11085,39 +11102,20 @@
                                      (if (string? %a) (string->list %a) %a)))))
                       (%concatenate-loop (cdr %ee)))))
               %res))))
-     (let ((f
-            (let ((%type 'string) (%ee (list *aux-dir/* img-file)))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
-       (write-log #\()
-       (write-log f)
-       (write-log ':separation-space)
-       (valid-img-file-p f)
-       (emit "<img src=\"")
-       (do-img-src img-file)
-       (emit "\"")
-       (emit " style=\"border: 0\"")
-       (emit " alt=\"")
-       (cond (alt (emit alt)) (else (emit "[") (emit img-file) (emit "]")))
-       (emit "\">")
-       (write-log #\))
-       (write-log ':separation-space)
-       true))))
+     (write-log #\()
+     (write-log img-file)
+     (write-log ':separation-space)
+     (valid-img-file-p img-file)
+     (emit "<img src=\"")
+     (do-img-src (ensure-url-reachable img-file))
+     (emit "\"")
+     (emit " style=\"border: 0\"")
+     (emit " alt=\"")
+     (cond (alt (emit alt)) (else (emit "[") (emit img-file) (emit "]")))
+     (emit "\">")
+     (write-log #\))
+     (write-log ':separation-space)
+     true)))
 
 (define (reuse-img) (source-img-file (ungroup (get-group))))
 
@@ -14404,8 +14402,12 @@
                ((and (char-alphabetic? c0) (char=? (string-ref f 1) #\:)) true)
                (else false))))))
 
-(define (ensure-url-reachable f)
- (if (and *aux-dir* (not (fully-qualified-url-p f)) (not (substring? "/" f)))
+(define (ensure-url-reachable f . %lambda-rest-arg)
+ (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (deletep false))
+   (when (< 0 %lambda-rest-arg-len)
+     (set! deletep (list-ref %lambda-rest-arg 0)))
+   (cond
+    ((and *aux-dir* (not (fully-qualified-url-p f)) (not (substring? "/" f)))
      (let ((real-f
             (let ((%type 'string) (%ee (list *aux-dir/* f)))
               (let ((%res (if (eq? %type 'string) "" null)))
@@ -14444,9 +14446,10 @@
                                      (if (string? %a) (string->list %a) %a)))))
                       (%concatenate-loop (cdr %ee)))))
               %res))))
-        (else false))
-       real-f)
-     f))
+        (else false)))
+     (cond (deletep (ensure-file-deleted f)) (else false)))
+    (else false))
+   f))
 
 (define (!stylesheet css)
  (cond
@@ -15829,8 +15832,7 @@ Try the commands
          (let ((img-file-stem (next-html-image-file-stem)))
            (let ((img-file
                   (let ((%type 'string)
-                        (%ee
-                         (list *aux-dir/* img-file-stem (find-img-file-extn))))
+                        (%ee (list img-file-stem (find-img-file-extn))))
                     (let ((%res (if (eq? %type 'string) "" null)))
                       (let %concatenate-loop
                         ((%ee %ee))
@@ -15848,47 +15850,66 @@ Try the commands
                                                  %a)))))
                               (%concatenate-loop (cdr %ee)))))
                       %res))))
-             (let* ((%loop-returned false)
-                    (%loop-result 0)
-                    (return
-                     (lambda %args
-                       (set! %loop-returned true)
-                       (set! %loop-result (and (pair? %args) (car %args))))))
-               (let %loop
-                 ()
-                 (cond ((eat-word "height") (set! height (get-pixels)) height)
-                       ((eat-word "rotated") (set! rotated (get-number))
-                        rotated)
-                       ((eat-word "width") (set! width (get-pixels)) width)
-                       (else (return)))
-                 (if %loop-returned %loop-result (%loop))))
-             (cond
-              ((not (file-exists? img-file)) (write-log ':separation-space)
-               (write-log #\{) (write-log pdf-file)
-               (write-log ':separation-space) (write-log "->")
-               (write-log ':separation-space) (write-log img-file)
-               (write-log #\}) (write-log ':separation-space)
-               (ps-to-img pdf-file img-file))
-              (else false))
-             (write-log #\()
-             (write-log img-file)
-             (write-log ':separation-space)
-             (emit "<img src=\"")
-             (do-img-src img-file)
-             (emit "\"")
-             (cond (height (emit " height=") (emit height)) (else false))
-             (cond
-              (rotated (set! rotated (- rotated))
-               (emit " style=\"transform: rotate(") (emit rotated)
-               (emit "deg)\""))
-              (else false))
-             (cond (width (emit " width=") (emit width)) (else false))
-             (emit " alt=\"")
-             (emit img-file)
-             (emit "\"")
-             (emit ">")
-             (write-log #\))
-             (write-log ':separation-space))))))))
+             (let ((fq-img-file
+                    (let ((%type 'string) (%ee (list *aux-dir/* img-file)))
+                      (let ((%res (if (eq? %type 'string) "" null)))
+                        (let %concatenate-loop
+                          ((%ee %ee))
+                          (if (null? %ee)
+                              %res
+                              (let ((%a (car %ee)))
+                                (unless (not %a)
+                                  (set! %res
+                                   (if (eq? %type 'string)
+                                       (string-append %res
+                                        (if (string? %a) %a (list->string %a)))
+                                       (append %res
+                                               (if (string? %a)
+                                                   (string->list %a)
+                                                   %a)))))
+                                (%concatenate-loop (cdr %ee)))))
+                        %res))))
+               (let* ((%loop-returned false)
+                      (%loop-result 0)
+                      (return
+                       (lambda %args
+                         (set! %loop-returned true)
+                         (set! %loop-result (and (pair? %args) (car %args))))))
+                 (let %loop
+                   ()
+                   (cond
+                    ((eat-word "height") (set! height (get-pixels)) height)
+                    ((eat-word "rotated") (set! rotated (get-number)) rotated)
+                    ((eat-word "width") (set! width (get-pixels)) width)
+                    (else (return)))
+                   (if %loop-returned %loop-result (%loop))))
+               (cond
+                ((not (file-exists? fq-img-file))
+                 (write-log ':separation-space) (write-log #\{)
+                 (write-log pdf-file) (write-log ':separation-space)
+                 (write-log "->") (write-log ':separation-space)
+                 (write-log img-file) (write-log #\})
+                 (write-log ':separation-space) (ps-to-img pdf-file img-file))
+                (else false))
+               (write-log #\()
+               (write-log img-file)
+               (write-log ':separation-space)
+               (emit "<img src=\"")
+               (do-img-src (ensure-url-reachable img-file ':delete))
+               (emit "\"")
+               (cond (height (emit " height=") (emit height)) (else false))
+               (cond
+                (rotated (set! rotated (- rotated))
+                 (emit " style=\"transform: rotate(") (emit rotated)
+                 (emit "deg)\""))
+                (else false))
+               (cond (width (emit " width=") (emit width)) (else false))
+               (emit " alt=\"")
+               (emit img-file)
+               (emit "\"")
+               (emit ">")
+               (write-log #\))
+               (write-log ':separation-space)))))))))
 
 (tex-def-prim "\\XeTeXpdffile" do-xetexpdffile)
 
@@ -15908,7 +15929,7 @@ Try the commands
              (else (return)))
        (if %loop-returned %loop-result (%loop))))
    (emit "<img src=\"")
-   (do-img-src img-file)
+   (do-img-src (fully-qualify-url img-file))
    (emit "\"")
    (cond (height (emit " height=") (emit height)) (else false))
    (cond

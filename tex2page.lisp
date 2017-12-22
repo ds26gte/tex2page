@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20171214") ;last change
+(defparameter *tex2page-version* "20171222") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -2320,8 +2320,11 @@
              (when (and (> k seclvl) (> k 0))
                (setf (gethash k *section-counters*) 0)))
            *section-counters*)
-  ;zero footnote counter if new chapter
-  (when (= seclvl 0) (tex-gdef-count "\\footnotenumber" 0))
+  ;zero footnote counter if not single page and new chapter
+  (when (and (not (or (tex2page-flag-boolean "\\TIIPsinglepage")
+                      (tex2page-flag-boolean "\\TZPsinglepage")))
+             (= seclvl 0))
+    (tex-gdef-count "\\footnotenumber" 0))
   ;zero all theorem-counters that hang off this seclvl
   (mapc
    (lambda (counter-name)

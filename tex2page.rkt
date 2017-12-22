@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
 
 
-(define *tex2page-version* "20171214")
+(define *tex2page-version* "20171222")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -3837,7 +3837,14 @@
       (table-get k *section-counters*))
      (else false)))
   *section-counters*)
- (cond ((= seclvl 0) (tex-gdef-count "\\footnotenumber" 0)) (else false))
+ (cond
+  ((and
+    (not
+     (or (tex2page-flag-boolean "\\TIIPsinglepage")
+         (tex2page-flag-boolean "\\TZPsinglepage")))
+    (= seclvl 0))
+   (tex-gdef-count "\\footnotenumber" 0))
+  (else false))
  (for-each
   (lambda (counter-name)
     (set!counter*-value (table-get counter-name *dotted-counters*) 0)

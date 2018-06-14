@@ -10,7 +10,7 @@
   \let\maybeendinput\endinput\fi
 \maybeendinput
 
-\message{version 20170125} % last change
+\message{version 20180614} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -266,13 +266,15 @@
   |long|gdef|beginttQii#1\endtt{#1|endgroup}}
 \fi
 
-% Allow _ as itself in text.
+% \allowunderscoreintext allows _ as itself in text.
 % OPmac trick of \let_=\sb \catcode`_=12 would work
 % in a Unicode font, but unfortunately default cm fonts
 % don't have _ in 0x5f.
 
-\catcode`_ 13
-\def_{\ifmmode\sb\else\_\fi}
+{\catcode`_13
+  \gdef\allowunderscoreintext{%
+    \catcode`_13
+    \def_{\ifmmode\sb\else\_\fi}}}
 
 % \url{URL} becomes
 % <a href="URL">URL</a> in HTML, and

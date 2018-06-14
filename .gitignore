@@ -24,7 +24,7 @@ Makefile
 #?.*
 #??.*
 #???
-[^2cefilmpstu]*.tex
+[^2cdefilmpstu]*.tex
 [^IR]*.adoc
 [^ct]*.lisp
 [^s]*log

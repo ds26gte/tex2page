@@ -10,7 +10,7 @@
   \let\maybeendinput\endinput\fi
 \maybeendinput
 
-\message{version 20180614} % last change
+\message{version 20180628} % last change
 
 \let\texonly\relax
 \let\endtexonly\relax
@@ -954,6 +954,7 @@
 
 \ifx\Gin@driver\UnDeFiNeD
   \ifx\pdfoutput\UnDeFiNeD\else\def\Gin@driver{pdftex.def}\fi
+  \ifx\directlua\UnDeFiNeD\else\def\Gin@driver{luatex.def}\fi
   \ifx\XeTeXversion\UnDeFiNeD\else\def\Gin@driver{xetex.def}\fi
   \ifx\Gin@driver\UnDeFiNeD\def\Gin@driver{dvips.def}\fi
 \fi

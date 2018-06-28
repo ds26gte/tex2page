@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2017-12-13} %last change
+\c{2018-06-28} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1136,6 +1136,7 @@ models `hsl` and `Hsl`.
 {\color[HSB]{20, 199.2, 192} ochre},
 {\color[rgb]{.69, .19, .38} maroon},
 {\color[RGB]{220, 20, 60} crimson},
+{\color[HTML]{77216F} aubergine},
 {\color[wave]{455.528} cesium blue},
 {\color[hsl]{.0389, .78, .62} burnt sienna},
 {\color[Hsl]{10, .36, .37} venetian red},
@@ -1153,6 +1154,7 @@ produces
 {\color[HSB]{20, 199.2, 192} ochre},
 {\color[rgb]{.69, .19, .38} maroon},
 {\color[RGB]{220, 20, 60} crimson},
+{\color[HTML]{77216F} aubergine},
 {\color[wave]{455.528} cesium blue},
 {\color[hsl]{.0389, .78, .62} burnt sienna},
 {\color[Hsl]{10, .36, .37} venetian red},
@@ -2688,7 +2690,10 @@ JPEG and GIF images. E.g.,
 \endtt
 for
 
+\ifx\XeTeXversion\UnDeFiNeD
+\centerline{\includegraphics[width=3in]{tbdek.jpg}}\else
 \centerline{\hbox{\XeTeXpicfile tbdek.jpg width 3in \relax}}
+\fi
 
 There are two ways to load a graphic specified in MetaPost:
 
@@ -2736,7 +2741,11 @@ source file. See p.~\ref{write18}.}
 
 \index{centerline@`\centerline`}
 
+\ifx\XeTeXversion\UnDeFiNeD
+\centerline{\includegraphics{lambda-1.pdf}}
+\else
 \centerline{\XeTeXpdffile lambda-1.pdf }
+\fi
 
 \item(ii) Alternatively, you can have MetaPost directly convert
 the spec to

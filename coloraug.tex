@@ -29,8 +29,67 @@
 \def\colorQii{\ifx\colorQi[\let\colorQiii\colorQwithmodel
 \else\let\colorQiii\colorQorig\fi\colorQiii}
 
+\let\maybeendinput\relax
 \ifx\directlua\UnDeFiNeD
   \input colorxe
-\else
-  \input colorlua
-\fi
+  \let\maybeendinput\endinput
+\fi\maybeendinput
+
+{\catcode`\%=11
+\catcode`\#=11
+\gdef\pct0{%}
+\gdef\sharp0{#}
+}
+
+\directlua{require(kpse.find_file('colormodels.lua'))}
+
+\def\colorQwithmodel[#1]{\directlua{
+  local model = '#1'
+  if model == 'HTML' then
+    tex.print("\noexpand\\colorQwithmodelirregular[" .. model .. "]")
+  else
+    tex.print("\noexpand\\colorQwithmodelregular[" .. model .. "]")
+  end
+}}
+
+\def\colorQwithmodelregular[#1]#2{\directlua{
+  local model = "#1"
+  local values = { #2 }
+  local newmodel, newvalues = convert_to_known_color_model(model, values)
+  tex.print("\noexpand\\colorQorig[" .. newmodel .. "]" .. convert_to_csv(newvalues))
+}}
+
+\def\colorQwithmodelirregular[#1]#2{\directlua{
+  local model = "#1"
+  local values = { 0x#2 }
+  local newmodel, newvalues = convert_to_known_color_model(model, values)
+  tex.print("\noexpand\\colorQorig[" .. newmodel .. "]" .. convert_to_csv(newvalues))
+}}
+
+\def\definecolor#1#2{\directlua{
+  local name = '#1'
+  local model = '#2'
+  if model == 'HTML' then
+    tex.print("\noexpand\\definecolorQirregular{" .. name .. "}{" .. model .. "}")
+  else
+    tex.print("\noexpand\\definecolorQregular{" .. name .. "}{" .. model .. "}")
+  end
+}}
+
+\def\definecolorQregular#1#2#3{\directlua{
+  local name = '#1'
+  local model = '#2'
+  local values = { #3 }
+  local newmodel, newvalues = convert_to_known_color_model(model, values)
+  tex.print("\noexpand\\definecolorQorig{" .. name .. "}{" .. newmodel .. "}" ..
+    convert_to_csv(newvalues))
+}}
+
+\def\definecolorQirregular#1#2#3{\directlua{
+  local name = '#1'
+  local model = '#2'
+  local values = { 0x#3 }
+  local newmodel, newvalues = convert_to_known_color_model(model, values)
+  tex.print("\noexpand\\definecolorQorig{" .. name .. "}{" .. newmodel .. "}" ..
+    convert_to_csv(newvalues))
+}}

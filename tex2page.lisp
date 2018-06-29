@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20171222") ;last change
+(defparameter *tex2page-version* "20180629") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -5298,7 +5298,7 @@
     (unless tex-prog-name
       (let ((d (find-def "\\TZPtexprogname")))
         (when d (setq tex-prog-name (tdef*-expansion d))))
-      (unless tex-prog-name (setq tex-prog-name "xetex"))
+      (unless tex-prog-name (setq tex-prog-name "luatex"))
       (setq tex-output-format
             (if (or (eql (search "pdf" tex-prog-name) 0)
                     (eql (search "xe" tex-prog-name) 0)
@@ -5337,11 +5337,7 @@
                       (setq outfile ps-file)))
                   outfile))))))))
 
-(defun ps-to-img/gif/netpbm (ps-file img-file)
-  (system
-   (concatenate 'string *ghostscript* *ghostscript-options* " -sOutputFile=" img-file
-                ".ppm.1 " ps-file " quit.ps"))
-  (system (concatenate 'string "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
+(defun ps-to-img/gif/netpbm (img-file)
   (system (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
    (concatenate 'string "ppmtogif -transparent rgb:ff/ff/ff < " img-file ".ppm > "
@@ -5349,11 +5345,7 @@
   (mapc (lambda (e) (ensure-file-deleted (concatenate 'string img-file e)))
         '(".ppm" ".ppm.tmp" ".ppm.1")))
 
-(defun ps-to-img/png/netpbm (ps-file img-file)
-  (system
-   (concatenate 'string *ghostscript* *ghostscript-options* " -sOutputFile=" img-file
-                ".ppm.1 " ps-file " quit.ps"))
-  (system (concatenate 'string "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
+(defun ps-to-img/png/netpbm (img-file)
   '(system
     (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
@@ -5362,11 +5354,7 @@
   (mapc (lambda (e) (ensure-file-deleted (concatenate 'string img-file e)))
         '(".ppm.1" ".ppm.tmp" ".ppm")))
 
-(defun ps-to-img/jpeg/netpbm (ps-file img-file)
-  (system
-   (concatenate 'string *ghostscript* *ghostscript-options* " -sOutputFile=" img-file
-                ".ppm.1 " ps-file  " quit.ps"))
-  (system (concatenate 'string "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
+(defun ps-to-img/jpeg/netpbm (img-file)
   (system (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
    (concatenate 'string "ppmtojpeg --grayscale < " img-file ".ppm > " img-file))
@@ -5379,10 +5367,15 @@
      (system
       (concatenate 'string "convert -transparent white -trim "
                    ps-file  " " img-file)))
-    (t (case (tex2page-flag-value "\\TZPimageformat")
-         ((#\p #\P) (ps-to-img/png/netpbm ps-file img-file))
-         ((#\j #\J) (ps-to-img/jpeg/netpbm ps-file img-file))
-         (t (ps-to-img/gif/netpbm ps-file img-file))))))
+    (t
+      (system
+        (concatenate 'string *ghostscript* *ghostscript-options* " -sOutputFile=" img-file
+                     ".ppm.1 " ps-file))
+      (system (concatenate 'string "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
+      (case (tex2page-flag-value "\\TZPimageformat")
+         ((#\p #\P) (ps-to-img/png/netpbm img-file))
+         ((#\j #\J) (ps-to-img/jpeg/netpbm img-file))
+         (t (ps-to-img/gif/netpbm img-file))))))
 
 (defun tex-to-img (f)
   (incf *img-file-tally*)
@@ -5513,6 +5506,14 @@
        (princ arg1 o)
        (princ arg2 o)
        (princ arg3 o)))))
+
+(defun do-mplibcode ()
+  (call-with-html-image-stream
+    (lambda (o)
+      (princ "\\input luamplib.sty" o) (terpri o)
+      (princ "\\mplibcode" o)
+      (dump-till-end-env "mplibcode" o)
+      (princ "\\endmplibcode" o) (terpri o))))
 
 (defun do-mfpic-opengraphsfile ()
   (setq *mfpic-file-stem* (get-filename-possibly-braced))
@@ -10435,6 +10436,7 @@ Try the commands
 (tex-def-prim "\\mathp" #'do-mathp)
 (tex-def-prim "\\mfpic" #'do-mfpic)
 (tex-def-prim "\\minipage" #'do-minipage)
+(tex-def-prim "\\mplibcode" #'do-mplibcode)
 
 (tex-def-prim "\\newcommand" (lambda () (do-newcommand nil)))
 (tex-def-prim "\\newcounter" #'do-newcounter)

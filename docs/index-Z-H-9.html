@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang=en>
 <!--
-Generated from index.tex by tex2page, v. 20171214
-Copyright (C) 1997-2017 Dorai Sitaram
+Generated from index.tex by tex2page, v. 20180629
+Copyright (C) 1997-2018 Dorai Sitaram
 (running on ECL 16.1.2 Linux)
 http://ds26gte.github.io/tex2page/index.html
 -->
@@ -249,7 +249,7 @@ pixels.
 <a id="TAG:__tex2page_index_404"></a><a id="TAG:__tex2page_index_406"></a></p>
 <p>
 
-If you use pdfT<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;or luaT<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;(which produce PDF
+If you use pdfT<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;or LuaT<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;(which produce PDF
 instead of DVI output), you can insert
 MetaPost-created EPS files with the
 <code class=verbatim>\convertMPtoPDF</code> command:</p>
@@ -305,7 +305,7 @@ for</p>
 <p>
 
 </p>
-<div class=centerline>&#xa0;<img src="tbdek.jpg" width=216 alt="tbdek.jpg">&#xa0;</div>
+<div class=centerline>&#xa0;<img width=216 src="tbdek.jpg"  alt="tbdek.jpg">&#xa0;</div>
 <p>
 
 There are two ways to load a graphic specified in MetaPost:</p>
@@ -342,7 +342,8 @@ to obtain<a id="TAG:__tex2page_call_footnote_Temp_69"></a><span class=footnotema
 <p>
 
 </p>
-<div class=centerline>&#xa0;<img src="index-Z-G-4.png" alt="index-Z-G-4.png">&#xa0;</div>
+<div class=centerline>&#xa0;<img src="index-Z-G-4.png" style="border: 0" alt="[index-Z-G-4.png]">&#xa0;</div>
+
 <p>
 
 (<span class=item>ii</span>) Alternatively, you can have MetaPost directly convert
@@ -367,10 +368,17 @@ can be inserted with</p>
 <p class=noindent></p>
 <p>
 
+<a id="TAG:__tex2page_index_426"></a><a id="TAG:__tex2page_index_428"></a>LuaT<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;is perhaps the easiest format when it comes to MetaPost:
+input the style file <code class=verbatim>luamplib.sty</code>, and insert your MetaPost
+code inside <code class=verbatim>\mplibcode ... \endmplibcode</code>. (In LuaL<span style="position: relative; bottom: 0.3ex; margin-left: -0.36em; margin-right: -0.15em; text-transform: uppercase"><small>a</small></span>T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;use
+the <code class=verbatim>{mplibcode}</code> environment.) There is no need to save to any
+MetaPost file or call MetaPost specifically.</p>
+<p>
+
 </p>
 <a id="TAG:__tex2page_sec_Temp_70"></a>
 <h2 class=section>Other image inserts</h2>
-<p class=noindent><a id="TAG:__tex2page_index_426"></a>You may explicitly request any part at all of your T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
+<p class=noindent><a id="TAG:__tex2page_index_430"></a>You may explicitly request any part at all of your T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X
 document — not just its math or EPS inserts —
 to be converted into images for your HTML output.  The
 fragment of the document to be converted to image is
@@ -424,7 +432,7 @@ no unmatched braces.</p>
 <a id="TAG:__tex2page_sec_Temp_71"></a>
 <h2 class=section>Image preamble</h2>
 <p class=noindent><a id="TAG:__tex2page_tag_Temp_72"></a>
-<a id="TAG:__tex2page_index_428"></a><a id="TAG:__tex2page_index_430"></a><a id="TAG:__tex2page_index_432"></a>When converting math, EPS, and other implicit or
+<a id="TAG:__tex2page_index_432"></a><a id="TAG:__tex2page_index_434"></a><a id="TAG:__tex2page_index_436"></a>When converting math, EPS, and other implicit or
 explicit <code class=verbatim>\htmlimage</code>s into images for HTML, T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page
 extracts the small fragment of the T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;document
 containing the would-be image into a separate, smaller
@@ -476,7 +484,7 @@ though.</p>
 </p>
 <a id="TAG:__tex2page_sec_Temp_73"></a>
 <h2 class=section>Image magnification</h2>
-<p class=noindent><a id="TAG:__tex2page_index_434"></a><a id="TAG:__tex2page_index_436"></a>In general, the magnification of the image
+<p class=noindent><a id="TAG:__tex2page_index_438"></a><a id="TAG:__tex2page_index_440"></a>In general, the magnification of the image
 inserts, whether math or picture, may not match that
 of the rest of the text in the HTML output.  The DVI
 output has no such problem, because the math and
@@ -544,7 +552,7 @@ on the image.)</p>
 <a id="TAG:__tex2page_sec_Temp_74"></a>
 <h2 class=section>Reusing image files</h2>
 <p class=noindent><a id="TAG:__tex2page_tag_Temp_75"></a>
-<a id="TAG:__tex2page_index_438"></a><a id="TAG:__tex2page_index_440"></a><a id="TAG:__tex2page_index_442"></a><code class=verbatim>\def</code>initions that use math (such as the following
+<a id="TAG:__tex2page_index_442"></a><a id="TAG:__tex2page_index_444"></a><a id="TAG:__tex2page_index_446"></a><code class=verbatim>\def</code>initions that use math (such as the following
 one for <code class=verbatim>\um</code>) work as expected in the
 HTML output.</p>
 <p>
@@ -578,7 +586,7 @@ to 0.78 <img src="index-Z-G-D-1.png" style="border: 0" alt="[index-Z-G-D-1.png]"
 <p class=noindent></p>
 <p>
 
-<a id="TAG:__tex2page_index_444"></a></p>
+<a id="TAG:__tex2page_index_448"></a></p>
 <p>
 
 </p>
@@ -604,7 +612,7 @@ the same image for these multiple occurrences, use
 </p>
 <a id="TAG:__tex2page_sec_Temp_77"></a>
 <h2 class=section>Recycling image files</h2>
-<p class=noindent><a id="TAG:__tex2page_index_446"></a>The conversion of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;fragments into images can
+<p class=noindent><a id="TAG:__tex2page_index_450"></a>The conversion of T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X&#x200b; &#x200b;fragments into images can
 consume a lot of time.  T<span style="position: relative; top: 0.5ex; margin-left: -0.1667em; margin-right: -0.125em; text-transform: uppercase">e</span>X2page will therefore
 <em>recycle</em> existing image files from
 a previous run, instead of generating them anew.

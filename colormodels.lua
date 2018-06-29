@@ -1,7 +1,7 @@
 -- Last modified 2018-06-28
 -- Dorai Sitaram
 
-function hsl360_to_rgb(H, s, L)
+local function hsl360_to_rgb(H, s, L)
   local c = (1 - math.abs(2*L - 1)) * s
   local x = c * (1 - math.abs(((H/60) % 2) - 1))
   local m = L - c/2
@@ -16,29 +16,29 @@ function hsl360_to_rgb(H, s, L)
   return "rgb", { r1+m, g1+m, b1+m }
 end
 
-function hsl_to_rgb(h, s, L)
+local function hsl_to_rgb(h, s, L)
   return hsl360_to_rgb(h * 360, s, L)
 end
 
-function hsb360_to_rgb(h, s, b)
+local function hsb360_to_rgb(h, s, b)
   local L = .5 * b * (2 - s)
   local s2 =  (b * s) / (1 - math.abs(2*L - 1))
   return hsl360_to_rgb(h, s2, L)
 end
 
-function hsb_to_rgb(h, s, b)
+local function hsb_to_rgb(h, s, b)
   return hsb360_to_rgb(h*360, s, b)
 end
 
-function hsb240_to_rgb(h, s, b)
+local function hsb240_to_rgb(h, s, b)
   return hsb_to_rgb(h/240, s/240, b/240)
 end
 
-function cmy_to_rgb(c, m, y)
+local function cmy_to_rgb(c, m, y)
   return "rgb", { 1-c, 1-m, 1-y }
 end
 
-function html_to_rgb(xn)
+local function html_to_rgb(xn)
   local y = xn
   local r = math.floor(y / 0x10000)
   y = y % 0x10000
@@ -47,11 +47,11 @@ function html_to_rgb(xn)
   return "rgb", { r/255, g/255, b/255 }
 end
 
-function gray15_to_gray(g)
+local function gray15_to_gray(g)
   return "gray", { g/15 }
 end
 
-function wavelength_to_rgb(w)
+local function wavelength_to_rgb(w)
   local h
   if w <= 362.857 then h = 5
   elseif w < 440 then h = 4 + (w - 440)/-60

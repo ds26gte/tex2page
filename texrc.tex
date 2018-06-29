@@ -1,4 +1,4 @@
-% last modified 2017-01-12
+% last modified 2018-06-28
 % Dorai Sitaram
 
 \input tgtermes
@@ -8,13 +8,15 @@
 \let\oldtentt\tentt
 \font\tentt "Ubuntu Mono" at 10pt
 \ifx\tentt\nullfont
-\let\tentt\oldtentt
-\font\eighttt "TeX Gyre Cursor:-liga:embolden=1" at 8pt
+\font\tentt cmtt10
+%\let\tentt\oldtentt
+%\font\eighttt "TeX Gyre Cursor:-liga:embolden=1" at 8pt
+\font\eighttt cmtt10 at 8pt
 \font\fourteenrm "TeX Gyre Termes" at 14pt
 %\font\fourteenrm "TeX Gyre Schola" at 14pt
 %\font\fourteenrm "Latin Modern Roman/B" at 14pt
-\font\twelvebf "TeX Gyre Termes/B" at 12pt
-\font\tensansbf "TeX Gyre Heros/B" at 12pt
+\font\twelvebf "TeX Gyre Heros/B" at 12pt
+\font\tensansbf "TeX Gyre Heros/B" at 10pt
 \else
 \font\tenbf "Ubuntu/B" at 10pt
 %\font\tenbf "Ubuntu/M" at 10pt

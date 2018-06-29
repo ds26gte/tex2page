@@ -35,31 +35,25 @@
   \let\maybeendinput\endinput
 \fi\maybeendinput
 
-{\catcode`\%=11
-\catcode`\#=11
-\gdef\pct0{%}
-\gdef\sharp0{#}
-}
-
 \directlua{require(kpse.find_file('colormodels.lua'))}
 
 \def\colorQwithmodel[#1]{\directlua{
   local model = '#1'
   if model == 'HTML' then
-    tex.print("\noexpand\\colorQwithmodelirregular[" .. model .. "]")
+    tex.print("\noexpand\\colorQwithmodelnondecimal[" .. model .. "]")
   else
-    tex.print("\noexpand\\colorQwithmodelregular[" .. model .. "]")
+    tex.print("\noexpand\\colorQwithmodeldecimal[" .. model .. "]")
   end
 }}
 
-\def\colorQwithmodelregular[#1]#2{\directlua{
+\def\colorQwithmodeldecimal[#1]#2{\directlua{
   local model = "#1"
   local values = { #2 }
   local newmodel, newvalues = convert_to_known_color_model(model, values)
   tex.print("\noexpand\\colorQorig[" .. newmodel .. "]" .. convert_to_csv(newvalues))
 }}
 
-\def\colorQwithmodelirregular[#1]#2{\directlua{
+\def\colorQwithmodelnondecimal[#1]#2{\directlua{
   local model = "#1"
   local values = { 0x#2 }
   local newmodel, newvalues = convert_to_known_color_model(model, values)
@@ -70,13 +64,13 @@
   local name = '#1'
   local model = '#2'
   if model == 'HTML' then
-    tex.print("\noexpand\\definecolorQirregular{" .. name .. "}{" .. model .. "}")
+    tex.print("\noexpand\\definecolorQnondecimal{" .. name .. "}{" .. model .. "}")
   else
-    tex.print("\noexpand\\definecolorQregular{" .. name .. "}{" .. model .. "}")
+    tex.print("\noexpand\\definecolorQdecimal{" .. name .. "}{" .. model .. "}")
   end
 }}
 
-\def\definecolorQregular#1#2#3{\directlua{
+\def\definecolorQdecimal#1#2#3{\directlua{
   local name = '#1'
   local model = '#2'
   local values = { #3 }
@@ -85,7 +79,7 @@
     convert_to_csv(newvalues))
 }}
 
-\def\definecolorQirregular#1#2#3{\directlua{
+\def\definecolorQnondecimal#1#2#3{\directlua{
   local name = '#1'
   local model = '#2'
   local values = { 0x#3 }

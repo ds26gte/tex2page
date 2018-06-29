@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2018-06-28} %last change
+\c{2018-06-29} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -132,13 +132,13 @@ tex |meta[wherever-it-is/jobname].|meta[ext]
 at the operating-system command line.\f{The executable `tex` expects
 its input file to be marked up in plain \TeX.  For a \LaTeX\ document, the
 executable to use is `latex`. Modern \TeX\ engines such as
-pdf\TeX, \XeTeX~\cite{xetex}, and lua\TeX~\cite{luatex} have
+pdf\TeX, \XeTeX~\cite{xetex}, and Lua\TeX~\cite{luatex} have
 executables named `pdftex`, `xetex`, `luatex` for the plain
 format, and `pdflatex`, `xelatex`, and `lualatex` for \LaTeX.}  You do not need to mention the extension
 \p{.|meta[ext]} if it is `.tex`.  This creates the output DVI file,
 \p{|meta[jobname].dvi}, in the working directory.\f{The modern \TeX s
 pdf\TeX, \XeTeX, and
-lua\TeX~\cite{luatex} produce PDF rather than DVI.  In the rest of this manual,
+Lua\TeX~\cite{luatex} produce PDF rather than DVI.  In the rest of this manual,
 whenever we refer to the output DVI file, the reader using the PDF versions
 of \TeX\ should read PDF for DVI.}
 
@@ -1600,12 +1600,12 @@ change this, e.g,
 \beginsection \TeX\ executable used for image generation
 
 \index{TZPtexprogname@`\TZPtexprogname`}
-By default, \TeX2page uses `xetex` to
+By default, \TeX2page uses `luatex` to
 generate images. To change this, set the flag `\TZPtexprogname` to
 contain the name of your preferred \TeX\ executable, e.g.,
 
 \begintt
-\def\TZPtexprogname{pdftex}
+\def\TZPtexprogname{xetex}
 \endtt
 %
 You only need to set the executable name used for the “plain” format:
@@ -1767,7 +1767,6 @@ In this case, you also have to ensure that the fonts you use in \XeTeX\ do not h
 
 \index{TZPslides@`\TZPslides`}
 \index{t2pslides.tex@`t2pslides.tex`}
-\index{MozPoint}
 \index{presentations}
 %
 To produce a Web presentation,
@@ -2647,7 +2646,7 @@ pixels.
 \index{convertMPtoPDF@`\convertMPtoPDF`}
 \index{supp-pdf.tex@`supp-pdf.tex`}
 
-If you use pdf\TeX\ or lua\TeX\ (which produce PDF
+If you use pdf\TeX\ or Lua\TeX\ (which produce PDF
 instead of DVI output), you can insert
 MetaPost-created EPS files with the
 `\convertMPtoPDF` command:
@@ -2761,6 +2760,15 @@ can be inserted with
 \begintt
 \XeTeXpicfile lambda-1.png
 \endtt
+
+\index{mplibcode@`\mplibcode`}
+\index{endmplibcode@`\endmplibcode`}
+%
+Lua\TeX\ is perhaps the easiest format when it comes to MetaPost:
+input the style file `luamplib.sty`, and insert your MetaPost
+code inside `\mplibcode ... \endmplibcode`. (In Lua\LaTeX\ use
+the `{mplibcode}` environment.) There is no need to save to any
+MetaPost file or call MetaPost specifically.
 
 \beginsection Other image inserts
 

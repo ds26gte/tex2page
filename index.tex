@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2018-06-29} %last change
+\c{2018-07-03} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -132,13 +132,13 @@ tex |meta[wherever-it-is/jobname].|meta[ext]
 at the operating-system command line.\f{The executable `tex` expects
 its input file to be marked up in plain \TeX.  For a \LaTeX\ document, the
 executable to use is `latex`. Modern \TeX\ engines such as
-pdf\TeX, \XeTeX~\cite{xetex}, and Lua\TeX~\cite{luatex} have
-executables named `pdftex`, `xetex`, `luatex` for the plain
-format, and `pdflatex`, `xelatex`, and `lualatex` for \LaTeX.}  You do not need to mention the extension
+Lua\TeX~\cite{luatex}, \XeTeX~\cite{xetex}, and pdf\TeX\ have
+executables named `luatex`, `xetex`, `pdftex` for the plain
+format, and `lualatex`, `xelatex`, and `pdflatex` for \LaTeX.}  You do not need to mention the extension
 \p{.|meta[ext]} if it is `.tex`.  This creates the output DVI file,
 \p{|meta[jobname].dvi}, in the working directory.\f{The modern \TeX s
-pdf\TeX, \XeTeX, and
-Lua\TeX~\cite{luatex} produce PDF rather than DVI.  In the rest of this manual,
+Lua\TeX, \XeTeX, and
+pdf\TeX\ produce PDF rather than DVI.  In the rest of this manual,
 whenever we refer to the output DVI file, the reader using the PDF versions
 of \TeX\ should read PDF for DVI.}
 
@@ -208,7 +208,7 @@ in this log refers to the only HTML file created, viz.,
 `story.html`.
 
 All this is of course almost exactly analogous to the
-way you type `tex story` (or `xetex story` or `pdftex story`) to get
+way you type `tex story` (or `luatex story` or `xetex story` or `pdftex story`) to get
 `story.dvi` (or `story.pdf`)
 from `story.tex`, with the log going into
 `story.log`.
@@ -475,7 +475,7 @@ enumeration macros,
 \TeX2page also recognizes some commonly used commands
 that are not part of the formats but
 are loaded from \LaTeX\ packages (e.g.,
-`color.sty`, `epsfig.sty`, `graphicx.sty`,
+`color.sty`, `epsfig.sty`, `graphicx.sty`, `luamplib.sty`,
 `path.sty`,
 `verbatim.sty`)
 or other external macro
@@ -2090,13 +2090,13 @@ that is visible.  This allows you to easily count
 spaces or tell if there is trailing space on a line.
 
 \begintt
-“\verb*{three   spaces}”
+\verb*{three   spaces}
 \endtt
 %
 produces
 
 \quote
-“\verb*{three   spaces}”
+\verb*{three   spaces}
 \endquote
 
 \beginsection Commands within verbatim
@@ -2740,10 +2740,18 @@ source file. See p.~\ref{write18}.}
 
 \index{centerline@`\centerline`}
 
+\ifx\directlua\UnDeFiNeD
 \ifx\XeTeXversion\UnDeFiNeD
 \centerline{\includegraphics{lambda-1.pdf}}
 \else
 \centerline{\XeTeXpdffile lambda-1.pdf }
+\fi
+\else
+\centerline{%
+  \mplibcode
+  input lambda.mp;
+  \endmplibcode
+  }%
 \fi
 
 \item(ii) Alternatively, you can have MetaPost directly convert
@@ -2763,6 +2771,7 @@ can be inserted with
 
 \index{mplibcode@`\mplibcode`}
 \index{endmplibcode@`\endmplibcode`}
+\index{luamplib.sty@`\luamplib.sty`}
 %
 Lua\TeX\ is perhaps the easiest format when it comes to MetaPost:
 input the style file `luamplib.sty`, and insert your MetaPost
@@ -3131,7 +3140,7 @@ in \TeX\ as follows:
     \qquad ;#3}\par}
 \endtt
 %
-where, `\spaceifnotempty` is a helper macro
+where `\spaceifnotempty` is a helper macro
 that expands to a space only if its argument is
 not empty.  \TeX2page can expand this definition
 for `\proto`, provided it knows how to deal

@@ -115,7 +115,7 @@ The TeX2page documentation is provided in the TeX file `index.tex`.
 To get a PDF version of the document run, first ensure that the
 file `story.log` exists.  If it does not, run
 
-  xetex story
+  luatex story
 
 and supply
 
@@ -123,21 +123,32 @@ and supply
 
 at TeX’s interactive prompt.  Then do
 
-  xetex index
+  luatex index
   makeindex index
   bibtex index
-  mpost lambda
-  epstopdf lambda-1.eps
-  xetex index
-  xetex index
-
-The first TeX run may fail due to missing files.  Simply type `s`
-at the TeX prompt to force TeX to continue.
+  luatex index
+  luatex index
 
 The multiple runs of TeX are needed to resolve cross-references.
 
+=== TeXs other than LuaTeX
+
+If you’re using a TeX other than LuaTeX (e.g., XeTeX), use
+`--shell-escape` so that MetaPost can be called on one of the
+illustrations. The first TeX run may fail due to missing files.
+Simply type `s` at the TeX prompt to force XeTeX to continue.
+
 If the MetaPost executable is named `mp` on your system (e.g.,
-MiKTeX), use `mp` instead of `mpost`.
+MiKTeX), you may need to create an `mpost` batch file that calls
+`mp`. If the shell escape doesn’t work on your TeX for some
+reason, explicitly call
+
+  mpost lambda
+  epstopdf lambda-1.eps
+
+after the first TeX run.
+
+=== HTML documentation
 
 To get an HTML version of the document, run
 
@@ -153,3 +164,5 @@ you if another run is necessary.
 
 The WWW copy of the HTML documentation is at
 http://ds26gte.github.io/tex2page/index.html.
+
+// Last modified 2018-07-03

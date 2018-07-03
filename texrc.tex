@@ -1,15 +1,13 @@
-% last modified 2018-06-28
+% last modified 2018-07-02
 % Dorai Sitaram
 
 \input tgtermes
-\input tex2page
+\input tex2page.tex
 \input tex2pagerc
 
-\let\oldtentt\tentt
-\font\tentt "Ubuntu Mono" at 10pt
-\ifx\tentt\nullfont
+%\font\tentt "Ubuntu Mono" at 10pt
 \font\tentt cmtt10
-%\let\tentt\oldtentt
+\def\visiblespace{\relax\char`\ }
 %\font\eighttt "TeX Gyre Cursor:-liga:embolden=1" at 8pt
 \font\eighttt cmtt10 at 8pt
 \font\fourteenrm "TeX Gyre Termes" at 14pt
@@ -17,14 +15,13 @@
 %\font\fourteenrm "Latin Modern Roman/B" at 14pt
 \font\twelvebf "TeX Gyre Heros/B" at 12pt
 \font\tensansbf "TeX Gyre Heros/B" at 10pt
-\else
-\font\tenbf "Ubuntu/B" at 10pt
+
+%\font\tenbf "Ubuntu/B" at 10pt
 %\font\tenbf "Ubuntu/M" at 10pt
-\font\eighttt "Ubuntu Mono" at 8pt
-\font\fourteenrm "Ubuntu" at 14pt
-\font\twelvebf "Ubuntu/B" at 12pt
-\font\tensansbf "Ubuntu/B" at 10pt
-\fi
+%\font\eighttt "Ubuntu Mono" at 8pt
+%\font\fourteenrm "Ubuntu" at 14pt
+%\font\twelvebf "Ubuntu/B" at 12pt
+%\font\tensansbf "Ubuntu/B" at 10pt
 
 \font\eightrm "TeX Gyre Termes" at 8pt
 \font\eightit "TeX Gyre Termes/I" at 8pt
@@ -42,17 +39,3 @@
   \baselineskip 9.6pt \relax}
 
 \def\footnotehook{\eightfont}
-
-\def\sectionQbreak#1\par{$\dashv$\bigbreak\noindent}
-
-%\defcsactive\⊣ {\sectionQbreak}
-
-\def\begindocumenthook{\activettchar`\let\begindocumenthook\relax}
-
-\let\ORIGtitle\title
-\let\ORIGbeginchapter\beginchapter
-\let\ORIGbeginsection\beginsection
-
-\def\title{\begindocumenthook\ORIGtitle}
-\def\beginchapter{\begindocumenthook\ORIGbeginchapter}
-\def\beginsection{\begindocumenthook\ORIGbeginsection} 

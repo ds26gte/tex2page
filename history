@@ -1,4 +1,53 @@
-Last change 2017-12-04
+Last change 2019-01-26
+
+2019 Jan 26
+
+Ignore \set{main,sans,mono}font with args.
+
+2018 Jul 3
+
+Make index.tex processable by LuaTeX without recourse to external
+MetaPost.
+
+2018 Jun 29
+
+Added \mplibcode ... \endmplibcode.
+
+Default TeX program used by TeX2page (for making images) is
+LuaTeX.
+
+2018 Jun 28
+
+color.sty won't define 'hsb' model for LuaTeX, which is a basis
+for defining several new models in coloraug.tex. Added two
+subsidiary files for coloraug.tex: colorlua.tex for LuaTeX, and
+colorxe.tex for others (eg, XeTeX).
+
+Move Lua portion of coloraug.tex ot colormodels.tex.
+
+Allow index.tex to be processable by LuaTeX.
+
+2018 Jun 14
+
+Don't set _ catcode to 13 as it messes with loading of some
+standard files. Instead let user optionally call
+\allowunderscoreintext.
+
+tgtermes.tex: font features separated by semicolon, not colon.
+(embolden=1 doesn't seem to work.)
+
+2017 Dec 22
+
+Footnote counter shouldn't be 0'd for each chapter in single-page
+mode.
+
+2017 Dec 14
+
+Properly qualify <img src=...> (aux file dir could be set).
+
+2017 Dec 13
+
+Put generated HTML doc in docs/ subdirectory.
 
 2017 Dec 4
 

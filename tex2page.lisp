@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20180629") ;last change
+(defparameter *tex2page-version* "20190126") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -10749,6 +10749,13 @@ Try the commands
 
 (tex-def-prim "\\usepackage"
  (lambda () (get-bracketed-text-if-any) (get-group) (probably-latex)))
+
+(tex-def-prim "\\setmainfont"
+  (lambda () (get-bracketed-text-if-any) (get-group) (get-bracketed-text-if-any)))
+(tex-def-prim "\\setsansfont"
+  (lambda () (get-bracketed-text-if-any) (get-group) (get-bracketed-text-if-any)))
+(tex-def-prim "\\setmonofont"
+  (lambda () (get-bracketed-text-if-any) (get-group) (get-bracketed-text-if-any)))
 
 (tex-def-prim "\\readindexfile" (lambda () (get-token) (do-inputindex nil)))
 

@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20190126") ;last change
+(defparameter *tex2page-version* "20191122") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1114,7 +1114,7 @@
       (terror 'get-tex-char-spec "not a char"))))
 
 (defun get-token-as-tex-char-spec ()
-  (let* ((x (get-token))
+  (let* ((x (get-token-or-peeled-group))
          (c0 (char x 0)))
     (when (and (= (catcode c0) **escape**) (> (length x) 1))
       (setq c0 (char x 1)))
@@ -6822,8 +6822,8 @@
               ((char= c #\{)
                (emit #\{) (incf nesting))
               ((char= c #\})
-               (when (= nesting 0) (return))
-               (emit #\}) (decf nesting))
+               (if (= nesting 0) (return)
+                 (progn (emit #\}) (decf nesting))))
               ((char= c #\space)
                (emit (if *verb-visible-space-p* *verbatim-visible-space* #\space)))
               ((char= c #\newline)
@@ -7080,6 +7080,7 @@
   (bgroup)
   (emit "<pre class=verbatim>")
   (let ((*verb-visible-space-p* (eat-star)))
+    (when (string= env "Verbatim") (get-bracketed-text-if-any))
     (when *verb-visible-space-p* (setq env (concatenate 'string env "*")))
     (munched-a-newline-p)
     (let ((*ligatures-p* nil) c)
@@ -9467,6 +9468,8 @@ Try the commands
 
 (tex-def-prim "\\activettchar" #'do-opmac-activettchar)
 
+(tex-def-prim "\\DefineShortVerb" #'do-opmac-activettchar)
+
 (tex-def-prim "\\url" #'do-url)
 (tex-def-prim "\\urlh" #'do-urlh)
 (tex-def-prim "\\urlp" #'do-urlp)
@@ -10575,6 +10578,7 @@ Try the commands
       (do-verbatim-eplain)))
 
 (tex-def-prim "\\verbatim" #'do-verbatim)
+(tex-def-prim "\\Verbatim" (lambda () (do-verbatim-latex "Verbatim")))
 
 (tex-def-prim "\\verbc" #'do-verbc)
 (tex-def-prim "\\verbinput" #'do-opmac-verbinput)

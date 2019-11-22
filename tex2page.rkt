@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
 
 
-(define *tex2page-version* "20190126")
+(define *tex2page-version* "20191122")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -2200,7 +2200,7 @@
    (if n (integer->char n) (terror 'get-tex-char-spec "not a char"))))
 
 (define (get-token-as-tex-char-spec)
- (let ((x (get-token)))
+ (let ((x (get-token-or-peeled-group)))
    (let ((c0 (string-ref x 0)))
      (cond
       ((and (= (catcode c0) **escape**)
@@ -11859,8 +11859,11 @@
                        (fluid-let ((*catcodes* %fluid-var-*catcodes*))
                         (catcode #\\ 0) (do-tex-ctl-seq-completely x)))))))
            ((char=? c #\{) (emit #\{) (set! nesting (+ nesting 1)) nesting)
-           ((char=? c #\}) (cond ((= nesting 0) (return)) (else false))
-            (emit #\}) (set! nesting (- nesting 1)) nesting)
+           ((char=? c #\})
+            (if (= nesting 0)
+                (return)
+                (begin (emit #\})
+                 (begin (set! nesting (- nesting 1)) nesting))))
            ((char=? c #\ )
             (emit (if *verb-visible-space-p* *verbatim-visible-space* #\ )))
            ((char=? c #\newline)
@@ -12262,6 +12265,7 @@
  (emit "<pre class=verbatim>")
  (let ((%fluid-var-*verb-visible-space-p* (eat-star)))
    (fluid-let ((*verb-visible-space-p* %fluid-var-*verb-visible-space-p*))
+    (cond ((string=? env "Verbatim") (get-bracketed-text-if-any)) (else false))
     (cond
      (*verb-visible-space-p*
       (set! env
@@ -15906,6 +15910,8 @@ Try the commands
 
 (tex-def-prim "\\activettchar" do-opmac-activettchar)
 
+(tex-def-prim "\\DefineShortVerb" do-opmac-activettchar)
+
 (tex-def-prim "\\url" do-url)
 
 (tex-def-prim "\\urlh" do-urlh)
@@ -17633,6 +17639,8 @@ Try the commands
      (do-verbatim-eplain)))
 
 (tex-def-prim "\\verbatim" do-verbatim)
+
+(tex-def-prim "\\Verbatim" (lambda () (do-verbatim-latex "Verbatim")))
 
 (tex-def-prim "\\verbc" do-verbc)
 

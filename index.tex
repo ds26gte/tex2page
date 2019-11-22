@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2018-07-03} %last change
+\c{2019-11-22} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -2162,18 +2162,26 @@ makes ‘`@`’ the verbatim escape.
 \index{verbatim@`{verbatim}`}
 \index{path@`\path`}
 \index{activettchar@`\activettchar`}
+\index{DefineShortVerb@`\DefineShortVerb`}
 %
 \TeX2page also understands \LaTeX’s `{verbatim}`
-environment, the `\path` macro from `path.sty`,
-Eplain’s `\verbatim`, and  OPmac’s
-`\activettchar`\f{Setting \verb{\activettchar`} lets you write
+and `{verbatim*}`
+environments, Eplain’s `\verbatim`, the `\path` macro from `path.sty`,
+and the `{Verbatim}` and `{Verbatim*}` environments from
+`fancyvrb.sty`.
+
+It recognizes  `fancyvrb`’s `\DefineShortVerb` and OPmac’s
+`\activettchar`.
+Setting \verb{\DefineShortVerb{\`}} or
+\verb{\activettchar`} lets you write
 \verb+\verb`\c@de_fr&gm%#t$`+
 as simply
 \verb+`\c@de_fr&gm%#t$`+,
-as in AsciiDoc; and
+as in AsciiDoc. Setting
+\verb+\DefineShortVerb{\|}+ or
 \verb+\activettchar|+ lets you write
 \verb+|\c@de_fr&gm%#t$|+,
-as in `manmac`.}.
+as in `manmac`.
 
 \index{begintt@`\begintt`}
 \index{endtt@`\endtt`}

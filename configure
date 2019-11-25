@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Last modified: 2017-01-20
+# Last modified: 2019-11-25
 
 # Set scmxlate to the pathname of scmxlate/scmxlate.scm
 # on your system, if you know it.  Otherwise let
@@ -55,7 +55,7 @@ adieu() {
 
 makeit() {
   case "$dialect" in
-    abcl|allegro|clisp|clozure|cmucl|ecl|mkcl|sbcl-compiled)
+    abcl|allegro|clisp|clozure|cmucl|ecl|mkcl|sbcl|sbcl-compiled)
     :;;
     #bigloo|chez|chibi|chicken|gambit|gauche|guile|mitscheme|petite|plt|scm|sxm)
     chez|chicken|gambit|gauche|guile|petite|plt)
@@ -73,7 +73,7 @@ makeit() {
     --eval '(sb-ext:quit)'
     rm tex2page.fasl;;
 
-    abcl|allegro|clisp|clozure|cmucl|ecl|mkcl)
+    abcl|allegro|clisp|clozure|cmucl|ecl|mkcl|sbcl)
     echo \":\"\; export LISP=$dialect > my-tex2page
     cat tex2page.lisp >> my-tex2page;;
 
@@ -213,9 +213,6 @@ then
   if test "$dialect" = "racket"
   then 
     cp -p tex2page.rkt my-tex2page
-  elif test "$dialect" = "sbcl" 
-  then
-    cp -p tex2page.lisp my-tex2page
   elif test "$dialect" = "guile" -a -f ./dialects/make-guile-version
   then
     ./dialects/make-guile-version

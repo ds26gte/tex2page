@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20191122") ;last change
+(defparameter *tex2page-version* "20191125") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -81,10 +81,10 @@
           (setq p (subseq p (1+ i))))))))
 
 (defun system-with-visual (cmd)
-  (cond ((and (not 'nil) (or #+ecl t #+mkcl t))
-         (let ((s (string=split cmd #\space)))
-           (#+ecl ext:run-program #+mkcl mkcl:run-program
-            (car s) (cdr s) :input t :output t)))
+  (cond #+(or ecl mkcl)
+        (t (let ((s (string=split cmd #\space)))
+             (#+ecl ext:run-program #+mkcl mkcl:run-program
+              (car s) (cdr s) :input t :output t)))
         (t (system cmd))))
 
 (defparameter *tex2page-file-arg*

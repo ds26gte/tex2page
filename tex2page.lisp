@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20191125") ;last change
+(defparameter *tex2page-version* "20200131") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -6520,27 +6520,26 @@
                    (when (null tmplt)
                      (terror 'expand-halign-line "Eof in \\halign"))
                    (let ((y (car tmplt)))
-                     (case y
-                       ((nil) (emit "<td>")
-                              (tex2page-string
-                                (concatenate 'string r "}"))
-                              (when (and (string= x "\\cr")
-                                         (string= ins " "))
-                                (emit-nbsp 1))
-                              (emit "</td>")
-                              (if (string= x "\\cr")
-                                  (progn (emit "</tr>")
-                                         (emit-newline)
-                                         (setq outer-loop-done t)
-                                         (return))
-                                  (progn (pop tmplt)
-                                         (setq ins " ") ; or ""?
-                                         (return))))
-                       ((t)
-                        (pop tmplt)
-                        (setq r (concatenate 'string r ins)))
-                       (t (pop tmplt)
-                          (setq r (concatenate 'string r y))))))))
+                     (cond ((not y) (emit "<td>")
+                                    (tex2page-string
+                                      (concatenate 'string r "}"))
+                                    (when (and (string= x "\\cr")
+                                               (string= ins " "))
+                                      (emit-nbsp 1))
+                                    (emit "</td>")
+                                    (if (string= x "\\cr")
+                                        (progn (emit "</tr>")
+                                               (emit-newline)
+                                               (setq outer-loop-done t)
+                                               (return))
+                                        (progn (pop tmplt)
+                                               (setq ins " ") ; or ""?
+                                               (return))))
+                           ((eq y t)
+                            (pop tmplt)
+                            (setq r (concatenate 'string r ins)))
+                           (t (pop tmplt)
+                              (setq r (concatenate 'string r y))))))))
               (t (setq ins
                        (concatenate 'string ins x))))))))
 
@@ -7423,7 +7422,7 @@
 (defun do-cr (z)
   (declare (string z))
   (ignorespaces)
-  (case (car *tabular-stack*)
+  (case (and (consp *tabular-stack*) (car *tabular-stack*))
     (:tabular
      (get-bracketed-text-if-any)
      (egroup)

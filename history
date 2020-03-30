@@ -1,4 +1,9 @@
-Last change 2020-01-31
+Last change 2020-03-29
+
+2020 Mar 29
+
+If LaTeX format can be determined (which it will before second run), do not render preamble 
+(stuff before \begin{document}).
 
 2020 Jan 31
 

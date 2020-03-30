@@ -282,10 +282,10 @@
       (else ""))
     htmlcolor)))
 
-;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20170126, ecl.
+;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20200201, ecl.
 
 
-(define *tex2page-version* "20200131")
+(define *tex2page-version* "20200329")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -533,6 +533,8 @@
 (define *dotted-counters* false)
 
 (define *dumping-nontex-p* false)
+
+(define *emit-enabled-p* true)
 
 (define *equation-number* false)
 
@@ -2504,19 +2506,28 @@
  (ostream*-hbuffer op) (get-output-string (ostream*-stream op)))
 
 (define (emit s)
- (let ((p (ostream*-stream *html*)))
-   (for-each (lambda (x) (display x p)) (reverse (ostream*-hbuffer *html*)))
-   (set!ostream*-hbuffer *html* null)
-   (ostream*-hbuffer *html*)
-   (display s p)))
+ (cond
+  (*emit-enabled-p*
+   (let ((p (ostream*-stream *html*)))
+     (for-each (lambda (x) (display x p)) (reverse (ostream*-hbuffer *html*)))
+     (set!ostream*-hbuffer *html* null)
+     (ostream*-hbuffer *html*)
+     (display s p)))
+  (else false)))
 
 (define (emit-space s)
- (set!ostream*-hbuffer *html* (cons s (ostream*-hbuffer *html*)))
- (ostream*-hbuffer *html*))
+ (cond
+  (*emit-enabled-p*
+   (set!ostream*-hbuffer *html* (cons s (ostream*-hbuffer *html*)))
+   (ostream*-hbuffer *html*))
+  (else false)))
 
 (define (emit-newline)
- (set!ostream*-hbuffer *html* (cons #\newline (ostream*-hbuffer *html*)))
- (ostream*-hbuffer *html*))
+ (cond
+  (*emit-enabled-p*
+   (set!ostream*-hbuffer *html* (cons #\newline (ostream*-hbuffer *html*)))
+   (ostream*-hbuffer *html*))
+  (else false)))
 
 (define (emit-html-char c)
  (cond
@@ -4213,6 +4224,11 @@
 (define (do-documentclass) (probably-latex) (get-bracketed-text-if-any)
  (let ((x (get-peeled-group)))
    (cond ((member x '("report" "book")) (!using-chapters)) (else false))))
+
+(define (do-document) (probably-latex)
+ (cond
+  ((eqv? *tex-format* ':latex) (set! *emit-enabled-p* true) *emit-enabled-p*)
+  (else false)))
 
 (define (get-till-par)
  (let ((r null) (newline-p false))
@@ -6126,6 +6142,10 @@
 (define (show-missing-pieces)
  (cond
   ((not (null? *missing-pieces*)) (write-log ':separation-newline)
+   (cond
+    ((member ':tex-format *missing-pieces*)
+     (write-log "TeX format not determined") (write-log ':separation-newline))
+    (else false))
    (cond
     ((member ':document-title *missing-pieces*)
      (write-log "Document title not determined")
@@ -14057,6 +14077,9 @@
     ((file-exists? aux-file) (load-tex2page-data-file aux-file)
      (delete-file aux-file))
     (else false)))
+ (cond
+  ((eqv? *tex-format* ':latex) (set! *emit-enabled-p* false) *emit-enabled-p*)
+  (else false))
  (start-css-file)
  (cond
   ((not (null? *toc-list*)) (set! *toc-list* (reverse *toc-list*)) *toc-list*)
@@ -14089,7 +14112,13 @@
 (define (probably-latex)
  (cond
   ((null? *tex-env*) (set! *latex-probability* (+ *latex-probability* 1))
-   (cond ((>= *latex-probability* 2) (definitely-latex)) (else false)))
+   (cond
+    ((>= *latex-probability* 2)
+     (cond
+      ((not (eqv? *tex-format* ':latex)) (flag-missing-piece ':tex-format))
+      (else false))
+     (definitely-latex))
+    (else false)))
   (else false)))
 
 (define definitely-latex
@@ -17003,7 +17032,7 @@ Try the commands
 (tex-def-prim "\\displaymath"
  (lambda () (do-latex-env-as-image "displaymath" ':display)))
 
-(tex-def-prim "\\document" probably-latex)
+(tex-def-prim "\\document" do-document)
 
 (tex-def-prim "\\documentclass" do-documentclass)
 
@@ -18014,7 +18043,7 @@ Try the commands
    (*color-names* null) (*css-stream* false) (*current-source-file* false)
    (*current-tex2page-input* false) (*display-justification* "centerline")
    (*doctype* *doctype*) (*dotted-counters* (make-table ':test equal?))
-   (*dumping-nontex-p* false) (*equation-number* false)
+   (*dumping-nontex-p* false) (*emit-enabled-p* true) (*equation-number* false)
    (*equation-numbered-p* true) (*equation-position* 0) (*esc-char-verb* #\|)
    (*eval-for-tex-only-p* false)
    (*external-label-tables* (make-table ':test equal?)) (*footnote-list* null)

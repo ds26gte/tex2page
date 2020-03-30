@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20200131") ;last change
+(defparameter *tex2page-version* "20200329") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -266,6 +266,7 @@
 (defvar *dotted-counters* nil)
 (defvar *dumping-nontex-p* nil)
 
+(defvar *emit-enabled-p* t)
 (defvar *equation-number* nil)
 (defvar *equation-numbered-p* t)
 (defvar *equation-position* 0)
@@ -1282,17 +1283,20 @@
   (get-output-stream-string (ostream*-stream op)))
 
 (defun emit (s)
-  (let ((p (ostream*-stream *html*)))
-    (mapc (lambda (x) (princ x p))
-          (nreverse (ostream*-hbuffer *html*)))
-    (setf (ostream*-hbuffer *html*) '())
-    (princ s p)))
+  (when *emit-enabled-p*
+    (let ((p (ostream*-stream *html*)))
+      (mapc (lambda (x) (princ x p))
+            (nreverse (ostream*-hbuffer *html*)))
+      (setf (ostream*-hbuffer *html*) '())
+      (princ s p))))
 
 (defun emit-space (s)
-  (push s (ostream*-hbuffer *html*)))
+  (when *emit-enabled-p*
+    (push s (ostream*-hbuffer *html*))))
 
 (defun emit-newline ()
-  (push #\newline (ostream*-hbuffer *html*)))
+  (when *emit-enabled-p*
+    (push #\newline (ostream*-hbuffer *html*))))
 
 (defun emit-html-char (c)
   (unless (not c)
@@ -2535,6 +2539,11 @@
       ;(write-aux '(!using-chapters))
       )))
 
+(defun do-document ()
+  (probably-latex)
+  (when (eql *tex-format* :latex)
+    (setq *emit-enabled-p* t)))
+
 (defun get-till-par ()
   (let ((r '()) (newline-p nil))
     (loop
@@ -3712,6 +3721,9 @@
 (defun show-missing-pieces ()
   (unless (null *missing-pieces*)
     (write-log :separation-newline)
+    (when (member :tex-format *missing-pieces*)
+      (write-log "TeX format not determined")
+      (write-log :separation-newline))
     (when (member :document-title *missing-pieces*)
       (write-log "Document title not determined")
       (write-log :separation-newline))
@@ -8388,6 +8400,8 @@
     (when (probe-file aux-file)
       (load-tex2page-data-file aux-file)
       (delete-file aux-file)))
+  (when (eql *tex-format* :latex)
+    (setq *emit-enabled-p* nil))
   (start-css-file)
   (unless (null *toc-list*) (setq *toc-list* (nreverse *toc-list*)))
   (unless (null *stylesheets*) (setq *stylesheets* (nreverse *stylesheets*)))
@@ -8410,7 +8424,10 @@
 (defun probably-latex ()
   (when (null *tex-env*)
     (incf *latex-probability* 1)
-    (when (>= *latex-probability* 2) (definitely-latex))))
+    (when (>= *latex-probability* 2)
+      (unless (eql *tex-format* :latex)
+        (flag-missing-piece :tex-format))
+      (definitely-latex))))
 
 (let ((already-noted-p nil))
   (defun definitely-latex ()
@@ -10301,7 +10318,7 @@ Try the commands
     (emit "<dl><dt></dt><dd>")))
 (tex-def-prim "\\displaymath"
  (lambda () (do-latex-env-as-image "displaymath" :display)))
-(tex-def-prim "\\document" #'probably-latex)
+(tex-def-prim "\\document" #'do-document)
 (tex-def-prim "\\documentclass" #'do-documentclass)
 (tex-def-prim "\\dontuseimgforhtmlmath" (lambda () (tex-def-0arg "\\TZPmathtext" "1"))) ;obsolete
 (tex-def-prim "\\dontuseimgforhtmlmathdisplay" (lambda () (tex-def-0arg "\\TZPmathtext" "1"))) ;obsolete
@@ -10876,6 +10893,7 @@ Try the commands
         (*dotted-counters* (make-hash-table :test #'equal))
         (*dumping-nontex-p* nil)
         ;
+        (*emit-enabled-p* t)
         (*equation-number* nil)
         (*equation-numbered-p* t)
         (*equation-position* 0)

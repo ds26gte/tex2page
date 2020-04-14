@@ -1,4 +1,4 @@
-":";exec racket -f $0 -m -- "$@"
+":";exec racket -f $0 -- "$@"
   
 (require mzlib/process)
 
@@ -18168,4 +18168,6 @@ Try the commands
    (else (tex2page-help tex-file)))
   (output-stats)))
 
-(define (main . args) (tex2page (and (>= (length args) 1) (list-ref args 0))))
+(tex2page
+ (let ((args (current-command-line-arguments)))
+   (and (> (vector-length args) 0) (vector-ref args 0))))

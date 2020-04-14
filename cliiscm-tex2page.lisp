@@ -1,7 +1,7 @@
-;last modified 2017-01-28
+;last modified 2020-04-14
 
 (cliiscm-insert
-  "\":\";exec racket -f $0 -m -- \"$@\"
+  "\":\";exec racket -f $0 -- \"$@\"
   ")
 
 (require mzlib/process)
@@ -12,7 +12,6 @@
 
   defpackage
   in-package
-;  sb-alien:define-alien-routine
   tex2page
   trace
 
@@ -376,10 +375,9 @@
 
 (cliiscm-postamble)
 
-(define (main . args)
-  (tex2page
-    (and (>= (length args) 1)
-         (list-ref args 0))))
+(tex2page
+  (let ((args (current-command-line-arguments)))
+    (and (> (vector-length args) 0) (vector-ref args 0))))
 
 (cliiscm-postprocess
   (cliiscm-system "cp my-tex2page.lisp tex2page.rkt")

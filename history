@@ -1,4 +1,9 @@
-Last change 2020-03-29
+Last change 2020-04-14
+
+2020 Apr 14
+
+tex2page.rkt: Simplify #! line: avoid -m; use (current-command-line-arguments)
+in body of code instead.
 
 2020 Mar 29
 

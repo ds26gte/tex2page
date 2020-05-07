@@ -34,14 +34,26 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20200329") ;last change
+(defparameter *tex2page-version* "20200506") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
   "http://ds26gte.github.io/tex2page/index.html")
 
+(defmacro string-append (&rest ss)
+  `(concatenate 'string ,@ss))
+
+(defmacro list->string (L)
+  `(concatenate 'string ,L))
+
+(defmacro string->list (s)
+  `(concatenate 'list ,s))
+
+(defmacro string-length (s)
+  `(length ,s))
+
 (defparameter *tex2page-copyright-notice*
-  (concatenate 'string "Copyright (C) 1997-"
+  (string-append "Copyright (C) 1997-"
     (subseq *tex2page-version* 0 4) " Dorai Sitaram"))
 
 (defun retrieve-env (s)
@@ -98,7 +110,7 @@
       (retrieve-env "T2PARG")))
 
 (defparameter *common-lisp-version*
-  (concatenate 'string (lisp-implementation-type) " "
+  (string-append (lisp-implementation-type) " "
                (lisp-implementation-version) " "
                #+linux "Linux"
                #+cygwin "Cygwin"
@@ -191,7 +203,7 @@
   '("\\csname" "\\else" "\\end" "\\eval" "\\fi" "\\let"))
 
 (defparameter *tex-logo*
-  (concatenate 'string "T" "<span style=\""
+  (string-append "T" "<span style=\""
     "position: relative; "
     "top: 0.5ex; "
     "margin-left: -0.1667em; "
@@ -455,7 +467,7 @@
 
 (defun gen-temp-string ()
   (incf *temp-string-count*)
-  (concatenate 'string "Temp_" (write-to-string *temp-string-count*)))
+  (string-append "Temp_" (write-to-string *temp-string-count*)))
 
 (defun file-stem-name (f)
   (declare (string f))
@@ -477,26 +489,26 @@
 
 (defun write-aux (e)
   (unless *aux-stream*
-    (let ((f (concatenate 'string *aux-dir/* *jobname* *aux-file-suffix*)))
+    (let ((f (string-append *aux-dir/* *jobname* *aux-file-suffix*)))
       (setq *aux-stream* (open f :direction :output :if-exists :supersede))))
   (prin1 e *aux-stream*) (terpri *aux-stream*))
 
 (defun write-label (e)
   (unless *label-stream*
-    (let ((f (concatenate 'string *aux-dir/* *jobname* *label-file-suffix*)))
+    (let ((f (string-append *aux-dir/* *jobname* *label-file-suffix*)))
       (setq *label-stream* (open f :direction :output :if-exists :supersede))))
   (prin1 e *label-stream*)
   (terpri *label-stream*))
 
 (defun write-bib-aux (x)
   (unless *bib-aux-stream*
-    (let ((f (concatenate 'string *aux-dir/* *jobname* *bib-aux-file-suffix* ".aux")))
+    (let ((f (string-append *aux-dir/* *jobname* *bib-aux-file-suffix* ".aux")))
       (setq *bib-aux-stream* (open f :direction :output :if-exists :supersede))))
   (princ x *bib-aux-stream*))
 
 (defun write-log (x &optional log-file-only-p)
   (unless *log-stream*
-    (setq *log-file* (concatenate 'string *aux-dir/* *jobname* ".hlog")
+    (setq *log-file* (string-append *aux-dir/* *jobname* ".hlog")
           *log-stream* (open *log-file* :direction :output :if-exists :supersede)))
   (when (and *write-log-possible-break-p* (characterp x)
              (member x '(#\) #\] #\} #\,) :test #'char=))
@@ -527,8 +539,8 @@
          (incf *write-log-index*
                (typecase x
                  (character 1)
-                 (number (length (write-to-string x)))
-                 (string (length x))
+                 (number (string-length (write-to-string x)))
+                 (string (string-length x))
                  (t 1)))))))
 
 ;(trace write-log)
@@ -591,14 +603,14 @@
             (when texedit-string
               (cond ((setq *it* (search "%d" texedit-string))
                      (let ((i *it*))
-                       (setq texedit-string (concatenate 'string (subseq texedit-string 0 i)
+                       (setq texedit-string (string-append (subseq texedit-string 0 i)
                                               (write-to-string *input-line-no*)
                                               (subseq texedit-string (+ i 2))))))
                     (t (setq ill-formed-texedit-p t texedit-string nil))))
             (when texedit-string
               (cond ((setq *it* (search "%s" texedit-string))
                      (let ((i *it*))
-                       (setq texedit-string (concatenate 'string (subseq texedit-string 0 i)
+                       (setq texedit-string (string-append (subseq texedit-string 0 i)
                                               *current-source-file*
                                               (subseq texedit-string (+ i 2))))))
                     (t (setq ill-formed-texedit-p t texedit-string nil))))
@@ -609,7 +621,7 @@
               (when (setq *it* (or (retrieve-env "EDITOR") "vi"))
                 (let ((e *it*))
                   (setq texedit-string
-                        (concatenate 'string e
+                        (string-append e
                           " +" (write-to-string *input-line-no*)
                           " " *current-source-file*)))))
             (when texedit-string
@@ -670,7 +682,7 @@
 
 (defun call-with-input-string/buffered (s th)
   (declare (string s) (function th))
-  (let ((*current-tex2page-input* (make-istream* :buffer (concatenate 'list s)))
+  (let ((*current-tex2page-input* (make-istream* :buffer (string->list s)))
         (*input-line-no* *input-line-no*))
     (funcall th)))
 
@@ -696,7 +708,7 @@
 (defun toss-back-string (s)
   (declare (string s))
   (setf (istream*-buffer *current-tex2page-input*)
-        (nconc (concatenate 'list s)
+        (nconc (string->list s)
                (istream*-buffer *current-tex2page-input*))))
 
 (defun toss-back-char (c)
@@ -730,9 +742,9 @@
   (let ((r '()))
     (loop (let ((c (get-actual-char)))
             (cond ((not c)
-                   (return (if r (concatenate 'string (nreverse r)) c)))
+                   (return (if r (list->string (nreverse r)) c)))
                   ((char= c #\newline)
-                   (return (concatenate 'string (nreverse r))))
+                   (return (list->string (nreverse r))))
                   (t (push c r)))))))
 
 (defun char-whitespace-p (c)
@@ -810,7 +822,7 @@
       (cond ((not c) "\\ ")
             ((= (catcode c) **ignore**) "\\ ")
             ((= (catcode c) **letter**)
-             (concatenate 'string
+             (list->string
                (nreverse
                  (let ((s (list c #\\)))
                    (loop
@@ -822,7 +834,7 @@
                               (push c s))
                              (t (ignorespaces :stop-before-first-newline)
                                 (return s)))))))))
-            (t (concatenate 'string (list #\\ c)))))))
+            (t (list->string (list #\\ c)))))))
 
 ;(trace get-ctl-seq)
 
@@ -831,7 +843,7 @@
 
 (defun if-aware-ctl-seq-p (z)
   (or (member z *if-aware-ctl-seqs* :test #'string=)
-      (and (>= (length z) 3) (char= (char z 1) #\i) (char= (char z 2) #\f))
+      (and (>= (string-length z) 3) (char= (char z 1) #\i) (char= (char z 2) #\f))
       (let ((z-th (find-corresp-prim-thunk z)))
         (if (stringp z-th) nil
             (some (lambda (y) (eq z-th (find-corresp-prim-thunk y)))
@@ -855,10 +867,10 @@
                              (toss-back-char c)
                              (let ((x (get-ctl-seq)))
                                (cond ((member x '("\\ " "\\{" "\\}") :test #'string=)
-                                      (concatenate 'string
+                                      (list->string
                                         (list (char x 1))))
                                      (t (tex-string-to-html-string x)))))))
-                       (setq s (nconc (nreverse (concatenate 'list s1)) s)
+                       (setq s (nconc (nreverse (string->list s1)) s)
                              escape-p nil))
                    (progn (push c s)
                           (setq escape-p t))))
@@ -872,7 +884,7 @@
                    (setq escape-p nil))))))))
 
 (defun get-group ()
-  (concatenate 'string (nreverse (get-group-as-reversed-chars))))
+  (list->string (nreverse (get-group-as-reversed-chars))))
 
 (defun string-trim-blanks (s)
   (string-trim '(#\space #\Tab #\newline #\Return) s))
@@ -892,7 +904,7 @@
                           (get-actual-char) (push c s))
                          ((and (consp s) (char= c #\}))
                           (get-actual-char)
-                          (return (concatenate 'string (nreverse s))))
+                          (return (list->string (nreverse s))))
                          (t (mapc #'toss-back-char s)
                             (toss-back-char #\{)
                             (return nil))))))))))
@@ -905,8 +917,7 @@
     (if (or (not c) (not (char= c #\[))) nil
       (progn
        (get-actual-char)
-       (concatenate
-        'string
+       (list->string
         (nreverse
          (let ((s '()) (nesting 0) (escape-p nil))
            (loop
@@ -928,7 +939,7 @@
                      (t (push c s))))))))))))
 
 (defun ungroup (s)
-  (let* ((n (length s))
+  (let* ((n (string-length s))
          (n-1 (1- n)))
     (if (and (>= n 2)
              (char= (char s 0) #\{)
@@ -954,8 +965,7 @@
     (let ((c (snoop-actual-char)))
       (if (and (characterp c) (char= c #\{)) (get-actual-char)
           (setq bracedp nil))))
-  (concatenate
-    'string
+  (list->string
     (nreverse
       (let ((s '()))
         (loop
@@ -973,7 +983,7 @@
                    (let ((x (get-ctl-seq)))
                      (if (string= x "\\jobname")
                          (setq s (nconc (reverse
-                                          (concatenate 'list *jobname*)) s))
+                                          (string->list *jobname*)) s))
                          (progn
                            (toss-back-char *invisible-space*)
                            (toss-back-string x)
@@ -988,7 +998,7 @@
 
 (defun get-word ()
   (ignorespaces)
-  (concatenate 'string
+  (list->string
     (nreverse (let ((s '()))
                 (loop (let ((c (snoop-actual-char)))
                         (cond ((not c) (return s))
@@ -1013,7 +1023,7 @@
       (push c s))
     (when (consp s)
       (string-to-number
-        (concatenate 'string (nreverse s)) base))))
+        (list->string (nreverse s)) base))))
 
 (defun get-real ()
   (ignorespaces)
@@ -1031,7 +1041,7 @@
                 (t (ignorespaces)
                    (return)))))
       (if s
-          (let ((n (read-from-string (concatenate 'string (nreverse s)))))
+          (let ((n (read-from-string (list->string (nreverse s)))))
             (if minusp (- n) n))
           nil))))
 
@@ -1082,7 +1092,7 @@
         ((find-dimen x))
         ;not sure about following
         ((setq *it* (resolve-defs x)) (char-code (char *it* 0)))
-        ((= (length x) 2) (char-code (char x 1)))
+        ((= (string-length x) 2) (char-code (char x 1)))
         (t (string-to-number x))))
 
 (defun get-number-or-false ()
@@ -1117,7 +1127,7 @@
 (defun get-token-as-tex-char-spec ()
   (let* ((x (get-token-or-peeled-group))
          (c0 (char x 0)))
-    (when (and (= (catcode c0) **escape**) (> (length x) 1))
+    (when (and (= (catcode c0) **escape**) (> (string-length x) 1))
       (setq c0 (char x 1)))
     c0))
 
@@ -1127,7 +1137,7 @@
     (when (or (not c) (not (char= c #\{)))
       (terror 'get-url "Missing {"))
     (string-trim-blanks
-     (concatenate 'string
+     (list->string
        (nreverse
         (let ((nesting 0) (s '()))
           (loop
@@ -1165,7 +1175,7 @@
                        (toss-back-char c) (return s))
                       (t (push c s))))))))
     (when (not (null rev-lbl))
-      (concatenate 'string (nreverse rev-lbl)))))
+      (list->string (nreverse rev-lbl)))))
 
 ;functions for reading TeX tokens.  Token isn't really the right name.
 ;It's more like a TeX sexpr (texpr?), i.e. something that is treated as
@@ -1176,7 +1186,7 @@
     (cond ((not c) c)
           ((= (catcode c) **escape**)
            (get-ctl-seq))
-          (t (concatenate 'string (list (get-actual-char)))))))
+          (t (list->string (list (get-actual-char)))))))
 
 (defun get-raw-token/is ()
   (ignorespaces)
@@ -1185,7 +1195,7 @@
           ((= (catcode c) **escape**) (get-ctl-seq))
           ((= (catcode c) **comment**) (eat-till-eol)
            (get-raw-token/is))
-          (t (concatenate 'string (list (get-actual-char)))))))
+          (t (list->string (list (get-actual-char)))))))
 
 (defun get-token ()
   (ignorespaces)
@@ -1195,7 +1205,7 @@
           ((char= c #\{) (get-group))
           ((= (catcode c) **comment**) (eat-till-eol)
            (get-token))
-          (t (concatenate 'string (list (get-actual-char)))))))
+          (t (list->string (list (get-actual-char)))))))
 
 (defun get-token/ps ()
   ; preserve space
@@ -1204,13 +1214,13 @@
           ((= (catcode c) **escape**) (get-ctl-seq))
           ((char= c #\{) (get-group))
           ((= (catcode c) **comment**) (eat-till-eol) (get-token/ps))
-          (t (concatenate 'string (list (get-actual-char)))))))
+          (t (list->string (list (get-actual-char)))))))
 
 (defun eat-word (word)
   (declare (string word))
   (ignorespaces)
   (let ((r '()))
-    (dotimes (i (length word) t)
+    (dotimes (i (string-length word) t)
       (let ((c (snoop-actual-char)))
         (cond ((char= c (char word i)) (get-actual-char) (push c r))
               (t (mapc #'toss-back-char r)
@@ -1253,7 +1263,7 @@
     (get-number)))
 
 (defun scm-get-token ()
-  (concatenate 'string
+  (list->string
     (nreverse
       (let ((s '()) (esc-p nil) c)
         (loop
@@ -1312,7 +1322,7 @@
 
 (defun emit-html-string (s)
   (declare (string s))
-  (dotimes (i (length s))
+  (dotimes (i (string-length s))
     (emit-html-char (char s i))))
 
 (defun do-unskip ()
@@ -1334,7 +1344,7 @@
 ;;
 
 (defun kern (len)
-  (concatenate 'string "<span style=\"margin-left: "
+  (string-append "<span style=\"margin-left: "
     ;in following, tried &#x200c; (= zwnj) instead of space,
     ;but it causes table-row fault
     len "\"> </span>"))
@@ -1354,7 +1364,7 @@
         (cond ((member cs '("\\hbox" "\\vbox" "\\vtop") :test #'string=)
                (let* ((box-caller (get-till-char #\{))
                       (box-content (get-group)))
-                 (setq s (concatenate 'string cs box-caller box-content))))
+                 (setq s (string-append cs box-caller box-content))))
               ((string= cs "\\box")
                (setq s (read-box-string (get-number))))
               ((string= cs "\\copy")
@@ -1414,7 +1424,7 @@
      (lambda ()
        (let ((res (html-output-stream-to-string *html*)))
          (setq res
-               (concatenate 'string
+               (string-append
                  "<table><tr><td class=centerline>"
                  res
                  "</td></tr></table>"))
@@ -1424,7 +1434,7 @@
                       (evenp *math-height*))
              (incf *math-height*))
            (setq res
-                 (concatenate 'string
+                 (string-append
                    "<table><tr><td>"
                    (tex-math-delim-string *math-delim-left*)
                    "</td><td>"
@@ -1549,7 +1559,7 @@
 
 (defun tex-def-pat-prim (prim argstr rhs)
   (declare (string prim argstr rhs))
-  (tex-def prim (concatenate 'list argstr) rhs nil nil nil nil *primitive-texframe*))
+  (tex-def prim (string->list argstr) rhs nil nil nil nil *primitive-texframe*))
 
 (defun tex-defsym-prim (prim str)
   (declare (string prim str))
@@ -2126,7 +2136,7 @@
   (let ((*outputting-external-title-p* t))
     (bgroup)
     (let ((s (tex-string-to-html-string
-              (concatenate 'string "\\let\\\\\\ignorespaces"
+              (string-append "\\let\\\\\\ignorespaces"
                 "\\def\\resizebox#1#2#3{}"
                 "\\let\\thanks\\TIIPgobblegroup"
                 "\\let\\urlh\\TIIPgobblegroup " title))))
@@ -2146,7 +2156,7 @@
   (declare (string title))
   (emit "<h1 class=title>")
   (bgroup)
-  (tex2page-string (concatenate 'string "\\let\\\\\\break " title))
+  (tex2page-string (string-append "\\let\\\\\\break " title))
   (egroup)
   (emit "</h1>")
   (do-noindent)
@@ -2239,7 +2249,7 @@
   (do-end-para)
   (bgroup)
   (tex2page-string
-   (concatenate 'string "\\let\\\\\\break" "\\let\\and\\break"
+   (string-append "\\let\\\\\\break" "\\let\\and\\break"
                 "\\let\\thanks\\symfootnote"))
   (output-title "\\TIIPtitle")
   (do-para)
@@ -2278,7 +2288,7 @@
                         (return))
                        (t (push (expand-ctl-seq-into-string x) r)))))
               (t (get-actual-char)
-                 (push (concatenate 'string (list c)) r)))))))
+                 (push (list->string (list c)) r)))))))
 
 (defun do-saved-csname ()
   (let ((x (get-peeled-group)))
@@ -2300,7 +2310,7 @@
       (emit "<style>") (emit-newline)
       (emit *basic-style*)
       (emit "</style>") (emit-newline))
-    (funcall link-it (concatenate 'string *jobname* *css-file-suffix*))))
+    (funcall link-it (string-append *jobname* *css-file-suffix*))))
 
 (defun link-scripts ()
   (let ((link-it (lambda (jsf)
@@ -2346,13 +2356,13 @@
         (let ((outermost-secnum
                (let ((n (gethash i *section-counters* 0)))
                  (if *inside-appendix-p*
-                     (concatenate 'string
+                     (list->string
                                   (list (code-char (+ (char-code #\A) -1 n))))
                      (write-to-string n)))))
           (let ((i (1+ i)) (r outermost-secnum))
             (loop
               (when (> i seclvl) (return r))
-              (setq r (concatenate 'string r "."
+              (setq r (string-append r "."
                                    (write-to-string
                                      (gethash i *section-counters* 0))))
               (incf i)))))))
@@ -2363,7 +2373,7 @@
         ((string= s "\\part") -1)
         ((string= s "\\chapter") 0)
         ;optional [...] after section commands?
-        (t (let ((n (length s)))
+        (t (let ((n (string-length s)))
              (cond ((< n 8) nil)
                    ((and (>= n 10) (string= (subseq s (- n 9)) "paragraph"))
                     (let ((n-9 (- n 9)) (i 1) (i+3 4) (k 4))
@@ -2418,7 +2428,7 @@
           (if nonum-p "IGNORE" (section-counter-value seclvl))))
   (let* ((htmlnum (max 1 (min 6 (if *using-chapters-p* (1+ seclvl) seclvl))))
          (lbl
-          (concatenate 'string *html-node-prefix*
+          (string-append *html-node-prefix*
             (case seclvl ((-1) "part") ((0) "chap") (t "sec")) "_"
             (if nonum-p (gen-temp-string) lbl-val))))
     (unless nil
@@ -2448,7 +2458,7 @@
                (progn
                  (when write-to-toc-p
                    (emit-page-node-link-start *toc-page*
-                                              (concatenate 'string *html-node-prefix* "toc_" lbl)))
+                                              (string-append *html-node-prefix* "toc_" lbl)))
                  (tex2page-string "\\partname")
                  (emit " ")
                  (emit lbl-val)
@@ -2462,7 +2472,7 @@
                (progn
                  (when write-to-toc-p
                    (emit-page-node-link-start *toc-page*
-                                              (concatenate 'string *html-node-prefix* "toc_" lbl)))
+                                              (string-append *html-node-prefix* "toc_" lbl)))
                  (tex2page-string
                    (if *inside-appendix-p* "\\appendixname" "\\chaptername"))
                  (emit " ")
@@ -2472,7 +2482,7 @@
            (emit-newline))))
       (when write-to-toc-p
         (emit-page-node-link-start *toc-page*
-                                   (concatenate 'string *html-node-prefix* "toc_" lbl)))
+                                   (string-append *html-node-prefix* "toc_" lbl)))
       (unless (or (and (eql *tex-format* :latex) (<= seclvl 0)) nonum-p)
         (emit lbl-val) (emit-nbsp 2))
       (emit header)
@@ -2509,7 +2519,7 @@
 (defun do-write-to-toc-aux (seclvl secnum sectitle)
   (declare (fixnum seclvl) (string secnum sectitle))
   (let ((node-name
-         (concatenate 'string *html-node-prefix* "sec_"
+         (string-append *html-node-prefix* "sec_"
                       (if (string= secnum "") (gen-temp-string) secnum))))
     (tex-def-0arg "\\TIIPcurrentnodename" node-name)
     (tex-def-0arg "\\@currentlabel" secnum)
@@ -2550,7 +2560,7 @@
       (let ((c (get-actual-char)))
         (cond ((or (not c)
                    (and newline-p (char= c #\newline)))
-               (return (concatenate 'string (nreverse r))))
+               (return (list->string (nreverse r))))
               (newline-p
                 (unless (char-whitespace-p c)
                   (push #\space r)
@@ -2612,10 +2622,10 @@
   (let* ((counter (gethash name *dotted-counters*))
          (new-value (1+ (counter*-value counter))))
     (setf (counter*-value counter) new-value)
-    (let ((num (concatenate 'string
+    (let ((num (string-append
                             (let ((sec-num (counter*-within counter)))
                               (if sec-num
-                                (concatenate 'string
+                                (string-append
                                              (section-counter-value sec-num)
                                              ".")
                                 ""))
@@ -2707,7 +2717,7 @@
            (setq *math-mode-p* t
                  *in-display-math-p* t)
            (let ((eqn-tag
-                  (concatenate 'string *html-node-prefix* "eqn_" (gen-temp-string))))
+                  (string-append *html-node-prefix* "eqn_" (gen-temp-string))))
              (tex-def-0arg "\\TIIPcurrentnodename" eqn-tag)
              (emit-anchor eqn-tag)
              (emit-newline)
@@ -2776,14 +2786,14 @@
     (emit " ")))
 
 (defun do-toc ()
-  (let ((*subjobname* (concatenate 'string *jobname* *toc-file-suffix*))
+  (let ((*subjobname* (string-append *jobname* *toc-file-suffix*))
         (*img-file-count* 0)
         (*imgdef-file-count* 0))
     (when (eql *tex-format* :latex)
       (tex2page-string
        (if *using-chapters-p* "\\chapter*{\\contentsname}"
          "\\section*{\\contentsname}")))
-    (emit-anchor (concatenate 'string *html-node-prefix* "toc"))
+    (emit-anchor (string-append *html-node-prefix* "toc"))
     (!toc-page *html-page-count*)
     (write-aux `(!toc-page ,*html-page-count*))
     (cond ((null *toc-list*) (flag-missing-piece :toc)
@@ -2812,7 +2822,7 @@
                       (emit-newline))
                     (indent-n-levels lvl)
                     (emit-anchor
-                     (concatenate 'string *html-node-prefix* "toc_" seclabel))
+                     (string-append *html-node-prefix* "toc_" seclabel))
                     (emit-page-node-link-start (tocentry*-page x) seclabel)
                     (unless (or (string= secnum "") (string= secnum "IGNORE"))
                       (emit secnum)
@@ -2824,7 +2834,7 @@
                     (emit "<br>")
                     (emit-newline)))
                 *toc-list*))))
-    (emit-anchor (concatenate 'string *html-node-prefix* "toc_end"))))
+    (emit-anchor (string-append *html-node-prefix* "toc_end"))))
 
 (defun do-numbered-footnote ()
   (do-footnote-aux nil))
@@ -2872,9 +2882,9 @@
   (let* ((fnno nil)
          (fnlabel (gen-temp-string))
          (fntag
-          (concatenate 'string *html-node-prefix* "footnote_" fnlabel))
+          (string-append *html-node-prefix* "footnote_" fnlabel))
          (fncalltag
-          (concatenate 'string *html-node-prefix* "call_footnote_"
+          (string-append *html-node-prefix* "call_footnote_"
             fnlabel)))
     (unless fnmark
       (setq fnno (1+ (get-gcount "\\footnotenumber")))
@@ -2951,10 +2961,10 @@
 (let ((f (lambda (x)
            (let* ((n  (round (* 1.0 x)))
                   (s (write-to-string n :base 16)))
-             (if (< n 16) (concatenate 'string "0" s) s)))))
+             (if (< n 16) (string-append "0" s) s)))))
   (defun rgb-dec-to-rrggbb (r g b)
     (declare (number r g b))
-    (concatenate 'string "#" (funcall f r) (funcall f g) (funcall f b))))
+    (string-append "#" (funcall f r) (funcall f g) (funcall f b))))
 
 (defun rgb-frac-to-rrggbb (r g b)
   (declare (number r g b))
@@ -2966,7 +2976,7 @@
     (rgb-frac-to-rrggbb (funcall f c k) (funcall f m k) (funcall f y k))))
 
 (defun hsl-in-html (h s L)
-  (concatenate 'string "hsl("
+  (string-append "hsl("
     (write-to-string h) ","
     (write-to-string (* s 100)) "%,"
     (write-to-string (* L 100)) "%)"))
@@ -3000,7 +3010,7 @@
     (:cmy (bgroup)
           (with-input-from-string
             (i (tex-string-to-html-string
-                 (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+                 (string-append "\\defcsactive\\,{ }" (get-token))))
             (egroup)
             (let* ((c (read i nil))
                    (m (read i nil))
@@ -3010,7 +3020,7 @@
     (:cmyk (bgroup)
           (with-input-from-string
             (i (tex-string-to-html-string
-                 (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+                 (string-append "\\defcsactive\\,{ }" (get-token))))
             (egroup)
             (let* ((c (read i nil))
                    (m (read i nil))
@@ -3021,7 +3031,7 @@
     (:rgb (bgroup)
           (with-input-from-string
             (i (tex-string-to-html-string
-                 (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+                 (string-append "\\defcsactive\\,{ }" (get-token))))
             (egroup)
             (let* ((r (read i nil))
                    (g (read i nil))
@@ -3032,7 +3042,7 @@
       (bgroup)
       (with-input-from-string
         (i (tex-string-to-html-string
-             (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+             (string-append "\\defcsactive\\,{ }" (get-token))))
         (egroup)
         (let* ((r (read i nil))
                (g (read i nil))
@@ -3057,7 +3067,7 @@
     (:hsb
       (bgroup)
       (with-input-from-string (i (tex-string-to-html-string
-                                   (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+                                   (string-append "\\defcsactive\\,{ }" (get-token))))
         (egroup)
         (let* ((h (read i nil))
                (s (read i nil))
@@ -3067,7 +3077,7 @@
     (:hsb360
       (bgroup)
       (with-input-from-string (i (tex-string-to-html-string
-                                   (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+                                   (string-append "\\defcsactive\\,{ }" (get-token))))
         (egroup)
         (let* ((h (read i nil))
                (s (read i nil))
@@ -3077,7 +3087,7 @@
     (:hsb240
       (bgroup)
       (with-input-from-string (i (tex-string-to-html-string
-                                   (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+                                   (string-append "\\defcsactive\\,{ }" (get-token))))
         (egroup)
         (let* ((h (read i nil))
                (s (read i nil))
@@ -3092,7 +3102,7 @@
     (:hsl
       (bgroup)
       (with-input-from-string (i (tex-string-to-html-string
-                                   (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+                                   (string-append "\\defcsactive\\,{ }" (get-token))))
         (egroup)
         (let* ((h (read i nil))
                (s (read i nil))
@@ -3102,7 +3112,7 @@
     (:hsl360
       (bgroup)
       (with-input-from-string (i (tex-string-to-html-string
-                                   (concatenate 'string "\\defcsactive\\,{ }" (get-token))))
+                                   (string-append "\\defcsactive\\,{ }" (get-token))))
         (egroup)
         (let* ((h (read i nil))
                (s (read i nil))
@@ -3521,9 +3531,9 @@
                 (position #\tab lbl :test #'char=)
                 (position #\newline lbl :test #'char=))))
     (if (not i) lbl
-      (let ((s (concatenate 'list lbl)) (r '()) (whitep nil))
+      (let ((s (string->list lbl)) (r '()) (whitep nil))
         (loop
-          (when (null s) (return (concatenate 'string (nreverse r))))
+          (when (null s) (return (list->string (nreverse r))))
           (let ((c (pop s)))
             (cond ((char-whitespace-p c)
                    (unless whitep (push #\space r))
@@ -3559,7 +3569,7 @@
 
 (defun do-anchor-for-potential-label ()
   (let ((node-name
-         (concatenate 'string *html-node-prefix* "anchor_" (gen-temp-string))))
+         (string-append *html-node-prefix* "anchor_" (gen-temp-string))))
     (tex-def-0arg "\\TIIPcurrentnodename" node-name)
     (emit-anchor node-name)))
 
@@ -3574,8 +3584,8 @@
 
 (defun do-inputexternallabels ()
   (let* ((f (get-filename-possibly-braced))
-         (fq-f (if (fully-qualified-pathname-p f) f (concatenate 'string *aux-dir/* f)))
-         (ext-label-file (concatenate 'string fq-f *label-file-suffix*))
+         (fq-f (if (fully-qualified-pathname-p f) f (string-append *aux-dir/* f)))
+         (ext-label-file (string-append fq-f *label-file-suffix*))
          (ext-label-table (gethash f *external-label-tables*)))
     (unless ext-label-table
       (setq ext-label-table (make-hash-table :test #'equal))
@@ -3587,9 +3597,9 @@
 (defun do-includeexternallabels ()
   (let* ((jobname (get-filename-possibly-braced))
          (ext-label-file
-          (concatenate 'string
+          (string-append
             (if (fully-qualified-pathname-p jobname) jobname
-              (concatenate 'string *aux-dir/* jobname))
+              (string-append *aux-dir/* jobname))
             *label-file-suffix*)))
     (when (probe-file ext-label-file)
       (let ((*label-source* jobname))
@@ -3608,7 +3618,7 @@
 (defun do-tag-aux (tag-name tag-val)
   (declare (string tag-name tag-val))
   (let ((node-name
-         (concatenate 'string *html-node-prefix* "tag_" (gen-temp-string))))
+         (string-append *html-node-prefix* "tag_" (gen-temp-string))))
     (tex-def-0arg "\\TIIPcurrentnodename" node-name)
     (tex-def-0arg "\\@currentlabel" tag-val)
     (emit-anchor node-name)
@@ -3639,9 +3649,9 @@
 
 (defun maybe-label-page (this-label-src this-label-pageno)
   (if (and (not this-label-src) (= *html-page-count* this-label-pageno)) ""
-      (concatenate 'string (or this-label-src *jobname*)
+      (string-append (or this-label-src *jobname*)
                    (if (= this-label-pageno 0) ""
-                       (concatenate 'string *html-page-suffix*
+                       (string-append *html-page-suffix*
                                     (write-to-string this-label-pageno)))
                    *output-extension*)))
 
@@ -3671,7 +3681,7 @@
 
 (defun do-hyperlink ()
   (emit-link-start
-   (fully-qualify-url (concatenate 'string "#" (get-peeled-group))))
+   (fully-qualify-url (string-append "#" (get-peeled-group))))
   (tex2page-string (get-token))
   (emit-link-stop))
 
@@ -3682,7 +3692,7 @@
     (or (and label-table (gethash label label-table))
         (progn
          (flag-unresolved-xref
-          (if ext-file (concatenate 'string "{" ext-file " -> " label "}")
+          (if ext-file (string-append "{" ext-file " -> " label "}")
             label))
          nil))))
 
@@ -3769,7 +3779,7 @@
 
 (defun doc-internal-url (url)
   (declare (string url))
-  (let ((n (length url)))
+  (let ((n (string-length url)))
     (cond ((and (> n 0) (char= (char url 0) #\#))
            (let* ((label (subseq url 1))
                   (label-ref (label-bound-p label)))
@@ -3781,12 +3791,12 @@
 
 (defun fully-qualify-url (url)
   (declare (string url))
-  (let ((n (length url)))
+  (let ((n (string-length url)))
     (cond ((and (> n 0) (char= (char url 0) #\#))
            (let* ((label (subseq url 1))
                   (label-ref (label-bound-p label)))
              (if label-ref
-                 (concatenate 'string
+                 (string-append
                    (maybe-label-page (label*-src label-ref)
                                      (label*-page label-ref))
                    "#" (label*-name label-ref))
@@ -3807,7 +3817,7 @@
 
 (defun do-mailto ()
   (let ((addr (get-url)))
-    (emit-link-start (concatenate 'string "mailto:" addr))
+    (emit-link-start (string-append "mailto:" addr))
     (emit addr)
     (emit-link-stop)))
 
@@ -3819,7 +3829,7 @@
         (emit-link-start (fully-qualify-url url))))
   (bgroup)
   (tex2page-string
-    (concatenate 'string "\\def\\\\{\\egroup\\endinput}" (get-token)))
+    (string-append "\\def\\\\{\\egroup\\endinput}" (get-token)))
   (egroup)
   (emit-link-stop))
 
@@ -3853,11 +3863,11 @@
 (defun do-img-src (f)
   (cond ((or (tex2page-flag-boolean "\\TIIPsinglepage")
              (tex2page-flag-boolean "\\TZPsinglepage"))
-         (let ((tmpf (concatenate 'string *aux-dir/* *jobname* "-Z-Z.temp")))
-           (system (concatenate 'string "echo -n data: > " tmpf))
-           (system (concatenate 'string "file -bN --mime-type " f " >> " tmpf))
-           (system (concatenate 'string "echo -n \\;base64, >> " tmpf))
-           (system (concatenate 'string "base64 -w0 < " f " >> " tmpf))
+         (let ((tmpf (string-append *aux-dir/* *jobname* "-Z-Z.temp")))
+           (system (string-append "echo -n data: > " tmpf))
+           (system (string-append "file -bN --mime-type " f " >> " tmpf))
+           (system (string-append "echo -n \\;base64, >> " tmpf))
+           (system (string-append "base64 -w0 < " f " >> " tmpf))
            (with-open-file (i tmpf :direction :input)
              (loop
                (let ((c (read-char i nil)))
@@ -3901,24 +3911,24 @@
 
 (defun display-index-entry (s o)
   (mapc (lambda (c) (princ (if (or (char= c #\newline)) #\space c) o))
-        (concatenate 'list s)))
+        (string->list s)))
 
 (defun escape-opmac-index-entry (x)
   (let ((y '()))
-    (dotimes (i (length x))
+    (dotimes (i (string-length x))
       (let ((c (char x i)))
         (case c
           ((#\") (push c y) (push c y))
           ((#\! #\@) (push #\" y) (push c y))
           (t (push c y)))))
-    (concatenate 'string (nreverse y))))
+    (list->string (nreverse y))))
 
 (defun expand-html-index ()
   (let* ((s (get-peeled-group))
          (n (read-from-string s))
          (pageno (gethash n *index-table*)))
     (emit-page-node-link-start
-      pageno (concatenate 'string *html-node-prefix* "index_" s))
+      pageno (string-append *html-node-prefix* "index_" s))
     (emit pageno)
     (cond ((setq *it* (gethash pageno *index-page-mention-alist*))
            (let ((n (1+ *it*)))
@@ -3935,7 +3945,7 @@
 
 (defun html-length (s)
   (declare (string s))
-  (let ((n (length s))
+  (let ((n (string-length s))
         (res 0)
         (i 0)
         (skip-tag nil)
@@ -4148,7 +4158,7 @@
   (multiple-value-bind (sec m h d mo y dow dst tz)
     (decode-universal-time s)
     (declare (ignore sec))
-    (concatenate 'string
+    (string-append
       (svref *week-day-names* dow)
       ", "
       (svref *short-month-names* (1- mo))
@@ -4289,7 +4299,7 @@
           (emit ">")
           (unless toc-page-p
             (emit-page-node-link-start *toc-page*
-                                       (concatenate 'string *html-node-prefix*
+                                       (string-append *html-node-prefix*
                                          "toc")))
           (emit *navigation-contents-name*)
           (unless toc-page-p (emit-link-stop))
@@ -4306,7 +4316,7 @@
           (emit "</span>")
           (unless index-page-p
             (emit-page-node-link-start *index-page*
-                                       (concatenate 'string *html-node-prefix*
+                                       (string-append *html-node-prefix*
                                          "index_start")))
           (emit *navigation-index-name*)
           (unless index-page-p (emit-link-stop))
@@ -4338,7 +4348,7 @@
             (do-end-page)
             (tex-def-count 0 (incf *html-page-count*) t)
             (setq *html-page*
-                  (concatenate 'string *aux-dir/* *jobname* *html-page-suffix*
+                  (string-append *aux-dir/* *jobname* *html-page-suffix*
                     (write-to-string *html-page-count*)
                     *output-extension*))
             (setq *html*
@@ -4527,7 +4537,7 @@
 
 (defun set-text-width ()
   (let ((hsize (cond ((setq *it* (find-def "\\TZPhsize"))
-                      (tex2page-string (concatenate 'string "\\TIIPhsize=" (tdef*-expansion *it*)))
+                      (tex2page-string (string-append "\\TIIPhsize=" (tdef*-expansion *it*)))
                       (the-dimen "\\TIIPhsize"))
                      ((or (tex2page-flag-boolean "\\TIIPtexlayout")
                           (tex2page-flag-boolean "\\TZPtexlayout"))
@@ -4739,13 +4749,13 @@
 
 (defun next-html-image-file-stem ()
   (incf *img-file-count*)
-  (concatenate 'string *subjobname* *img-file-suffix*
+  (string-append *subjobname* *img-file-suffix*
                (write-to-string *img-file-count*)))
 
 (defun call-with-html-image-stream (p &optional alt)
   (declare (function p))
   (let* ((img-file-stem (next-html-image-file-stem))
-         (aux-tex-file (concatenate 'string img-file-stem ".tex")))
+         (aux-tex-file (string-append img-file-stem ".tex")))
     (with-open-file (o aux-tex-file :direction :output
                        :if-exists :supersede)
       (dump-tex-preamble o)
@@ -4813,13 +4823,13 @@
       (:rbrack (setq top "&#x23a4;" bot "&#x23a6;" ext "&#x23a5;" mid ext))
       (:rbrace (setq top "&#x23ab;" mid "&#x23ac;" bot "&#x23ad;" ext "&#x23ae;"))
       (:rvert (setq ext "&#x239f;" top ext mid ext bot ext)))
-    (concatenate 'string
+    (string-append
       "<table class=mathdelim><tr><td>" top "</td></tr>"
       (cond ((oddp *math-height*)
-             (concatenate 'string
+             (string-append
                (let ((r ""))
                  (dotimes (i (/ (1- *math-height*) 2) r)
-                   (setq r (concatenate 'string r
+                   (setq r (string-append r
                              "<tr><td>"
                              ext
                              "</td></tr>"))))
@@ -4828,13 +4838,13 @@
                "</td></tr>"
                (let ((r ""))
                  (dotimes (i (/ (1- *math-height*) 2) r)
-                   (setq r (concatenate 'string r
+                   (setq r (string-append r
                              "<tr><td>"
                              ext
                              "</td></tr>"))))))
             (t (let ((r ""))
                  (dotimes (i *math-height* r)
-                   (setq r (concatenate 'string r
+                   (setq r (string-append r
                              "<tr><td>"
                              ext
                              "</td></tr>"))))))
@@ -4908,7 +4918,7 @@
 
 (defun dump-till-end-env (env o)
   (declare (string env) (stream o))
-  (let* ((endenv (concatenate 'string "\\end" env))
+  (let* ((endenv (string-append "\\end" env))
          (endenv-prim (find-corresp-prim endenv))
          (endenv-prim-th (find-corresp-prim-thunk endenv))
          (*not-processing-p* t)
@@ -4933,7 +4943,7 @@
                       (let ((g (get-grouped-environment-name-if-any)))
                         (cond ((and g
                                     (or *dumping-nontex-p* (= env-nesting 0))
-                                    (let ((endg (concatenate 'string "\\end" g)))
+                                    (let ((endg (string-append "\\end" g)))
                                       (or (string= (find-corresp-prim endg) endenv-prim)
                                           (eql (find-corresp-prim-thunk endg) endenv-prim-th))))
                                (return))
@@ -4954,7 +4964,7 @@
 
 (defun dump-imgdef (f)
   (declare (string f))
-  (let ((aux-tex-file (concatenate 'string f ".tex")))
+  (let ((aux-tex-file (string-append f ".tex")))
     (with-open-file (o aux-tex-file :direction :output
                        :if-exists :supersede)
       (dump-tex-preamble o)
@@ -4974,9 +4984,9 @@
                        (when (member x '("\\endimgpreamble" "\\endgifpreamble" "\\endmathpreamble")
                                      :test #'string=)
                          (return r))
-                       (setq r (concatenate 'string r x))))
+                       (setq r (string-append r x))))
                     (t (get-actual-char)
-                       (setq r (concatenate 'string r (list c))))))))))
+                       (setq r (string-append r (string c))))))))))
 
 (defun do-open-stream (type)
   (declare (keyword type))
@@ -5055,12 +5065,12 @@
       (let ((c (snoop-actual-char)))
         (when (not c)
           (return
-           (if (null r) c (concatenate 'string (nreverse r)))))
+           (if (null r) c (list->string (nreverse r)))))
         (when (char= c #\newline) (get-actual-char)
-          (return (concatenate 'string (nreverse r))))
+          (return (list->string (nreverse r))))
         (when (char= c #\{)
           (return
-           (concatenate 'string (concatenate 'string (nreverse r))
+           (string-append (list->string (nreverse r))
              (get-group))))
         (push (get-actual-char) r)))))
 
@@ -5219,10 +5229,10 @@
                                                      (t (push clause or-clauses)))
                                                (setq outer-loop-done t)
                                                (return))
-                           (t (setq clause (concatenate 'string clause x))))))
+                           (t (setq clause (string-append clause x))))))
                   (t (get-actual-char)
                      (setq clause
-                           (concatenate 'string clause (list c)))))))))
+                           (string-append clause (string c)))))))))
     (values (nreverse or-clauses) else-clause)))
 
 (defun do-ifcase ()
@@ -5256,16 +5266,16 @@
 
 (defun do-newif ()
   (let* ((iffoo (get-ctl-seq))
-         (foo (concatenate 'string "\\" (subseq iffoo 3)))
-         (foo-register (concatenate 'string foo "BOOLEANREGISTER")))
+         (foo (string-append "\\" (subseq iffoo 3)))
+         (foo-register (string-append foo "BOOLEANREGISTER")))
     (plain-count foo-register 0 nil)
     (tex-def-thunk iffoo
                    (lambda ()
                      (push (> (the-count foo-register) 0) *tex-if-stack*))
                    nil)
-    (tex-def-thunk (concatenate 'string foo "true")
+    (tex-def-thunk (string-append foo "true")
                    (lambda () (plain-count foo-register 1 nil)) nil)
-    (tex-def-thunk (concatenate 'string foo "false")
+    (tex-def-thunk (string-append foo "false")
                    (lambda () (plain-count foo-register 0 nil)) nil)))
 
 ;(trace do-newif)
@@ -5297,11 +5307,11 @@
       (unless tex-prog-name (setq tex-prog-name "xetex"))
       (when (eq *tex-format* :latex)
         (setq tex-prog-name
-              (concatenate 'string (subseq tex-prog-name 0
-                                           (- (length tex-prog-name) 3))
+              (string-append (subseq tex-prog-name 0
+                                           (- (string-length tex-prog-name) 3))
                 "latex")))
       |#)
-    (system (concatenate 'string *metapost* " -tex=" tex-prog-name " " f))))
+    (system (string-append *metapost* " -tex=" tex-prog-name " " f))))
 
 (let ((tex-prog-name nil)
       (tex-output-format nil))
@@ -5318,18 +5328,18 @@
               :pdf :dvi))
       (when (eq *tex-format* :latex)
         (setq tex-prog-name
-              (concatenate 'string (subseq tex-prog-name 0
-                                           (- (length tex-prog-name) 3))
+              (string-append (subseq tex-prog-name 0
+                                           (- (string-length tex-prog-name) 3))
                            "latex"))))
-      (let* ((dvi-file (concatenate 'string f
+      (let* ((dvi-file (string-append f
                                    (if (eq tex-output-format :pdf)
                                      ".pdf" ".dvi")))
              (outfile dvi-file))
-        (system (concatenate 'string
+        (system (string-append
                              tex-prog-name
                              " " f))
         (when (probe-file dvi-file)
-          (let ((logfile (concatenate 'string f ".log")))
+          (let ((logfile (string-append f ".log")))
             (when (probe-file logfile)
               ;scan the log file for sign of problems
               (let ((fine-p
@@ -5343,47 +5353,47 @@
                               (return nil)))))))
                 (when fine-p
                   (unless (eq tex-output-format :pdf)
-                    (let ((ps-file (concatenate 'string f ".ps")))
+                    (let ((ps-file (string-append f ".ps")))
                       (system
-                        (concatenate 'string "dvips " dvi-file " -o " ps-file))
+                        (string-append "dvips " dvi-file " -o " ps-file))
                       (setq outfile ps-file)))
                   outfile))))))))
 
 (defun ps-to-img/gif/netpbm (img-file)
-  (system (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
+  (system (string-append "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
-   (concatenate 'string "ppmtogif -transparent rgb:ff/ff/ff < " img-file ".ppm > "
+   (string-append "ppmtogif -transparent rgb:ff/ff/ff < " img-file ".ppm > "
                 img-file))
-  (mapc (lambda (e) (ensure-file-deleted (concatenate 'string img-file e)))
+  (mapc (lambda (e) (ensure-file-deleted (string-append img-file e)))
         '(".ppm" ".ppm.tmp" ".ppm.1")))
 
 (defun ps-to-img/png/netpbm (img-file)
   '(system
-    (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
+    (string-append "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
-   (concatenate 'string "pnmtopng -interlace -transparent \"#FFFFFF\" " " < " img-file
+   (string-append "pnmtopng -interlace -transparent \"#FFFFFF\" " " < " img-file
                 ".ppm.tmp > " img-file))
-  (mapc (lambda (e) (ensure-file-deleted (concatenate 'string img-file e)))
+  (mapc (lambda (e) (ensure-file-deleted (string-append img-file e)))
         '(".ppm.1" ".ppm.tmp" ".ppm")))
 
 (defun ps-to-img/jpeg/netpbm (img-file)
-  (system (concatenate 'string "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
+  (system (string-append "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
   (system
-   (concatenate 'string "ppmtojpeg --grayscale < " img-file ".ppm > " img-file))
-  (mapc (lambda (e) (ensure-file-deleted (concatenate 'string img-file e)))
+   (string-append "ppmtojpeg --grayscale < " img-file ".ppm > " img-file))
+  (mapc (lambda (e) (ensure-file-deleted (string-append img-file e)))
         '(".ppm.1" ".ppm.tmp" ".ppm")))
 
 (defun ps-to-img (ps-file img-file)
   (case (tex2page-flag-value "\\TZPimageconverter")
     ((#\i #\I)
      (system
-      (concatenate 'string "convert -transparent white -trim "
+      (string-append "convert -transparent white -trim "
                    ps-file  " " img-file)))
     (t
       (system
-        (concatenate 'string *ghostscript* *ghostscript-options* " -sOutputFile=" img-file
+        (string-append *ghostscript* *ghostscript-options* " -sOutputFile=" img-file
                      ".ppm.1 " ps-file))
-      (system (concatenate 'string "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
+      (system (string-append "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
       (case (tex2page-flag-value "\\TZPimageformat")
          ((#\p #\P) (ps-to-img/png/netpbm img-file))
          ((#\j #\J) (ps-to-img/jpeg/netpbm img-file))
@@ -5391,12 +5401,12 @@
 
 (defun tex-to-img (f)
   (incf *img-file-tally*)
-  (let* ((img-file (concatenate 'string f (find-img-file-extn)))
-         (fq-img-file (concatenate 'string *aux-dir/* img-file)))
+  (let* ((img-file (string-append f (find-img-file-extn)))
+         (fq-img-file (string-append *aux-dir/* img-file)))
     (unless (probe-file fq-img-file)
       (write-log :separation-space)
       (write-log #\{)
-      (write-log (concatenate 'string f ".tex"))
+      (write-log (string-append f ".tex"))
       (write-log :separation-space)
       (write-log "->")
       (write-log :separation-space)
@@ -5406,7 +5416,7 @@
              (write-log img-file)
              (mapc
                (lambda (e)
-                 (ensure-file-deleted (concatenate 'string f e)))
+                 (ensure-file-deleted (string-append f e)))
                '(;".aux" ".dvi"
                  ".log" ".pdf" ;".ps"
                  ".tex")))
@@ -5415,7 +5425,7 @@
       (write-log :separation-space))))
 
 (defun call-with-lazy-image-stream (eps-file img-file-stem p)
-  (let ((aux-tex-file (concatenate 'string img-file-stem ".tex")))
+  (let ((aux-tex-file (string-append img-file-stem ".tex")))
     (with-open-file (o aux-tex-file :direction :output
                        :if-exists :supersede)
       (dump-tex-preamble o)
@@ -5479,7 +5489,7 @@
          (f (get-filename-possibly-braced))
          (ffull (if (probe-file f) f
                     (some (lambda (e)
-                            (let ((f2 (concatenate 'string f e)))
+                            (let ((f2 (string-append f e)))
                               (and (probe-file f2) f2)))
                           *graphics-file-extensions*)))
          (ffull-ext (and ffull (file-extension ffull))))
@@ -5530,7 +5540,7 @@
 (defun do-mfpic-opengraphsfile ()
   (setq *mfpic-file-stem* (get-filename-possibly-braced))
   (when *mfpic-stream* (close *mfpic-stream*))
-  (let ((f (concatenate 'string *mfpic-file-stem* *mfpic-tex-file-suffix*)))
+  (let ((f (string-append *mfpic-file-stem* *mfpic-tex-file-suffix*)))
     (setq *mfpic-stream* (open f :direction :output
                              :if-exists :supersede)))
   (setq *mfpic-file-num* 0)
@@ -5557,8 +5567,8 @@
   (princ "\\closegraphsfile" *mfpic-stream*)
   (terpri *mfpic-stream*)
   (close *mfpic-stream*)
-  (let ((tex-f (concatenate 'string *mfpic-file-stem* *mfpic-tex-file-suffix*))
-        (mp-f (concatenate 'string *mfpic-file-stem* ".mp")))
+  (let ((tex-f (string-append *mfpic-file-stem* *mfpic-tex-file-suffix*))
+        (mp-f (string-append *mfpic-file-stem* ".mp")))
     (unless (probe-file mp-f)
       (let ((*tex-format* :plain))
         (call-tex tex-f)))
@@ -5570,7 +5580,7 @@
   (princ "\\endmfpic" *mfpic-stream*)
   (terpri *mfpic-stream*)
   (setq *mfpic-file-num* (1+ *mfpic-file-num*))
-  (let ((f (concatenate 'string *mfpic-file-stem* "."
+  (let ((f (string-append *mfpic-file-stem* "."
                         (write-to-string *mfpic-file-num*)))
         (img-file-stem (next-html-image-file-stem)))
     (lazily-make-epsf-image-file f img-file-stem)
@@ -5583,8 +5593,8 @@
   (let ((env2 (if (string= env "align") "eqnarray" env)))
     (when (char= (snoop-actual-char) #\*)
       (get-actual-char)
-      (setq env (concatenate 'string env "*"))
-      (setq env2 (concatenate 'string env2 "*")))
+      (setq env (string-append env "*"))
+      (setq env2 (string-append env2 "*")))
     (egroup)
     (when display-p
       (do-end-para)
@@ -5735,32 +5745,32 @@
       (let ((s (pop ss)))
         (setq res
               (cond ((string= res "") s)
-                    (t (concatenate 'string res (list sepc) s))))))))
+                    (t (string-append res (list sepc) s))))))))
 
 (defun kpsewhich (f)
-  (let ((tmpf (concatenate 'string *aux-dir/* *jobname* "-Z-Z.temp")))
-    (system (concatenate 'string "kpsewhich -- " f " > " tmpf))
+  (let ((tmpf (string-append *aux-dir/* *jobname* "-Z-Z.temp")))
+    (system (string-append "kpsewhich -- " f " > " tmpf))
     (let ((f (and (probe-file tmpf)
                   (with-open-file (i tmpf :direction :input)
                     (read-line i nil)))))
       (ensure-file-deleted tmpf)
       (if (not f) nil
         (let ((f (string-trim-blanks f)))
-          (cond ((= (length f) 0) nil)
+          (cond ((= (string-length f) 0) nil)
                 ((probe-file f) f)
                 (t nil)))))))
 
 (defun find-tex-file (file)
   ;search for file.tex before file.  Search in current directory first.
   ;If TEX2PAGEINPUTS is set search there, else use kpsewhich(1)
-  (let ((file.tex (concatenate 'string file ".tex")))
+  (let ((file.tex (string-append file ".tex")))
     (or (and (probe-file file.tex) file.tex)
         (and (probe-file file) file)
         (if (not (null *tex2page-inputs*))
             (dolist (dir *tex2page-inputs*)
-              (let ((f (concatenate 'string dir *directory-separator* file.tex)))
+              (let ((f (string-append dir *directory-separator* file.tex)))
                 (when (probe-file f) (return f)))
-              (let ((f (concatenate 'string dir *directory-separator* file)))
+              (let ((f (string-append dir *directory-separator* file)))
                 (when (probe-file f) (return f))))
           (kpsewhich file)))))
 
@@ -5862,16 +5872,16 @@
         (setq *jobname* (file-stem-name f))
         (make-target-dir)
         (let ((main-html-page
-                (concatenate 'string *aux-dir/* *jobname* *output-extension*)))
+                (string-append *aux-dir/* *jobname* *output-extension*)))
           (when (string= main-html-page f)
-            (let ((f-save (concatenate 'string f ".sav")))
+            (let ((f-save (string-append f ".sav")))
               (write-log :separation-newline)
               (write-log "Copying weirdly named TeX source file ")
               (write-log f)
               (write-log " to ")
               (write-log f-save)
               (write-log :separation-newline)
-              (system (concatenate 'string
+              (system (string-append
                         #-windows "cp -pf "
                         #+windows "copy/y "
                         f " " f-save))
@@ -5885,10 +5895,10 @@
 
 (defun add-dot-tex-if-no-extension-provided (f)
   (let ((e (file-extension f)))
-    (if e f (concatenate 'string f ".tex"))))
+    (if e f (string-append f ".tex"))))
 
 (defun ignore-tex-specific-text (env)
-  (let ((endenv (concatenate 'string "\\end" env)))
+  (let ((endenv (string-append "\\end" env)))
     (loop
       (let ((c (snoop-actual-char)))
         (when
@@ -5916,7 +5926,7 @@
                      ((and (string= y "\\end")
                            (setq *it* (get-grouped-environment-name-if-any)))
                       (let* ((g *it*)
-                             (y (find-corresp-prim (concatenate 'string x g))))
+                             (y (find-corresp-prim (string-append x g))))
                         (cond ((string= y "\\endrawhtml")
                                (ignorespaces) (return))
                               (t (emit "\\end{") (emit g) (emit "}")))))
@@ -5931,11 +5941,11 @@
     (loop
       (let ((c (snoop-actual-char)))
         (cond ((not c)
-               (setq s2 (concatenate 'string (nreverse s)))
+               (setq s2 (list->string (nreverse s)))
                (write-aux `(!html-head ,s2))
                (return))
               ((= (catcode c) **escape**)
-               (setq s2 (concatenate 'string (nreverse s)))
+               (setq s2 (list->string (nreverse s)))
                (write-aux `(!html-head ,s2))
                (setq s '())
                (let ((x (get-ctl-seq)))
@@ -6162,7 +6172,7 @@
     (t "")))
 
 (defun scaled-point-to-tex-point (sp)
-  (concatenate 'string (write-to-string (/ sp 65536.0)) "pt"))
+  (string-append (write-to-string (/ sp 65536.0)) "pt"))
 
 (defun expand-the ()
   (let ((ctlseq (get-ctl-seq)))
@@ -6267,7 +6277,7 @@
 (defun do-newenvironment (renewp)
   (ignorespaces)
   (let* ((envname (string-trim-blanks (ungroup (get-token))))
-         (bs-envname (concatenate 'string "\\" envname))
+         (bs-envname (string-append "\\" envname))
          (optarg nil)
          (argc (cond ((setq *it* (get-bracketed-text-if-any))
                       (let ((s *it*))
@@ -6275,12 +6285,12 @@
                                (setq optarg *it*)))
                         (read-from-string (string-trim-blanks s))))
                      (t 0)))
-         (beginning (concatenate 'string "\\begingroup " (ungroup (get-token))))
-         (ending (concatenate 'string (ungroup (get-token)) "\\endgroup"))
+         (beginning (string-append "\\begingroup " (ungroup (get-token))))
+         (ending (string-append (ungroup (get-token)) "\\endgroup"))
          (ok-to-def-p (or renewp (not (find-def bs-envname)))))
     (tex-def bs-envname (latex-argnum-to-plain-argpat argc)
              beginning optarg nil nil nil nil)
-    (tex-def (concatenate 'string "\\end" envname) '() ending nil
+    (tex-def (string-append "\\end" envname) '() ending nil
              nil nil nil nil)
     (unless ok-to-def-p
       (trace-if t "{" envname "} already defined"))))
@@ -6303,14 +6313,14 @@
          (caption (ungroup (get-group)))
          (within (if numbered-like nil (get-bracketed-text-if-any)))
          (sec-num (and within
-                       (section-ctl-seq-p (concatenate 'string "\\" within)))))
+                       (section-ctl-seq-p (string-append "\\" within)))))
     (unless numbered-like
       (tex-def-dotted-count counter-name sec-num))
-    (tex-def (concatenate 'string "\\" env) '()
-             (concatenate 'string "\\par\\begingroup\\TIIPtheorem{"
+    (tex-def (string-append "\\" env) '()
+             (string-append "\\par\\begingroup\\TIIPtheorem{"
                           counter-name "}{" caption "}")
              nil nil nil nil *global-texframe*)
-    (tex-def (concatenate 'string "\\end" env) '() "\\endgroup\\par"
+    (tex-def (string-append "\\end" env) '() "\\endgroup\\par"
              nil nil nil nil *global-texframe*)))
 
 (defun do-theorem ()
@@ -6323,10 +6333,10 @@
       (let* ((thm-num
               (let ((sec-num (counter*-within counter)))
                 (if sec-num
-                    (concatenate 'string (section-counter-value sec-num) "."
+                    (string-append (section-counter-value sec-num) "."
                                  (write-to-string new-counter-value))
                   (write-to-string new-counter-value))))
-             (lbl (concatenate 'string *html-node-prefix* "thm_" thm-num)))
+             (lbl (string-append *html-node-prefix* "thm_" thm-num)))
         (tex-def-0arg "\\TIIPcurrentnodename" lbl)
         (tex-def-0arg "\\@currentlabel" thm-num)
         (emit-anchor lbl)
@@ -6343,7 +6353,7 @@
     (terror 'do-begin "\\begin not followed by environment name"))
   (let ((env *it*))
     (toss-back-char *invisible-space*)
-    (toss-back-string (concatenate 'string "\\" env))
+    (toss-back-string (string-append "\\" env))
     (unless (member env '("htmlonly" "cssblock" "document" "latexonly"
                           "rawhtml" "texonly" "verbatim" "verbatim*") :test #'string=)
       (toss-back-string "\\begingroup")
@@ -6358,7 +6368,7 @@
            (unless (member env '("htmlonly" "document") :test #'string=)
              (do-end-para)
              (toss-back-string "\\endgroup"))
-           (toss-back-string (concatenate 'string "\\end" env))))
+           (toss-back-string (string-append "\\end" env))))
         (t (toss-back-char *invisible-space*)
            (toss-back-string "\\TIIPbye"))))
 
@@ -6379,13 +6389,13 @@
   (ignorespaces)
   (let ((lhs (get-ctl-seq))
         (imgdef-file-stem
-         (concatenate 'string *subjobname* *img-file-suffix*
+         (string-append *subjobname* *img-file-suffix*
                       *imgdef-file-suffix*
                       (write-to-string *imgdef-file-count*))))
     (dump-imgdef imgdef-file-stem)
     (tex-to-img imgdef-file-stem)
     (tex-def lhs '()
-     (concatenate 'string "\\TIIPreuseimage{" imgdef-file-stem "}") nil nil nil
+     (string-append "\\TIIPreuseimage{" imgdef-file-stem "}") nil nil nil
      nil (and globalp *global-texframe*))))
 
 (defun valid-img-file-p (f)
@@ -6401,7 +6411,7 @@
 
 (defun source-img-file (img-file-stem &rest alt)
   (let* ((alt (if (null alt) nil (car alt)))
-         (img-file (concatenate 'string img-file-stem (find-img-file-extn))))
+         (img-file (string-append img-file-stem (find-img-file-extn))))
     (write-log #\()
     (write-log img-file)
     (write-log :separation-space)
@@ -6434,7 +6444,7 @@
                    ;save \par as :par?
                    (progn (push #\newline params)
                           (push #\newline params))
-                   (setq params (append (nreverse (concatenate 'list x)) params)))))
+                   (setq params (append (nreverse (string->list x)) params)))))
             ((= (catcode c) **bgroup**) (return))
             (t (cond ((char= c #\newline)
                       ;kludge for writing Texinfo-type
@@ -6451,8 +6461,7 @@
 
 (defun get-till-char (c0)
   (declare (character c0))
-  (concatenate
-   'string
+  (list->string
    (nreverse
     (let ((s '()) (nesting 0) (escape-p nil))
       (loop
@@ -6534,7 +6543,7 @@
                    (let ((y (car tmplt)))
                      (cond ((not y) (emit "<td>")
                                     (tex2page-string
-                                      (concatenate 'string r "}"))
+                                      (string-append r "}"))
                                     (when (and (string= x "\\cr")
                                                (string= ins " "))
                                       (emit-nbsp 1))
@@ -6549,11 +6558,11 @@
                                                (return))))
                            ((eq y t)
                             (pop tmplt)
-                            (setq r (concatenate 'string r ins)))
+                            (setq r (string-append r ins)))
                            (t (pop tmplt)
-                              (setq r (concatenate 'string r y))))))))
+                              (setq r (string-append r y))))))))
               (t (setq ins
-                       (concatenate 'string ins x))))))))
+                       (string-append ins x))))))))
 
 (defun do-settabs ()
   (let ((settabs-spec ""))
@@ -6563,12 +6572,12 @@
           (terror 'do-settabs "Eof in \\settabs"))
         (cond ((string= x "\\columns")
                (tex2page-string
-                 (concatenate 'string "\\TIIPsettabscolumns=" settabs-spec))
+                 (string-append "\\TIIPsettabscolumns=" settabs-spec))
                (return))
               ((string= x "\\cr")
                (plain-count "\\TIIPsettabscolumns" 0 nil)
                (return))
-              (t (setq settabs-spec (concatenate 'string settabs-spec x))))))))
+              (t (setq settabs-spec (string-append settabs-spec x))))))))
 
 (defun do-tabalign ()
   (emit-newline)
@@ -6593,7 +6602,7 @@
         (cell-width ""))
     (when (> num-cols 0)
       (setq cell-width
-            (concatenate 'string " width="
+            (string-append " width="
               (write-to-string (/ 100.0 num-cols)) "%")))
     (loop
       (let ((x (get-token/ps)))
@@ -6609,7 +6618,7 @@
                (setq cell-contents "")
                (emit "</td>") (emit-newline)
                (when (string= x "\\cr") (return)))
-              (t (setq cell-contents (concatenate 'string
+              (t (setq cell-contents (string-append
                                        cell-contents x)))))))
   (emit "</tr>") (emit-newline))
 
@@ -6619,7 +6628,7 @@
   (let ((n (list-length argpat)) (ss '()) i s c (outer-loop-done nil))
     (loop
       (when outer-loop-done
-        (return (values i (concatenate 'string (nreverse ss)))))
+        (return (values i (list->string (nreverse ss)))))
       (setq i k
             s '())
       (loop
@@ -6757,10 +6766,9 @@
                 (cond ((setq *it* (get-bracketed-text-if-any)) *it*)
                       (t optarg))))))
          (args (read-macro-args argpat k r))
-         (rhs-n (length rhs))
+         (rhs-n (string-length rhs))
          (*catcodes* lexical-catcodes))
-    (concatenate
-     'string
+    (list->string
      (labels ((aux
                (k)
                (if (>= k rhs-n) '()
@@ -6795,7 +6803,7 @@
                                     ((and (digit-char-p n)
                                           (<= (digit-to-int n) (list-length args)))
                                      (append
-                                      (concatenate 'list
+                                      (string->list
                                                    (elt args
                                                         (1- (digit-to-int n))))
                                       (aux (+ k 2))))
@@ -7022,7 +7030,7 @@
 (defun do-verbwritefile ()
   (let* ((f (get-filename-possibly-braced))
          (e (file-extension f)))
-    (unless e (setq e ".tex") (setq f (concatenate 'string f e)))
+    (unless e (setq e ".tex") (setq f (string-append f e)))
     (when *verb-stream* (close *verb-stream*))
     (push f *verb-written-files*)
     (when (string-equal e ".mp") (push f *mp-files*))
@@ -7030,7 +7038,7 @@
 
 (defun verb-ensure-output-stream ()
   (unless *verb-stream*
-    (let ((output-file (concatenate 'string *jobname* ".txt")))
+    (let ((output-file (string-append *jobname* ".txt")))
       (setq *verb-stream* (open output-file :direction :output
                               :if-exists :supersede)))))
 
@@ -7092,7 +7100,7 @@
   (emit "<pre class=verbatim>")
   (let ((*verb-visible-space-p* (eat-star)))
     (when (string= env "Verbatim") (get-bracketed-text-if-any))
-    (when *verb-visible-space-p* (setq env (concatenate 'string env "*")))
+    (when *verb-visible-space-p* (setq env (string-append env "*")))
     (munched-a-newline-p)
     (let ((*ligatures-p* nil) c)
       (loop
@@ -7198,7 +7206,7 @@
       (emit "<span class=variable>")
       (let ((*catcodes* *catcodes*))
         (catcode #\\ 11) (catcode *esc-char-verb* 11)
-        (tex2page-string (concatenate 'string "$" math-text "$")))
+        (tex2page-string (string-append "$" math-text "$")))
       (emit "</span>"))))
 
 (defun scm-output-slatex-comment ()
@@ -7304,7 +7312,7 @@
 
 (defun scm-display-token (s)
   (declare (string s))
-  (let ((n (length s)) (k 0))
+  (let ((n (string-length s)) (k 0))
     (loop
       (unless (< k n) (return))
       (scm-emit-html-char (char s k))
@@ -7404,12 +7412,12 @@
 
 (defun string-is-all-dots-p (s)
   (declare (string s))
-  (dotimes (i (length s) t)
+  (dotimes (i (string-length s) t)
     (unless (char= (char s i) #\.) (return nil))))
 
 (defun string-is-flanked-by-stars-p (s)
   (declare (string s))
-  (let ((n (length s)))
+  (let ((n (string-length s)))
     (and (>= n 3)
          (char= (char s 0) (char s (1- n)) #\*))))
 
@@ -7612,7 +7620,7 @@
                (incf (counter*-value counter) new-value)
                (setf (counter*-value counter) new-value))))
         (t
-          (let ((count-seq (concatenate 'string "\\" counter-name)))
+          (let ((count-seq (string-append "\\" counter-name)))
             (cond ((setq *it* (section-ctl-seq-p count-seq))
                    (let ((n *it*))
                      (setf (gethash n *section-counters*)
@@ -7677,20 +7685,20 @@
     ((#\Q) "&#x211a;")
     ((#\R) "&#x211d;")
     ((#\Z) "&#x2124;")
-    (t (concatenate 'string "&#x"
+    (t (string-append "&#x"
                     (write-to-string
                       (+ #x1d538 (- (char-int c) (char-int #\A))) :base 16)
                     ";"))))
 
 (defun tex-math-cal (c)
-  (concatenate 'string
+  (string-append
                "&#x"
                (write-to-string
                  (+ #x1d4d0 (- (char-int c) (char-int #\A))) :base 16)
                ";"))
 
 (defun tex-math-frak (c)
-  (concatenate 'string
+  (string-append
                "&#x"
                (write-to-string
                  (if (upper-case-p c)
@@ -7832,7 +7840,7 @@
         (*inputting-boilerplate-p* nil)
         (*ignore-timestamp-p* nil)
         ((> *html-only* 0) nil)
-        ((and (>= (length f) 3) (char= (char f 0) #\.) (char= (char f 1) #\/)) nil)
+        ((and (>= (string-length f) 3) (char= (char f 0) #\.) (char= (char f 1) #\/)) nil)
         ((member f *verb-written-files* :test #'equal) nil)
         (t t)))
 
@@ -7857,7 +7865,7 @@
   (let ((e (or (file-extension f) "")))
     (cond ((string-equal e ".sty") t)
           (t (when (string-equal e ".tex")
-               (setq f (subseq f 0 (- (length f) 4))))
+               (setq f (subseq f 0 (- (string-length f) 4))))
              (cond ((string= f "opmac")
                     (tex-gdef-0arg "\\TZPopmac" "1")
                     t)
@@ -7944,7 +7952,7 @@
   (let ((run-bibtex-p
          (cond ((not *using-bibliography-p*) nil)
                ((not (probe-file
-                  (concatenate 'string *aux-dir/* *jobname*
+                  (string-append *aux-dir/* *jobname*
                                *bib-aux-file-suffix* ".aux")))
                 nil)
                ((member :bibliography *missing-pieces*) t)
@@ -7954,7 +7962,7 @@
         (run-makeindex-p
          (cond ((not *using-index-p*) nil)
                ((not (probe-file
-                  (concatenate 'string *aux-dir/* *jobname* *index-file-suffix*
+                  (string-append *aux-dir/* *jobname* *index-file-suffix*
                                ".idx")))
                 nil)
                ((member :fresh-index *missing-pieces*)
@@ -7973,11 +7981,11 @@
       (write-log *bib-aux-file-suffix*)
       (write-log #\space)
       (system
-       (concatenate 'string "bibtex " *aux-dir/* *jobname*
+       (string-append "bibtex " *aux-dir/* *jobname*
                     *bib-aux-file-suffix*))
       (unless
           (probe-file
-           (concatenate 'string *aux-dir/* *jobname* *bib-aux-file-suffix* ".bbl"))
+           (string-append *aux-dir/* *jobname* *bib-aux-file-suffix* ".bbl"))
         (write-log " ... failed; try manually"))
       (write-log :separation-newline))
     ;makeindex
@@ -7989,16 +7997,16 @@
       (write-log *index-file-suffix*)
       (write-log #\space)
       (system
-       (concatenate 'string "makeindex " *aux-dir/* *jobname*
+       (string-append "makeindex " *aux-dir/* *jobname*
                     *index-file-suffix*))
       (unless
           (probe-file
-           (concatenate 'string *aux-dir/* *jobname* *index-file-suffix*
+           (string-append *aux-dir/* *jobname* *index-file-suffix*
                         ".ind"))
         (write-log " ... failed; try manually"))
       (write-log :separation-newline))
     ;eval4tex
-    (load (concatenate 'string *jobname* *eval4tex-file-suffix*) :if-does-not-exist nil)
+    (load (string-append *jobname* *eval4tex-file-suffix*) :if-does-not-exist nil)
     ;metapost
     (mapc
      (lambda (f)
@@ -8024,49 +8032,49 @@
   (let ((home (retrieve-env "HOME")))
     (and home
          (let ((slash-already-p
-                (let ((n (length home)))
+                (let ((n (string-length home)))
                   (and (>= n 0)
                        (let ((c (char home (1- n))))
                          (or (char= c #\/) (char= c #\\)))))))
-           (concatenate 'string home (if slash-already-p "" "/") f)))))
+           (string-append home (if slash-already-p "" "/") f)))))
 
 (defun make-target-dir ()
   (let ((hdir-file
          (first-file-that-exists
-          (concatenate 'string *jobname* ".hdir")
+          (string-append *jobname* ".hdir")
           ".tex2page.hdir" (file-in-home ".tex2page.hdir"))))
     (when hdir-file
       (let ((hdir
              (call-with-input-file/buffered hdir-file
                (lambda () (get-filename-possibly-braced)))))
-        (unless (= (length hdir) 0)
+        (unless (= (string-length hdir) 0)
           #-windows
           (progn
-            (system (concatenate 'string "mkdir -p " hdir))
-            (system (concatenate 'string "touch " hdir "/probe")))
+            (system (string-append "mkdir -p " hdir))
+            (system (string-append "touch " hdir "/probe")))
           #+windows
           (progn
-            (system (concatenate 'string "mkdir " hdir))
-            (system (concatenate 'string "echo probe > " hdir "\\probe")))
-          (let ((probe (concatenate 'string hdir "/probe")))
+            (system (string-append "mkdir " hdir))
+            (system (string-append "echo probe > " hdir "\\probe")))
+          (let ((probe (string-append hdir "/probe")))
             (when (probe-file probe)
               (ensure-file-deleted probe)
               (setq *aux-dir* hdir
-                    *aux-dir/* (concatenate 'string *aux-dir* "/")))))))))
+                    *aux-dir/* (string-append *aux-dir* "/")))))))))
 
 (defun move-aux-files-to-aux-dir (f)
   (when (and *aux-dir*
-             (or (probe-file (concatenate 'string f ".tex"))
-                 (probe-file (concatenate 'string f ".scm"))
-                 (probe-file (concatenate 'string f (find-img-file-extn)))))
-    #-windows (system (concatenate 'string "mv " f ".* " *aux-dir*))
+             (or (probe-file (string-append f ".tex"))
+                 (probe-file (string-append f ".scm"))
+                 (probe-file (string-append f (find-img-file-extn)))))
+    #-windows (system (string-append "mv " f ".* " *aux-dir*))
     #+windows
     (progn
-      (system (concatenate 'string "copy " f ".* " *aux-dir*))
+      (system (string-append "copy " f ".* " *aux-dir*))
       (when
-        (or (probe-file (concatenate 'string f ".tex"))
-            (probe-file (concatenate 'string f ".scm")))
-        (system (concatenate 'string "del " f ".*"))))))
+        (or (probe-file (string-append f ".tex"))
+            (probe-file (string-append f ".scm")))
+        (system (string-append "del " f ".*"))))))
 
 (defun start-css-file ()
   (setq *basic-style* "body {
@@ -8379,7 +8387,7 @@
         margin-left: 0pt;
         }
         ")
-          (let ((css-file (concatenate 'string *aux-dir/* *jobname* *css-file-suffix*)))
+          (let ((css-file (string-append *aux-dir/* *jobname* *css-file-suffix*)))
             (setq *css-stream* (open css-file :direction :output
                                      :if-exists :supersede))
             (unless (or (tex2page-flag-boolean "\\TIIPsinglepage")
@@ -8388,15 +8396,15 @@
 
 (defun load-aux-file ()
   (let ((label-file
-         (concatenate 'string *aux-dir/* *jobname* *label-file-suffix*)))
+         (string-append *aux-dir/* *jobname* *label-file-suffix*)))
     (when (probe-file label-file)
       (load-tex2page-data-file label-file)
       (delete-file label-file)))
   (unless (string= *jobname* "texput")
-    (let ((texput-aux (concatenate 'string "texput" *aux-file-suffix*)))
+    (let ((texput-aux (string-append "texput" *aux-file-suffix*)))
       (when (probe-file texput-aux) (delete-file texput-aux))))
   (let ((aux-file
-         (concatenate 'string *aux-dir/* *jobname* *aux-file-suffix*)))
+         (string-append *aux-dir/* *jobname* *aux-file-suffix*)))
     (when (probe-file aux-file)
       (load-tex2page-data-file aux-file)
       (delete-file aux-file)))
@@ -8534,7 +8542,7 @@
 (defun fully-qualified-url-p (u) (or (search "//" u) (char= (char u 0) #\/)))
 
 (defun fully-qualified-pathname-p (f)
-  (let ((n (length f)))
+  (let ((n (string-length f)))
     (if (= n 0) t
         (let ((c0 (char f 0)))
           (cond ((char= c0 #\/) t) ((= n 1) nil)
@@ -8542,12 +8550,12 @@
 
 (defun ensure-url-reachable (f &optional deletep)
   (when (and *aux-dir* (not (fully-qualified-url-p f)) (not (search "/" f)))
-    (let ((real-f (concatenate 'string *aux-dir/* f)))
+    (let ((real-f (string-append *aux-dir/* f)))
       (when (and (probe-file f) (not (probe-file real-f)))
         #-windows
-        (system (concatenate 'string "cp -p " f " " real-f))
+        (system (string-append "cp -p " f " " real-f))
         #+windows
-        (system (concatenate 'string "copy/b " f " " *aux-dir*))))
+        (system (string-append "copy/b " f " " *aux-dir*))))
     (when deletep
       (ensure-file-deleted f)))
   f)
@@ -8566,7 +8574,7 @@
 (defun !html-redirect (url seconds)
   (setq *redirect-url* url
         *redirect-delay* seconds)
-  (!html-head (concatenate 'string
+  (!html-head (string-append
                            "<meta http-equiv=\"refresh\" content=\""
                            seconds ";"
                            url "\">")))
@@ -8689,7 +8697,7 @@ Try the commands
   (close-all-open-streams))
 
 (defun non-fatal-error (&rest ss)
-  (emit-link-start (concatenate 'string *jobname* ".hlog"))
+  (emit-link-start (string-append *jobname* ".hlog"))
   ;x2692 won't print on lynx
   (emit "<span style=\"color: red\">&#x2388;&#xa0;")
   (mapc #'emit-html-string ss)
@@ -8717,7 +8725,7 @@ Try the commands
     (tex-def-math-prim cs
      (lambda ()
          (tex2page-string
-          (concatenate 'string "\\global\\imgdef" cs "{$" expn "$}"))
+          (string-append "\\global\\imgdef" cs "{$" expn "$}"))
          (tex2page-string cs)))))
 
 ;;TeX primitives
@@ -9273,10 +9281,10 @@ Try the commands
 (defun texbook-18-2 (x)
   (let (lhs rhs)
     (cond ((atom x)
-           (setq lhs (concatenate 'string "\\" x)
-                 rhs (concatenate 'string x " ")))
-          (t (setq lhs (concatenate 'string "\\" (car x))
-                   rhs (concatenate 'string (cadr x) " "))))
+           (setq lhs (string-append "\\" x)
+                 rhs (string-append x " ")))
+          (t (setq lhs (string-append "\\" (car x))
+                   rhs (string-append (cadr x) " "))))
     (tex-defsym-math-prim lhs rhs)))
 
 (mapc #'texbook-18-2
@@ -9324,13 +9332,13 @@ Try the commands
 (tex-def-prim "\\beginchapter" #'do-beginchapter)
 
 (tex-def-prim "\\MF"
-              (let ((MF (concatenate 'string "<span style=\""
+              (let ((MF (string-append "<span style=\""
                           "font-family: sans-serif"
                           "\">METAFONT</span>")))
                 (lambda () (emit MF))))
 
 (tex-def-prim "\\AmSTeX"
-              (let ((AmS (concatenate 'string "<span style=\"font-family: cursive;\">"
+              (let ((AmS (string-append "<span style=\"font-family: cursive;\">"
                            "A"
                            "<span style=\""
                            "position: relative; "
@@ -9396,8 +9404,8 @@ Try the commands
   (let* ((pdf-file (get-filename))
          height rotated width
          (img-file-stem (next-html-image-file-stem))
-         (img-file (concatenate 'string img-file-stem (find-img-file-extn)))
-         (fq-img-file (concatenate 'string *aux-dir/* img-file)))
+         (img-file (string-append img-file-stem (find-img-file-extn)))
+         (fq-img-file (string-append *aux-dir/* img-file)))
     (loop (cond ((eat-word "height") (setq height (get-pixels)))
                 ((eat-word "rotated") (setq rotated (get-number)))
                 ((eat-word "width") (setq width (get-pixels)))
@@ -9582,7 +9590,7 @@ Try the commands
 (defun do-scm-slatex-lines (env display-p result-p)
   (declare (string env))
   (let ((*catcodes* *catcodes*)
-        (endenv (concatenate 'string "\\end" env))
+        (endenv (string-append "\\end" env))
         (in-table-p (and (not (null *tabular-stack*))
                          (member (car *tabular-stack*) '(:block :figure :table)))))
     (cond (display-p (do-end-para)) (in-table-p (emit "</td><td>")))
@@ -9656,11 +9664,11 @@ Try the commands
   ;
   (!index *index-count* *html-page-count*)
   (write-aux `(!index ,*index-count* ,*html-page-count*))
-  (let ((tag (concatenate 'string *html-node-prefix* "index_"
+  (let ((tag (string-append *html-node-prefix* "index_"
                (write-to-string *index-count*))))
     (emit-anchor tag)
     (unless *index-stream*
-      (let ((idx-file (concatenate 'string *aux-dir/* *jobname*
+      (let ((idx-file (string-append *aux-dir/* *jobname*
                         *index-file-suffix* ".idx")))
         (setq *index-stream* (open idx-file :direction :output
                                  :if-exists :supersede))))
@@ -9716,11 +9724,11 @@ Try the commands
      (if *using-chapters-p* "\\chapter*{\\indexname}"
          "\\section*{\\indexname}"))
     (emit-newline))
-  (emit-anchor (concatenate 'string *html-node-prefix* "index_start"))
+  (emit-anchor (string-append *html-node-prefix* "index_start"))
   (!index-page *html-page-count*)
   (write-aux `(!index-page ,*html-page-count*))
   (let ((ind-file
-         (concatenate 'string *aux-dir/* *jobname* *index-file-suffix* ".ind")))
+         (string-append *aux-dir/* *jobname* *index-file-suffix* ".ind")))
     (cond ((probe-file ind-file) (tex2page-file ind-file))
           (t (flag-missing-piece :index)
            (non-fatal-error "Index not generated; rerun TeX2page")))))
@@ -9869,8 +9877,8 @@ Try the commands
     (let* ((bibitem-num-s (write-to-string *bibitem-num*))
            ;wrapping bibitem with cite{...} so label can be used as a regular
            ;non-bib-related label also
-           (key (concatenate 'string "cite{" (get-peeled-group) "}"))
-           (node-name (concatenate 'string *html-node-prefix* "bib_" bibitem-num-s)))
+           (key (string-append "cite{" (get-peeled-group) "}"))
+           (node-name (string-append *html-node-prefix* "bib_" bibitem-num-s)))
       (tex-def-0arg "\\TIIPcurrentnodename" node-name)
       (unless bibmark (setq bibmark bibitem-num-s))
       (tex-def-0arg "\\@currentlabel" bibmark)
@@ -9888,7 +9896,7 @@ Try the commands
   (declare (string bibdata))
   (setq *using-bibliography-p* t)
   (let ((bbl-file
-          (concatenate 'string *aux-dir/* *jobname* *bib-aux-file-suffix*
+          (string-append *aux-dir/* *jobname* *bib-aux-file-suffix*
             ".bbl")))
     (write-bib-aux "\\bibdata{")
     (write-bib-aux bibdata)
@@ -9935,7 +9943,7 @@ Try the commands
         (write-bib-aux key)
         (write-bib-aux "}")
         (write-bib-aux #\newline)
-        (do-ref-aux (concatenate 'string "cite{" key "}") nil nil))
+        (do-ref-aux (string-append "cite{" key "}") nil nil))
       (when extra-text
         (emit ",") (emit-nbsp 1)
         (tex2page-string extra-text))
@@ -9965,7 +9973,7 @@ Try the commands
         (write-bib-aux "\\citation{")
         (write-bib-aux key)
         (write-bib-aux "}")
-        (label-bound-p (concatenate 'string "cite{" key "}"))
+        (label-bound-p (string-append "cite{" key "}"))
         (write-bib-aux #\newline)))
     (unless (char= (get-actual-char) closing-delim)
       (terror 'do-nocite "missing" closing-delim))))
@@ -10137,10 +10145,10 @@ Try the commands
       (terror 'do-opmac-iis "Malformed \\iis."))
     (loop
       (when (null lhs-list) (return t))
-      (let ((additive (concatenate 'string (pop lhs-list) "@" (pop rhs-list))))
+      (let ((additive (string-append (pop lhs-list) "@" (pop rhs-list))))
         (setq sub
               (cond ((string= sub "") additive)
-                    (t (concatenate 'string sub "!" additive))))))
+                    (t (string-append sub "!" additive))))))
     (unless *opmac-index-sub-table*
       (flag-missing-piece :fresh-index))
     (!opmac-iis lhs sub)
@@ -10161,8 +10169,8 @@ Try the commands
   (incf *bibitem-num*)
   (let* ((key0 (get-bracketed-text-if-any))
          (bibitem-num-s (write-to-string *bibitem-num*))
-         (key (concatenate 'string "cite{" key0 "}"))
-         (node-name (concatenate 'string *html-node-prefix* "bib_" bibitem-num-s)))
+         (key (string-append "cite{" key0 "}"))
+         (node-name (string-append *html-node-prefix* "bib_" bibitem-num-s)))
     (unless key0
       (terror 'do-opmac-bib "Improper \\bib entry"))
     (tex-def-0arg "\\TIIPcurrentnodename" node-name)
@@ -10373,7 +10381,7 @@ Try the commands
   (push type *tabular-stack*)
   (get-bracketed-text-if-any)
   (let ((tbl-tag
-         (concatenate 'string *html-node-prefix*
+         (string-append *html-node-prefix*
            (if (eql type 'table) "tbl_" "fig_") (gen-temp-string))))
     (tex-def-0arg "\\TIIPcurrentnodename" tbl-tag)
     (emit-anchor tbl-tag)
@@ -10649,18 +10657,18 @@ Try the commands
                 (when (and (not (null *tabular-stack*))
                            (eql (car *tabular-stack*) :tabbing))
                   (emit-nbsp 3))))
-(tex-def-prim (concatenate 'string (list #\\ #\newline)) #'emit-newline)
+(tex-def-prim (list->string (list #\\ #\newline)) #'emit-newline)
 
 ;TeX logos
 
 (let* ((TeX *tex-logo*)
-       (Bib (concatenate 'string "B" "<span style=\""
+       (Bib (string-append "B" "<span style=\""
               "text-transform: uppercase"
               "\"><small>ib</small></span>"))
-       (ConTeXt (concatenate 'string "Con"
+       (ConTeXt (string-append "Con"
                   TeX
                   "t"))
-       (LaTeX (concatenate 'string "L" "<span style=\""
+       (LaTeX (string-append "L" "<span style=\""
                 "position: relative; "
                 "bottom: 0.3ex; "
                 "margin-left: -0.36em; "
@@ -10668,7 +10676,7 @@ Try the commands
                 "text-transform: uppercase"
                 "\"><small>a</small></span>"
                 TeX))
-       (Xe (concatenate 'string "X" "<span style=\""
+       (Xe (string-append "X" "<span style=\""
               "text-transform: uppercase; "
               "position: relative; "
               "top: 0.5ex; "
@@ -10676,7 +10684,7 @@ Try the commands
               "margin-right: -0.1667em"
               "\">&#x1dd;</span>"))
        (thinspace (kern ".16667em"))
-       (ii/e (concatenate 'string "<span style=\""
+       (ii/e (string-append "<span style=\""
               "margin-left: .05em"
               "\">2<span>"
               "<span style=\""
@@ -11036,7 +11044,7 @@ Try the commands
     (cond (*main-tex-file*
             (setq *subjobname* *jobname*
                   *html-page*
-                  (concatenate 'string *aux-dir/* *jobname* *output-extension*))
+                  (string-append *aux-dir/* *jobname* *output-extension*))
             (setq *html* (make-ostream* :stream
                                       (open *html-page* :direction :output
                                             :if-exists :supersede)))
@@ -11045,7 +11053,7 @@ Try the commands
               (tex2page-file-if-exists (file-in-home ".tex2page.t2p"))
               (tex2page-file-if-exists ".tex2page.t2p")
               (let ((f (actual-tex-filename
-                         (concatenate 'string *jobname* ".t2p"))))
+                         (string-append *jobname* ".t2p"))))
                 (when f (tex2page-file f))))
             (unless (eql (tex2page-file *main-tex-file*) :encountered-bye)
               (insert-missing-end))

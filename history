@@ -1,4 +1,10 @@
-Last change 2020-04-14
+Last change 2020-05-07
+
+2020 May 06
+
+Use macros {string-append, list->string, string->list,
+string-length} in tex2page.lisp instead of {concatenate, length}.
+Makes for less clumsy translation to Racket.
 
 2020 Apr 14
 

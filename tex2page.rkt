@@ -285,29 +285,13 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20200201, ecl.
 
 
-(define *tex2page-version* "20200329")
+(define *tex2page-version* "20200506")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
 (define *tex2page-copyright-notice*
- (let ((%type 'string)
-       (%ee
-        (list "Copyright (C) 1997-"
-              (substring *tex2page-version* 0 4)
-              " Dorai Sitaram")))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (string-append "Copyright (C) 1997-" (substring *tex2page-version* 0 4)
+  " Dorai Sitaram"))
 
 (define (string=split p sepc)
  (if (not p)
@@ -433,30 +417,9 @@
  '("\\csname" "\\else" "\\end" "\\eval" "\\fi" "\\let"))
 
 (define *tex-logo*
- (let ((%type 'string)
-       (%ee
-        (list "T"
-              "<span style=\""
-              "position: relative; "
-              "top: 0.5ex; "
-              "margin-left: -0.1667em; "
-              "margin-right: -0.125em; "
-              "text-transform: uppercase"
-              "\">e</span>"
-              "X")))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (string-append "T" "<span style=\"" "position: relative; " "top: 0.5ex; "
+  "margin-left: -0.1667em; " "margin-right: -0.125em; "
+  "text-transform: uppercase" "\">e</span>" "X"))
 
 (define *tex-files-to-ignore*
  '("btxmac" "eplain" "epsf" "lmfonts" "mfpic" "supp-pdf"))
@@ -825,21 +788,7 @@
 (defstruct label* (src false) page name value)
 
 (define (gen-temp-string) (set! *temp-string-count* (+ *temp-string-count* 1))
- (let ((%type 'string)
-       (%ee (list "Temp_" (write-to-string *temp-string-count*))))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (string-append "Temp_" (write-to-string *temp-string-count*)))
 
 (define (file-stem-name f)
  (let ((slash
@@ -888,24 +837,7 @@
 (define (write-aux e)
  (cond
   ((not *aux-stream*)
-   (let ((f
-          (let ((%type 'string)
-                (%ee (list *aux-dir/* *jobname* *aux-file-suffix*)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+   (let ((f (string-append *aux-dir/* *jobname* *aux-file-suffix*)))
      (set! *aux-stream*
       (let* ((%f f)
              (%ee (list ':direction ':output ':if-exists ':supersede))
@@ -931,24 +863,7 @@
 (define (write-label e)
  (cond
   ((not *label-stream*)
-   (let ((f
-          (let ((%type 'string)
-                (%ee (list *aux-dir/* *jobname* *label-file-suffix*)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+   (let ((f (string-append *aux-dir/* *jobname* *label-file-suffix*)))
      (set! *label-stream*
       (let* ((%f f)
              (%ee (list ':direction ':output ':if-exists ':supersede))
@@ -974,24 +889,7 @@
 (define (write-bib-aux x)
  (cond
   ((not *bib-aux-stream*)
-   (let ((f
-          (let ((%type 'string)
-                (%ee (list *aux-dir/* *jobname* *bib-aux-file-suffix* ".aux")))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+   (let ((f (string-append *aux-dir/* *jobname* *bib-aux-file-suffix* ".aux")))
      (set! *bib-aux-stream*
       (let* ((%f f)
              (%ee (list ':direction ':output ':if-exists ':supersede))
@@ -1020,23 +918,7 @@
      (set! log-file-only-p (list-ref %lambda-rest-arg 0)))
    (cond
     ((not *log-stream*)
-     (set! *log-file*
-      (let ((%type 'string) (%ee (list *aux-dir/* *jobname* ".hlog")))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+     (set! *log-file* (string-append *aux-dir/* *jobname* ".hlog"))
      (set! *log-stream*
       (let* ((%f *log-file*)
              (%ee (list ':direction ':output ':if-exists ':supersede))
@@ -1100,14 +982,8 @@
          (+ *write-log-index*
             (let ((%tag x))
               (cond ((char? %tag) 1)
-                    ((number? %tag)
-                     (let ((%length-arg (write-to-string x)))
-                       ((if (string? %length-arg) string-length length)
-                        %length-arg)))
-                    ((string? %tag)
-                     (let ((%length-arg x))
-                       ((if (string? %length-arg) string-length length)
-                        %length-arg)))
+                    ((number? %tag) (string-length (write-to-string x)))
+                    ((string? %tag) (string-length x))
                     (else 1)))))
         *write-log-index*)))
     (else false))))
@@ -1204,28 +1080,9 @@
               ((begin (set! *it* (substring? "%d" texedit-string)) *it*)
                (let ((i *it*))
                  (set! texedit-string
-                  (let ((%type 'string)
-                        (%ee
-                         (list (substring texedit-string 0 i)
-                               (write-to-string *input-line-no*)
-                               (substring texedit-string (+ i 2)))))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res)))
+                  (string-append (substring texedit-string 0 i)
+                   (write-to-string *input-line-no*)
+                   (substring texedit-string (+ i 2))))
                  texedit-string))
               (else (set! ill-formed-texedit-p true)
                (set! texedit-string false) texedit-string)))
@@ -1236,28 +1093,8 @@
               ((begin (set! *it* (substring? "%s" texedit-string)) *it*)
                (let ((i *it*))
                  (set! texedit-string
-                  (let ((%type 'string)
-                        (%ee
-                         (list (substring texedit-string 0 i)
-                               *current-source-file*
-                               (substring texedit-string (+ i 2)))))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res)))
+                  (string-append (substring texedit-string 0 i)
+                   *current-source-file* (substring texedit-string (+ i 2))))
                  texedit-string))
               (else (set! ill-formed-texedit-p true)
                (set! texedit-string false) texedit-string)))
@@ -1272,30 +1109,8 @@
               ((begin (set! *it* (or (getenv "EDITOR") "vi")) *it*)
                (let ((e *it*))
                  (set! texedit-string
-                  (let ((%type 'string)
-                        (%ee
-                         (list e
-                               " +"
-                               (write-to-string *input-line-no*)
-                               " "
-                               *current-source-file*)))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res)))
+                  (string-append e " +" (write-to-string *input-line-no*) " "
+                   *current-source-file*))
                  texedit-string))
               (else false)))
             (else false))
@@ -1346,23 +1161,7 @@
 
 (define (call-with-input-string/buffered s th)
  (fluid-let
-  ((*current-tex2page-input*
-    (make-istream* ':buffer
-     (let ((%type 'list) (%ee (list s)))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res))))
+  ((*current-tex2page-input* (make-istream* ':buffer (string->list s)))
    (*input-line-no* *input-line-no*))
   (th)))
 
@@ -1397,23 +1196,7 @@
 
 (define (toss-back-string s)
  (set!istream*-buffer *current-tex2page-input*
-  (append
-   (let ((%type 'list) (%ee (list s)))
-     (let ((%res (if (eq? %type 'string) "" null)))
-       (let %concatenate-loop
-         ((%ee %ee))
-         (if (null? %ee)
-             %res
-             (let ((%a (car %ee)))
-               (unless (not %a)
-                 (set! %res
-                  (if (eq? %type 'string)
-                      (string-append %res
-                       (if (string? %a) %a (list->string %a)))
-                      (append %res (if (string? %a) (string->list %a) %a)))))
-               (%concatenate-loop (cdr %ee)))))
-       %res))
-   (istream*-buffer *current-tex2page-input*)))
+  (append (string->list s) (istream*-buffer *current-tex2page-input*)))
  (istream*-buffer *current-tex2page-input*))
 
 (define (toss-back-char c)
@@ -1452,50 +1235,9 @@
      (let %loop
        ()
        (let ((c (get-actual-char)))
-         (cond
-          ((not c)
-           (return
-            (if r
-                (let ((%type 'string) (%ee (list (reverse r))))
-                  (let ((%res (if (eq? %type 'string) "" null)))
-                    (let %concatenate-loop
-                      ((%ee %ee))
-                      (if (null? %ee)
-                          %res
-                          (let ((%a (car %ee)))
-                            (unless (not %a)
-                              (set! %res
-                               (if (eq? %type 'string)
-                                   (string-append %res
-                                    (if (string? %a) %a (list->string %a)))
-                                   (append %res
-                                           (if (string? %a)
-                                               (string->list %a)
-                                               %a)))))
-                            (%concatenate-loop (cdr %ee)))))
-                    %res))
-                c)))
-          ((char=? c #\newline)
-           (return
-            (let ((%type 'string) (%ee (list (reverse r))))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
-          (else (set! r (cons c r)) r)))
+         (cond ((not c) (return (if r (list->string (reverse r)) c)))
+               ((char=? c #\newline) (return (list->string (reverse r))))
+               (else (set! r (cons c r)) r)))
        (if %loop-returned %loop-result (%loop))))))
 
 (define (ignorespaces . %lambda-rest-arg)
@@ -1595,77 +1337,34 @@
      (cond ((not c) "\\ ")
            ((= (catcode c) **ignore**) "\\ ")
            ((= (catcode c) **letter**)
-            (let ((%type 'string)
-                  (%ee
-                   (list
-                    (reverse
-                     (let ((s (list c #\\)))
-                       (let* ((%loop-returned false)
-                              (%loop-result 0)
-                              (return
-                               (lambda %args
-                                 (set! %loop-returned true)
-                                 (set! %loop-result
-                                  (and (pair? %args) (car %args))))))
-                         (let %loop
-                           ()
-                           (let ((c (snoop-char)))
-                             (cond ((not c) (return s))
-                                   ((= (catcode c) **ignore**) (return s))
-                                   ((= (catcode c) **letter**) (get-char)
-                                    (set! s (cons c s)) s)
-                                   (else
-                                    (ignorespaces ':stop-before-first-newline)
-                                    (return s))))
-                           (if %loop-returned %loop-result (%loop)))))))))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res)))
-           (else
-            (let ((%type 'string) (%ee (list (list #\\ c))))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res)))))))
+            (list->string
+             (reverse
+              (let ((s (list c #\\)))
+                (let* ((%loop-returned false)
+                       (%loop-result 0)
+                       (return
+                        (lambda %args
+                          (set! %loop-returned true)
+                          (set! %loop-result (and (pair? %args) (car %args))))))
+                  (let %loop
+                    ()
+                    (let ((c (snoop-char)))
+                      (cond ((not c) (return s))
+                            ((= (catcode c) **ignore**) (return s))
+                            ((= (catcode c) **letter**) (get-char)
+                             (set! s (cons c s)) s)
+                            (else (ignorespaces ':stop-before-first-newline)
+                             (return s))))
+                    (if %loop-returned %loop-result (%loop))))))))
+           (else (list->string (list #\\ c)))))))
 
 (define (ctl-seq-p z) (char=? (string-ref z 0) #\\))
 
 (define (if-aware-ctl-seq-p z)
  (or (member z *if-aware-ctl-seqs*)
-     (and
-      (>=
-       (let ((%length-arg z))
-         ((if (string? %length-arg) string-length length) %length-arg))
-       3)
-      (char=? (string-ref z 1) #\i)
-      (char=? (string-ref z 2) #\f))
+     (and (>= (string-length z) 3)
+          (char=? (string-ref z 1) #\i)
+          (char=? (string-ref z 2) #\f))
      (let ((z-th (find-corresp-prim-thunk z)))
        (if (string? z-th)
            false
@@ -1696,54 +1395,9 @@
                               (let ((x (get-ctl-seq)))
                                 (cond
                                  ((member x '("\\ " "\\{" "\\}"))
-                                  (let ((%type 'string)
-                                        (%ee (list (list (string-ref x 1)))))
-                                    (let ((%res
-                                           (if (eq? %type 'string) "" null)))
-                                      (let %concatenate-loop
-                                        ((%ee %ee))
-                                        (if (null? %ee)
-                                            %res
-                                            (let ((%a (car %ee)))
-                                              (unless (not %a)
-                                                (set! %res
-                                                 (if (eq? %type 'string)
-                                                     (string-append %res
-                                                      (if (string? %a)
-                                                          %a
-                                                          (list->string %a)))
-                                                     (append %res
-                                                             (if (string? %a)
-                                                                 (string->list
-                                                                  %a)
-                                                                 %a)))))
-                                              (%concatenate-loop (cdr %ee)))))
-                                      %res)))
+                                  (list->string (list (string-ref x 1))))
                                  (else (tex-string-to-html-string x)))))))
-                        (set! s
-                         (append
-                          (reverse
-                           (let ((%type 'list) (%ee (list s1)))
-                             (let ((%res (if (eq? %type 'string) "" null)))
-                               (let %concatenate-loop
-                                 ((%ee %ee))
-                                 (if (null? %ee)
-                                     %res
-                                     (let ((%a (car %ee)))
-                                       (unless (not %a)
-                                         (set! %res
-                                          (if (eq? %type 'string)
-                                              (string-append %res
-                                               (if (string? %a)
-                                                   %a
-                                                   (list->string %a)))
-                                              (append %res
-                                                      (if (string? %a)
-                                                          (string->list %a)
-                                                          %a)))))
-                                       (%concatenate-loop (cdr %ee)))))
-                               %res)))
-                          s))
+                        (set! s (append (reverse (string->list s1)) s))
                         (set! escape-p false)
                         escape-p)
                       (begin (begin (set! s (cons c s)) s)
@@ -1758,21 +1412,7 @@
                  (else (set! s (cons c s)) (set! escape-p false) escape-p)))
          (if %loop-returned %loop-result (%loop)))))))
 
-(define (get-group)
- (let ((%type 'string) (%ee (list (reverse (get-group-as-reversed-chars)))))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+(define (get-group) (list->string (reverse (get-group-as-reversed-chars))))
 
 (define (get-peeled-group) (string-trim (ungroup (get-group))))
 
@@ -1797,25 +1437,7 @@
                  ((or (char-alphabetic? c) (char=? c #\*)) (get-actual-char)
                   (set! s (cons c s)) s)
                  ((and (pair? s) (char=? c #\})) (get-actual-char)
-                  (return
-                   (let ((%type 'string) (%ee (list (reverse s))))
-                     (let ((%res (if (eq? %type 'string) "" null)))
-                       (let %concatenate-loop
-                         ((%ee %ee))
-                         (if (null? %ee)
-                             %res
-                             (let ((%a (car %ee)))
-                               (unless (not %a)
-                                 (set! %res
-                                  (if (eq? %type 'string)
-                                      (string-append %res
-                                       (if (string? %a) %a (list->string %a)))
-                                      (append %res
-                                              (if (string? %a)
-                                                  (string->list %a)
-                                                  %a)))))
-                               (%concatenate-loop (cdr %ee)))))
-                       %res))))
+                  (return (list->string (reverse s))))
                  (else (for-each toss-back-char s) (toss-back-char #\{)
                   (return false))))
               (if %loop-returned %loop-result (%loop)))))))))
@@ -1825,61 +1447,40 @@
    (if (or (not c) (not (char=? c #\[)))
        false
        (begin (get-actual-char)
-        (let ((%type 'string)
-              (%ee
-               (list
-                (reverse
-                 (let ((s null) (nesting 0) (escape-p false))
-                   (let* ((%loop-returned false)
-                          (%loop-result 0)
-                          (return
-                           (lambda %args
-                             (set! %loop-returned true)
-                             (set! %loop-result
-                              (and (pair? %args) (car %args))))))
-                     (let %loop
-                       ()
-                       (let ((c (get-actual-char)))
-                         (cond
-                          ((not c)
-                           (terror 'get-bracketed-text-if-any
-                            "Runaway argument?"))
-                          (else false))
-                         (cond
-                          (escape-p (set! s (cons c s)) (set! escape-p false)
-                           escape-p)
-                          ((= (catcode c) **escape**) (set! s (cons c s))
-                           (set! escape-p true) escape-p)
-                          ((char=? c #\{) (set! s (cons c s))
-                           (set! nesting (+ nesting 1)) nesting)
-                          ((char=? c #\}) (set! s (cons c s))
-                           (set! nesting (- nesting 1)) nesting)
-                          ((char=? c #\])
-                           (if (= nesting 0)
-                               (return s)
-                               (begin (set! s (cons c s)) s)))
-                          (else (set! s (cons c s)) s)))
-                       (if %loop-returned %loop-result (%loop)))))))))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))))
+        (list->string
+         (reverse
+          (let ((s null) (nesting 0) (escape-p false))
+            (let* ((%loop-returned false)
+                   (%loop-result 0)
+                   (return
+                    (lambda %args
+                      (set! %loop-returned true)
+                      (set! %loop-result (and (pair? %args) (car %args))))))
+              (let %loop
+                ()
+                (let ((c (get-actual-char)))
+                  (cond
+                   ((not c)
+                    (terror 'get-bracketed-text-if-any "Runaway argument?"))
+                   (else false))
+                  (cond
+                   (escape-p (set! s (cons c s)) (set! escape-p false)
+                    escape-p)
+                   ((= (catcode c) **escape**) (set! s (cons c s))
+                    (set! escape-p true) escape-p)
+                   ((char=? c #\{) (set! s (cons c s))
+                    (set! nesting (+ nesting 1)) nesting)
+                   ((char=? c #\}) (set! s (cons c s))
+                    (set! nesting (- nesting 1)) nesting)
+                   ((char=? c #\])
+                    (if (= nesting 0)
+                        (return s)
+                        (begin (set! s (cons c s)) s)))
+                   (else (set! s (cons c s)) s)))
+                (if %loop-returned %loop-result (%loop)))))))))))
 
 (define (ungroup s)
- (let ((n
-        (let ((%length-arg s))
-          ((if (string? %length-arg) string-length length) %length-arg))))
+ (let ((n (string-length s)))
    (let ((n-1 (sub1 n)))
      (if
       (and (>= n 2)
@@ -1921,122 +1522,62 @@
            (get-actual-char)
            (begin (set! bracedp false) bracedp))))
     (else false))
-   (let ((%type 'string)
-         (%ee
-          (list
-           (reverse
-            (let ((s null))
-              (let* ((%loop-returned false)
-                     (%loop-result 0)
-                     (return
-                      (lambda %args
-                        (set! %loop-returned true)
-                        (set! %loop-result (and (pair? %args) (car %args))))))
-                (let %loop
-                  ()
-                  (let ((c (snoop-actual-char)))
-                    (cond ((not c) (return s))
-                          ((and (not bracedp)
-                                (or (char-whitespace? c)
-                                    (= (catcode c) **comment**)
-                                    (member c *filename-delims*)))
-                           (ignorespaces ':stop-before-first-newline)
-                           (return s))
-                          ((and bracedp (char=? c #\})) (get-actual-char)
-                           (return s))
-                          ((= (catcode c) **escape**)
-                           (let ((x (get-ctl-seq)))
-                             (if (string=? x "\\jobname")
-                                 (begin
-                                  (set! s
-                                   (append
-                                    (reverse
-                                     (let ((%type 'list) (%ee (list *jobname*)))
-                                       (let ((%res
-                                              (if (eq? %type 'string) "" null)))
-                                         (let %concatenate-loop
-                                           ((%ee %ee))
-                                           (if (null? %ee)
-                                               %res
-                                               (let ((%a (car %ee)))
-                                                 (unless (not %a)
-                                                   (set! %res
-                                                    (if (eq? %type 'string)
-                                                        (string-append %res
-                                                         (if (string? %a)
-                                                             %a
-                                                             (list->string
-                                                              %a)))
-                                                        (append %res
-                                                                (if
-                                                                 (string? %a)
-                                                                 (string->list
-                                                                  %a)
-                                                                 %a)))))
-                                                 (%concatenate-loop
-                                                  (cdr %ee)))))
-                                         %res)))
-                                    s))
-                                  s)
-                                 (begin (toss-back-char *invisible-space*)
-                                  (toss-back-string x) (return s)))))
-                          (else (get-actual-char) (set! s (cons c s)) s)))
-                  (if %loop-returned %loop-result (%loop)))))))))
-     (let ((%res (if (eq? %type 'string) "" null)))
-       (let %concatenate-loop
-         ((%ee %ee))
-         (if (null? %ee)
-             %res
-             (let ((%a (car %ee)))
-               (unless (not %a)
-                 (set! %res
-                  (if (eq? %type 'string)
-                      (string-append %res
-                       (if (string? %a) %a (list->string %a)))
-                      (append %res (if (string? %a) (string->list %a) %a)))))
-               (%concatenate-loop (cdr %ee)))))
-       %res))))
+   (list->string
+    (reverse
+     (let ((s null))
+       (let* ((%loop-returned false)
+              (%loop-result 0)
+              (return
+               (lambda %args
+                 (set! %loop-returned true)
+                 (set! %loop-result (and (pair? %args) (car %args))))))
+         (let %loop
+           ()
+           (let ((c (snoop-actual-char)))
+             (cond ((not c) (return s))
+                   ((and (not bracedp)
+                         (or (char-whitespace? c)
+                             (= (catcode c) **comment**)
+                             (member c *filename-delims*)))
+                    (ignorespaces ':stop-before-first-newline) (return s))
+                   ((and bracedp (char=? c #\})) (get-actual-char) (return s))
+                   ((= (catcode c) **escape**)
+                    (let ((x (get-ctl-seq)))
+                      (if (string=? x "\\jobname")
+                          (begin
+                           (set! s
+                            (append (reverse (string->list *jobname*)) s))
+                           s)
+                          (begin (toss-back-char *invisible-space*)
+                           (toss-back-string x) (return s)))))
+                   (else (get-actual-char) (set! s (cons c s)) s)))
+           (if %loop-returned %loop-result (%loop)))))))))
 
 (define (get-filename-possibly-braced) (ignorespaces)
  (let ((c (snoop-actual-char)))
    (get-filename (and (char? c) (char=? c #\{)))))
 
 (define (get-word) (ignorespaces)
- (let ((%type 'string)
-       (%ee
-        (list
-         (reverse
-          (let ((s null))
-            (let* ((%loop-returned false)
-                   (%loop-result 0)
-                   (return
-                    (lambda %args
-                      (set! %loop-returned true)
-                      (set! %loop-result (and (pair? %args) (car %args))))))
-              (let %loop
-                ()
-                (let ((c (snoop-actual-char)))
-                  (cond ((not c) (return s))
-                        ((or (char-whitespace? c)
-                             (= (catcode c) **comment**)
-                             (= (catcode c))
-                             **escape**)
-                         (return s))
-                        (else (get-actual-char) (set! s (cons c s)) s)))
-                (if %loop-returned %loop-result (%loop)))))))))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (list->string
+  (reverse
+   (let ((s null))
+     (let* ((%loop-returned false)
+            (%loop-result 0)
+            (return
+             (lambda %args
+               (set! %loop-returned true)
+               (set! %loop-result (and (pair? %args) (car %args))))))
+       (let %loop
+         ()
+         (let ((c (snoop-actual-char)))
+           (cond ((not c) (return s))
+                 ((or (char-whitespace? c)
+                      (= (catcode c) **comment**)
+                      (= (catcode c))
+                      **escape**)
+                  (return s))
+                 (else (get-actual-char) (set! s (cons c s)) s)))
+         (if %loop-returned %loop-result (%loop))))))))
 
 (define (get-integer base) (ignorespaces)
  (let ((s null) (c false))
@@ -2058,27 +1599,8 @@
        (unless %loop-returned (get-actual-char))
        (unless %loop-returned (set! s (cons c s)) s)
        (if %loop-returned %loop-result (%loop))))
-   (cond
-    ((pair? s)
-     (string->number
-      (let ((%type 'string) (%ee (list (reverse s))))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res))
-      base))
-    (else false))))
+   (cond ((pair? s) (string->number (list->string (reverse s)) base))
+         (else false))))
 
 (define (get-real) (ignorespaces)
  (let ((negative? false) (c (snoop-actual-char)))
@@ -2100,26 +1622,7 @@
                  (else (ignorespaces) (return))))
          (if %loop-returned %loop-result (%loop))))
      (if s
-         (let ((n
-                (string->number
-                 (let ((%type 'string) (%ee (list (reverse s))))
-                   (let ((%res (if (eq? %type 'string) "" null)))
-                     (let %concatenate-loop
-                       ((%ee %ee))
-                       (if (null? %ee)
-                           %res
-                           (let ((%a (car %ee)))
-                             (unless (not %a)
-                               (set! %res
-                                (if (eq? %type 'string)
-                                    (string-append %res
-                                     (if (string? %a) %a (list->string %a)))
-                                    (append %res
-                                            (if (string? %a)
-                                                (string->list %a)
-                                                %a)))))
-                             (%concatenate-loop (cdr %ee)))))
-                     %res)))))
+         (let ((n (string->number (list->string (reverse s)))))
            (if negative? (- n) n))
          false))))
 
@@ -2161,11 +1664,7 @@
        ((find-dimen x))
        ((begin (set! *it* (resolve-defs x)) *it*)
         (char->integer (string-ref *it* 0)))
-       ((=
-         (let ((%length-arg x))
-           ((if (string? %length-arg) string-length length) %length-arg))
-         2)
-        (char->integer (string-ref x 1)))
+       ((= (string-length x) 2) (char->integer (string-ref x 1)))
        (else (string->number x))))
 
 (define (get-number-or-false) (ignorespaces)
@@ -2197,11 +1696,7 @@
  (let ((x (get-token-or-peeled-group)))
    (let ((c0 (string-ref x 0)))
      (cond
-      ((and (= (catcode c0) **escape**)
-            (>
-             (let ((%length-arg x))
-               ((if (string? %length-arg) string-length length) %length-arg))
-             1))
+      ((and (= (catcode c0) **escape**) (> (string-length x) 1))
        (set! c0 (string-ref x 1)) c0)
       (else false))
      c0)))
@@ -2211,50 +1706,33 @@
    (cond ((or (not c) (not (char=? c #\{))) (terror 'get-url "Missing {"))
          (else false))
    (string-trim
-    (let ((%type 'string)
-          (%ee
-           (list
-            (reverse
-             (let ((nesting 0) (s null))
-               (let* ((%loop-returned false)
-                      (%loop-result 0)
-                      (return
-                       (lambda %args
-                         (set! %loop-returned true)
-                         (set! %loop-result (and (pair? %args) (car %args))))))
-                 (let %loop
-                   ()
-                   (let ((c (get-actual-char)))
-                     (cond ((not c) (terror 'get-url "Missing }"))
-                           (else false))
-                     (cond
-                      ((= (catcode c) **comment**)
-                       (let ((c1 (snoop-actual-char)))
-                         (if (and (char? c1) (char-whitespace? c1))
-                             (ignorespaces)
-                             (begin (set! s (cons c s)) s))))
-                      ((char=? c #\{) (set! nesting (+ nesting 1))
-                       (set! s (cons c s)) s)
-                      ((char=? c #\})
-                       (cond ((= nesting 0) (return s))
-                             (else (set! nesting (- nesting 1))
-                              (set! s (cons c s)) s)))
-                      (else (set! s (cons c s)) s)))
-                   (if %loop-returned %loop-result (%loop)))))))))
-      (let ((%res (if (eq? %type 'string) "" null)))
-        (let %concatenate-loop
-          ((%ee %ee))
-          (if (null? %ee)
-              %res
-              (let ((%a (car %ee)))
-                (unless (not %a)
-                  (set! %res
-                   (if (eq? %type 'string)
-                       (string-append %res
-                        (if (string? %a) %a (list->string %a)))
-                       (append %res (if (string? %a) (string->list %a) %a)))))
-                (%concatenate-loop (cdr %ee)))))
-        %res)))))
+    (list->string
+     (reverse
+      (let ((nesting 0) (s null))
+        (let* ((%loop-returned false)
+               (%loop-result 0)
+               (return
+                (lambda %args
+                  (set! %loop-returned true)
+                  (set! %loop-result (and (pair? %args) (car %args))))))
+          (let %loop
+            ()
+            (let ((c (get-actual-char)))
+              (cond ((not c) (terror 'get-url "Missing }")) (else false))
+              (cond
+               ((= (catcode c) **comment**)
+                (let ((c1 (snoop-actual-char)))
+                  (if (and (char? c1) (char-whitespace? c1))
+                      (ignorespaces)
+                      (begin (set! s (cons c s)) s))))
+               ((char=? c #\{) (set! nesting (+ nesting 1)) (set! s (cons c s))
+                s)
+               ((char=? c #\})
+                (cond ((= nesting 0) (return s))
+                      (else (set! nesting (- nesting 1)) (set! s (cons c s))
+                       s)))
+               (else (set! s (cons c s)) s)))
+            (if %loop-returned %loop-result (%loop))))))))))
 
 (define (get-csv closing-delim) (ignorespaces)
  (let ((rev-lbl
@@ -2277,69 +1755,21 @@
                       ((char=? c closing-delim) (toss-back-char c) (return s))
                       (else (set! s (cons c s)) s)))
               (if %loop-returned %loop-result (%loop)))))))
-   (cond
-    ((not (null? rev-lbl))
-     (let ((%type 'string) (%ee (list (reverse rev-lbl))))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res)))
-    (else false))))
+   (cond ((not (null? rev-lbl)) (list->string (reverse rev-lbl)))
+         (else false))))
 
 (define (get-raw-token)
  (let ((c (snoop-actual-char)))
    (cond ((not c) c)
          ((= (catcode c) **escape**) (get-ctl-seq))
-         (else
-          (let ((%type 'string) (%ee (list (list (get-actual-char)))))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))))
+         (else (list->string (list (get-actual-char)))))))
 
 (define (get-raw-token/is) (ignorespaces)
  (let ((c (snoop-actual-char)))
    (cond ((not c) c)
          ((= (catcode c) **escape**) (get-ctl-seq))
          ((= (catcode c) **comment**) (eat-till-eol) (get-raw-token/is))
-         (else
-          (let ((%type 'string) (%ee (list (list (get-actual-char)))))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))))
+         (else (list->string (list (get-actual-char)))))))
 
 (define (get-token) (ignorespaces)
  (let ((c (snoop-actual-char)))
@@ -2347,23 +1777,7 @@
          ((= (catcode c) **escape**) (get-ctl-seq))
          ((char=? c #\{) (get-group))
          ((= (catcode c) **comment**) (eat-till-eol) (get-token))
-         (else
-          (let ((%type 'string) (%ee (list (list (get-actual-char)))))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))))
+         (else (list->string (list (get-actual-char)))))))
 
 (define (get-token/ps)
  (let ((c (snoop-actual-char)))
@@ -2371,30 +1785,11 @@
          ((= (catcode c) **escape**) (get-ctl-seq))
          ((char=? c #\{) (get-group))
          ((= (catcode c) **comment**) (eat-till-eol) (get-token/ps))
-         (else
-          (let ((%type 'string) (%ee (list (list (get-actual-char)))))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))))
+         (else (list->string (list (get-actual-char)))))))
 
 (define (eat-word word) (ignorespaces)
  (let ((r null))
-   (let ((%dotimes-n
-          (let ((%length-arg word))
-            ((if (string? %length-arg) string-length length) %length-arg)))
-         (i 0))
+   (let ((%dotimes-n (string-length word)) (i 0))
      (let* ((%loop-returned false)
             (%loop-result 0)
             (return
@@ -2453,44 +1848,29 @@
   (get-number)))
 
 (define (scm-get-token)
- (let ((%type 'string)
-       (%ee
-        (list
-         (reverse
-          (let ((s null) (esc-p false) (c false))
-            (let* ((%loop-returned false)
-                   (%loop-result 0)
-                   (return
-                    (lambda %args
-                      (set! %loop-returned true)
-                      (set! %loop-result (and (pair? %args) (car %args))))))
-              (let %loop
-                ()
-                (set! c (snoop-actual-char))
-                (cond ((not c) (return s)) (else false))
-                (unless %loop-returned
-                  (cond
-                   (esc-p (get-actual-char) (set! s (cons c s))
-                    (set! esc-p false) esc-p)
-                   ((char=? c #\\) (get-actual-char) (set! s (cons c s))
-                    (set! esc-p true) esc-p)
-                   ((or (char-whitespace? c) (member c *scm-token-delims*))
-                    (return s))
-                   (else (get-actual-char) (set! s (cons c s)) s)))
-                (if %loop-returned %loop-result (%loop)))))))))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (list->string
+  (reverse
+   (let ((s null) (esc-p false) (c false))
+     (let* ((%loop-returned false)
+            (%loop-result 0)
+            (return
+             (lambda %args
+               (set! %loop-returned true)
+               (set! %loop-result (and (pair? %args) (car %args))))))
+       (let %loop
+         ()
+         (set! c (snoop-actual-char))
+         (cond ((not c) (return s)) (else false))
+         (unless %loop-returned
+           (cond
+            (esc-p (get-actual-char) (set! s (cons c s)) (set! esc-p false)
+             esc-p)
+            ((char=? c #\\) (get-actual-char) (set! s (cons c s))
+             (set! esc-p true) esc-p)
+            ((or (char-whitespace? c) (member c *scm-token-delims*))
+             (return s))
+            (else (get-actual-char) (set! s (cons c s)) s)))
+         (if %loop-returned %loop-result (%loop))))))))
 
 (define (make-html-output-stream) (make-ostream* ':stream (open-output-string)))
 
@@ -2546,10 +1926,7 @@
   (else false)))
 
 (define (emit-html-string s)
- (let ((%dotimes-n
-        (let ((%length-arg s))
-          ((if (string? %length-arg) string-length length) %length-arg)))
-       (i 0))
+ (let ((%dotimes-n (string-length s)) (i 0))
    (let* ((%loop-returned false)
           (%loop-result 0)
           (return
@@ -2584,21 +1961,7 @@
 (define (curr-esc-char) (car (rassoc 0 *catcodes*)))
 
 (define (kern len)
- (let ((%type 'string)
-       (%ee (list "<span style=\"margin-left: " len "\"> </span>")))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (string-append "<span style=\"margin-left: " len "\"> </span>"))
 
 (define (do-kern)
  (let ((n (get-pixels)))
@@ -2615,25 +1978,7 @@
         ((member cs '("\\hbox" "\\vbox" "\\vtop"))
          (let ((box-caller (get-till-char #\{)))
            (let ((box-content (get-group)))
-             (set! s
-              (let ((%type 'string) (%ee (list cs box-caller box-content)))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res)))
+             (set! s (string-append cs box-caller box-content))
              s)))
         ((string=? cs "\\box") (set! s (read-box-string (get-number))) s)
         ((string=? cs "\\copy") (set! s (read-box-string (get-number) true))
@@ -2692,26 +2037,8 @@
     (lambda ()
       (let ((res (html-output-stream-to-string *html*)))
         (set! res
-         (let ((%type 'string)
-               (%ee
-                (list "<table><tr><td class=centerline>"
-                      res
-                      "</td></tr></table>")))
-           (let ((%res (if (eq? %type 'string) "" null)))
-             (let %concatenate-loop
-               ((%ee %ee))
-               (if (null? %ee)
-                   %res
-                   (let ((%a (car %ee)))
-                     (unless (not %a)
-                       (set! %res
-                        (if (eq? %type 'string)
-                            (string-append %res
-                             (if (string? %a) %a (list->string %a)))
-                            (append %res
-                                    (if (string? %a) (string->list %a) %a)))))
-                     (%concatenate-loop (cdr %ee)))))
-             %res)))
+         (string-append "<table><tr><td class=centerline>" res
+          "</td></tr></table>"))
         (cond
          ((or *math-delim-left* *math-delim-right*)
           (cond
@@ -2722,32 +2049,10 @@
             (set! *math-height* (+ *math-height* 1)) *math-height*)
            (else false))
           (set! res
-           (let ((%type 'string)
-                 (%ee
-                  (list "<table><tr><td>"
-                        (tex-math-delim-string *math-delim-left*)
-                        "</td><td>"
-                        res
-                        "</td><td>"
-                        (tex-math-delim-string *math-delim-right*)
-                        "</td></tr></table>")))
-             (let ((%res (if (eq? %type 'string) "" null)))
-               (let %concatenate-loop
-                 ((%ee %ee))
-                 (if (null? %ee)
-                     %res
-                     (let ((%a (car %ee)))
-                       (unless (not %a)
-                         (set! %res
-                          (if (eq? %type 'string)
-                              (string-append %res
-                               (if (string? %a) %a (list->string %a)))
-                              (append %res
-                                      (if (string? %a)
-                                          (string->list %a)
-                                          %a)))))
-                       (%concatenate-loop (cdr %ee)))))
-               %res)))
+           (string-append "<table><tr><td>"
+            (tex-math-delim-string *math-delim-left*) "</td><td>" res
+            "</td><td>" (tex-math-delim-string *math-delim-right*)
+            "</td></tr></table>"))
           res)
          (else false))
         (set! *html* old-html)
@@ -2858,23 +2163,8 @@
  (tex-def prim null false false thunk prim false *primitive-texframe*))
 
 (define (tex-def-pat-prim prim argstr rhs)
- (tex-def prim
-  (let ((%type 'list) (%ee (list argstr)))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res))
-  rhs false false false false *primitive-texframe*))
+ (tex-def prim (string->list argstr) rhs false false false false
+  *primitive-texframe*))
 
 (define (tex-defsym-prim prim str)
  (tex-def prim null false false (lambda () (emit str)) prim false
@@ -3564,28 +2854,9 @@
  (fluid-let ((*outputting-external-title-p* true)) (bgroup)
   (let ((s
          (tex-string-to-html-string
-          (let ((%type 'string)
-                (%ee
-                 (list "\\let\\\\\\ignorespaces"
-                       "\\def\\resizebox#1#2#3{}"
-                       "\\let\\thanks\\TIIPgobblegroup"
-                       "\\let\\urlh\\TIIPgobblegroup "
-                       title)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res)))))
+          (string-append "\\let\\\\\\ignorespaces" "\\def\\resizebox#1#2#3{}"
+           "\\let\\thanks\\TIIPgobblegroup" "\\let\\urlh\\TIIPgobblegroup "
+           title))))
     (egroup)
     s)))
 
@@ -3595,23 +2866,8 @@
   (emit-newline)))
 
 (define (output-title title) (emit "<h1 class=title>") (bgroup)
- (tex2page-string
-  (let ((%type 'string) (%ee (list "\\let\\\\\\break " title)))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res)))
- (egroup) (emit "</h1>") (do-noindent))
+ (tex2page-string (string-append "\\let\\\\\\break " title)) (egroup)
+ (emit "</h1>") (do-noindent))
 
 (define (do-subject) (tex-gdef-0arg "\\TIIPtitleused" "1") (do-end-para)
  (ignorespaces)
@@ -3687,25 +2943,8 @@
 
 (define (do-maketitle) (do-end-para) (bgroup)
  (tex2page-string
-  (let ((%type 'string)
-        (%ee
-         (list "\\let\\\\\\break"
-               "\\let\\and\\break"
-               "\\let\\thanks\\symfootnote")))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res)))
+  (string-append "\\let\\\\\\break" "\\let\\and\\break"
+   "\\let\\thanks\\symfootnote"))
  (output-title "\\TIIPtitle") (do-para) (do-end-para)
  (emit "<div class=centerline>") (emit-newline)
  (tex2page-string "\\TIIPauthor") (do-para) (tex2page-string "\\TIIPdate")
@@ -3737,28 +2976,7 @@
                (toss-back-char #\{) (toss-back-string "TIIPcsname")
                (toss-back-char c) (return))
               (else (set! r (cons (expand-ctl-seq-into-string x) r)) r))))
-          (else (get-actual-char)
-           (set! r
-            (cons
-             (let ((%type 'string) (%ee (list (list c))))
-               (let ((%res (if (eq? %type 'string) "" null)))
-                 (let %concatenate-loop
-                   ((%ee %ee))
-                   (if (null? %ee)
-                       %res
-                       (let ((%a (car %ee)))
-                         (unless (not %a)
-                           (set! %res
-                            (if (eq? %type 'string)
-                                (string-append %res
-                                 (if (string? %a) %a (list->string %a)))
-                                (append %res
-                                        (if (string? %a)
-                                            (string->list %a)
-                                            %a)))))
-                         (%concatenate-loop (cdr %ee)))))
-                 %res))
-             r))
+          (else (get-actual-char) (set! r (cons (list->string (list c)) r))
            r)))
        (if %loop-returned %loop-result (%loop))))))
 
@@ -3784,22 +3002,7 @@
      (emit "<style>") (emit-newline) (emit *basic-style*) (emit "</style>")
      (emit-newline))
     (else false))
-   (link-it
-    (let ((%type 'string) (%ee (list *jobname* *css-file-suffix*)))
-      (let ((%res (if (eq? %type 'string) "" null)))
-        (let %concatenate-loop
-          ((%ee %ee))
-          (if (null? %ee)
-              %res
-              (let ((%a (car %ee)))
-                (unless (not %a)
-                  (set! %res
-                   (if (eq? %type 'string)
-                       (string-append %res
-                        (if (string? %a) %a (list->string %a)))
-                       (append %res (if (string? %a) (string->list %a) %a)))))
-                (%concatenate-loop (cdr %ee)))))
-        %res)))))
+   (link-it (string-append *jobname* *css-file-suffix*))))
 
 (define (link-scripts)
  (let ((link-it
@@ -3850,28 +3053,8 @@
        (let ((outermost-secnum
               (let ((n (table-get i *section-counters* 0)))
                 (if *inside-appendix-p*
-                    (let ((%type 'string)
-                          (%ee
-                           (list
-                            (list
-                             (integer->char (+ (char->integer #\A) -1 n))))))
-                      (let ((%res (if (eq? %type 'string) "" null)))
-                        (let %concatenate-loop
-                          ((%ee %ee))
-                          (if (null? %ee)
-                              %res
-                              (let ((%a (car %ee)))
-                                (unless (not %a)
-                                  (set! %res
-                                   (if (eq? %type 'string)
-                                       (string-append %res
-                                        (if (string? %a) %a (list->string %a)))
-                                       (append %res
-                                               (if (string? %a)
-                                                   (string->list %a)
-                                                   %a)))))
-                                (%concatenate-loop (cdr %ee)))))
-                        %res))
+                    (list->string
+                     (list (integer->char (+ (char->integer #\A) -1 n))))
                     (write-to-string n)))))
          (let ((i (add1 i)) (r outermost-secnum))
            (let* ((%loop-returned false)
@@ -3885,29 +3068,8 @@
                (cond ((> i seclvl) (return r)) (else false))
                (unless %loop-returned
                  (set! r
-                  (let ((%type 'string)
-                        (%ee
-                         (list r
-                               "."
-                               (write-to-string
-                                (table-get i *section-counters* 0)))))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res)))
+                  (string-append r "."
+                   (write-to-string (table-get i *section-counters* 0))))
                  r)
                (unless %loop-returned (set! i (+ i 1)) i)
                (if %loop-returned %loop-result (%loop)))))))))
@@ -3917,10 +3079,7 @@
        ((string=? s "\\part") -1)
        ((string=? s "\\chapter") 0)
        (else
-        (let ((n
-               (let ((%length-arg s))
-                 ((if (string? %length-arg) string-length length)
-                  %length-arg))))
+        (let ((n (string-length s)))
           (cond ((< n 8) false)
                 ((and (>= n 10) (string=? (substring s (- n 9)) "paragraph"))
                  (let ((n-9 (- n 9)) (i 1) (i+3 4) (k 4))
@@ -3999,27 +3158,9 @@
   (else false))
  (let ((htmlnum (max 1 (min 6 (if *using-chapters-p* (add1 seclvl) seclvl)))))
    (let ((lbl
-          (let ((%type 'string)
-                (%ee
-                 (list *html-node-prefix*
-                       (case seclvl ((-1) "part") ((0) "chap") (else "sec"))
-                       "_"
-                       (if nonum-p (gen-temp-string) lbl-val))))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+          (string-append *html-node-prefix*
+           (case seclvl ((-1) "part") ((0) "chap") (else "sec")) "_"
+           (if nonum-p (gen-temp-string) lbl-val))))
      (cond
       ((not false) (tex-def-0arg "\\TIIPcurrentnodename" lbl)
        (tex-def-0arg "\\@currentlabel" lbl-val))
@@ -4052,25 +3193,7 @@
                  (cond
                   (write-to-toc-p
                    (emit-page-node-link-start *toc-page*
-                    (let ((%type 'string)
-                          (%ee (list *html-node-prefix* "toc_" lbl)))
-                      (let ((%res (if (eq? %type 'string) "" null)))
-                        (let %concatenate-loop
-                          ((%ee %ee))
-                          (if (null? %ee)
-                              %res
-                              (let ((%a (car %ee)))
-                                (unless (not %a)
-                                  (set! %res
-                                   (if (eq? %type 'string)
-                                       (string-append %res
-                                        (if (string? %a) %a (list->string %a)))
-                                       (append %res
-                                               (if (string? %a)
-                                                   (string->list %a)
-                                                   %a)))))
-                                (%concatenate-loop (cdr %ee)))))
-                        %res))))
+                    (string-append *html-node-prefix* "toc_" lbl)))
                   (else false))
                  (tex2page-string "\\partname") (emit " ") (emit lbl-val)
                  (cond (write-to-toc-p (emit-link-stop)) (else false))))
@@ -4085,25 +3208,7 @@
                  (cond
                   (write-to-toc-p
                    (emit-page-node-link-start *toc-page*
-                    (let ((%type 'string)
-                          (%ee (list *html-node-prefix* "toc_" lbl)))
-                      (let ((%res (if (eq? %type 'string) "" null)))
-                        (let %concatenate-loop
-                          ((%ee %ee))
-                          (if (null? %ee)
-                              %res
-                              (let ((%a (car %ee)))
-                                (unless (not %a)
-                                  (set! %res
-                                   (if (eq? %type 'string)
-                                       (string-append %res
-                                        (if (string? %a) %a (list->string %a)))
-                                       (append %res
-                                               (if (string? %a)
-                                                   (string->list %a)
-                                                   %a)))))
-                                (%concatenate-loop (cdr %ee)))))
-                        %res))))
+                    (string-append *html-node-prefix* "toc_" lbl)))
                   (else false))
                  (tex2page-string
                   (if *inside-appendix-p* "\\appendixname" "\\chaptername"))
@@ -4115,22 +3220,7 @@
        (cond
         (write-to-toc-p
          (emit-page-node-link-start *toc-page*
-          (let ((%type 'string) (%ee (list *html-node-prefix* "toc_" lbl)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+          (string-append *html-node-prefix* "toc_" lbl)))
         (else false))
        (cond
         ((not (or (and (eqv? *tex-format* ':latex) (<= seclvl 0)) nonum-p))
@@ -4174,26 +3264,8 @@
 
 (define (do-write-to-toc-aux seclvl secnum sectitle)
  (let ((node-name
-        (let ((%type 'string)
-              (%ee
-               (list *html-node-prefix*
-                     "sec_"
-                     (if (string=? secnum "") (gen-temp-string) secnum))))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+        (string-append *html-node-prefix* "sec_"
+         (if (string=? secnum "") (gen-temp-string) secnum))))
    (tex-def-0arg "\\TIIPcurrentnodename" node-name)
    (tex-def-0arg "\\@currentlabel" secnum)
    (emit-anchor node-name)
@@ -4243,25 +3315,7 @@
        (let ((c (get-actual-char)))
          (cond
           ((or (not c) (and newline-p (char=? c #\newline)))
-           (return
-            (let ((%type 'string) (%ee (list (reverse r))))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
+           (return (list->string (reverse r))))
           (newline-p
            (cond
             ((not (char-whitespace? c)) (set! r (cons #\  r))
@@ -4326,52 +3380,12 @@
      (set!counter*-value counter new-value)
      (counter*-value counter)
      (let ((num
-            (let ((%type 'string)
-                  (%ee
-                   (list
-                    (let ((sec-num (counter*-within counter)))
-                      (if sec-num
-                          (let ((%type 'string)
-                                (%ee
-                                 (list (section-counter-value sec-num) ".")))
-                            (let ((%res (if (eq? %type 'string) "" null)))
-                              (let %concatenate-loop
-                                ((%ee %ee))
-                                (if (null? %ee)
-                                    %res
-                                    (let ((%a (car %ee)))
-                                      (unless (not %a)
-                                        (set! %res
-                                         (if (eq? %type 'string)
-                                             (string-append %res
-                                              (if (string? %a)
-                                                  %a
-                                                  (list->string %a)))
-                                             (append %res
-                                                     (if (string? %a)
-                                                         (string->list %a)
-                                                         %a)))))
-                                      (%concatenate-loop (cdr %ee)))))
-                              %res))
-                          ""))
-                    (write-to-string new-value))))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
+            (string-append
+             (let ((sec-num (counter*-within counter)))
+               (if sec-num
+                   (string-append (section-counter-value sec-num) ".")
+                   ""))
+             (write-to-string new-value))))
        (tex-def-0arg "\\@currentlabel" num)
        num))))
 
@@ -4455,24 +3469,7 @@
          (else false))
    (set! *tabular-stack* (cons type *tabular-stack*)) (set! *math-mode-p* true)
    (set! *in-display-math-p* true)
-   (let ((eqn-tag
-          (let ((%type 'string)
-                (%ee (list *html-node-prefix* "eqn_" (gen-temp-string))))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+   (let ((eqn-tag (string-append *html-node-prefix* "eqn_" (gen-temp-string))))
      (tex-def-0arg "\\TIIPcurrentnodename" eqn-tag)
      (emit-anchor eqn-tag)
      (emit-newline)
@@ -4565,22 +3562,7 @@
 
 (define (do-toc)
  (fluid-let
-  ((*subjobname*
-    (let ((%type 'string) (%ee (list *jobname* *toc-file-suffix*)))
-      (let ((%res (if (eq? %type 'string) "" null)))
-        (let %concatenate-loop
-          ((%ee %ee))
-          (if (null? %ee)
-              %res
-              (let ((%a (car %ee)))
-                (unless (not %a)
-                  (set! %res
-                   (if (eq? %type 'string)
-                       (string-append %res
-                        (if (string? %a) %a (list->string %a)))
-                       (append %res (if (string? %a) (string->list %a) %a)))))
-                (%concatenate-loop (cdr %ee)))))
-        %res)))
+  ((*subjobname* (string-append *jobname* *toc-file-suffix*))
    (*img-file-count* 0) (*imgdef-file-count* 0))
   (cond
    ((eqv? *tex-format* ':latex)
@@ -4589,22 +3571,7 @@
          "\\chapter*{\\contentsname}"
          "\\section*{\\contentsname}")))
    (else false))
-  (emit-anchor
-   (let ((%type 'string) (%ee (list *html-node-prefix* "toc")))
-     (let ((%res (if (eq? %type 'string) "" null)))
-       (let %concatenate-loop
-         ((%ee %ee))
-         (if (null? %ee)
-             %res
-             (let ((%a (car %ee)))
-               (unless (not %a)
-                 (set! %res
-                  (if (eq? %type 'string)
-                      (string-append %res
-                       (if (string? %a) %a (list->string %a)))
-                      (append %res (if (string? %a) (string->list %a) %a)))))
-               (%concatenate-loop (cdr %ee)))))
-       %res)))
+  (emit-anchor (string-append *html-node-prefix* "toc"))
   (!toc-page *html-page-count*)
   (write-aux (quasiquote (!toc-page (unquote *html-page-count*))))
   (cond
@@ -4635,25 +3602,7 @@
                   (else false))
                  (indent-n-levels lvl)
                  (emit-anchor
-                  (let ((%type 'string)
-                        (%ee (list *html-node-prefix* "toc_" seclabel)))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res)))
+                  (string-append *html-node-prefix* "toc_" seclabel))
                  (emit-page-node-link-start (tocentry*-page x) seclabel)
                  (cond
                   ((not (or (string=? secnum "") (string=? secnum "IGNORE")))
@@ -4666,22 +3615,7 @@
                  (emit "<br>")
                  (emit-newline))))))
        *toc-list*))))
-  (emit-anchor
-   (let ((%type 'string) (%ee (list *html-node-prefix* "toc_end")))
-     (let ((%res (if (eq? %type 'string) "" null)))
-       (let %concatenate-loop
-         ((%ee %ee))
-         (if (null? %ee)
-             %res
-             (let ((%a (car %ee)))
-               (unless (not %a)
-                 (set! %res
-                  (if (eq? %type 'string)
-                      (string-append %res
-                       (if (string? %a) %a (list->string %a)))
-                      (append %res (if (string? %a) (string->list %a) %a)))))
-               (%concatenate-loop (cdr %ee)))))
-       %res)))))
+  (emit-anchor (string-append *html-node-prefix* "toc_end"))))
 
 (define (do-numbered-footnote) (do-footnote-aux false))
 
@@ -4720,46 +3654,9 @@
 (define (do-footnote-aux fnmark)
  (let ((fnno false))
    (let ((fnlabel (gen-temp-string)))
-     (let ((fntag
-            (let ((%type 'string)
-                  (%ee (list *html-node-prefix* "footnote_" fnlabel)))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
+     (let ((fntag (string-append *html-node-prefix* "footnote_" fnlabel)))
        (let ((fncalltag
-              (let ((%type 'string)
-                    (%ee (list *html-node-prefix* "call_footnote_" fnlabel)))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res))))
+              (string-append *html-node-prefix* "call_footnote_" fnlabel)))
          (cond
           ((not fnmark) (set! fnno (add1 (get-gcount "\\footnotenumber")))
            (tex-gdef-count "\\footnotenumber" fnno)
@@ -4849,42 +3746,8 @@
         (lambda (x)
           (let ((n (round (* 1.0 x))))
             (let ((s (write-to-string n ':base 16)))
-              (if (< n 16)
-                  (let ((%type 'string) (%ee (list "0" s)))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res))
-                  s))))))
-   (lambda (r g b)
-     (let ((%type 'string) (%ee (list "#" (f r) (f g) (f b))))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res)))))
+              (if (< n 16) (string-append "0" s) s))))))
+   (lambda (r g b) (string-append "#" (f r) (f g) (f b)))))
 
 (define (rgb-frac-to-rrggbb r g b)
  (rgb-dec-to-rrggbb (* r 255) (* g 255) (* b 255)))
@@ -4894,28 +3757,8 @@
    (lambda (c m y k) (rgb-frac-to-rrggbb (f c k) (f m k) (f y k)))))
 
 (define (hsl-in-html h s l)
- (let ((%type 'string)
-       (%ee
-        (list "hsl("
-              (write-to-string h)
-              ","
-              (write-to-string (* s 100))
-              "%,"
-              (write-to-string (* l 100))
-              "%)")))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (string-append "hsl(" (write-to-string h) "," (write-to-string (* s 100)) "%,"
+  (write-to-string (* l 100)) "%)"))
 
 (define (hsb360-to-hsl h s b)
  (let ((l (* 0.5 b (- 2 s))))
@@ -4946,22 +3789,7 @@
     (bgroup)
     (call-with-input-string
      (tex-string-to-html-string
-      (let ((%type 'string) (%ee (list "\\defcsactive\\,{ }" (get-token))))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append "\\defcsactive\\,{ }" (get-token)))
      (lambda (i)
        (egroup)
        (let ((c
@@ -4982,22 +3810,7 @@
     (bgroup)
     (call-with-input-string
      (tex-string-to-html-string
-      (let ((%type 'string) (%ee (list "\\defcsactive\\,{ }" (get-token))))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append "\\defcsactive\\,{ }" (get-token)))
      (lambda (i)
        (egroup)
        (let ((c
@@ -5022,22 +3835,7 @@
     (bgroup)
     (call-with-input-string
      (tex-string-to-html-string
-      (let ((%type 'string) (%ee (list "\\defcsactive\\,{ }" (get-token))))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append "\\defcsactive\\,{ }" (get-token)))
      (lambda (i)
        (egroup)
        (let ((r
@@ -5058,22 +3856,7 @@
     (bgroup)
     (call-with-input-string
      (tex-string-to-html-string
-      (let ((%type 'string) (%ee (list "\\defcsactive\\,{ }" (get-token))))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append "\\defcsactive\\,{ }" (get-token)))
      (lambda (i)
        (egroup)
        (let ((r
@@ -5118,22 +3901,7 @@
     (bgroup)
     (call-with-input-string
      (tex-string-to-html-string
-      (let ((%type 'string) (%ee (list "\\defcsactive\\,{ }" (get-token))))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append "\\defcsactive\\,{ }" (get-token)))
      (lambda (i)
        (egroup)
        (let ((h
@@ -5154,22 +3922,7 @@
     (bgroup)
     (call-with-input-string
      (tex-string-to-html-string
-      (let ((%type 'string) (%ee (list "\\defcsactive\\,{ }" (get-token))))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append "\\defcsactive\\,{ }" (get-token)))
      (lambda (i)
        (egroup)
        (let ((h
@@ -5190,22 +3943,7 @@
     (bgroup)
     (call-with-input-string
      (tex-string-to-html-string
-      (let ((%type 'string) (%ee (list "\\defcsactive\\,{ }" (get-token))))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append "\\defcsactive\\,{ }" (get-token)))
      (lambda (i)
        (egroup)
        (let ((h
@@ -5235,22 +3973,7 @@
     (bgroup)
     (call-with-input-string
      (tex-string-to-html-string
-      (let ((%type 'string) (%ee (list "\\defcsactive\\,{ }" (get-token))))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append "\\defcsactive\\,{ }" (get-token)))
      (lambda (i)
        (egroup)
        (let ((h
@@ -5271,22 +3994,7 @@
     (bgroup)
     (call-with-input-string
      (tex-string-to-html-string
-      (let ((%type 'string) (%ee (list "\\defcsactive\\,{ }" (get-token))))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append "\\defcsactive\\,{ }" (get-token)))
      (lambda (i)
        (egroup)
        (let ((h
@@ -5694,27 +4402,7 @@
               (else (list-position %position-v %position-s)))))))
      (if (not i)
          lbl
-         (let ((s
-                (let ((%type 'list) (%ee (list lbl)))
-                  (let ((%res (if (eq? %type 'string) "" null)))
-                    (let %concatenate-loop
-                      ((%ee %ee))
-                      (if (null? %ee)
-                          %res
-                          (let ((%a (car %ee)))
-                            (unless (not %a)
-                              (set! %res
-                               (if (eq? %type 'string)
-                                   (string-append %res
-                                    (if (string? %a) %a (list->string %a)))
-                                   (append %res
-                                           (if (string? %a)
-                                               (string->list %a)
-                                               %a)))))
-                            (%concatenate-loop (cdr %ee)))))
-                    %res)))
-               (r null)
-               (whitep false))
+         (let ((s (string->list lbl)) (r null) (whitep false))
            (let* ((%loop-returned false)
                   (%loop-result 0)
                   (return
@@ -5723,28 +4411,8 @@
                      (set! %loop-result (and (pair? %args) (car %args))))))
              (let %loop
                ()
-               (cond
-                ((null? s)
-                 (return
-                  (let ((%type 'string) (%ee (list (reverse r))))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res))))
-                (else false))
+               (cond ((null? s) (return (list->string (reverse r))))
+                     (else false))
                (unless %loop-returned
                  (let ((c
                         (let* ((%pop-old-stack s)
@@ -5784,23 +4452,7 @@
 
 (define (do-anchor-for-potential-label)
  (let ((node-name
-        (let ((%type 'string)
-              (%ee (list *html-node-prefix* "anchor_" (gen-temp-string))))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+        (string-append *html-node-prefix* "anchor_" (gen-temp-string))))
    (tex-def-0arg "\\TIIPcurrentnodename" node-name)
    (emit-anchor node-name)))
 
@@ -5820,45 +4472,8 @@
 (define (do-inputexternallabels)
  (let ((f (get-filename-possibly-braced)))
    (let ((fq-f
-          (if (fully-qualified-pathname-p f)
-              f
-              (let ((%type 'string) (%ee (list *aux-dir/* f)))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res)))))
-     (let ((ext-label-file
-            (let ((%type 'string) (%ee (list fq-f *label-file-suffix*)))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
+          (if (fully-qualified-pathname-p f) f (string-append *aux-dir/* f))))
+     (let ((ext-label-file (string-append fq-f *label-file-suffix*)))
        (let ((ext-label-table (table-get f *external-label-tables*)))
          (cond
           ((not ext-label-table)
@@ -5875,47 +4490,11 @@
 (define (do-includeexternallabels)
  (let ((jobname (get-filename-possibly-braced)))
    (let ((ext-label-file
-          (let ((%type 'string)
-                (%ee
-                 (list
-                  (if (fully-qualified-pathname-p jobname)
-                      jobname
-                      (let ((%type 'string) (%ee (list *aux-dir/* jobname)))
-                        (let ((%res (if (eq? %type 'string) "" null)))
-                          (let %concatenate-loop
-                            ((%ee %ee))
-                            (if (null? %ee)
-                                %res
-                                (let ((%a (car %ee)))
-                                  (unless (not %a)
-                                    (set! %res
-                                     (if (eq? %type 'string)
-                                         (string-append %res
-                                          (if (string? %a)
-                                              %a
-                                              (list->string %a)))
-                                         (append %res
-                                                 (if (string? %a)
-                                                     (string->list %a)
-                                                     %a)))))
-                                  (%concatenate-loop (cdr %ee)))))
-                          %res)))
-                  *label-file-suffix*)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+          (string-append
+           (if (fully-qualified-pathname-p jobname)
+               jobname
+               (string-append *aux-dir/* jobname))
+           *label-file-suffix*)))
      (cond
       ((file-exists? ext-label-file)
        (fluid-let ((*label-source* jobname))
@@ -5933,24 +4512,7 @@
      (do-tag-aux tag value))))
 
 (define (do-tag-aux tag-name tag-val)
- (let ((node-name
-        (let ((%type 'string)
-              (%ee (list *html-node-prefix* "tag_" (gen-temp-string))))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+ (let ((node-name (string-append *html-node-prefix* "tag_" (gen-temp-string))))
    (tex-def-0arg "\\TIIPcurrentnodename" node-name)
    (tex-def-0arg "\\@currentlabel" tag-val)
    (emit-anchor node-name)
@@ -5983,49 +4545,12 @@
 (define (maybe-label-page this-label-src this-label-pageno)
  (if (and (not this-label-src) (= *html-page-count* this-label-pageno))
      ""
-     (let ((%type 'string)
-           (%ee
-            (list (or this-label-src *jobname*)
-                  (if (= this-label-pageno 0)
-                      ""
-                      (let ((%type 'string)
-                            (%ee
-                             (list *html-page-suffix*
-                                   (write-to-string this-label-pageno))))
-                        (let ((%res (if (eq? %type 'string) "" null)))
-                          (let %concatenate-loop
-                            ((%ee %ee))
-                            (if (null? %ee)
-                                %res
-                                (let ((%a (car %ee)))
-                                  (unless (not %a)
-                                    (set! %res
-                                     (if (eq? %type 'string)
-                                         (string-append %res
-                                          (if (string? %a)
-                                              %a
-                                              (list->string %a)))
-                                         (append %res
-                                                 (if (string? %a)
-                                                     (string->list %a)
-                                                     %a)))))
-                                  (%concatenate-loop (cdr %ee)))))
-                          %res)))
-                  *output-extension*)))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res))))
+     (string-append (or this-label-src *jobname*)
+      (if (= this-label-pageno 0)
+          ""
+          (string-append *html-page-suffix*
+           (write-to-string this-label-pageno)))
+      *output-extension*)))
 
 (define (do-htmlref)
  (let ((text (get-group)))
@@ -6051,23 +4576,7 @@
    (do-tag-aux lbl "hypertarget")))
 
 (define (do-hyperlink)
- (emit-link-start
-  (fully-qualify-url
-   (let ((%type 'string) (%ee (list "#" (get-peeled-group))))
-     (let ((%res (if (eq? %type 'string) "" null)))
-       (let %concatenate-loop
-         ((%ee %ee))
-         (if (null? %ee)
-             %res
-             (let ((%a (car %ee)))
-               (unless (not %a)
-                 (set! %res
-                  (if (eq? %type 'string)
-                      (string-append %res
-                       (if (string? %a) %a (list->string %a)))
-                      (append %res (if (string? %a) (string->list %a) %a)))))
-               (%concatenate-loop (cdr %ee)))))
-       %res))))
+ (emit-link-start (fully-qualify-url (string-append "#" (get-peeled-group))))
  (tex2page-string (get-token)) (emit-link-stop))
 
 (define (label-bound-p label . %lambda-rest-arg)
@@ -6081,26 +4590,7 @@
      (or (and label-table (table-get label label-table))
          (begin
           (flag-unresolved-xref
-           (if ext-file
-               (let ((%type 'string) (%ee (list "{" ext-file " -> " label "}")))
-                 (let ((%res (if (eq? %type 'string) "" null)))
-                   (let %concatenate-loop
-                     ((%ee %ee))
-                     (if (null? %ee)
-                         %res
-                         (let ((%a (car %ee)))
-                           (unless (not %a)
-                             (set! %res
-                              (if (eq? %type 'string)
-                                  (string-append %res
-                                   (if (string? %a) %a (list->string %a)))
-                                  (append %res
-                                          (if (string? %a)
-                                              (string->list %a)
-                                              %a)))))
-                           (%concatenate-loop (cdr %ee)))))
-                   %res))
-               label))
+           (if ext-file (string-append "{" ext-file " -> " label "}") label))
           false)))))
 
 (define (flag-unresolved-xref xr)
@@ -6207,9 +4697,7 @@
      (emit "\""))))
 
 (define (doc-internal-url url)
- (let ((n
-        (let ((%length-arg url))
-          ((if (string? %length-arg) string-length length) %length-arg))))
+ (let ((n (string-length url)))
    (cond
     ((and (> n 0) (char=? (string-ref url 0) #\#))
      (let ((label (substring url 1)))
@@ -6222,38 +4710,15 @@
     (else false))))
 
 (define (fully-qualify-url url)
- (let ((n
-        (let ((%length-arg url))
-          ((if (string? %length-arg) string-length length) %length-arg))))
+ (let ((n (string-length url)))
    (cond
     ((and (> n 0) (char=? (string-ref url 0) #\#))
      (let ((label (substring url 1)))
        (let ((label-ref (label-bound-p label)))
          (if label-ref
-             (let ((%type 'string)
-                   (%ee
-                    (list
-                     (maybe-label-page (label*-src label-ref)
-                      (label*-page label-ref))
-                     "#"
-                     (label*-name label-ref))))
-               (let ((%res (if (eq? %type 'string) "" null)))
-                 (let %concatenate-loop
-                   ((%ee %ee))
-                   (if (null? %ee)
-                       %res
-                       (let ((%a (car %ee)))
-                         (unless (not %a)
-                           (set! %res
-                            (if (eq? %type 'string)
-                                (string-append %res
-                                 (if (string? %a) %a (list->string %a)))
-                                (append %res
-                                        (if (string? %a)
-                                            (string->list %a)
-                                            %a)))))
-                         (%concatenate-loop (cdr %ee)))))
-                 %res))
+             (string-append
+              (maybe-label-page (label*-src label-ref) (label*-page label-ref))
+              "#" (label*-name label-ref))
              url))))
     ((fully-qualified-url-p url) url)
     (else (ensure-url-reachable url) url))))
@@ -6269,22 +4734,7 @@
 
 (define (do-mailto)
  (let ((addr (get-url)))
-   (emit-link-start
-    (let ((%type 'string) (%ee (list "mailto:" addr)))
-      (let ((%res (if (eq? %type 'string) "" null)))
-        (let %concatenate-loop
-          ((%ee %ee))
-          (if (null? %ee)
-              %res
-              (let ((%a (car %ee)))
-                (unless (not %a)
-                  (set! %res
-                   (if (eq? %type 'string)
-                       (string-append %res
-                        (if (string? %a) %a (list->string %a)))
-                       (append %res (if (string? %a) (string->list %a) %a)))))
-                (%concatenate-loop (cdr %ee)))))
-        %res)))
+   (emit-link-start (string-append "mailto:" addr))
    (emit addr)
    (emit-link-stop)))
 
@@ -6295,23 +4745,7 @@
          (emit-page-node-link-start (car durl) (cadr durl))
          (emit-link-start (fully-qualify-url url)))))
  (bgroup)
- (tex2page-string
-  (let ((%type 'string)
-        (%ee (list "\\def\\\\{\\egroup\\endinput}" (get-token))))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res)))
+ (tex2page-string (string-append "\\def\\\\{\\egroup\\endinput}" (get-token)))
  (egroup) (emit-link-stop))
 
 (define (do-urlhd) (do-urlh) (get-token))
@@ -6341,91 +4775,11 @@
  (cond
   ((or (tex2page-flag-boolean "\\TIIPsinglepage")
        (tex2page-flag-boolean "\\TZPsinglepage"))
-   (let ((tmpf
-          (let ((%type 'string) (%ee (list *aux-dir/* *jobname* "-Z-Z.temp")))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
-     (system
-      (let ((%type 'string) (%ee (list "echo -n data: > " tmpf)))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
-     (system
-      (let ((%type 'string) (%ee (list "file -bN --mime-type " f " >> " tmpf)))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
-     (system
-      (let ((%type 'string) (%ee (list "echo -n \\;base64, >> " tmpf)))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
-     (system
-      (let ((%type 'string) (%ee (list "base64 -w0 < " f " >> " tmpf)))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+   (let ((tmpf (string-append *aux-dir/* *jobname* "-Z-Z.temp")))
+     (system (string-append "echo -n data: > " tmpf))
+     (system (string-append "file -bN --mime-type " f " >> " tmpf))
+     (system (string-append "echo -n \\;base64, >> " tmpf))
+     (system (string-append "base64 -w0 < " f " >> " tmpf))
      (let ((i (open-input-file tmpf)))
        (let ((%with-open-file-res
               (let* ((%loop-returned false)
@@ -6493,28 +4847,11 @@
 
 (define (display-index-entry s o)
  (for-each (lambda (c) (display (if (or (char=? c #\newline)) #\  c) o))
-  (let ((%type 'list) (%ee (list s)))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res))))
+  (string->list s)))
 
 (define (escape-opmac-index-entry x)
  (let ((y null))
-   (let ((%dotimes-n
-          (let ((%length-arg x))
-            ((if (string? %length-arg) string-length length) %length-arg)))
-         (i 0))
+   (let ((%dotimes-n (string-length x)) (i 0))
      (let* ((%loop-returned false)
             (%loop-result 0)
             (return
@@ -6532,43 +4869,14 @@
                (else (set! y (cons c y)) y))))
          (unless %loop-returned (set! i (+ i 1)))
          (if %loop-returned %loop-result (%loop)))))
-   (let ((%type 'string) (%ee (list (reverse y))))
-     (let ((%res (if (eq? %type 'string) "" null)))
-       (let %concatenate-loop
-         ((%ee %ee))
-         (if (null? %ee)
-             %res
-             (let ((%a (car %ee)))
-               (unless (not %a)
-                 (set! %res
-                  (if (eq? %type 'string)
-                      (string-append %res
-                       (if (string? %a) %a (list->string %a)))
-                      (append %res (if (string? %a) (string->list %a) %a)))))
-               (%concatenate-loop (cdr %ee)))))
-       %res))))
+   (list->string (reverse y))))
 
 (define (expand-html-index)
  (let ((s (get-peeled-group)))
    (let ((n (string->number s)))
      (let ((pageno (table-get n *index-table*)))
        (emit-page-node-link-start pageno
-        (let ((%type 'string) (%ee (list *html-node-prefix* "index_" s)))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res)))
+        (string-append *html-node-prefix* "index_" s))
        (emit pageno)
        (cond
         ((begin (set! *it* (table-get pageno *index-page-mention-alist*)) *it*)
@@ -6587,13 +4895,7 @@
    (tex2page-string other-entry)))
 
 (define (html-length s)
- (let ((n
-        (let ((%length-arg s))
-          ((if (string? %length-arg) string-length length) %length-arg)))
-       (res 0)
-       (i 0)
-       (skip-tag false)
-       (skip-entity false))
+ (let ((n (string-length s)) (res 0) (i 0) (skip-tag false) (skip-entity false))
    (let* ((%loop-returned false)
           (%loop-result 0)
           (return
@@ -6920,27 +5222,7 @@
                      (cond
                       ((not toc-page-p)
                        (emit-page-node-link-start *toc-page*
-                        (let ((%type 'string)
-                              (%ee (list *html-node-prefix* "toc")))
-                          (let ((%res (if (eq? %type 'string) "" null)))
-                            (let %concatenate-loop
-                              ((%ee %ee))
-                              (if (null? %ee)
-                                  %res
-                                  (let ((%a (car %ee)))
-                                    (unless (not %a)
-                                      (set! %res
-                                       (if (eq? %type 'string)
-                                           (string-append %res
-                                            (if (string? %a)
-                                                %a
-                                                (list->string %a)))
-                                           (append %res
-                                                   (if (string? %a)
-                                                       (string->list %a)
-                                                       %a)))))
-                                    (%concatenate-loop (cdr %ee)))))
-                            %res))))
+                        (string-append *html-node-prefix* "toc")))
                       (else false))
                      (emit *navigation-contents-name*)
                      (cond ((not toc-page-p) (emit-link-stop)) (else false))
@@ -6960,27 +5242,7 @@
                      (cond
                       ((not index-page-p)
                        (emit-page-node-link-start *index-page*
-                        (let ((%type 'string)
-                              (%ee (list *html-node-prefix* "index_start")))
-                          (let ((%res (if (eq? %type 'string) "" null)))
-                            (let %concatenate-loop
-                              ((%ee %ee))
-                              (if (null? %ee)
-                                  %res
-                                  (let ((%a (car %ee)))
-                                    (unless (not %a)
-                                      (set! %res
-                                       (if (eq? %type 'string)
-                                           (string-append %res
-                                            (if (string? %a)
-                                                %a
-                                                (list->string %a)))
-                                           (append %res
-                                                   (if (string? %a)
-                                                       (string->list %a)
-                                                       %a)))))
-                                    (%concatenate-loop (cdr %ee)))))
-                            %res))))
+                        (string-append *html-node-prefix* "index_start")))
                       (else false))
                      (emit *navigation-index-name*)
                      (cond ((not index-page-p) (emit-link-stop)) (else false))
@@ -7014,28 +5276,8 @@
        *html-page-count*)
       true)
      (set! *html-page*
-      (let ((%type 'string)
-            (%ee
-             (list *aux-dir/*
-                   *jobname*
-                   *html-page-suffix*
-                   (write-to-string *html-page-count*)
-                   *output-extension*)))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append *aux-dir/* *jobname* *html-page-suffix*
+       (write-to-string *html-page-count*) *output-extension*))
      (set! *html*
       (make-ostream* ':stream
        (let* ((%f *html-page*)
@@ -7239,25 +5481,7 @@
         (cond
          ((begin (set! *it* (find-def "\\TZPhsize")) *it*)
           (tex2page-string
-           (let ((%type 'string)
-                 (%ee (list "\\TIIPhsize=" (tdef*-expansion *it*))))
-             (let ((%res (if (eq? %type 'string) "" null)))
-               (let %concatenate-loop
-                 ((%ee %ee))
-                 (if (null? %ee)
-                     %res
-                     (let ((%a (car %ee)))
-                       (unless (not %a)
-                         (set! %res
-                          (if (eq? %type 'string)
-                              (string-append %res
-                               (if (string? %a) %a (list->string %a)))
-                              (append %res
-                                      (if (string? %a)
-                                          (string->list %a)
-                                          %a)))))
-                       (%concatenate-loop (cdr %ee)))))
-               %res)))
+           (string-append "\\TIIPhsize=" (tdef*-expansion *it*)))
           (the-dimen "\\TIIPhsize"))
          ((or (tex2page-flag-boolean "\\TIIPtexlayout")
               (tex2page-flag-boolean "\\TZPtexlayout"))
@@ -7477,48 +5701,14 @@
 
 (define (next-html-image-file-stem)
  (set! *img-file-count* (+ *img-file-count* 1))
- (let ((%type 'string)
-       (%ee
-        (list *subjobname*
-              *img-file-suffix*
-              (write-to-string *img-file-count*))))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (string-append *subjobname* *img-file-suffix*
+  (write-to-string *img-file-count*)))
 
 (define (call-with-html-image-stream p . %lambda-rest-arg)
  (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (alt false))
    (when (< 0 %lambda-rest-arg-len) (set! alt (list-ref %lambda-rest-arg 0)))
    (let ((img-file-stem (next-html-image-file-stem)))
-     (let ((aux-tex-file
-            (let ((%type 'string) (%ee (list img-file-stem ".tex")))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
+     (let ((aux-tex-file (string-append img-file-stem ".tex")))
        (let ((o
               (let* ((%f aux-tex-file)
                      (%ee (list ':direction ':output ':if-exists ':supersede))
@@ -7649,188 +5839,61 @@
       (set! bot ext)
       bot)
      (else (error 'ecase "0xdeadc0de")))
-   (let ((%type 'string)
-         (%ee
-          (list "<table class=mathdelim><tr><td>"
-                top
-                "</td></tr>"
-                (cond
-                 ((odd? *math-height*)
-                  (let ((%type 'string)
-                        (%ee
-                         (list
-                          (let ((r ""))
-                            (let ((%dotimes-n (/ (sub1 *math-height*) 2)) (i 0))
-                              (let* ((%loop-returned false)
-                                     (%loop-result 0)
-                                     (return
-                                      (lambda %args
-                                        (set! %loop-returned true)
-                                        (set! %loop-result
-                                         (and (pair? %args) (car %args))))))
-                                (let %loop
-                                  ()
-                                  (if (>= i %dotimes-n) (return r) false)
-                                  (unless %loop-returned
-                                    (set! r
-                                     (let ((%type 'string)
-                                           (%ee
-                                            (list r
-                                                  "<tr><td>"
-                                                  ext
-                                                  "</td></tr>")))
-                                       (let ((%res
-                                              (if (eq? %type 'string) "" null)))
-                                         (let %concatenate-loop
-                                           ((%ee %ee))
-                                           (if (null? %ee)
-                                               %res
-                                               (let ((%a (car %ee)))
-                                                 (unless (not %a)
-                                                   (set! %res
-                                                    (if (eq? %type 'string)
-                                                        (string-append %res
-                                                         (if (string? %a)
-                                                             %a
-                                                             (list->string
-                                                              %a)))
-                                                        (append %res
-                                                                (if
-                                                                 (string? %a)
-                                                                 (string->list
-                                                                  %a)
-                                                                 %a)))))
-                                                 (%concatenate-loop
-                                                  (cdr %ee)))))
-                                         %res)))
-                                    r)
-                                  (unless %loop-returned (set! i (+ i 1)))
-                                  (if %loop-returned %loop-result (%loop))))))
-                          "<tr><td>"
-                          mid
-                          "</td></tr>"
-                          (let ((r ""))
-                            (let ((%dotimes-n (/ (sub1 *math-height*) 2)) (i 0))
-                              (let* ((%loop-returned false)
-                                     (%loop-result 0)
-                                     (return
-                                      (lambda %args
-                                        (set! %loop-returned true)
-                                        (set! %loop-result
-                                         (and (pair? %args) (car %args))))))
-                                (let %loop
-                                  ()
-                                  (if (>= i %dotimes-n) (return r) false)
-                                  (unless %loop-returned
-                                    (set! r
-                                     (let ((%type 'string)
-                                           (%ee
-                                            (list r
-                                                  "<tr><td>"
-                                                  ext
-                                                  "</td></tr>")))
-                                       (let ((%res
-                                              (if (eq? %type 'string) "" null)))
-                                         (let %concatenate-loop
-                                           ((%ee %ee))
-                                           (if (null? %ee)
-                                               %res
-                                               (let ((%a (car %ee)))
-                                                 (unless (not %a)
-                                                   (set! %res
-                                                    (if (eq? %type 'string)
-                                                        (string-append %res
-                                                         (if (string? %a)
-                                                             %a
-                                                             (list->string
-                                                              %a)))
-                                                        (append %res
-                                                                (if
-                                                                 (string? %a)
-                                                                 (string->list
-                                                                  %a)
-                                                                 %a)))))
-                                                 (%concatenate-loop
-                                                  (cdr %ee)))))
-                                         %res)))
-                                    r)
-                                  (unless %loop-returned (set! i (+ i 1)))
-                                  (if %loop-returned
-                                      %loop-result
-                                      (%loop)))))))))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res)))
-                 (else
-                  (let ((r ""))
-                    (let ((%dotimes-n *math-height*) (i 0))
-                      (let* ((%loop-returned false)
-                             (%loop-result 0)
-                             (return
-                              (lambda %args
-                                (set! %loop-returned true)
-                                (set! %loop-result
-                                 (and (pair? %args) (car %args))))))
-                        (let %loop
-                          ()
-                          (if (>= i %dotimes-n) (return r) false)
-                          (unless %loop-returned
-                            (set! r
-                             (let ((%type 'string)
-                                   (%ee (list r "<tr><td>" ext "</td></tr>")))
-                               (let ((%res (if (eq? %type 'string) "" null)))
-                                 (let %concatenate-loop
-                                   ((%ee %ee))
-                                   (if (null? %ee)
-                                       %res
-                                       (let ((%a (car %ee)))
-                                         (unless (not %a)
-                                           (set! %res
-                                            (if (eq? %type 'string)
-                                                (string-append %res
-                                                 (if (string? %a)
-                                                     %a
-                                                     (list->string %a)))
-                                                (append %res
-                                                        (if (string? %a)
-                                                            (string->list %a)
-                                                            %a)))))
-                                         (%concatenate-loop (cdr %ee)))))
-                                 %res)))
-                            r)
-                          (unless %loop-returned (set! i (+ i 1)))
-                          (if %loop-returned %loop-result (%loop))))))))
-                "<tr><td>"
-                bot
-                "</td></tr></table>")))
-     (let ((%res (if (eq? %type 'string) "" null)))
-       (let %concatenate-loop
-         ((%ee %ee))
-         (if (null? %ee)
-             %res
-             (let ((%a (car %ee)))
-               (unless (not %a)
-                 (set! %res
-                  (if (eq? %type 'string)
-                      (string-append %res
-                       (if (string? %a) %a (list->string %a)))
-                      (append %res (if (string? %a) (string->list %a) %a)))))
-               (%concatenate-loop (cdr %ee)))))
-       %res))))
+   (string-append "<table class=mathdelim><tr><td>" top "</td></tr>"
+    (cond
+     ((odd? *math-height*)
+      (string-append
+       (let ((r ""))
+         (let ((%dotimes-n (/ (sub1 *math-height*) 2)) (i 0))
+           (let* ((%loop-returned false)
+                  (%loop-result 0)
+                  (return
+                   (lambda %args
+                     (set! %loop-returned true)
+                     (set! %loop-result (and (pair? %args) (car %args))))))
+             (let %loop
+               ()
+               (if (>= i %dotimes-n) (return r) false)
+               (unless %loop-returned
+                 (set! r (string-append r "<tr><td>" ext "</td></tr>"))
+                 r)
+               (unless %loop-returned (set! i (+ i 1)))
+               (if %loop-returned %loop-result (%loop))))))
+       "<tr><td>" mid "</td></tr>"
+       (let ((r ""))
+         (let ((%dotimes-n (/ (sub1 *math-height*) 2)) (i 0))
+           (let* ((%loop-returned false)
+                  (%loop-result 0)
+                  (return
+                   (lambda %args
+                     (set! %loop-returned true)
+                     (set! %loop-result (and (pair? %args) (car %args))))))
+             (let %loop
+               ()
+               (if (>= i %dotimes-n) (return r) false)
+               (unless %loop-returned
+                 (set! r (string-append r "<tr><td>" ext "</td></tr>"))
+                 r)
+               (unless %loop-returned (set! i (+ i 1)))
+               (if %loop-returned %loop-result (%loop))))))))
+     (else
+      (let ((r ""))
+        (let ((%dotimes-n *math-height*) (i 0))
+          (let* ((%loop-returned false)
+                 (%loop-result 0)
+                 (return
+                  (lambda %args
+                    (set! %loop-returned true)
+                    (set! %loop-result (and (pair? %args) (car %args))))))
+            (let %loop
+              ()
+              (if (>= i %dotimes-n) (return r) false)
+              (unless %loop-returned
+                (set! r (string-append r "<tr><td>" ext "</td></tr>"))
+                r)
+              (unless %loop-returned (set! i (+ i 1)))
+              (if %loop-returned %loop-result (%loop))))))))
+    "<tr><td>" bot "</td></tr></table>")))
 
 (define (tex-math-string-to-html-string s)
  (fluid-let ((*html* (make-html-output-stream)))
@@ -7926,23 +5989,7 @@
         (if %loop-returned %loop-result (%loop)))))))
 
 (define (dump-till-end-env env o)
- (let ((endenv
-        (let ((%type 'string) (%ee (list "\\end" env)))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+ (let ((endenv (string-append "\\end" env)))
    (let ((endenv-prim (find-corresp-prim endenv)))
      (let ((endenv-prim-th (find-corresp-prim-thunk endenv)))
        (fluid-let ((*not-processing-p* true))
@@ -7978,36 +6025,7 @@
                           (cond
                            ((and g
                                  (or *dumping-nontex-p* (= env-nesting 0))
-                                 (let ((endg
-                                        (let ((%type 'string)
-                                              (%ee (list "\\end" g)))
-                                          (let ((%res
-                                                 (if (eq? %type 'string)
-                                                     ""
-                                                     null)))
-                                            (let %concatenate-loop
-                                              ((%ee %ee))
-                                              (if (null? %ee)
-                                                  %res
-                                                  (let ((%a (car %ee)))
-                                                    (unless (not %a)
-                                                      (set! %res
-                                                       (if (eq? %type 'string)
-                                                           (string-append %res
-                                                            (if (string? %a)
-                                                                %a
-                                                                (list->string
-                                                                 %a)))
-                                                           (append %res
-                                                                   (if
-                                                                    (string?
-                                                                     %a)
-                                                                    (string->list
-                                                                     %a)
-                                                                    %a)))))
-                                                    (%concatenate-loop
-                                                     (cdr %ee)))))
-                                            %res))))
+                                 (let ((endg (string-append "\\end" g)))
                                    (or
                                     (string=? (find-corresp-prim endg)
                                      endenv-prim)
@@ -8034,23 +6052,7 @@
                   (if %loop-returned %loop-result (%loop))))))))))))
 
 (define (dump-imgdef f)
- (let ((aux-tex-file
-        (let ((%type 'string) (%ee (list f ".tex")))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+ (let ((aux-tex-file (string-append f ".tex")))
    (let ((o
           (let* ((%f aux-tex-file)
                  (%ee (list ':direction ':output ':if-exists ':supersede))
@@ -8100,47 +6102,9 @@
                            "\\endmathpreamble"))
                  (return r))
                 (else false))
-               (set! r
-                (let ((%type 'string) (%ee (list r x)))
-                  (let ((%res (if (eq? %type 'string) "" null)))
-                    (let %concatenate-loop
-                      ((%ee %ee))
-                      (if (null? %ee)
-                          %res
-                          (let ((%a (car %ee)))
-                            (unless (not %a)
-                              (set! %res
-                               (if (eq? %type 'string)
-                                   (string-append %res
-                                    (if (string? %a) %a (list->string %a)))
-                                   (append %res
-                                           (if (string? %a)
-                                               (string->list %a)
-                                               %a)))))
-                            (%concatenate-loop (cdr %ee)))))
-                    %res)))
+               (set! r (string-append r x))
                r))
-            (else (get-actual-char)
-             (set! r
-              (let ((%type 'string) (%ee (list r (list c))))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res)))
-             r)))
+            (else (get-actual-char) (set! r (string-append r (string c))) r)))
          (if %loop-returned %loop-result (%loop)))))))
  *imgpreamble*)
 
@@ -8258,96 +6222,15 @@
       (let %loop
         ()
         (let ((c (snoop-actual-char)))
-          (cond
-           ((not c)
-            (return
-             (if (null? r)
-                 c
-                 (let ((%type 'string) (%ee (list (reverse r))))
-                   (let ((%res (if (eq? %type 'string) "" null)))
-                     (let %concatenate-loop
-                       ((%ee %ee))
-                       (if (null? %ee)
-                           %res
-                           (let ((%a (car %ee)))
-                             (unless (not %a)
-                               (set! %res
-                                (if (eq? %type 'string)
-                                    (string-append %res
-                                     (if (string? %a) %a (list->string %a)))
-                                    (append %res
-                                            (if (string? %a)
-                                                (string->list %a)
-                                                %a)))))
-                             (%concatenate-loop (cdr %ee)))))
-                     %res)))))
-           (else false))
+          (cond ((not c) (return (if (null? r) c (list->string (reverse r)))))
+                (else false))
           (cond
            ((char=? c #\newline) (get-actual-char)
-            (return
-             (let ((%type 'string) (%ee (list (reverse r))))
-               (let ((%res (if (eq? %type 'string) "" null)))
-                 (let %concatenate-loop
-                   ((%ee %ee))
-                   (if (null? %ee)
-                       %res
-                       (let ((%a (car %ee)))
-                         (unless (not %a)
-                           (set! %res
-                            (if (eq? %type 'string)
-                                (string-append %res
-                                 (if (string? %a) %a (list->string %a)))
-                                (append %res
-                                        (if (string? %a)
-                                            (string->list %a)
-                                            %a)))))
-                         (%concatenate-loop (cdr %ee)))))
-                 %res))))
+            (return (list->string (reverse r))))
            (else false))
           (cond
            ((char=? c #\{)
-            (return
-             (let ((%type 'string)
-                   (%ee
-                    (list
-                     (let ((%type 'string) (%ee (list (reverse r))))
-                       (let ((%res (if (eq? %type 'string) "" null)))
-                         (let %concatenate-loop
-                           ((%ee %ee))
-                           (if (null? %ee)
-                               %res
-                               (let ((%a (car %ee)))
-                                 (unless (not %a)
-                                   (set! %res
-                                    (if (eq? %type 'string)
-                                        (string-append %res
-                                         (if (string? %a)
-                                             %a
-                                             (list->string %a)))
-                                        (append %res
-                                                (if (string? %a)
-                                                    (string->list %a)
-                                                    %a)))))
-                                 (%concatenate-loop (cdr %ee)))))
-                         %res))
-                     (get-group))))
-               (let ((%res (if (eq? %type 'string) "" null)))
-                 (let %concatenate-loop
-                   ((%ee %ee))
-                   (if (null? %ee)
-                       %res
-                       (let ((%a (car %ee)))
-                         (unless (not %a)
-                           (set! %res
-                            (if (eq? %type 'string)
-                                (string-append %res
-                                 (if (string? %a) %a (list->string %a)))
-                                (append %res
-                                        (if (string? %a)
-                                            (string->list %a)
-                                            %a)))))
-                         (%concatenate-loop (cdr %ee)))))
-                 %res))))
+            (return (string-append (list->string (reverse r)) (get-group))))
            (else false))
           (set! r (cons (get-actual-char) r))
           r)
@@ -8542,51 +6425,10 @@
                                (else (set! or-clauses (cons clause or-clauses))
                                 or-clauses))
                               (set! outer-loop-done true) (return))
-                             (else
-                              (set! clause
-                               (let ((%type 'string) (%ee (list clause x)))
-                                 (let ((%res (if (eq? %type 'string) "" null)))
-                                   (let %concatenate-loop
-                                     ((%ee %ee))
-                                     (if (null? %ee)
-                                         %res
-                                         (let ((%a (car %ee)))
-                                           (unless (not %a)
-                                             (set! %res
-                                              (if (eq? %type 'string)
-                                                  (string-append %res
-                                                   (if (string? %a)
-                                                       %a
-                                                       (list->string %a)))
-                                                  (append %res
-                                                          (if (string? %a)
-                                                              (string->list %a)
-                                                              %a)))))
-                                           (%concatenate-loop (cdr %ee)))))
-                                   %res)))
+                             (else (set! clause (string-append clause x))
                               clause))))
                          (else (get-actual-char)
-                          (set! clause
-                           (let ((%type 'string) (%ee (list clause (list c))))
-                             (let ((%res (if (eq? %type 'string) "" null)))
-                               (let %concatenate-loop
-                                 ((%ee %ee))
-                                 (if (null? %ee)
-                                     %res
-                                     (let ((%a (car %ee)))
-                                       (unless (not %a)
-                                         (set! %res
-                                          (if (eq? %type 'string)
-                                              (string-append %res
-                                               (if (string? %a)
-                                                   %a
-                                                   (list->string %a)))
-                                              (append %res
-                                                      (if (string? %a)
-                                                          (string->list %a)
-                                                          %a)))))
-                                       (%concatenate-loop (cdr %ee)))))
-                               %res)))
+                          (set! clause (string-append clause (string c)))
                           clause)))
                       (if %loop-returned %loop-result (%loop))))))
               (if %loop-returned %loop-result (%loop))))
@@ -8620,42 +6462,8 @@
 
 (define (do-newif)
  (let ((iffoo (get-ctl-seq)))
-   (let ((foo
-          (let ((%type 'string) (%ee (list "\\" (substring iffoo 3))))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
-     (let ((foo-register
-            (let ((%type 'string) (%ee (list foo "BOOLEANREGISTER")))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
+   (let ((foo (string-append "\\" (substring iffoo 3))))
+     (let ((foo-register (string-append foo "BOOLEANREGISTER")))
        (plain-count foo-register 0 false)
        (tex-def-thunk iffoo
         (lambda ()
@@ -8663,41 +6471,9 @@
            (cons (> (the-count foo-register) 0) *tex-if-stack*))
           *tex-if-stack*)
         false)
-       (tex-def-thunk
-        (let ((%type 'string) (%ee (list foo "true")))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))
+       (tex-def-thunk (string-append foo "true")
         (lambda () (plain-count foo-register 1 false)) false)
-       (tex-def-thunk
-        (let ((%type 'string) (%ee (list foo "false")))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))
+       (tex-def-thunk (string-append foo "false")
         (lambda () (plain-count foo-register 0 false)) false)))))
 
 (define (do-htmlimg env)
@@ -8722,24 +6498,7 @@
    (lambda (f)
      (cond ((not tex-prog-name) (set! tex-prog-name "tex") tex-prog-name)
            (else false))
-     (system
-      (let ((%type 'string)
-            (%ee (list *metapost* " -tex=" tex-prog-name " " f)))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res))))))
+     (system (string-append *metapost* " -tex=" tex-prog-name " " f)))))
 
 (define call-tex
  (let ((tex-prog-name false) (tex-output-format false))
@@ -8761,94 +6520,19 @@
        (cond
         ((eq? *tex-format* ':latex)
          (set! tex-prog-name
-          (let ((%type 'string)
-                (%ee
-                 (list
-                  (substring tex-prog-name 0
-                   (-
-                    (let ((%length-arg tex-prog-name))
-                      ((if (string? %length-arg) string-length length)
-                       %length-arg))
-                    3))
-                  "latex")))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res)))
+          (string-append
+           (substring tex-prog-name 0 (- (string-length tex-prog-name) 3))
+           "latex"))
          tex-prog-name)
         (else false)))
       (else false))
      (let ((dvi-file
-            (let ((%type 'string)
-                  (%ee
-                   (list f (if (eq? tex-output-format ':pdf) ".pdf" ".dvi"))))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
+            (string-append f (if (eq? tex-output-format ':pdf) ".pdf" ".dvi"))))
        (let ((outfile dvi-file))
-         (system
-          (let ((%type 'string) (%ee (list tex-prog-name " " f)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res)))
+         (system (string-append tex-prog-name " " f))
          (cond
           ((file-exists? dvi-file)
-           (let ((logfile
-                  (let ((%type 'string) (%ee (list f ".log")))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res))))
+           (let ((logfile (string-append f ".log")))
              (cond
               ((file-exists? logfile)
                (let ((fine-p
@@ -8891,49 +6575,9 @@
                   (fine-p
                    (cond
                     ((not (eq? tex-output-format ':pdf))
-                     (let ((ps-file
-                            (let ((%type 'string) (%ee (list f ".ps")))
-                              (let ((%res (if (eq? %type 'string) "" null)))
-                                (let %concatenate-loop
-                                  ((%ee %ee))
-                                  (if (null? %ee)
-                                      %res
-                                      (let ((%a (car %ee)))
-                                        (unless (not %a)
-                                          (set! %res
-                                           (if (eq? %type 'string)
-                                               (string-append %res
-                                                (if (string? %a)
-                                                    %a
-                                                    (list->string %a)))
-                                               (append %res
-                                                       (if (string? %a)
-                                                           (string->list %a)
-                                                           %a)))))
-                                        (%concatenate-loop (cdr %ee)))))
-                                %res))))
+                     (let ((ps-file (string-append f ".ps")))
                        (system
-                        (let ((%type 'string)
-                              (%ee (list "dvips " dvi-file " -o " ps-file)))
-                          (let ((%res (if (eq? %type 'string) "" null)))
-                            (let %concatenate-loop
-                              ((%ee %ee))
-                              (if (null? %ee)
-                                  %res
-                                  (let ((%a (car %ee)))
-                                    (unless (not %a)
-                                      (set! %res
-                                       (if (eq? %type 'string)
-                                           (string-append %res
-                                            (if (string? %a)
-                                                %a
-                                                (list->string %a)))
-                                           (append %res
-                                                   (if (string? %a)
-                                                       (string->list %a)
-                                                       %a)))))
-                                    (%concatenate-loop (cdr %ee)))))
-                            %res)))
+                        (string-append "dvips " dvi-file " -o " ps-file))
                        (set! outfile ps-file)
                        outfile))
                     (else false))
@@ -8944,349 +6588,65 @@
 
 (define (ps-to-img/gif/netpbm img-file)
  (system
-  (let ((%type 'string)
-        (%ee (list "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm")))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res)))
+  (string-append "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
  (system
-  (let ((%type 'string)
-        (%ee
-         (list "ppmtogif -transparent rgb:ff/ff/ff < "
-               img-file
-               ".ppm > "
-               img-file)))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res)))
- (for-each
-  (lambda (e)
-    (ensure-file-deleted
-     (let ((%type 'string) (%ee (list img-file e)))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res))))
+  (string-append "ppmtogif -transparent rgb:ff/ff/ff < " img-file ".ppm > "
+   img-file))
+ (for-each (lambda (e) (ensure-file-deleted (string-append img-file e)))
   '(".ppm" ".ppm.tmp" ".ppm.1")))
 
 (define (ps-to-img/png/netpbm img-file)
  '(system
-   (let ((%type 'string)
-         (%ee (list "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm")))
-     (let ((%res (if (eq? %type 'string) "" null)))
-       (let %concatenate-loop
-         ((%ee %ee))
-         (if (null? %ee)
-             %res
-             (let ((%a (car %ee)))
-               (unless (not %a)
-                 (set! %res
-                  (if (eq? %type 'string)
-                      (string-append %res
-                       (if (string? %a) %a (list->string %a)))
-                      (append %res (if (string? %a) (string->list %a) %a)))))
-               (%concatenate-loop (cdr %ee)))))
-       %res)))
+   (string-append "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
  (system
-  (let ((%type 'string)
-        (%ee
-         (list "pnmtopng -interlace -transparent \"#FFFFFF\" "
-               " < "
-               img-file
-               ".ppm.tmp > "
-               img-file)))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res)))
- (for-each
-  (lambda (e)
-    (ensure-file-deleted
-     (let ((%type 'string) (%ee (list img-file e)))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res))))
+  (string-append "pnmtopng -interlace -transparent \"#FFFFFF\" " " < " img-file
+   ".ppm.tmp > " img-file))
+ (for-each (lambda (e) (ensure-file-deleted (string-append img-file e)))
   '(".ppm.1" ".ppm.tmp" ".ppm")))
 
 (define (ps-to-img/jpeg/netpbm img-file)
  (system
-  (let ((%type 'string)
-        (%ee (list "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm")))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res)))
+  (string-append "ppmquant 256 < " img-file ".ppm.tmp > " img-file ".ppm"))
  (system
-  (let ((%type 'string)
-        (%ee (list "ppmtojpeg --grayscale < " img-file ".ppm > " img-file)))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res)))
- (for-each
-  (lambda (e)
-    (ensure-file-deleted
-     (let ((%type 'string) (%ee (list img-file e)))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res))))
+  (string-append "ppmtojpeg --grayscale < " img-file ".ppm > " img-file))
+ (for-each (lambda (e) (ensure-file-deleted (string-append img-file e)))
   '(".ppm.1" ".ppm.tmp" ".ppm")))
 
 (define (ps-to-img ps-file img-file)
  (case (tex2page-flag-value "\\TZPimageconverter")
    ((#\i #\I)
     (system
-     (let ((%type 'string)
-           (%ee
-            (list "convert -transparent white -trim " ps-file " " img-file)))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res))))
+     (string-append "convert -transparent white -trim " ps-file " " img-file)))
    (else
     (system
-     (let ((%type 'string)
-           (%ee
-            (list *ghostscript*
-                  *ghostscript-options*
-                  " -sOutputFile="
-                  img-file
-                  ".ppm.1 "
-                  ps-file)))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res)))
+     (string-append *ghostscript* *ghostscript-options* " -sOutputFile="
+      img-file ".ppm.1 " ps-file))
     (system
-     (let ((%type 'string)
-           (%ee (list "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp")))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res)))
+     (string-append "pnmcrop " img-file ".ppm.1 > " img-file ".ppm.tmp"))
     (case (tex2page-flag-value "\\TZPimageformat")
       ((#\p #\P) (ps-to-img/png/netpbm img-file))
       ((#\j #\J) (ps-to-img/jpeg/netpbm img-file))
       (else (ps-to-img/gif/netpbm img-file))))))
 
 (define (tex-to-img f) (set! *img-file-tally* (+ *img-file-tally* 1))
- (let ((img-file
-        (let ((%type 'string) (%ee (list f (find-img-file-extn))))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
-   (let ((fq-img-file
-          (let ((%type 'string) (%ee (list *aux-dir/* img-file)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+ (let ((img-file (string-append f (find-img-file-extn))))
+   (let ((fq-img-file (string-append *aux-dir/* img-file)))
      (cond
       ((not (file-exists? fq-img-file)) (write-log ':separation-space)
-       (write-log #\{)
-       (write-log
-        (let ((%type 'string) (%ee (list f ".tex")))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res)))
+       (write-log #\{) (write-log (string-append f ".tex"))
        (write-log ':separation-space) (write-log "->")
        (write-log ':separation-space)
        (cond
         ((begin (set! *it* (call-tex f)) *it*) (ps-to-img *it* img-file)
          (ensure-url-reachable img-file ':delete) (write-log img-file)
-         (for-each
-          (lambda (e)
-            (ensure-file-deleted
-             (let ((%type 'string) (%ee (list f e)))
-               (let ((%res (if (eq? %type 'string) "" null)))
-                 (let %concatenate-loop
-                   ((%ee %ee))
-                   (if (null? %ee)
-                       %res
-                       (let ((%a (car %ee)))
-                         (unless (not %a)
-                           (set! %res
-                            (if (eq? %type 'string)
-                                (string-append %res
-                                 (if (string? %a) %a (list->string %a)))
-                                (append %res
-                                        (if (string? %a)
-                                            (string->list %a)
-                                            %a)))))
-                         (%concatenate-loop (cdr %ee)))))
-                 %res))))
+         (for-each (lambda (e) (ensure-file-deleted (string-append f e)))
           '(".log" ".pdf" ".tex")))
         (else (write-log "failed, try manually")))
        (write-log #\}) (write-log ':separation-space))
       (else false)))))
 
 (define (call-with-lazy-image-stream eps-file img-file-stem p)
- (let ((aux-tex-file
-        (let ((%type 'string) (%ee (list img-file-stem ".tex")))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+ (let ((aux-tex-file (string-append img-file-stem ".tex")))
    (let ((o
           (let* ((%f aux-tex-file)
                  (%ee (list ':direction ':output ':if-exists ':supersede))
@@ -9377,27 +6737,7 @@
                     f
                     (ormap
                      (lambda (e)
-                       (let ((f2
-                              (let ((%type 'string) (%ee (list f e)))
-                                (let ((%res (if (eq? %type 'string) "" null)))
-                                  (let %concatenate-loop
-                                    ((%ee %ee))
-                                    (if (null? %ee)
-                                        %res
-                                        (let ((%a (car %ee)))
-                                          (unless (not %a)
-                                            (set! %res
-                                             (if (eq? %type 'string)
-                                                 (string-append %res
-                                                  (if (string? %a)
-                                                      %a
-                                                      (list->string %a)))
-                                                 (append %res
-                                                         (if (string? %a)
-                                                             (string->list %a)
-                                                             %a)))))
-                                          (%concatenate-loop (cdr %ee)))))
-                                  %res))))
+                       (let ((f2 (string-append f e)))
                          (and (file-exists? f2) f2)))
                      *graphics-file-extensions*))))
            (let ((ffull-ext (and ffull (file-extension ffull))))
@@ -9455,24 +6795,7 @@
      ((if (input-port? %close-port-arg) close-input-port close-output-port)
       %close-port-arg)))
   (else false))
- (let ((f
-        (let ((%type 'string)
-              (%ee (list *mfpic-file-stem* *mfpic-tex-file-suffix*)))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+ (let ((f (string-append *mfpic-file-stem* *mfpic-tex-file-suffix*)))
    (set! *mfpic-stream*
     (let* ((%f f)
            (%ee (list ':direction ':output ':if-exists ':supersede))
@@ -9514,41 +6837,8 @@
  (let ((%close-port-arg *mfpic-stream*))
    ((if (input-port? %close-port-arg) close-input-port close-output-port)
     %close-port-arg))
- (let ((tex-f
-        (let ((%type 'string)
-              (%ee (list *mfpic-file-stem* *mfpic-tex-file-suffix*)))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res)))
-       (mp-f
-        (let ((%type 'string) (%ee (list *mfpic-file-stem* ".mp")))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+ (let ((tex-f (string-append *mfpic-file-stem* *mfpic-tex-file-suffix*))
+       (mp-f (string-append *mfpic-file-stem* ".mp")))
    (cond
     ((not (file-exists? mp-f))
      (fluid-let ((*tex-format* ':plain)) (call-tex tex-f)))
@@ -9560,24 +6850,8 @@
  (display "\\endmfpic" *mfpic-stream*) (newline *mfpic-stream*)
  (set! *mfpic-file-num* (add1 *mfpic-file-num*))
  (let ((f
-        (let ((%type 'string)
-              (%ee
-               (list *mfpic-file-stem* "." (write-to-string *mfpic-file-num*))))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res)))
+        (string-append *mfpic-file-stem* "."
+         (write-to-string *mfpic-file-num*)))
        (img-file-stem (next-html-image-file-stem)))
    (lazily-make-epsf-image-file f img-file-stem)
    (source-img-file img-file-stem)))
@@ -9589,40 +6863,7 @@
  (let ((env2 (if (string=? env "align") "eqnarray" env)))
    (cond
     ((char=? (snoop-actual-char) #\*) (get-actual-char)
-     (set! env
-      (let ((%type 'string) (%ee (list env "*")))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
-     (set! env2
-      (let ((%type 'string) (%ee (list env2 "*")))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+     (set! env (string-append env "*")) (set! env2 (string-append env2 "*"))
      env2)
     (else false))
    (egroup)
@@ -9792,62 +7033,13 @@
                   %pop-top-value)))
            (set! res
             (cond ((string=? res "") s)
-                  (else
-                   (let ((%type 'string) (%ee (list res (list sepc) s)))
-                     (let ((%res (if (eq? %type 'string) "" null)))
-                       (let %concatenate-loop
-                         ((%ee %ee))
-                         (if (null? %ee)
-                             %res
-                             (let ((%a (car %ee)))
-                               (unless (not %a)
-                                 (set! %res
-                                  (if (eq? %type 'string)
-                                      (string-append %res
-                                       (if (string? %a) %a (list->string %a)))
-                                      (append %res
-                                              (if (string? %a)
-                                                  (string->list %a)
-                                                  %a)))))
-                               (%concatenate-loop (cdr %ee)))))
-                       %res)))))
+                  (else (string-append res (list sepc) s))))
            res))
        (if %loop-returned %loop-result (%loop))))))
 
 (define (kpsewhich f)
- (let ((tmpf
-        (let ((%type 'string) (%ee (list *aux-dir/* *jobname* "-Z-Z.temp")))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
-   (system
-    (let ((%type 'string) (%ee (list "kpsewhich -- " f " > " tmpf)))
-      (let ((%res (if (eq? %type 'string) "" null)))
-        (let %concatenate-loop
-          ((%ee %ee))
-          (if (null? %ee)
-              %res
-              (let ((%a (car %ee)))
-                (unless (not %a)
-                  (set! %res
-                   (if (eq? %type 'string)
-                       (string-append %res
-                        (if (string? %a) %a (list->string %a)))
-                       (append %res (if (string? %a) (string->list %a) %a)))))
-                (%concatenate-loop (cdr %ee)))))
-        %res)))
+ (let ((tmpf (string-append *aux-dir/* *jobname* "-Z-Z.temp")))
+   (system (string-append "kpsewhich -- " f " > " tmpf))
    (let ((f
           (and (file-exists? tmpf)
                (let ((i (open-input-file tmpf)))
@@ -9866,33 +7058,12 @@
      (if (not f)
          false
          (let ((f (string-trim f)))
-           (cond
-            ((=
-              (let ((%length-arg f))
-                ((if (string? %length-arg) string-length length) %length-arg))
-              0)
-             false)
-            ((file-exists? f) f)
-            (else false)))))))
+           (cond ((= (string-length f) 0) false)
+                 ((file-exists? f) f)
+                 (else false)))))))
 
 (define (find-tex-file file)
- (let ((file.tex
-        (let ((%type 'string) (%ee (list file ".tex")))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+ (let ((file.tex (string-append file ".tex")))
    (or (and (file-exists? file.tex) file.tex)
        (and (file-exists? file) file)
        (if (not (null? *tex2page-inputs*))
@@ -9909,52 +7080,10 @@
                  (unless %loop-returned (set! dir (car %dolist-l)))
                  (unless %loop-returned (set! %dolist-l (cdr %dolist-l)))
                  (unless %loop-returned
-                   (let ((f
-                          (let ((%type 'string)
-                                (%ee (list dir *directory-separator* file.tex)))
-                            (let ((%res (if (eq? %type 'string) "" null)))
-                              (let %concatenate-loop
-                                ((%ee %ee))
-                                (if (null? %ee)
-                                    %res
-                                    (let ((%a (car %ee)))
-                                      (unless (not %a)
-                                        (set! %res
-                                         (if (eq? %type 'string)
-                                             (string-append %res
-                                              (if (string? %a)
-                                                  %a
-                                                  (list->string %a)))
-                                             (append %res
-                                                     (if (string? %a)
-                                                         (string->list %a)
-                                                         %a)))))
-                                      (%concatenate-loop (cdr %ee)))))
-                              %res))))
+                   (let ((f (string-append dir *directory-separator* file.tex)))
                      (cond ((file-exists? f) (return f)) (else false))))
                  (unless %loop-returned
-                   (let ((f
-                          (let ((%type 'string)
-                                (%ee (list dir *directory-separator* file)))
-                            (let ((%res (if (eq? %type 'string) "" null)))
-                              (let %concatenate-loop
-                                ((%ee %ee))
-                                (if (null? %ee)
-                                    %res
-                                    (let ((%a (car %ee)))
-                                      (unless (not %a)
-                                        (set! %res
-                                         (if (eq? %type 'string)
-                                             (string-append %res
-                                              (if (string? %a)
-                                                  %a
-                                                  (list->string %a)))
-                                             (append %res
-                                                     (if (string? %a)
-                                                         (string->list %a)
-                                                         %a)))))
-                                      (%concatenate-loop (cdr %ee)))))
-                              %res))))
+                   (let ((f (string-append dir *directory-separator* file)))
                      (cond ((file-exists? f) (return f)) (else false))))
                  (if %loop-returned %loop-result (%loop)))))
            (kpsewhich file)))))
@@ -9992,71 +7121,17 @@
        (cond
         (f (set! *jobname* (file-stem-name f)) (make-target-dir)
          (let ((main-html-page
-                (let ((%type 'string)
-                      (%ee (list *aux-dir/* *jobname* *output-extension*)))
-                  (let ((%res (if (eq? %type 'string) "" null)))
-                    (let %concatenate-loop
-                      ((%ee %ee))
-                      (if (null? %ee)
-                          %res
-                          (let ((%a (car %ee)))
-                            (unless (not %a)
-                              (set! %res
-                               (if (eq? %type 'string)
-                                   (string-append %res
-                                    (if (string? %a) %a (list->string %a)))
-                                   (append %res
-                                           (if (string? %a)
-                                               (string->list %a)
-                                               %a)))))
-                            (%concatenate-loop (cdr %ee)))))
-                    %res))))
+                (string-append *aux-dir/* *jobname* *output-extension*)))
            (cond
             ((string=? main-html-page f)
-             (let ((f-save
-                    (let ((%type 'string) (%ee (list f ".sav")))
-                      (let ((%res (if (eq? %type 'string) "" null)))
-                        (let %concatenate-loop
-                          ((%ee %ee))
-                          (if (null? %ee)
-                              %res
-                              (let ((%a (car %ee)))
-                                (unless (not %a)
-                                  (set! %res
-                                   (if (eq? %type 'string)
-                                       (string-append %res
-                                        (if (string? %a) %a (list->string %a)))
-                                       (append %res
-                                               (if (string? %a)
-                                                   (string->list %a)
-                                                   %a)))))
-                                (%concatenate-loop (cdr %ee)))))
-                        %res))))
+             (let ((f-save (string-append f ".sav")))
                (write-log ':separation-newline)
                (write-log "Copying weirdly named TeX source file ")
                (write-log f)
                (write-log " to ")
                (write-log f-save)
                (write-log ':separation-newline)
-               (system
-                (let ((%type 'string) (%ee (list "cp -pf " f " " f-save)))
-                  (let ((%res (if (eq? %type 'string) "" null)))
-                    (let %concatenate-loop
-                      ((%ee %ee))
-                      (if (null? %ee)
-                          %res
-                          (let ((%a (car %ee)))
-                            (unless (not %a)
-                              (set! %res
-                               (if (eq? %type 'string)
-                                   (string-append %res
-                                    (if (string? %a) %a (list->string %a)))
-                                   (append %res
-                                           (if (string? %a)
-                                               (string->list %a)
-                                               %a)))))
-                            (%concatenate-loop (cdr %ee)))))
-                    %res)))
+               (system (string-append "cp -pf " f " " f-save))
                (set! f f-save)
                f))
             (else false))))
@@ -10074,43 +7149,10 @@
 
 (define (add-dot-tex-if-no-extension-provided f)
  (let ((e (file-extension f)))
-   (if e
-       f
-       (let ((%type 'string) (%ee (list f ".tex")))
-         (let ((%res (if (eq? %type 'string) "" null)))
-           (let %concatenate-loop
-             ((%ee %ee))
-             (if (null? %ee)
-                 %res
-                 (let ((%a (car %ee)))
-                   (unless (not %a)
-                     (set! %res
-                      (if (eq? %type 'string)
-                          (string-append %res
-                           (if (string? %a) %a (list->string %a)))
-                          (append %res
-                                  (if (string? %a) (string->list %a) %a)))))
-                   (%concatenate-loop (cdr %ee)))))
-           %res)))))
+   (if e f (string-append f ".tex"))))
 
 (define (ignore-tex-specific-text env)
- (let ((endenv
-        (let ((%type 'string) (%ee (list "\\end" env)))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+ (let ((endenv (string-append "\\end" env)))
    (let* ((%loop-returned false)
           (%loop-result 0)
           (return
@@ -10154,30 +7196,7 @@
                                 (get-grouped-environment-name-if-any))
                                *it*))
                          (let ((g *it*))
-                           (let ((y
-                                  (find-corresp-prim
-                                   (let ((%type 'string) (%ee (list x g)))
-                                     (let ((%res
-                                            (if (eq? %type 'string) "" null)))
-                                       (let %concatenate-loop
-                                         ((%ee %ee))
-                                         (if (null? %ee)
-                                             %res
-                                             (let ((%a (car %ee)))
-                                               (unless (not %a)
-                                                 (set! %res
-                                                  (if (eq? %type 'string)
-                                                      (string-append %res
-                                                       (if (string? %a)
-                                                           %a
-                                                           (list->string %a)))
-                                                      (append %res
-                                                              (if (string? %a)
-                                                                  (string->list
-                                                                   %a)
-                                                                  %a)))))
-                                               (%concatenate-loop (cdr %ee)))))
-                                       %res)))))
+                           (let ((y (find-corresp-prim (string-append x g))))
                              (cond
                               ((string=? y "\\endrawhtml") (ignorespaces)
                                (return))
@@ -10200,47 +7219,9 @@
        ()
        (let ((c (snoop-actual-char)))
          (cond
-          ((not c)
-           (set! s2
-            (let ((%type 'string) (%ee (list (reverse s))))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res)))
+          ((not c) (set! s2 (list->string (reverse s)))
            (write-aux (quasiquote (!html-head (unquote s2)))) (return))
-          ((= (catcode c) **escape**)
-           (set! s2
-            (let ((%type 'string) (%ee (list (reverse s))))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res)))
+          ((= (catcode c) **escape**) (set! s2 (list->string (reverse s)))
            (write-aux (quasiquote (!html-head (unquote s2)))) (set! s null)
            (let ((x (get-ctl-seq)))
              (cond ((string=? x "\\endhtmlheadonly") (return))
@@ -10401,20 +7382,7 @@
    (else "")))
 
 (define (scaled-point-to-tex-point sp)
- (let ((%type 'string) (%ee (list (write-to-string (/ sp 65536.0)) "pt")))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (string-append (write-to-string (/ sp 65536.0)) "pt"))
 
 (define (expand-the)
  (let ((ctlseq (get-ctl-seq)))
@@ -10539,23 +7507,7 @@
 
 (define (do-newenvironment renewp) (ignorespaces)
  (let ((envname (string-trim (ungroup (get-token)))))
-   (let ((bs-envname
-          (let ((%type 'string) (%ee (list "\\" envname)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+   (let ((bs-envname (string-append "\\" envname)))
      (let ((optarg false))
        (let ((argc
               (cond
@@ -10567,68 +7519,13 @@
                   (string->number (string-trim s))))
                (else 0))))
          (let ((beginning
-                (let ((%type 'string)
-                      (%ee (list "\\begingroup " (ungroup (get-token)))))
-                  (let ((%res (if (eq? %type 'string) "" null)))
-                    (let %concatenate-loop
-                      ((%ee %ee))
-                      (if (null? %ee)
-                          %res
-                          (let ((%a (car %ee)))
-                            (unless (not %a)
-                              (set! %res
-                               (if (eq? %type 'string)
-                                   (string-append %res
-                                    (if (string? %a) %a (list->string %a)))
-                                   (append %res
-                                           (if (string? %a)
-                                               (string->list %a)
-                                               %a)))))
-                            (%concatenate-loop (cdr %ee)))))
-                    %res))))
-           (let ((ending
-                  (let ((%type 'string)
-                        (%ee (list (ungroup (get-token)) "\\endgroup")))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res))))
+                (string-append "\\begingroup " (ungroup (get-token)))))
+           (let ((ending (string-append (ungroup (get-token)) "\\endgroup")))
              (let ((ok-to-def-p (or renewp (not (find-def bs-envname)))))
                (tex-def bs-envname (latex-argnum-to-plain-argpat argc)
                 beginning optarg false false false false)
-               (tex-def
-                (let ((%type 'string) (%ee (list "\\end" envname)))
-                  (let ((%res (if (eq? %type 'string) "" null)))
-                    (let %concatenate-loop
-                      ((%ee %ee))
-                      (if (null? %ee)
-                          %res
-                          (let ((%a (car %ee)))
-                            (unless (not %a)
-                              (set! %res
-                               (if (eq? %type 'string)
-                                   (string-append %res
-                                    (if (string? %a) %a (list->string %a)))
-                                   (append %res
-                                           (if (string? %a)
-                                               (string->list %a)
-                                               %a)))))
-                            (%concatenate-loop (cdr %ee)))))
-                    %res))
-                null ending false false false false false)
+               (tex-def (string-append "\\end" envname) null ending false false
+                false false false)
                (cond
                 ((not ok-to-def-p)
                  (trace-if true "{" envname "} already defined"))
@@ -10656,97 +7553,16 @@
        (let ((caption (ungroup (get-group))))
          (let ((within (if numbered-like false (get-bracketed-text-if-any))))
            (let ((sec-num
-                  (and within
-                       (section-ctl-seq-p
-                        (let ((%type 'string) (%ee (list "\\" within)))
-                          (let ((%res (if (eq? %type 'string) "" null)))
-                            (let %concatenate-loop
-                              ((%ee %ee))
-                              (if (null? %ee)
-                                  %res
-                                  (let ((%a (car %ee)))
-                                    (unless (not %a)
-                                      (set! %res
-                                       (if (eq? %type 'string)
-                                           (string-append %res
-                                            (if (string? %a)
-                                                %a
-                                                (list->string %a)))
-                                           (append %res
-                                                   (if (string? %a)
-                                                       (string->list %a)
-                                                       %a)))))
-                                    (%concatenate-loop (cdr %ee)))))
-                            %res))))))
+                  (and within (section-ctl-seq-p (string-append "\\" within)))))
              (cond
               ((not numbered-like) (tex-def-dotted-count counter-name sec-num))
               (else false))
-             (tex-def
-              (let ((%type 'string) (%ee (list "\\" env)))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res))
-              null
-              (let ((%type 'string)
-                    (%ee
-                     (list "\\par\\begingroup\\TIIPtheorem{"
-                           counter-name
-                           "}{"
-                           caption
-                           "}")))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res))
+             (tex-def (string-append "\\" env) null
+              (string-append "\\par\\begingroup\\TIIPtheorem{" counter-name
+               "}{" caption "}")
               false false false false *global-texframe*)
-             (tex-def
-              (let ((%type 'string) (%ee (list "\\end" env)))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res))
-              null "\\endgroup\\par" false false false false
-              *global-texframe*))))))))
+             (tex-def (string-append "\\end" env) null "\\endgroup\\par" false
+              false false false *global-texframe*))))))))
 
 (define (do-theorem)
  (let ((counter-name (ungroup (get-group))))
@@ -10759,51 +7575,10 @@
          (let ((thm-num
                 (let ((sec-num (counter*-within counter)))
                   (if sec-num
-                      (let ((%type 'string)
-                            (%ee
-                             (list (section-counter-value sec-num)
-                                   "."
-                                   (write-to-string new-counter-value))))
-                        (let ((%res (if (eq? %type 'string) "" null)))
-                          (let %concatenate-loop
-                            ((%ee %ee))
-                            (if (null? %ee)
-                                %res
-                                (let ((%a (car %ee)))
-                                  (unless (not %a)
-                                    (set! %res
-                                     (if (eq? %type 'string)
-                                         (string-append %res
-                                          (if (string? %a)
-                                              %a
-                                              (list->string %a)))
-                                         (append %res
-                                                 (if (string? %a)
-                                                     (string->list %a)
-                                                     %a)))))
-                                  (%concatenate-loop (cdr %ee)))))
-                          %res))
+                      (string-append (section-counter-value sec-num) "."
+                       (write-to-string new-counter-value))
                       (write-to-string new-counter-value)))))
-           (let ((lbl
-                  (let ((%type 'string)
-                        (%ee (list *html-node-prefix* "thm_" thm-num)))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res))))
+           (let ((lbl (string-append *html-node-prefix* "thm_" thm-num)))
              (tex-def-0arg "\\TIIPcurrentnodename" lbl)
              (tex-def-0arg "\\@currentlabel" thm-num)
              (emit-anchor lbl)
@@ -10822,22 +7597,7 @@
   (else false))
  (let ((env *it*))
    (toss-back-char *invisible-space*)
-   (toss-back-string
-    (let ((%type 'string) (%ee (list "\\" env)))
-      (let ((%res (if (eq? %type 'string) "" null)))
-        (let %concatenate-loop
-          ((%ee %ee))
-          (if (null? %ee)
-              %res
-              (let ((%a (car %ee)))
-                (unless (not %a)
-                  (set! %res
-                   (if (eq? %type 'string)
-                       (string-append %res
-                        (if (string? %a) %a (list->string %a)))
-                       (append %res (if (string? %a) (string->list %a) %a)))))
-                (%concatenate-loop (cdr %ee)))))
-        %res)))
+   (toss-back-string (string-append "\\" env))
    (cond
     ((not
       (member env
@@ -10855,23 +7615,7 @@
       ((not (member env '("htmlonly" "document"))) (do-end-para)
        (toss-back-string "\\endgroup"))
       (else false))
-     (toss-back-string
-      (let ((%type 'string) (%ee (list "\\end" env)))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))))
+     (toss-back-string (string-append "\\end" env))))
   (else (toss-back-char *invisible-space*) (toss-back-string "\\TIIPbye"))))
 
 (define (latex-argnum-to-plain-argpat n)
@@ -10901,70 +7645,18 @@
    (ignorespaces)
    (let ((lhs (get-ctl-seq))
          (imgdef-file-stem
-          (let ((%type 'string)
-                (%ee
-                 (list *subjobname*
-                       *img-file-suffix*
-                       *imgdef-file-suffix*
-                       (write-to-string *imgdef-file-count*))))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+          (string-append *subjobname* *img-file-suffix* *imgdef-file-suffix*
+           (write-to-string *imgdef-file-count*))))
      (dump-imgdef imgdef-file-stem)
      (tex-to-img imgdef-file-stem)
-     (tex-def lhs null
-      (let ((%type 'string)
-            (%ee (list "\\TIIPreuseimage{" imgdef-file-stem "}")))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res))
+     (tex-def lhs null (string-append "\\TIIPreuseimage{" imgdef-file-stem "}")
       false false false false (and globalp *global-texframe*)))))
 
 (define (valid-img-file-p f) false)
 
 (define (source-img-file img-file-stem . alt)
  (let ((alt (if (null? alt) false (car alt))))
-   (let ((img-file
-          (let ((%type 'string) (%ee (list img-file-stem (find-img-file-extn))))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+   (let ((img-file (string-append img-file-stem (find-img-file-extn))))
      (write-log #\()
      (write-log img-file)
      (write-log ':separation-space)
@@ -11001,29 +7693,7 @@
            (if (string=? x "\\par")
                (begin (begin (set! params (cons #\newline params)) params)
                 (begin (set! params (cons #\newline params)) params))
-               (begin
-                (set! params
-                 (append
-                  (reverse
-                   (let ((%type 'list) (%ee (list x)))
-                     (let ((%res (if (eq? %type 'string) "" null)))
-                       (let %concatenate-loop
-                         ((%ee %ee))
-                         (if (null? %ee)
-                             %res
-                             (let ((%a (car %ee)))
-                               (unless (not %a)
-                                 (set! %res
-                                  (if (eq? %type 'string)
-                                      (string-append %res
-                                       (if (string? %a) %a (list->string %a)))
-                                      (append %res
-                                              (if (string? %a)
-                                                  (string->list %a)
-                                                  %a)))))
-                               (%concatenate-loop (cdr %ee)))))
-                       %res)))
-                  params))
+               (begin (set! params (append (reverse (string->list x)) params))
                 params))))
         ((= (catcode c) **bgroup**) (return))
         (else
@@ -11035,53 +7705,37 @@
    (reverse params)))
 
 (define (get-till-char c0)
- (let ((%type 'string)
-       (%ee
-        (list
-         (reverse
-          (let ((s null) (nesting 0) (escape-p false))
-            (let* ((%loop-returned false)
-                   (%loop-result 0)
-                   (return
-                    (lambda %args
-                      (set! %loop-returned true)
-                      (set! %loop-result (and (pair? %args) (car %args))))))
-              (let %loop
-                ()
-                (let ((c (snoop-actual-char)))
-                  (cond ((not c) (terror 'get-till-char "File ended too soon"))
-                        (else false))
-                  (cond
-                   (escape-p (set! s (cons (get-actual-char) s))
-                    (set! escape-p false) escape-p)
-                   ((char=? c c0) (return s))
-                   ((= (catcode c) **escape**)
-                    (set! s (cons (get-actual-char) s)) (set! escape-p true)
-                    escape-p)
-                   ((char=? c #\{) (set! s (cons (get-actual-char) s))
-                    (set! nesting (+ nesting 1)) nesting)
-                   ((char=? c #\}) (set! s (cons (get-actual-char) s))
-                    (set! nesting (- nesting 1)) nesting)
-                   ((> nesting 0) (set! s (cons (get-actual-char) s)) s)
-                   ((and (char-whitespace? c)
-                         (not (char=? c0 #\newline))
-                         (char-whitespace? c0))
-                    (return s))
-                   (else (set! s (cons (get-actual-char) s)) s)))
-                (if %loop-returned %loop-result (%loop)))))))))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (list->string
+  (reverse
+   (let ((s null) (nesting 0) (escape-p false))
+     (let* ((%loop-returned false)
+            (%loop-result 0)
+            (return
+             (lambda %args
+               (set! %loop-returned true)
+               (set! %loop-result (and (pair? %args) (car %args))))))
+       (let %loop
+         ()
+         (let ((c (snoop-actual-char)))
+           (cond ((not c) (terror 'get-till-char "File ended too soon"))
+                 (else false))
+           (cond
+            (escape-p (set! s (cons (get-actual-char) s)) (set! escape-p false)
+             escape-p)
+            ((char=? c c0) (return s))
+            ((= (catcode c) **escape**) (set! s (cons (get-actual-char) s))
+             (set! escape-p true) escape-p)
+            ((char=? c #\{) (set! s (cons (get-actual-char) s))
+             (set! nesting (+ nesting 1)) nesting)
+            ((char=? c #\}) (set! s (cons (get-actual-char) s))
+             (set! nesting (- nesting 1)) nesting)
+            ((> nesting 0) (set! s (cons (get-actual-char) s)) s)
+            ((and (char-whitespace? c)
+                  (not (char=? c0 #\newline))
+                  (char-whitespace? c0))
+             (return s))
+            (else (set! s (cons (get-actual-char) s)) s)))
+         (if %loop-returned %loop-result (%loop))))))))
 
 (define (digit-to-int d) (- (char->integer d) *int-corresp-to-0*))
 
@@ -11163,27 +7817,7 @@
                    (let ((y (car tmplt)))
                      (cond
                       ((not y) (emit "<td>")
-                       (tex2page-string
-                        (let ((%type 'string) (%ee (list r "}")))
-                          (let ((%res (if (eq? %type 'string) "" null)))
-                            (let %concatenate-loop
-                              ((%ee %ee))
-                              (if (null? %ee)
-                                  %res
-                                  (let ((%a (car %ee)))
-                                    (unless (not %a)
-                                      (set! %res
-                                       (if (eq? %type 'string)
-                                           (string-append %res
-                                            (if (string? %a)
-                                                %a
-                                                (list->string %a)))
-                                           (append %res
-                                                   (if (string? %a)
-                                                       (string->list %a)
-                                                       %a)))))
-                                    (%concatenate-loop (cdr %ee)))))
-                            %res)))
+                       (tex2page-string (string-append r "}"))
                        (cond
                         ((and (string=? x "\\cr") (string=? ins " "))
                          (emit-nbsp 1))
@@ -11204,77 +7838,15 @@
                               (%pop-top-value (car %pop-old-stack)))
                          (begin (set! tmplt (cdr %pop-old-stack)) tmplt)
                          %pop-top-value)
-                       (set! r
-                        (let ((%type 'string) (%ee (list r ins)))
-                          (let ((%res (if (eq? %type 'string) "" null)))
-                            (let %concatenate-loop
-                              ((%ee %ee))
-                              (if (null? %ee)
-                                  %res
-                                  (let ((%a (car %ee)))
-                                    (unless (not %a)
-                                      (set! %res
-                                       (if (eq? %type 'string)
-                                           (string-append %res
-                                            (if (string? %a)
-                                                %a
-                                                (list->string %a)))
-                                           (append %res
-                                                   (if (string? %a)
-                                                       (string->list %a)
-                                                       %a)))))
-                                    (%concatenate-loop (cdr %ee)))))
-                            %res)))
-                       r)
+                       (set! r (string-append r ins)) r)
                       (else
                        (let* ((%pop-old-stack tmplt)
                               (%pop-top-value (car %pop-old-stack)))
                          (begin (set! tmplt (cdr %pop-old-stack)) tmplt)
                          %pop-top-value)
-                       (set! r
-                        (let ((%type 'string) (%ee (list r y)))
-                          (let ((%res (if (eq? %type 'string) "" null)))
-                            (let %concatenate-loop
-                              ((%ee %ee))
-                              (if (null? %ee)
-                                  %res
-                                  (let ((%a (car %ee)))
-                                    (unless (not %a)
-                                      (set! %res
-                                       (if (eq? %type 'string)
-                                           (string-append %res
-                                            (if (string? %a)
-                                                %a
-                                                (list->string %a)))
-                                           (append %res
-                                                   (if (string? %a)
-                                                       (string->list %a)
-                                                       %a)))))
-                                    (%concatenate-loop (cdr %ee)))))
-                            %res)))
-                       r)))
+                       (set! r (string-append r y)) r)))
                    (if %loop-returned %loop-result (%loop))))))
-            (else
-             (set! ins
-              (let ((%type 'string) (%ee (list ins x)))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res)))
-             ins))))
+            (else (set! ins (string-append ins x)) ins))))
        (if %loop-returned %loop-result (%loop))))))
 
 (define (do-settabs)
@@ -11292,48 +7864,11 @@
          (cond
           ((string=? x "\\columns")
            (tex2page-string
-            (let ((%type 'string)
-                  (%ee (list "\\TIIPsettabscolumns=" settabs-spec)))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res)))
+            (string-append "\\TIIPsettabscolumns=" settabs-spec))
            (return))
           ((string=? x "\\cr") (plain-count "\\TIIPsettabscolumns" 0 false)
            (return))
-          (else
-           (set! settabs-spec
-            (let ((%type 'string) (%ee (list settabs-spec x)))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res)))
+          (else (set! settabs-spec (string-append settabs-spec x))
            settabs-spec)))
        (if %loop-returned %loop-result (%loop))))))
 
@@ -11366,23 +7901,7 @@
    (cond
     ((> num-cols 0)
      (set! cell-width
-      (let ((%type 'string)
-            (%ee (list " width=" (write-to-string (/ 100.0 num-cols)) "%")))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append " width=" (write-to-string (/ 100.0 num-cols)) "%"))
      cell-width)
     (else false))
    (let* ((%loop-returned false)
@@ -11401,26 +7920,7 @@
            (tex2page-string cell-contents) (egroup) (set! cell-contents "")
            (emit "</td>") (emit-newline)
            (cond ((string=? x "\\cr") (return)) (else false)))
-          (else
-           (set! cell-contents
-            (let ((%type 'string) (%ee (list cell-contents x)))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res)))
+          (else (set! cell-contents (string-append cell-contents x))
            cell-contents)))
        (if %loop-returned %loop-result (%loop)))))
  (emit "</tr>") (emit-newline))
@@ -11440,29 +7940,8 @@
              (set! %loop-result (and (pair? %args) (car %args))))))
      (let %loop
        ()
-       (cond
-        (outer-loop-done
-         (return
-          (list i
-                (let ((%type 'string) (%ee (list (reverse ss))))
-                  (let ((%res (if (eq? %type 'string) "" null)))
-                    (let %concatenate-loop
-                      ((%ee %ee))
-                      (if (null? %ee)
-                          %res
-                          (let ((%a (car %ee)))
-                            (unless (not %a)
-                              (set! %res
-                               (if (eq? %type 'string)
-                                   (string-append %res
-                                    (if (string? %a) %a (list->string %a)))
-                                   (append %res
-                                           (if (string? %a)
-                                               (string->list %a)
-                                               %a)))))
-                            (%concatenate-loop (cdr %ee)))))
-                    %res)))))
-        (else false))
+       (cond (outer-loop-done (return (list i (list->string (reverse ss)))))
+             (else false))
        (unless %loop-returned (set! i k) (set! s null) s)
        (unless %loop-returned
          (let* ((%loop-returned false)
@@ -11630,115 +8109,58 @@
                  ((begin (set! *it* (get-bracketed-text-if-any)) *it*) *it*)
                  (else optarg)))))))
      (let ((args (read-macro-args argpat k r)))
-       (let ((rhs-n
-              (let ((%length-arg rhs))
-                ((if (string? %length-arg) string-length length) %length-arg))))
+       (let ((rhs-n (string-length rhs)))
          (fluid-let ((*catcodes* lexical-catcodes))
-          (let ((%type 'string)
-                (%ee
-                 (list
-                  (letrec
-                   ((aux
-                     (lambda (k)
-                       (if (>= k rhs-n)
-                           null
-                           (let ((c (string-ref rhs k)))
-                             (cond
-                              ((char=? c #\\)
-                               (let ((j (add1 k)) (s (list #\\)))
-                                 (let* ((%loop-returned false)
-                                        (%loop-result 0)
-                                        (return
-                                         (lambda %args
-                                           (set! %loop-returned true)
-                                           (set! %loop-result
-                                            (and (pair? %args) (car %args))))))
-                                   (let %loop
-                                     ()
-                                     (cond ((>= j rhs-n) (return (reverse s)))
-                                           (else false))
-                                     (unless %loop-returned
-                                       (let ((c (string-ref rhs j)))
-                                         (cond
-                                          ((char-alphabetic? c)
-                                           (set! j (+ j 1)) (set! s (cons c s))
-                                           s)
-                                          ((and (char=? c #\#)
-                                                (> (length s) 1))
-                                           (return
-                                            (append (reverse s)
-                                                    (cons #\  (aux j)))))
-                                          ((= (length s) 1)
-                                           (return
-                                            (append (reverse (cons c s))
-                                                    (aux (add1 j)))))
-                                          (else
-                                           (return
-                                            (append (reverse s) (aux j)))))))
-                                     (if %loop-returned
-                                         %loop-result
-                                         (%loop))))))
-                              ((char=? c #\#)
-                               (if (= k (sub1 rhs-n))
-                                   (list #\#)
-                                   (let ((n (string-ref rhs (add1 k))))
-                                     (cond
-                                      ((char=? n #\#) (cons #\# (aux (+ k 2))))
-                                      ((and (char-numeric? n)
-                                            (<= (digit-to-int n)
-                                                (length args)))
-                                       (append
-                                        (let ((%type 'list)
-                                              (%ee
-                                               (list
-                                                (list-ref args
-                                                 (sub1 (digit-to-int n))))))
-                                          (let ((%res
-                                                 (if (eq? %type 'string)
-                                                     ""
-                                                     null)))
-                                            (let %concatenate-loop
-                                              ((%ee %ee))
-                                              (if (null? %ee)
-                                                  %res
-                                                  (let ((%a (car %ee)))
-                                                    (unless (not %a)
-                                                      (set! %res
-                                                       (if (eq? %type 'string)
-                                                           (string-append %res
-                                                            (if (string? %a)
-                                                                %a
-                                                                (list->string
-                                                                 %a)))
-                                                           (append %res
-                                                                   (if
-                                                                    (string?
-                                                                     %a)
-                                                                    (string->list
-                                                                     %a)
-                                                                    %a)))))
-                                                    (%concatenate-loop
-                                                     (cdr %ee)))))
-                                            %res))
-                                        (aux (+ k 2))))
-                                      (else (cons #\# (aux (add1 k))))))))
-                              (else (cons c (aux (add1 k))))))))))
-                   (aux 0)))))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))))))
+          (list->string
+           (letrec
+            ((aux
+              (lambda (k)
+                (if (>= k rhs-n)
+                    null
+                    (let ((c (string-ref rhs k)))
+                      (cond
+                       ((char=? c #\\)
+                        (let ((j (add1 k)) (s (list #\\)))
+                          (let* ((%loop-returned false)
+                                 (%loop-result 0)
+                                 (return
+                                  (lambda %args
+                                    (set! %loop-returned true)
+                                    (set! %loop-result
+                                     (and (pair? %args) (car %args))))))
+                            (let %loop
+                              ()
+                              (cond ((>= j rhs-n) (return (reverse s)))
+                                    (else false))
+                              (unless %loop-returned
+                                (let ((c (string-ref rhs j)))
+                                  (cond
+                                   ((char-alphabetic? c) (set! j (+ j 1))
+                                    (set! s (cons c s)) s)
+                                   ((and (char=? c #\#) (> (length s) 1))
+                                    (return
+                                     (append (reverse s) (cons #\  (aux j)))))
+                                   ((= (length s) 1)
+                                    (return
+                                     (append (reverse (cons c s))
+                                             (aux (add1 j)))))
+                                   (else
+                                    (return (append (reverse s) (aux j)))))))
+                              (if %loop-returned %loop-result (%loop))))))
+                       ((char=? c #\#)
+                        (if (= k (sub1 rhs-n))
+                            (list #\#)
+                            (let ((n (string-ref rhs (add1 k))))
+                              (cond ((char=? n #\#) (cons #\# (aux (+ k 2))))
+                                    ((and (char-numeric? n)
+                                          (<= (digit-to-int n) (length args)))
+                                     (append
+                                      (string->list
+                                       (list-ref args (sub1 (digit-to-int n))))
+                                      (aux (+ k 2))))
+                                    (else (cons #\# (aux (add1 k))))))))
+                       (else (cons c (aux (add1 k))))))))))
+            (aux 0)))))))))
 
 (define (do-verbatimescapechar) (ignorespaces)
  (let ((c1 (get-actual-char)))
@@ -12013,27 +8435,8 @@
 (define (do-verbwritefile)
  (let ((f (get-filename-possibly-braced)))
    (let ((e (file-extension f)))
-     (cond
-      ((not e) (set! e ".tex")
-       (set! f
-        (let ((%type 'string) (%ee (list f e)))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res)))
-       f)
-      (else false))
+     (cond ((not e) (set! e ".tex") (set! f (string-append f e)) f)
+           (else false))
      (cond
       (*verb-stream*
        (let ((%close-port-arg *verb-stream*))
@@ -12067,23 +8470,7 @@
 (define (verb-ensure-output-stream)
  (cond
   ((not *verb-stream*)
-   (let ((output-file
-          (let ((%type 'string) (%ee (list *jobname* ".txt")))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+   (let ((output-file (string-append *jobname* ".txt")))
      (set! *verb-stream*
       (let* ((%f output-file)
              (%ee (list ':direction ':output ':if-exists ':supersede))
@@ -12173,26 +8560,8 @@
  (emit "<pre class=verbatim>")
  (fluid-let ((*verb-visible-space-p* (eat-star)))
   (cond ((string=? env "Verbatim") (get-bracketed-text-if-any)) (else false))
-  (cond
-   (*verb-visible-space-p*
-    (set! env
-     (let ((%type 'string) (%ee (list env "*")))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res)))
-    env)
-   (else false))
+  (cond (*verb-visible-space-p* (set! env (string-append env "*")) env)
+        (else false))
   (munched-a-newline-p)
   (let ((%fluid-var-*ligatures-p* false) (c false))
     (fluid-let ((*ligatures-p* %fluid-var-*ligatures-p*))
@@ -12326,23 +8695,7 @@
     ((not (string=? math-text "")) (emit "<span class=variable>")
      (fluid-let ((*catcodes* *catcodes*)) (catcode #\\ 11)
       (catcode *esc-char-verb* 11)
-      (tex2page-string
-       (let ((%type 'string) (%ee (list "$" math-text "$")))
-         (let ((%res (if (eq? %type 'string) "" null)))
-           (let %concatenate-loop
-             ((%ee %ee))
-             (if (null? %ee)
-                 %res
-                 (let ((%a (car %ee)))
-                   (unless (not %a)
-                     (set! %res
-                      (if (eq? %type 'string)
-                          (string-append %res
-                           (if (string? %a) %a (list->string %a)))
-                          (append %res
-                                  (if (string? %a) (string->list %a) %a)))))
-                   (%concatenate-loop (cdr %ee)))))
-           %res))))
+      (tex2page-string (string-append "$" math-text "$")))
      (emit "</span>"))
     (else false))))
 
@@ -12465,10 +8818,7 @@
     (emit "</span>"))))
 
 (define (scm-display-token s)
- (let ((n
-        (let ((%length-arg s))
-          ((if (string? %length-arg) string-length length) %length-arg)))
-       (k 0))
+ (let ((n (string-length s)) (k 0))
    (let* ((%loop-returned false)
           (%loop-result 0)
           (return
@@ -12598,10 +8948,7 @@
  (fluid-let ((*scm-dribbling-p* true)) (do-scm false)) (newline *verb-stream*))
 
 (define (string-is-all-dots-p s)
- (let ((%dotimes-n
-        (let ((%length-arg s))
-          ((if (string? %length-arg) string-length length) %length-arg)))
-       (i 0))
+ (let ((%dotimes-n (string-length s)) (i 0))
    (let* ((%loop-returned false)
           (%loop-result 0)
           (return
@@ -12618,9 +8965,7 @@
        (if %loop-returned %loop-result (%loop))))))
 
 (define (string-is-flanked-by-stars-p s)
- (let ((n
-        (let ((%length-arg s))
-          ((if (string? %length-arg) string-length length) %length-arg))))
+ (let ((n (string-length s)))
    (and (>= n 3) (char=? (string-ref s 0) (string-ref s (sub1 n)) #\*))))
 
 (define (scm-get-type s)
@@ -12841,23 +9186,7 @@
          (begin (set!counter*-value counter new-value)
           (counter*-value counter)))))
   (else
-   (let ((count-seq
-          (let ((%type 'string) (%ee (list "\\" counter-name)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+   (let ((count-seq (string-append "\\" counter-name)))
      (cond
       ((begin (set! *it* (section-ctl-seq-p count-seq)) *it*)
        (let ((n *it*))
@@ -12899,76 +9228,28 @@
    ((#\R) "&#x211d;")
    ((#\Z) "&#x2124;")
    (else
-    (let ((%type 'string)
-          (%ee
-           (list "&#x"
-                 (write-to-string
-                  (+ 120120 (- (char->integer c) (char->integer #\A)))
-                  ':base
-                  16)
-                 ";")))
-      (let ((%res (if (eq? %type 'string) "" null)))
-        (let %concatenate-loop
-          ((%ee %ee))
-          (if (null? %ee)
-              %res
-              (let ((%a (car %ee)))
-                (unless (not %a)
-                  (set! %res
-                   (if (eq? %type 'string)
-                       (string-append %res
-                        (if (string? %a) %a (list->string %a)))
-                       (append %res (if (string? %a) (string->list %a) %a)))))
-                (%concatenate-loop (cdr %ee)))))
-        %res)))))
+    (string-append "&#x"
+     (write-to-string (+ 120120 (- (char->integer c) (char->integer #\A)))
+                      ':base
+                      16)
+     ";"))))
 
 (define (tex-math-cal c)
- (let ((%type 'string)
-       (%ee
-        (list "&#x"
-              (write-to-string
-               (+ 120016 (- (char->integer c) (char->integer #\A)))
-               ':base
-               16)
-              ";")))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (string-append "&#x"
+  (write-to-string (+ 120016 (- (char->integer c) (char->integer #\A)))
+                   ':base
+                   16)
+  ";"))
 
 (define (tex-math-frak c)
- (let ((%type 'string)
-       (%ee
-        (list "&#x"
-              (write-to-string
-               (if (char-upper-case? c)
-                   (+ 120172 (- (char->integer c) (char->integer #\A)))
-                   (+ 120198 (- (char->integer c) (char->integer #\a))))
-               ':base
-               16)
-              ";")))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res)))
+ (string-append "&#x"
+  (write-to-string
+   (if (char-upper-case? c)
+       (+ 120172 (- (char->integer c) (char->integer #\A)))
+       (+ 120198 (- (char->integer c) (char->integer #\a))))
+   ':base
+   16)
+  ";"))
 
 (define (emit-math-alpha-char c)
  (case *math-font*
@@ -13098,13 +9379,9 @@
   (*inputting-boilerplate-p* false)
   (*ignore-timestamp-p* false)
   ((> *html-only* 0) false)
-  ((and
-    (>=
-     (let ((%length-arg f))
-       ((if (string? %length-arg) string-length length) %length-arg))
-     3)
-    (char=? (string-ref f 0) #\.)
-    (char=? (string-ref f 1) #\/))
+  ((and (>= (string-length f) 3)
+        (char=? (string-ref f 0) #\.)
+        (char=? (string-ref f 1) #\/))
    false)
   ((member f *verb-written-files*) false)
   (else true)))
@@ -13128,13 +9405,7 @@
          (else
           (cond
            ((string-ci=? e ".tex")
-            (set! f
-             (substring f 0
-              (-
-               (let ((%length-arg f))
-                 ((if (string? %length-arg) string-length length) %length-arg))
-               4)))
-            f)
+            (set! f (substring f 0 (- (string-length f) 4))) f)
            (else false))
           (cond ((string=? f "opmac") (tex-gdef-0arg "\\TZPopmac" "1") true)
                 (else (member f *tex-files-to-ignore*)))))))
@@ -13241,29 +9512,8 @@
         (cond ((not *using-bibliography-p*) false)
               ((not
                 (file-exists?
-                 (let ((%type 'string)
-                       (%ee
-                        (list *aux-dir/*
-                              *jobname*
-                              *bib-aux-file-suffix*
-                              ".aux")))
-                   (let ((%res (if (eq? %type 'string) "" null)))
-                     (let %concatenate-loop
-                       ((%ee %ee))
-                       (if (null? %ee)
-                           %res
-                           (let ((%a (car %ee)))
-                             (unless (not %a)
-                               (set! %res
-                                (if (eq? %type 'string)
-                                    (string-append %res
-                                     (if (string? %a) %a (list->string %a)))
-                                    (append %res
-                                            (if (string? %a)
-                                                (string->list %a)
-                                                %a)))))
-                             (%concatenate-loop (cdr %ee)))))
-                     %res))))
+                 (string-append *aux-dir/* *jobname* *bib-aux-file-suffix*
+                  ".aux")))
                false)
               ((member ':bibliography *missing-pieces*) true)
               (*source-changed-since-last-run-p*
@@ -13273,26 +9523,8 @@
         (cond ((not *using-index-p*) false)
               ((not
                 (file-exists?
-                 (let ((%type 'string)
-                       (%ee
-                        (list *aux-dir/* *jobname* *index-file-suffix* ".idx")))
-                   (let ((%res (if (eq? %type 'string) "" null)))
-                     (let %concatenate-loop
-                       ((%ee %ee))
-                       (if (null? %ee)
-                           %res
-                           (let ((%a (car %ee)))
-                             (unless (not %a)
-                               (set! %res
-                                (if (eq? %type 'string)
-                                    (string-append %res
-                                     (if (string? %a) %a (list->string %a)))
-                                    (append %res
-                                            (if (string? %a)
-                                                (string->list %a)
-                                                %a)))))
-                             (%concatenate-loop (cdr %ee)))))
-                     %res))))
+                 (string-append *aux-dir/* *jobname* *index-file-suffix*
+                  ".idx")))
                false)
               ((member ':fresh-index *missing-pieces*) false)
               ((member ':index *missing-pieces*) true)
@@ -13304,43 +9536,11 @@
      (write-log "Running: bibtex ") (write-log *aux-dir/*)
      (write-log *jobname*) (write-log *bib-aux-file-suffix*) (write-log #\ )
      (system
-      (let ((%type 'string)
-            (%ee (list "bibtex " *aux-dir/* *jobname* *bib-aux-file-suffix*)))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append "bibtex " *aux-dir/* *jobname* *bib-aux-file-suffix*))
      (cond
       ((not
         (file-exists?
-         (let ((%type 'string)
-               (%ee (list *aux-dir/* *jobname* *bib-aux-file-suffix* ".bbl")))
-           (let ((%res (if (eq? %type 'string) "" null)))
-             (let %concatenate-loop
-               ((%ee %ee))
-               (if (null? %ee)
-                   %res
-                   (let ((%a (car %ee)))
-                     (unless (not %a)
-                       (set! %res
-                        (if (eq? %type 'string)
-                            (string-append %res
-                             (if (string? %a) %a (list->string %a)))
-                            (append %res
-                                    (if (string? %a) (string->list %a) %a)))))
-                     (%concatenate-loop (cdr %ee)))))
-             %res))))
+         (string-append *aux-dir/* *jobname* *bib-aux-file-suffix* ".bbl")))
        (write-log " ... failed; try manually"))
       (else false))
      (write-log ':separation-newline))
@@ -13350,66 +9550,16 @@
      (write-log "Running: makeindex ") (write-log *aux-dir/*)
      (write-log *jobname*) (write-log *index-file-suffix*) (write-log #\ )
      (system
-      (let ((%type 'string)
-            (%ee (list "makeindex " *aux-dir/* *jobname* *index-file-suffix*)))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
+      (string-append "makeindex " *aux-dir/* *jobname* *index-file-suffix*))
      (cond
       ((not
         (file-exists?
-         (let ((%type 'string)
-               (%ee (list *aux-dir/* *jobname* *index-file-suffix* ".ind")))
-           (let ((%res (if (eq? %type 'string) "" null)))
-             (let %concatenate-loop
-               ((%ee %ee))
-               (if (null? %ee)
-                   %res
-                   (let ((%a (car %ee)))
-                     (unless (not %a)
-                       (set! %res
-                        (if (eq? %type 'string)
-                            (string-append %res
-                             (if (string? %a) %a (list->string %a)))
-                            (append %res
-                                    (if (string? %a) (string->list %a) %a)))))
-                     (%concatenate-loop (cdr %ee)))))
-             %res))))
+         (string-append *aux-dir/* *jobname* *index-file-suffix* ".ind")))
        (write-log " ... failed; try manually"))
       (else false))
      (write-log ':separation-newline))
     (else false))
-   (let* ((%f
-           (let ((%type 'string) (%ee (list *jobname* *eval4tex-file-suffix*)))
-             (let ((%res (if (eq? %type 'string) "" null)))
-               (let %concatenate-loop
-                 ((%ee %ee))
-                 (if (null? %ee)
-                     %res
-                     (let ((%a (car %ee)))
-                       (unless (not %a)
-                         (set! %res
-                          (if (eq? %type 'string)
-                              (string-append %res
-                               (if (string? %a) %a (list->string %a)))
-                              (append %res
-                                      (if (string? %a)
-                                          (string->list %a)
-                                          %a)))))
-                       (%concatenate-loop (cdr %ee)))))
-               %res)))
+   (let* ((%f (string-append *jobname* *eval4tex-file-suffix*))
           (%ee (list ':if-does-not-exist false))
           (%if-does-not-exist (cadr (memv ':if-does-not-exist %ee))))
      (cond ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
@@ -13449,49 +9599,15 @@
  (let ((home (getenv "HOME")))
    (and home
         (let ((slash-already-p
-               (let ((n
-                      (let ((%length-arg home))
-                        ((if (string? %length-arg) string-length length)
-                         %length-arg))))
+               (let ((n (string-length home)))
                  (and (>= n 0)
                       (let ((c (string-ref home (sub1 n))))
                         (or (char=? c #\/) (char=? c #\\)))))))
-          (let ((%type 'string) (%ee (list home (if slash-already-p "" "/") f)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))))
+          (string-append home (if slash-already-p "" "/") f)))))
 
 (define (make-target-dir)
  (let ((hdir-file
-        (first-file-that-exists
-         (let ((%type 'string) (%ee (list *jobname* ".hdir")))
-           (let ((%res (if (eq? %type 'string) "" null)))
-             (let %concatenate-loop
-               ((%ee %ee))
-               (if (null? %ee)
-                   %res
-                   (let ((%a (car %ee)))
-                     (unless (not %a)
-                       (set! %res
-                        (if (eq? %type 'string)
-                            (string-append %res
-                             (if (string? %a) %a (list->string %a)))
-                            (append %res
-                                    (if (string? %a) (string->list %a) %a)))))
-                     (%concatenate-loop (cdr %ee)))))
-             %res))
+        (first-file-that-exists (string-append *jobname* ".hdir")
          ".tex2page.hdir" (file-in-home ".tex2page.hdir"))))
    (cond
     (hdir-file
@@ -13499,87 +9615,14 @@
             (call-with-input-file/buffered hdir-file
              (lambda () (get-filename-possibly-braced)))))
        (cond
-        ((not
-          (=
-           (let ((%length-arg hdir))
-             ((if (string? %length-arg) string-length length) %length-arg))
-           0))
-         (system
-          (let ((%type 'string) (%ee (list "mkdir -p " hdir)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res)))
-         (system
-          (let ((%type 'string) (%ee (list "touch " hdir "/probe")))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res)))
-         (let ((probe
-                (let ((%type 'string) (%ee (list hdir "/probe")))
-                  (let ((%res (if (eq? %type 'string) "" null)))
-                    (let %concatenate-loop
-                      ((%ee %ee))
-                      (if (null? %ee)
-                          %res
-                          (let ((%a (car %ee)))
-                            (unless (not %a)
-                              (set! %res
-                               (if (eq? %type 'string)
-                                   (string-append %res
-                                    (if (string? %a) %a (list->string %a)))
-                                   (append %res
-                                           (if (string? %a)
-                                               (string->list %a)
-                                               %a)))))
-                            (%concatenate-loop (cdr %ee)))))
-                    %res))))
+        ((not (= (string-length hdir) 0))
+         (system (string-append "mkdir -p " hdir))
+         (system (string-append "touch " hdir "/probe"))
+         (let ((probe (string-append hdir "/probe")))
            (cond
             ((file-exists? probe) (ensure-file-deleted probe)
              (set! *aux-dir* hdir)
-             (set! *aux-dir/*
-              (let ((%type 'string) (%ee (list *aux-dir* "/")))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res)))
-             *aux-dir/*)
+             (set! *aux-dir/* (string-append *aux-dir* "/")) *aux-dir/*)
             (else false))))
         (else false))))
     (else false))))
@@ -13587,74 +9630,10 @@
 (define (move-aux-files-to-aux-dir f)
  (cond
   ((and *aux-dir*
-        (or
-         (file-exists?
-          (let ((%type 'string) (%ee (list f ".tex")))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res)))
-         (file-exists?
-          (let ((%type 'string) (%ee (list f ".scm")))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res)))
-         (file-exists?
-          (let ((%type 'string) (%ee (list f (find-img-file-extn))))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res)))))
-   (system
-    (let ((%type 'string) (%ee (list "mv " f ".* " *aux-dir*)))
-      (let ((%res (if (eq? %type 'string) "" null)))
-        (let %concatenate-loop
-          ((%ee %ee))
-          (if (null? %ee)
-              %res
-              (let ((%a (car %ee)))
-                (unless (not %a)
-                  (set! %res
-                   (if (eq? %type 'string)
-                       (string-append %res
-                        (if (string? %a) %a (list->string %a)))
-                       (append %res (if (string? %a) (string->list %a) %a)))))
-                (%concatenate-loop (cdr %ee)))))
-        %res))))
+        (or (file-exists? (string-append f ".tex"))
+            (file-exists? (string-append f ".scm"))
+            (file-exists? (string-append f (find-img-file-extn)))))
+   (system (string-append "mv " f ".* " *aux-dir*)))
   (else false)))
 
 (define (start-css-file)
@@ -13968,24 +9947,7 @@
         margin-left: 0pt;
         }
         ")
- (let ((css-file
-        (let ((%type 'string)
-              (%ee (list *aux-dir/* *jobname* *css-file-suffix*)))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+ (let ((css-file (string-append *aux-dir/* *jobname* *css-file-suffix*)))
    (set! *css-stream*
     (let* ((%f css-file)
            (%ee (list ':direction ':output ':if-exists ':supersede))
@@ -14012,67 +9974,17 @@
     (else false))))
 
 (define (load-aux-file)
- (let ((label-file
-        (let ((%type 'string)
-              (%ee (list *aux-dir/* *jobname* *label-file-suffix*)))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+ (let ((label-file (string-append *aux-dir/* *jobname* *label-file-suffix*)))
    (cond
     ((file-exists? label-file) (load-tex2page-data-file label-file)
      (delete-file label-file))
     (else false)))
  (cond
   ((not (string=? *jobname* "texput"))
-   (let ((texput-aux
-          (let ((%type 'string) (%ee (list "texput" *aux-file-suffix*)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+   (let ((texput-aux (string-append "texput" *aux-file-suffix*)))
      (cond ((file-exists? texput-aux) (delete-file texput-aux)) (else false))))
   (else false))
- (let ((aux-file
-        (let ((%type 'string)
-              (%ee (list *aux-dir/* *jobname* *aux-file-suffix*)))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+ (let ((aux-file (string-append *aux-dir/* *jobname* *aux-file-suffix*)))
    (cond
     ((file-exists? aux-file) (load-tex2page-data-file aux-file)
      (delete-file aux-file))
@@ -14223,9 +10135,7 @@
  (or (substring? "//" u) (char=? (string-ref u 0) #\/)))
 
 (define (fully-qualified-pathname-p f)
- (let ((n
-        (let ((%length-arg f))
-          ((if (string? %length-arg) string-length length) %length-arg))))
+ (let ((n (string-length f)))
    (if (= n 0)
        true
        (let ((c0 (string-ref f 0)))
@@ -14240,44 +10150,10 @@
      (set! deletep (list-ref %lambda-rest-arg 0)))
    (cond
     ((and *aux-dir* (not (fully-qualified-url-p f)) (not (substring? "/" f)))
-     (let ((real-f
-            (let ((%type 'string) (%ee (list *aux-dir/* f)))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
+     (let ((real-f (string-append *aux-dir/* f)))
        (cond
         ((and (file-exists? f) (not (file-exists? real-f)))
-         (system
-          (let ((%type 'string) (%ee (list "cp -p " f " " real-f)))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+         (system (string-append "cp -p " f " " real-f)))
         (else false)))
      (cond (deletep (ensure-file-deleted f)) (else false)))
     (else false))
@@ -14295,27 +10171,8 @@
 (define (!html-redirect url seconds) (set! *redirect-url* url)
  (set! *redirect-delay* seconds)
  (!html-head
-  (let ((%type 'string)
-        (%ee
-         (list "<meta http-equiv=\"refresh\" content=\""
-               seconds
-               ";"
-               url
-               "\">")))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res))))
+  (string-append "<meta http-equiv=\"refresh\" content=\"" seconds ";" url
+   "\">")))
 
 (define (!default-title title)
  (cond ((not *title*) (set! *title* title) *title*) (else false)))
@@ -14489,22 +10346,7 @@ Try the commands
  (close-all-open-streams))
 
 (define (non-fatal-error . ss)
- (emit-link-start
-  (let ((%type 'string) (%ee (list *jobname* ".hlog")))
-    (let ((%res (if (eq? %type 'string) "" null)))
-      (let %concatenate-loop
-        ((%ee %ee))
-        (if (null? %ee)
-            %res
-            (let ((%a (car %ee)))
-              (unless (not %a)
-                (set! %res
-                 (if (eq? %type 'string)
-                     (string-append %res
-                      (if (string? %a) %a (list->string %a)))
-                     (append %res (if (string? %a) (string->list %a) %a)))))
-              (%concatenate-loop (cdr %ee)))))
-      %res)))
+ (emit-link-start (string-append *jobname* ".hlog"))
  (emit "<span style=\"color: red\">&#x2388;&#xa0;")
  (for-each emit-html-string ss) (emit-link-stop) (emit "</span>"))
 
@@ -14528,23 +10370,7 @@ Try the commands
  (let ((expn (if (null? expn) cs (car expn))))
    (tex-def-math-prim cs
     (lambda ()
-      (tex2page-string
-       (let ((%type 'string) (%ee (list "\\global\\imgdef" cs "{$" expn "$}")))
-         (let ((%res (if (eq? %type 'string) "" null)))
-           (let %concatenate-loop
-             ((%ee %ee))
-             (if (null? %ee)
-                 %res
-                 (let ((%a (car %ee)))
-                   (unless (not %a)
-                     (set! %res
-                      (if (eq? %type 'string)
-                          (string-append %res
-                           (if (string? %a) %a (list->string %a)))
-                          (append %res
-                                  (if (string? %a) (string->list %a) %a)))))
-                   (%concatenate-loop (cdr %ee)))))
-           %res)))
+      (tex2page-string (string-append "\\global\\imgdef" cs "{$" expn "$}"))
       (tex2page-string cs)))))
 
 (tex-def-math-prim "\\eqno" do-eqno)
@@ -15436,78 +11262,10 @@ Try the commands
 (define (texbook-18-2 x)
  (let ((lhs false) (rhs false))
    (cond
-    ((not (pair? x))
-     (set! lhs
-      (let ((%type 'string) (%ee (list "\\" x)))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
-     (set! rhs
-      (let ((%type 'string) (%ee (list x " ")))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
-     rhs)
-    (else
-     (set! lhs
-      (let ((%type 'string) (%ee (list "\\" (car x))))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
-     (set! rhs
-      (let ((%type 'string) (%ee (list (cadr x) " ")))
-        (let ((%res (if (eq? %type 'string) "" null)))
-          (let %concatenate-loop
-            ((%ee %ee))
-            (if (null? %ee)
-                %res
-                (let ((%a (car %ee)))
-                  (unless (not %a)
-                    (set! %res
-                     (if (eq? %type 'string)
-                         (string-append %res
-                          (if (string? %a) %a (list->string %a)))
-                         (append %res
-                                 (if (string? %a) (string->list %a) %a)))))
-                  (%concatenate-loop (cdr %ee)))))
-          %res)))
-     rhs))
+    ((not (pair? x)) (set! lhs (string-append "\\" x))
+     (set! rhs (string-append x " ")) rhs)
+    (else (set! lhs (string-append "\\" (car x)))
+     (set! rhs (string-append (cadr x) " ")) rhs))
    (tex-defsym-math-prim lhs rhs)))
 
 (for-each texbook-18-2
@@ -15550,56 +11308,16 @@ Try the commands
 
 (tex-def-prim "\\MF"
  (let ((mf
-        (let ((%type 'string)
-              (%ee
-               (list "<span style=\""
-                     "font-family: sans-serif"
-                     "\">METAFONT</span>")))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+        (string-append "<span style=\"" "font-family: sans-serif"
+         "\">METAFONT</span>")))
    (lambda () (emit mf))))
 
 (tex-def-prim "\\AmSTeX"
  (let ((ams
-        (let ((%type 'string)
-              (%ee
-               (list "<span style=\"font-family: cursive;\">"
-                     "A"
-                     "<span style=\""
-                     "position: relative; "
-                     "top: 0.5ex; "
-                     "margin-left: -.1667em; "
-                     "margin-right: -.075em"
-                     "\">M</span>"
-                     "S</span>")))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+        (string-append "<span style=\"font-family: cursive;\">" "A"
+         "<span style=\"" "position: relative; " "top: 0.5ex; "
+         "margin-left: -.1667em; " "margin-right: -.075em" "\">M</span>"
+         "S</span>")))
    (lambda () (emit ams) (emit #\-) (emit *tex-logo*))))
 
 (tex-defsym-prim "\\bull" "&#x25fe;")
@@ -15657,45 +11375,8 @@ Try the commands
      (let ((rotated false))
        (let ((width false))
          (let ((img-file-stem (next-html-image-file-stem)))
-           (let ((img-file
-                  (let ((%type 'string)
-                        (%ee (list img-file-stem (find-img-file-extn))))
-                    (let ((%res (if (eq? %type 'string) "" null)))
-                      (let %concatenate-loop
-                        ((%ee %ee))
-                        (if (null? %ee)
-                            %res
-                            (let ((%a (car %ee)))
-                              (unless (not %a)
-                                (set! %res
-                                 (if (eq? %type 'string)
-                                     (string-append %res
-                                      (if (string? %a) %a (list->string %a)))
-                                     (append %res
-                                             (if (string? %a)
-                                                 (string->list %a)
-                                                 %a)))))
-                              (%concatenate-loop (cdr %ee)))))
-                      %res))))
-             (let ((fq-img-file
-                    (let ((%type 'string) (%ee (list *aux-dir/* img-file)))
-                      (let ((%res (if (eq? %type 'string) "" null)))
-                        (let %concatenate-loop
-                          ((%ee %ee))
-                          (if (null? %ee)
-                              %res
-                              (let ((%a (car %ee)))
-                                (unless (not %a)
-                                  (set! %res
-                                   (if (eq? %type 'string)
-                                       (string-append %res
-                                        (if (string? %a) %a (list->string %a)))
-                                       (append %res
-                                               (if (string? %a)
-                                                   (string->list %a)
-                                                   %a)))))
-                                (%concatenate-loop (cdr %ee)))))
-                        %res))))
+           (let ((img-file (string-append img-file-stem (find-img-file-extn))))
+             (let ((fq-img-file (string-append *aux-dir/* img-file)))
                (let* ((%loop-returned false)
                       (%loop-result 0)
                       (return
@@ -15937,23 +11618,7 @@ Try the commands
 
 (define (do-scm-slatex-lines env display-p result-p)
  (let ((%fluid-var-*catcodes* *catcodes*)
-       (endenv
-        (let ((%type 'string) (%ee (list "\\end" env)))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res)))
+       (endenv (string-append "\\end" env))
        (in-table-p
         (and (not (null? *tabular-stack*))
              (member (car *tabular-stack*) '(:block :figure :table)))))
@@ -16035,49 +11700,13 @@ Try the commands
  (write-aux
   (quasiquote (!index (unquote *index-count*) (unquote *html-page-count*))))
  (let ((tag
-        (let ((%type 'string)
-              (%ee
-               (list *html-node-prefix*
-                     "index_"
-                     (write-to-string *index-count*))))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+        (string-append *html-node-prefix* "index_"
+         (write-to-string *index-count*))))
    (emit-anchor tag)
    (cond
     ((not *index-stream*)
      (let ((idx-file
-            (let ((%type 'string)
-                  (%ee (list *aux-dir/* *jobname* *index-file-suffix* ".idx")))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
+            (string-append *aux-dir/* *jobname* *index-file-suffix* ".idx")))
        (set! *index-stream*
         (let* ((%f idx-file)
                (%ee (list ':direction ':output ':if-exists ':supersede))
@@ -16153,42 +11782,11 @@ Try the commands
           "\\section*{\\indexname}"))
      (emit-newline))
     (else false))
-   (emit-anchor
-    (let ((%type 'string) (%ee (list *html-node-prefix* "index_start")))
-      (let ((%res (if (eq? %type 'string) "" null)))
-        (let %concatenate-loop
-          ((%ee %ee))
-          (if (null? %ee)
-              %res
-              (let ((%a (car %ee)))
-                (unless (not %a)
-                  (set! %res
-                   (if (eq? %type 'string)
-                       (string-append %res
-                        (if (string? %a) %a (list->string %a)))
-                       (append %res (if (string? %a) (string->list %a) %a)))))
-                (%concatenate-loop (cdr %ee)))))
-        %res)))
+   (emit-anchor (string-append *html-node-prefix* "index_start"))
    (!index-page *html-page-count*)
    (write-aux (quasiquote (!index-page (unquote *html-page-count*))))
    (let ((ind-file
-          (let ((%type 'string)
-                (%ee (list *aux-dir/* *jobname* *index-file-suffix* ".ind")))
-            (let ((%res (if (eq? %type 'string) "" null)))
-              (let %concatenate-loop
-                ((%ee %ee))
-                (if (null? %ee)
-                    %res
-                    (let ((%a (car %ee)))
-                      (unless (not %a)
-                        (set! %res
-                         (if (eq? %type 'string)
-                             (string-append %res
-                              (if (string? %a) %a (list->string %a)))
-                             (append %res
-                                     (if (string? %a) (string->list %a) %a)))))
-                      (%concatenate-loop (cdr %ee)))))
-              %res))))
+          (string-append *aux-dir/* *jobname* *index-file-suffix* ".ind")))
      (cond ((file-exists? ind-file) (tex2page-file ind-file))
            (else (flag-missing-piece ':index)
             (non-fatal-error "Index not generated; rerun TeX2page"))))))
@@ -16339,45 +11937,9 @@ Try the commands
    (emit "<tr><td class=\"rightline bibitem\">")
    (set! *bibitem-num* (+ *bibitem-num* 1))
    (let ((bibitem-num-s (write-to-string *bibitem-num*)))
-     (let ((key
-            (let ((%type 'string) (%ee (list "cite{" (get-peeled-group) "}")))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
+     (let ((key (string-append "cite{" (get-peeled-group) "}")))
        (let ((node-name
-              (let ((%type 'string)
-                    (%ee (list *html-node-prefix* "bib_" bibitem-num-s)))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res))))
+              (string-append *html-node-prefix* "bib_" bibitem-num-s)))
          (tex-def-0arg "\\TIIPcurrentnodename" node-name)
          (cond ((not bibmark) (set! bibmark bibitem-num-s) bibmark)
                (else false))
@@ -16394,23 +11956,7 @@ Try the commands
 
 (define (do-bibliography-help bibdata) (set! *using-bibliography-p* true)
  (let ((bbl-file
-        (let ((%type 'string)
-              (%ee (list *aux-dir/* *jobname* *bib-aux-file-suffix* ".bbl")))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+        (string-append *aux-dir/* *jobname* *bib-aux-file-suffix* ".bbl")))
    (write-bib-aux "\\bibdata{")
    (write-bib-aux bibdata)
    (write-bib-aux "}")
@@ -16466,26 +12012,7 @@ Try the commands
            (unless %loop-returned (write-bib-aux "}"))
            (unless %loop-returned (write-bib-aux #\newline))
            (unless %loop-returned
-             (do-ref-aux
-              (let ((%type 'string) (%ee (list "cite{" key "}")))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res))
-              false false))
+             (do-ref-aux (string-append "cite{" key "}") false false))
            (if %loop-returned %loop-result (%loop))))
        (cond (extra-text (emit ",") (emit-nbsp 1) (tex2page-string extra-text))
              (else false))
@@ -16525,25 +12052,7 @@ Try the commands
            (unless %loop-returned (write-bib-aux key))
            (unless %loop-returned (write-bib-aux "}"))
            (unless %loop-returned
-             (label-bound-p
-              (let ((%type 'string) (%ee (list "cite{" key "}")))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res))))
+             (label-bound-p (string-append "cite{" key "}")))
            (unless %loop-returned (write-bib-aux #\newline))
            (if %loop-returned %loop-result (%loop)))))
      (cond
@@ -16717,62 +12226,21 @@ Try the commands
                (cond ((null? lhs-list) (return true)) (else false))
                (unless %loop-returned
                  (let ((additive
-                        (let ((%type 'string)
-                              (%ee
-                               (list
-                                (let* ((%pop-old-stack lhs-list)
-                                       (%pop-top-value (car %pop-old-stack)))
-                                  (begin (set! lhs-list (cdr %pop-old-stack))
-                                   lhs-list)
-                                  %pop-top-value)
-                                "@"
-                                (let* ((%pop-old-stack rhs-list)
-                                       (%pop-top-value (car %pop-old-stack)))
-                                  (begin (set! rhs-list (cdr %pop-old-stack))
-                                   rhs-list)
-                                  %pop-top-value))))
-                          (let ((%res (if (eq? %type 'string) "" null)))
-                            (let %concatenate-loop
-                              ((%ee %ee))
-                              (if (null? %ee)
-                                  %res
-                                  (let ((%a (car %ee)))
-                                    (unless (not %a)
-                                      (set! %res
-                                       (if (eq? %type 'string)
-                                           (string-append %res
-                                            (if (string? %a)
-                                                %a
-                                                (list->string %a)))
-                                           (append %res
-                                                   (if (string? %a)
-                                                       (string->list %a)
-                                                       %a)))))
-                                    (%concatenate-loop (cdr %ee)))))
-                            %res))))
+                        (string-append
+                         (let* ((%pop-old-stack lhs-list)
+                                (%pop-top-value (car %pop-old-stack)))
+                           (begin (set! lhs-list (cdr %pop-old-stack))
+                            lhs-list)
+                           %pop-top-value)
+                         "@"
+                         (let* ((%pop-old-stack rhs-list)
+                                (%pop-top-value (car %pop-old-stack)))
+                           (begin (set! rhs-list (cdr %pop-old-stack))
+                            rhs-list)
+                           %pop-top-value))))
                    (set! sub
                     (cond ((string=? sub "") additive)
-                          (else
-                           (let ((%type 'string) (%ee (list sub "!" additive)))
-                             (let ((%res (if (eq? %type 'string) "" null)))
-                               (let %concatenate-loop
-                                 ((%ee %ee))
-                                 (if (null? %ee)
-                                     %res
-                                     (let ((%a (car %ee)))
-                                       (unless (not %a)
-                                         (set! %res
-                                          (if (eq? %type 'string)
-                                              (string-append %res
-                                               (if (string? %a)
-                                                   %a
-                                                   (list->string %a)))
-                                              (append %res
-                                                      (if (string? %a)
-                                                          (string->list %a)
-                                                          %a)))))
-                                       (%concatenate-loop (cdr %ee)))))
-                               %res)))))
+                          (else (string-append sub "!" additive))))
                    sub))
                (if %loop-returned %loop-result (%loop))))
            (cond
@@ -16795,45 +12263,9 @@ Try the commands
 (define (do-opmac-bib) (do-para) (set! *bibitem-num* (+ *bibitem-num* 1))
  (let ((key0 (get-bracketed-text-if-any)))
    (let ((bibitem-num-s (write-to-string *bibitem-num*)))
-     (let ((key
-            (let ((%type 'string) (%ee (list "cite{" key0 "}")))
-              (let ((%res (if (eq? %type 'string) "" null)))
-                (let %concatenate-loop
-                  ((%ee %ee))
-                  (if (null? %ee)
-                      %res
-                      (let ((%a (car %ee)))
-                        (unless (not %a)
-                          (set! %res
-                           (if (eq? %type 'string)
-                               (string-append %res
-                                (if (string? %a) %a (list->string %a)))
-                               (append %res
-                                       (if (string? %a)
-                                           (string->list %a)
-                                           %a)))))
-                        (%concatenate-loop (cdr %ee)))))
-                %res))))
+     (let ((key (string-append "cite{" key0 "}")))
        (let ((node-name
-              (let ((%type 'string)
-                    (%ee (list *html-node-prefix* "bib_" bibitem-num-s)))
-                (let ((%res (if (eq? %type 'string) "" null)))
-                  (let %concatenate-loop
-                    ((%ee %ee))
-                    (if (null? %ee)
-                        %res
-                        (let ((%a (car %ee)))
-                          (unless (not %a)
-                            (set! %res
-                             (if (eq? %type 'string)
-                                 (string-append %res
-                                  (if (string? %a) %a (list->string %a)))
-                                 (append %res
-                                         (if (string? %a)
-                                             (string->list %a)
-                                             %a)))))
-                          (%concatenate-loop (cdr %ee)))))
-                  %res))))
+              (string-append *html-node-prefix* "bib_" bibitem-num-s)))
          (cond ((not key0) (terror 'do-opmac-bib "Improper \\bib entry"))
                (else false))
          (tex-def-0arg "\\TIIPcurrentnodename" node-name)
@@ -17119,26 +12551,8 @@ Try the commands
   (else false))
  (set! *tabular-stack* (cons type *tabular-stack*)) (get-bracketed-text-if-any)
  (let ((tbl-tag
-        (let ((%type 'string)
-              (%ee
-               (list *html-node-prefix*
-                     (if (eqv? type 'table) "tbl_" "fig_")
-                     (gen-temp-string))))
-          (let ((%res (if (eq? %type 'string) "" null)))
-            (let %concatenate-loop
-              ((%ee %ee))
-              (if (null? %ee)
-                  %res
-                  (let ((%a (car %ee)))
-                    (unless (not %a)
-                      (set! %res
-                       (if (eq? %type 'string)
-                           (string-append %res
-                            (if (string? %a) %a (list->string %a)))
-                           (append %res
-                                   (if (string? %a) (string->list %a) %a)))))
-                    (%concatenate-loop (cdr %ee)))))
-            %res))))
+        (string-append *html-node-prefix* (if (eqv? type 'table) "tbl_" "fig_")
+         (gen-temp-string))))
    (tex-def-0arg "\\TIIPcurrentnodename" tbl-tag)
    (emit-anchor tbl-tag)
    (emit-newline)
@@ -17586,150 +13000,28 @@ Try the commands
      (emit-nbsp 3))
     (else false))))
 
-(tex-def-prim
- (let ((%type 'string) (%ee (list (list #\\ #\newline))))
-   (let ((%res (if (eq? %type 'string) "" null)))
-     (let %concatenate-loop
-       ((%ee %ee))
-       (if (null? %ee)
-           %res
-           (let ((%a (car %ee)))
-             (unless (not %a)
-               (set! %res
-                (if (eq? %type 'string)
-                    (string-append %res (if (string? %a) %a (list->string %a)))
-                    (append %res (if (string? %a) (string->list %a) %a)))))
-             (%concatenate-loop (cdr %ee)))))
-     %res))
- emit-newline)
+(tex-def-prim (list->string (list #\\ #\newline)) emit-newline)
 
 (let ((tex *tex-logo*))
   (let ((bib
-         (let ((%type 'string)
-               (%ee
-                (list "B"
-                      "<span style=\""
-                      "text-transform: uppercase"
-                      "\"><small>ib</small></span>")))
-           (let ((%res (if (eq? %type 'string) "" null)))
-             (let %concatenate-loop
-               ((%ee %ee))
-               (if (null? %ee)
-                   %res
-                   (let ((%a (car %ee)))
-                     (unless (not %a)
-                       (set! %res
-                        (if (eq? %type 'string)
-                            (string-append %res
-                             (if (string? %a) %a (list->string %a)))
-                            (append %res
-                                    (if (string? %a) (string->list %a) %a)))))
-                     (%concatenate-loop (cdr %ee)))))
-             %res))))
-    (let ((context
-           (let ((%type 'string) (%ee (list "Con" tex "t")))
-             (let ((%res (if (eq? %type 'string) "" null)))
-               (let %concatenate-loop
-                 ((%ee %ee))
-                 (if (null? %ee)
-                     %res
-                     (let ((%a (car %ee)))
-                       (unless (not %a)
-                         (set! %res
-                          (if (eq? %type 'string)
-                              (string-append %res
-                               (if (string? %a) %a (list->string %a)))
-                              (append %res
-                                      (if (string? %a)
-                                          (string->list %a)
-                                          %a)))))
-                       (%concatenate-loop (cdr %ee)))))
-               %res))))
+         (string-append "B" "<span style=\"" "text-transform: uppercase"
+          "\"><small>ib</small></span>")))
+    (let ((context (string-append "Con" tex "t")))
       (let ((latex
-             (let ((%type 'string)
-                   (%ee
-                    (list "L"
-                          "<span style=\""
-                          "position: relative; "
-                          "bottom: 0.3ex; "
-                          "margin-left: -0.36em; "
-                          "margin-right: -0.15em; "
-                          "text-transform: uppercase"
-                          "\"><small>a</small></span>"
-                          tex)))
-               (let ((%res (if (eq? %type 'string) "" null)))
-                 (let %concatenate-loop
-                   ((%ee %ee))
-                   (if (null? %ee)
-                       %res
-                       (let ((%a (car %ee)))
-                         (unless (not %a)
-                           (set! %res
-                            (if (eq? %type 'string)
-                                (string-append %res
-                                 (if (string? %a) %a (list->string %a)))
-                                (append %res
-                                        (if (string? %a)
-                                            (string->list %a)
-                                            %a)))))
-                         (%concatenate-loop (cdr %ee)))))
-                 %res))))
+             (string-append "L" "<span style=\"" "position: relative; "
+              "bottom: 0.3ex; " "margin-left: -0.36em; "
+              "margin-right: -0.15em; " "text-transform: uppercase"
+              "\"><small>a</small></span>" tex)))
         (let ((xe
-               (let ((%type 'string)
-                     (%ee
-                      (list "X"
-                            "<span style=\""
-                            "text-transform: uppercase; "
-                            "position: relative; "
-                            "top: 0.5ex; "
-                            "margin-left: -0.125em; "
-                            "margin-right: -0.1667em"
-                            "\">&#x1dd;</span>")))
-                 (let ((%res (if (eq? %type 'string) "" null)))
-                   (let %concatenate-loop
-                     ((%ee %ee))
-                     (if (null? %ee)
-                         %res
-                         (let ((%a (car %ee)))
-                           (unless (not %a)
-                             (set! %res
-                              (if (eq? %type 'string)
-                                  (string-append %res
-                                   (if (string? %a) %a (list->string %a)))
-                                  (append %res
-                                          (if (string? %a)
-                                              (string->list %a)
-                                              %a)))))
-                           (%concatenate-loop (cdr %ee)))))
-                   %res))))
+               (string-append "X" "<span style=\""
+                "text-transform: uppercase; " "position: relative; "
+                "top: 0.5ex; " "margin-left: -0.125em; "
+                "margin-right: -0.1667em" "\">&#x1dd;</span>")))
           (let ((thinspace (kern ".16667em")))
             (let ((ii/e
-                   (let ((%type 'string)
-                         (%ee
-                          (list "<span style=\""
-                                "margin-left: .05em"
-                                "\">2<span>"
-                                "<span style=\""
-                                "position: relative; "
-                                "top: .5ex"
-                                "\">&#x3b5;</span>")))
-                     (let ((%res (if (eq? %type 'string) "" null)))
-                       (let %concatenate-loop
-                         ((%ee %ee))
-                         (if (null? %ee)
-                             %res
-                             (let ((%a (car %ee)))
-                               (unless (not %a)
-                                 (set! %res
-                                  (if (eq? %type 'string)
-                                      (string-append %res
-                                       (if (string? %a) %a (list->string %a)))
-                                      (append %res
-                                              (if (string? %a)
-                                                  (string->list %a)
-                                                  %a)))))
-                               (%concatenate-loop (cdr %ee)))))
-                       %res))))
+                   (string-append "<span style=\"" "margin-left: .05em"
+                    "\">2<span>" "<span style=\"" "position: relative; "
+                    "top: .5ex" "\">&#x3b5;</span>")))
               (tex-def-prim "\\BibTeX" (lambda () (emit bib) (emit tex)))
               (tex-def-prim "\\ConTeXt" (lambda () (emit context)))
               (tex-def-prim "\\eTeX" (lambda () (emit "&#x3b5;-") (emit tex)))
@@ -18100,22 +13392,7 @@ Try the commands
   (write-log ':separation-newline)
   (cond
    (*main-tex-file* (set! *subjobname* *jobname*)
-    (set! *html-page*
-     (let ((%type 'string) (%ee (list *aux-dir/* *jobname* *output-extension*)))
-       (let ((%res (if (eq? %type 'string) "" null)))
-         (let %concatenate-loop
-           ((%ee %ee))
-           (if (null? %ee)
-               %res
-               (let ((%a (car %ee)))
-                 (unless (not %a)
-                   (set! %res
-                    (if (eq? %type 'string)
-                        (string-append %res
-                         (if (string? %a) %a (list->string %a)))
-                        (append %res (if (string? %a) (string->list %a) %a)))))
-                 (%concatenate-loop (cdr %ee)))))
-         %res)))
+    (set! *html-page* (string-append *aux-dir/* *jobname* *output-extension*))
     (set! *html*
      (make-ostream* ':stream
       (let* ((%f *html-page*)
@@ -18139,26 +13416,7 @@ Try the commands
     (fluid-let ((*html-only* (add1 *html-only*)))
      (tex2page-file-if-exists (file-in-home ".tex2page.t2p"))
      (tex2page-file-if-exists ".tex2page.t2p")
-     (let ((f
-            (actual-tex-filename
-             (let ((%type 'string) (%ee (list *jobname* ".t2p")))
-               (let ((%res (if (eq? %type 'string) "" null)))
-                 (let %concatenate-loop
-                   ((%ee %ee))
-                   (if (null? %ee)
-                       %res
-                       (let ((%a (car %ee)))
-                         (unless (not %a)
-                           (set! %res
-                            (if (eq? %type 'string)
-                                (string-append %res
-                                 (if (string? %a) %a (list->string %a)))
-                                (append %res
-                                        (if (string? %a)
-                                            (string->list %a)
-                                            %a)))))
-                         (%concatenate-loop (cdr %ee)))))
-                 %res)))))
+     (let ((f (actual-tex-filename (string-append *jobname* ".t2p"))))
        (cond (f (tex2page-file f)) (else false))))
     (cond
      ((not (eqv? (tex2page-file *main-tex-file*) ':encountered-bye))

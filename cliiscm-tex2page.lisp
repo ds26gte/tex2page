@@ -1,4 +1,4 @@
-;last modified 2020-04-14
+;last modified 2020-05-06
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -- \"$@\"
@@ -39,6 +39,10 @@
 (cliiscm-ignore-def
 
   *tex2page-file-arg*
+  list->string
+  string->list
+  string-append
+  string-length
   system
 
   )

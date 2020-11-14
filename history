@@ -2,6 +2,10 @@ Last change 2020-11-14
 
 2020 Nov 14
 
+Def of \epsfbox in luatex needs changed: 
+  check for \directlua not \pdfoutput;
+  \input miniltx, graphicx, not supp-pdf.
+
 tex2page.lisp: Rewrite scm-output-verbaitm-comment's loop so Racket translation is correct.
 The if-stack entries have three values now: 
 - #t if currently in the true branch of a running \if;

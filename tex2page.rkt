@@ -318,6 +318,9 @@
              p)
            (if %loop-returned %loop-result (%loop)))))))
 
+(define (sys-copy-file src dst)
+ (system (string-append "cp -p" " " src " " dst)))
+
 (define *month-names*
  (vector "January"
          "February"
@@ -474,6 +477,8 @@
 (define *aux-dir* false)
 
 (define *aux-dir/* "")
+
+(define *aux-dir-absolute-p* false)
 
 (define *aux-stream* false)
 
@@ -7138,7 +7143,7 @@
                (write-log " to ")
                (write-log f-save)
                (write-log ':separation-newline)
-               (system (string-append "cp -pf " f " " f-save))
+               (sys-copy-file f f-save)
                (set! f f-save)
                f))
             (else false))))
@@ -9512,6 +9517,41 @@
 (define (call-with-html-output-going-to p th)
  (fluid-let ((*html* (make-ostream* ':stream p))) (th)))
 
+(define
+ (run-support-program support-program file-sfx input-file-ext output-file-ext)
+ (let ((input-file-basename (string-append *jobname* file-sfx)))
+   (let ((output-file (string-append *jobname* file-sfx output-file-ext)))
+     (let ((arg-file input-file-basename))
+       (cond
+        ((not *aux-dir-absolute-p*)
+         (set! arg-file (string-append *aux-dir/* input-file-basename))
+         (set! output-file (string-append *aux-dir/* output-file)) output-file)
+        (else false))
+       (write-log ':separation-newline)
+       (write-log "Running: ")
+       (write-log support-program)
+       (write-log #\ )
+       (cond
+        (*aux-dir-absolute-p*
+         (sys-copy-file
+          (string-append *aux-dir/* input-file-basename input-file-ext) "."))
+        (else (write-log *aux-dir/*)))
+       (write-log arg-file)
+       (write-log #\ )
+       (system (string-append support-program " " arg-file))
+       (cond
+        ((file-exists? output-file)
+         (cond (*aux-dir-absolute-p* (sys-copy-file output-file *aux-dir*))
+               (else false)))
+        (else (write-log "... failed; try manually")))
+       (write-log ':separation-newline)))))
+
+(define (run-bibtex)
+ (run-support-program "bibtex" *bib-aux-file-suffix* ".aux" ".bbl"))
+
+(define (run-makeindex)
+ (run-support-program "makeindex" *index-file-suffix* ".idx" ".ind"))
+
 (define (call-external-programs-if-necessary)
  (let ((run-bibtex-p
         (cond ((not *using-bibliography-p*) false)
@@ -9520,8 +9560,9 @@
                  (string-append *aux-dir/* *jobname* *bib-aux-file-suffix*
                   ".aux")))
                false)
-              ((member ':bibliography *missing-pieces*) true)
-              (*source-changed-since-last-run-p*
+              ((member ':bibliography *missing-pieces*)
+               (printf "bib missing I~%") true)
+              (*source-changed-since-last-run-p* (printf "bib missing II~%")
                (flag-missing-piece ':fresh-bibliography) true)
               (else false)))
        (run-makeindex-p
@@ -9536,34 +9577,8 @@
               (*source-changed-since-last-run-p*
                (flag-missing-piece ':fresh-index) true)
               (else false))))
-   (cond
-    (run-bibtex-p (write-log ':separation-newline)
-     (write-log "Running: bibtex ") (write-log *aux-dir/*)
-     (write-log *jobname*) (write-log *bib-aux-file-suffix*) (write-log #\ )
-     (system
-      (string-append "bibtex " *aux-dir/* *jobname* *bib-aux-file-suffix*))
-     (cond
-      ((not
-        (file-exists?
-         (string-append *aux-dir/* *jobname* *bib-aux-file-suffix* ".bbl")))
-       (write-log " ... failed; try manually"))
-      (else false))
-     (write-log ':separation-newline))
-    (else false))
-   (cond
-    (run-makeindex-p (write-log ':separation-newline)
-     (write-log "Running: makeindex ") (write-log *aux-dir/*)
-     (write-log *jobname*) (write-log *index-file-suffix*) (write-log #\ )
-     (system
-      (string-append "makeindex " *aux-dir/* *jobname* *index-file-suffix*))
-     (cond
-      ((not
-        (file-exists?
-         (string-append *aux-dir/* *jobname* *index-file-suffix* ".ind")))
-       (write-log " ... failed; try manually"))
-      (else false))
-     (write-log ':separation-newline))
-    (else false))
+   (cond (run-bibtex-p (run-bibtex)) (else false))
+   (cond (run-makeindex-p (run-makeindex)) (else false))
    (let* ((%f (string-append *jobname* *eval4tex-file-suffix*))
           (%ee (list ':if-does-not-exist false))
           (%if-does-not-exist (cadr (memv ':if-does-not-exist %ee))))
@@ -9626,6 +9641,10 @@
          (let ((probe (string-append hdir "/probe")))
            (cond
             ((file-exists? probe) (ensure-file-deleted probe)
+             (cond
+              ((char=? (string-ref hdir 0) #\/)
+               (set! *aux-dir-absolute-p* true) *aux-dir-absolute-p*)
+              (else false))
              (set! *aux-dir* hdir)
              (set! *aux-dir/* (string-append *aux-dir* "/")) *aux-dir/*)
             (else false))))
@@ -10158,7 +10177,7 @@
      (let ((real-f (string-append *aux-dir/* f)))
        (cond
         ((and (file-exists? f) (not (file-exists? real-f)))
-         (system (string-append "cp -p " f " " real-f)))
+         (sys-copy-file f real-f))
         (else false)))
      (cond (deletep (ensure-file-deleted f)) (else false)))
     (else false))
@@ -13335,9 +13354,10 @@ Try the commands
   (else false))
  (fluid-let
   ((*afterassignment* false) (*afterbye* null) (*afterpar* null)
-   (*aux-dir* false) (*aux-dir/* "") (*aux-stream* false) (*basic-style* "")
-   (*bib-aux-stream* false) (*bibitem-num* 0) (*catcodes* *catcodes*)
-   (*color-names* null) (*css-stream* false) (*current-source-file* false)
+   (*aux-dir* false) (*aux-dir/* "") (*aux-dir-absolute-p* false)
+   (*aux-stream* false) (*basic-style* "") (*bib-aux-stream* false)
+   (*bibitem-num* 0) (*catcodes* *catcodes*) (*color-names* null)
+   (*css-stream* false) (*current-source-file* false)
    (*current-tex2page-input* false) (*display-justification* "centerline")
    (*doctype* *doctype*) (*dotted-counters* (make-table ':test equal?))
    (*dumping-nontex-p* false) (*emit-enabled-p* true) (*equation-number* false)

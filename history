@@ -2,6 +2,10 @@ Last change 2020-11-14
 
 2020 Nov 14
 
+bibtex & makeindex refuse to work if arg is given as absolute pathname.
+  Causes problem if .tex2page.hdir has abs pathname. Work around it.
+Added LaTeX Companion 2/e to bibliog.
+
 Def of \epsfbox in luatex needs changed: 
   check for \directlua not \pdfoutput;
   \input miniltx, graphicx, not supp-pdf.

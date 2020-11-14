@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2020-11-06} %last change
+\c{2020-11-14} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -58,7 +58,7 @@ makes Web pages
 from \TeX~\cite{texbook} manuscripts.
 It reads an
 input document that is marked up in
-plain \TeX\ or \LaTeX~\cite{latex}
+plain \TeX\ or \LaTeX~\cite{latex,latex-companion}
 and
 produces an output document with the functionally
 equivalent HTML markup.
@@ -440,7 +440,8 @@ recognizes a list of primitive commands, is invariably
 called with a {\em format}, which is essentially a
 preloaded set of definitions of some additional
 commands.  The two most popular formats
-are plain \TeX~\cite{texbook} and \LaTeX~\cite{latex}.
+are plain \TeX~\cite{texbook} and
+\LaTeX~\cite{latex,latex-companion}.
 
 %\index{texi2p.tex@`texi2p.tex` (\TeX2page macro file)}
 
@@ -1002,7 +1003,7 @@ ones.
 \index{bibliographies}
 %
 \TeX2page
-can use the external program \BibTeX~\cite{latex,bibtex} to
+can use the external program \BibTeX~\cite{latex,latex-companion,bibtex} to
 generate bibliographies from bibliographic database
 (`.bib`) files.  The bibliography commands —
 `\cite` and the rest — are included in \LaTeX, but
@@ -1015,8 +1016,8 @@ bibliography.
 Bibliographies can also be manually embedded in the
 document via the `thebibliography` environment,
 without the need for the \BibTeX\ program.  For
-more details, see the \LaTeX\ manual~\cite[sec.~4.3.2,
-p.~71]{latex}.
+more details, see the \LaTeX\
+documentation~\cite{latex,latex-companion}.
 
 \beginsection Index generation
 
@@ -1028,7 +1029,7 @@ p.~71]{latex}.
 MakeIndex~\cite{ind,makeindex} to generate indices.
 \TeX2page’s index-generation feature follows the same
 conventions as traditionally used with \TeX\ and its
-derived packages~\cite[sec.~4.5 \& app.~A]{latex}.
+derived packages~\cite{latex,latex-companion}.
 
 \index{printindex@`\printindex`}
 \index{inputindex@`\inputindex`}

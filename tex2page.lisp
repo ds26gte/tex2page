@@ -99,6 +99,10 @@
               (car s) (cdr s) :input t :output t)))
         (t (system cmd))))
 
+(defun sys-copy-file (src dst)
+  (system (string-append #-windows "cp -p" #+windows "copy/b"
+            " " src " " dst)))
+
 (defparameter *tex2page-file-arg*
   (or #+abcl (nth 0 ext:*command-line-argument-list*)
       #+clisp (nth 1 ext:*args*)
@@ -263,6 +267,7 @@
 (defvar *afterbye* '())
 (defvar *aux-dir* nil)
 (defvar *aux-dir/* "")
+(defvar *aux-dir-absolute-p* nil)
 (defvar *aux-stream* nil)
 
 (defvar *basic-style* "")
@@ -5889,10 +5894,7 @@
               (write-log " to ")
               (write-log f-save)
               (write-log :separation-newline)
-              (system (string-append
-                        #-windows "cp -pf "
-                        #+windows "copy/y "
-                        f " " f-save))
+              (sys-copy-file f f-save)
               (setq f f-save)))))
       (load-aux-file)
       )
@@ -7957,22 +7959,54 @@
   (let ((*html* (make-ostream* :stream p)))
     (funcall th)))
 
+(defun run-support-program (support-program
+                             file-sfx
+                             input-file-ext output-file-ext)
+  (let* ((input-file-basename (string-append *jobname* file-sfx))
+         (output-file (string-append *jobname* file-sfx output-file-ext))
+         (arg-file input-file-basename))
+    (unless *aux-dir-absolute-p*
+      (setq arg-file (string-append *aux-dir/* input-file-basename)
+            output-file (string-append *aux-dir/* output-file)))
+    (write-log :separation-newline)
+    (write-log "Running: ") (write-log support-program) (write-log #\space)
+    (cond (*aux-dir-absolute-p*
+            (sys-copy-file
+              (string-append *aux-dir/* input-file-basename input-file-ext) "."))
+          (t (write-log *aux-dir/*)))
+    (write-log arg-file) (write-log #\space)
+    (system (string-append support-program " " arg-file))
+    (cond ((probe-file output-file)
+           (when *aux-dir-absolute-p* (sys-copy-file output-file *aux-dir*)))
+          (t (write-log "... failed; try manually")))
+    (write-log :separation-newline)))
+
+(defun run-bibtex ()
+  (run-support-program "bibtex" *bib-aux-file-suffix* ".aux" ".bbl"))
+
+(defun run-makeindex ()
+  (run-support-program "makeindex" *index-file-suffix* ".idx" ".ind"))
+
 (defun call-external-programs-if-necessary ()
   (let ((run-bibtex-p
          (cond ((not *using-bibliography-p*) nil)
                ((not (probe-file
-                  (string-append *aux-dir/* *jobname*
-                               *bib-aux-file-suffix* ".aux")))
+                       (string-append *aux-dir/* *jobname*
+                         *bib-aux-file-suffix* ".aux")))
                 nil)
-               ((member :bibliography *missing-pieces*) t)
+               ((member :bibliography *missing-pieces*)
+                (format t "bib missing I~%")
+
+                t)
                (*source-changed-since-last-run-p*
+                 (format t "bib missing II~%")
                 (flag-missing-piece :fresh-bibliography) t)
                (t nil)))
         (run-makeindex-p
          (cond ((not *using-index-p*) nil)
                ((not (probe-file
-                  (string-append *aux-dir/* *jobname* *index-file-suffix*
-                               ".idx")))
+                       (string-append *aux-dir/* *jobname* *index-file-suffix*
+                         ".idx")))
                 nil)
                ((member :fresh-index *missing-pieces*)
                 ;wait to run makeindex
@@ -7982,38 +8016,9 @@
                 (flag-missing-piece :fresh-index) t)
                (t nil))))
     ;bibtex
-    (when run-bibtex-p
-      (write-log :separation-newline)
-      (write-log "Running: bibtex ")
-      (write-log *aux-dir/*)
-      (write-log *jobname*)
-      (write-log *bib-aux-file-suffix*)
-      (write-log #\space)
-      (system
-       (string-append "bibtex " *aux-dir/* *jobname*
-                    *bib-aux-file-suffix*))
-      (unless
-          (probe-file
-           (string-append *aux-dir/* *jobname* *bib-aux-file-suffix* ".bbl"))
-        (write-log " ... failed; try manually"))
-      (write-log :separation-newline))
+    (when run-bibtex-p (run-bibtex))
     ;makeindex
-    (when run-makeindex-p
-      (write-log :separation-newline)
-      (write-log "Running: makeindex ")
-      (write-log *aux-dir/*)
-      (write-log *jobname*)
-      (write-log *index-file-suffix*)
-      (write-log #\space)
-      (system
-       (string-append "makeindex " *aux-dir/* *jobname*
-                    *index-file-suffix*))
-      (unless
-          (probe-file
-           (string-append *aux-dir/* *jobname* *index-file-suffix*
-                        ".ind"))
-        (write-log " ... failed; try manually"))
-      (write-log :separation-newline))
+    (when run-makeindex-p (run-makeindex))
     ;eval4tex
     (load (string-append *jobname* *eval4tex-file-suffix*) :if-does-not-exist nil)
     ;metapost
@@ -8068,6 +8073,8 @@
           (let ((probe (string-append hdir "/probe")))
             (when (probe-file probe)
               (ensure-file-deleted probe)
+              (when (char= (char hdir 0) #\/)
+                (setq *aux-dir-absolute-p* t))
               (setq *aux-dir* hdir
                     *aux-dir/* (string-append *aux-dir* "/")))))))))
 
@@ -8561,10 +8568,7 @@
   (when (and *aux-dir* (not (fully-qualified-url-p f)) (not (search "/" f)))
     (let ((real-f (string-append *aux-dir/* f)))
       (when (and (probe-file f) (not (probe-file real-f)))
-        #-windows
-        (system (string-append "cp -p " f " " real-f))
-        #+windows
-        (system (string-append "copy/b " f " " *aux-dir*))))
+        (sys-copy-file f real-f)))
     (when deletep
       (ensure-file-deleted f)))
   f)
@@ -10893,6 +10897,7 @@ Try the commands
         (*afterpar* '())
         (*aux-dir* nil)
         (*aux-dir/* "")
+        (*aux-dir-absolute-p* nil)
         (*aux-stream* nil)
         ;
         (*basic-style* "")

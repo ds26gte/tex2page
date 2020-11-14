@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20200201, ecl.
 
 
-(define *tex2page-version* "20200506")
+(define *tex2page-version* "20201114")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -6287,6 +6287,9 @@
 (define (do-iftrue) (set! *tex-if-stack* (cons true *tex-if-stack*))
  *tex-if-stack*)
 
+(define (do-ifskip) (set! *tex-if-stack* (cons 'skip *tex-if-stack*))
+ *tex-if-stack*)
+
 (define (insert-tex-if test) (if test (do-iftrue) (do-iffalse)))
 
 (define (do-ifx)
@@ -6357,18 +6360,21 @@
  *tex-if-stack*)
 
 (define (do-ifnum)
- (let ((one (get-number)))
-   (let ((rel (string-ref (get-raw-token/is) 0)))
-     (let ((two (get-number)))
-       (if
-        ((case rel
-           ((#\<) <)
-           ((#\=) =)
-           ((#\>) >)
-           (else (terror 'do-ifnum "Missing = for \\ifnum.")))
-         one two)
-        (do-iftrue)
-        (do-iffalse))))))
+ (if (inside-false-world-p)
+     (do-ifskip)
+     (let ((one (get-number)))
+       (let ((rel (string-ref (get-raw-token/is) 0)))
+         (let ((two (get-number)))
+           (printf "one= ~s; two= ~s~%" one two)
+           (if
+            ((case rel
+               ((#\<) <)
+               ((#\=) =)
+               ((#\>) >)
+               (else (terror 'do-ifnum "Missing = for \\ifnum.")))
+             one two)
+            (do-iftrue)
+            (do-iffalse)))))))
 
 (define (read-ifcase-clauses)
  (fluid-let ((*not-processing-p* true))
@@ -6451,7 +6457,8 @@
                (%pop-top-value (car %pop-old-stack)))
           (begin (set! *tex-if-stack* (cdr %pop-old-stack)) *tex-if-stack*)
           %pop-top-value)))
-   (set! *tex-if-stack* (cons (not top-if) *tex-if-stack*))
+   (set! *tex-if-stack*
+    (cons (if (eq? top-if 'skip) 'skip (not top-if)) *tex-if-stack*))
    *tex-if-stack*))
 
 (define (do-fi) (ignorespaces ':stop-before-first-newline)
@@ -8723,8 +8730,6 @@
        (cond
         ((or (not c) (char=? c #\newline)) (emit "</span>")
          (scm-emit-html-char c) (return))
-        (else false))
-       (cond
         ((and (char-whitespace? c)
               (let ((c2 (snoop-actual-char)))
                 (or (not c2) (char=? c2 #\newline))))
@@ -9325,7 +9330,7 @@
               (else false)))))
 
 (define (inside-false-world-p)
- (or (member false *tex-if-stack*) (member '? *tex-if-stack*)))
+ (or (member false *tex-if-stack*) (member 'skip *tex-if-stack*)))
 
 (define (do-tex-ctl-seq z) (trace-if (> (the-count "\\tracingmacros") 0) z)
  (cond

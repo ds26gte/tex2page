@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20200506") ;last change
+(defparameter *tex2page-version* "20201114") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -5119,6 +5119,9 @@
 (defun do-iftrue ()
   (push t *tex-if-stack*))
 
+(defun do-ifskip ()
+  (push 'skip *tex-if-stack*))
+
 ;(trace do-iftrue do-iffalse)
 
 (defun insert-tex-if (test)
@@ -5182,19 +5185,21 @@
   (push *math-mode-p* *tex-if-stack*))
 
 (defun do-ifnum ()
-  (let* ((one (get-number))
-         (rel (char (get-raw-token/is) 0))
-         (two (get-number)))
-    ;(format t "one= ~s; two= ~s~%" one two)
-    (if (funcall
-         (case rel
-           (#\< #'<)
-           (#\= #'=)
-           (#\> #'>)
-           (t (terror 'do-ifnum "Missing = for \\ifnum.")))
-         one two)
-        (do-iftrue)
-      (do-iffalse))))
+  (if (inside-false-world-p)
+      (do-ifskip)
+      (let* ((one (get-number))
+             (rel (char (get-raw-token/is) 0))
+             (two (get-number)))
+        (format t "one= ~s; two= ~s~%" one two)
+        (if (funcall
+              (case rel
+                (#\< #'<)
+                (#\= #'=)
+                (#\> #'>)
+                (t (terror 'do-ifnum "Missing = for \\ifnum.")))
+              one two)
+            (do-iftrue)
+            (do-iffalse)))))
 
 ;(trace do-ifnum)
 
@@ -5252,7 +5257,9 @@
   (ignorespaces)
   (when (null *tex-if-stack*) (terror 'do-else "Extra \\else."))
   (let ((top-if (pop *tex-if-stack*)))
-    (push (not top-if) *tex-if-stack*)))
+    (push (if (eq top-if 'skip) 'skip
+              (not top-if))
+          *tex-if-stack*)))
 
 (defun do-fi ()
   ;(format t "doing do-fi~%")
@@ -7224,9 +7231,10 @@
   (emit "<span class=comment>")
   (loop
     (let ((c (get-actual-char)))
-      (when (or (not c) (char= c #\newline)) (emit "</span>")
-        (scm-emit-html-char c) (return))
-      (cond ((and (char-whitespace-p c)
+      (cond ((or (not c) (char= c #\newline))
+             (emit "</span>")
+             (scm-emit-html-char c) (return))
+            ((and (char-whitespace-p c)
                   (let ((c2 (snoop-actual-char)))
                     (or (not c2) (char= c2 #\newline))))
              (emit "</span>") (scm-emit-html-char (get-actual-char))
@@ -7778,7 +7786,7 @@
            (emit x)))))
 
 (defun inside-false-world-p ()
-  (or (member nil *tex-if-stack*) (member '? *tex-if-stack*)))
+  (or (member nil *tex-if-stack*) (member 'skip *tex-if-stack*)))
 
 (defun do-tex-ctl-seq (z)
   (declare (string z))

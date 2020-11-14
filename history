@@ -1,4 +1,15 @@
-Last change 2020-05-07
+Last change 2020-11-14
+
+2020 Nov 14
+
+tex2page.lisp: Rewrite scm-output-verbaitm-comment's loop so Racket translation is correct.
+The if-stack entries have three values now: 
+- #t if currently in the true branch of a running \if;
+- #f if currently in the false branch of a running \if;
+- 'skip if currently in a non-running \if (i.e., in the false branch of wider \if).
+This avoids problems if even the minimal parsing of a skippable nested \if could cause error.
+tgtermes.tex: Don't set math fonts -- the encoding doesn't match (e.g., \Gamma fails).
+Don't make GitHub pages from docs/ directory; keeps repo sparer.
 
 2020 May 06
 

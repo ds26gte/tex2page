@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20200201, ecl.
 
 
-(define *tex2page-version* "20201114")
+(define *tex2page-version* "20201115")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -3298,7 +3298,11 @@
           (unquote (ctl-seq-no-arg-expand-once "\\TIIPcurrentnodename"))
           (unquote sectitle))))))))
 
-(define (do-documentclass) (probably-latex) (get-bracketed-text-if-any)
+(define (do-documentclass) (probably-latex)
+ (cond
+  ((eqv? *tex-format* ':latex) (set! *emit-enabled-p* false) *emit-enabled-p*)
+  (else false))
+ (get-bracketed-text-if-any)
  (let ((x (get-peeled-group)))
    (cond ((member x '("report" "book")) (!using-chapters)) (else false))))
 
@@ -7074,31 +7078,36 @@
                  ((file-exists? f) f)
                  (else false)))))))
 
-(define (find-tex-file file)
- (let ((file.tex (string-append file ".tex")))
-   (or (and (file-exists? file.tex) file.tex)
-       (and (file-exists? file) file)
-       (if (not (null? *tex2page-inputs*))
-           (let ((%dolist-l *tex2page-inputs*) (dir false))
-             (let* ((%loop-returned false)
-                    (%loop-result 0)
-                    (return
-                     (lambda %args
-                       (set! %loop-returned true)
-                       (set! %loop-result (and (pair? %args) (car %args))))))
-               (let %loop
-                 ()
-                 (if (null? %dolist-l) (return) false)
-                 (unless %loop-returned (set! dir (car %dolist-l)))
-                 (unless %loop-returned (set! %dolist-l (cdr %dolist-l)))
-                 (unless %loop-returned
-                   (let ((f (string-append dir *directory-separator* file.tex)))
-                     (cond ((file-exists? f) (return f)) (else false))))
-                 (unless %loop-returned
-                   (let ((f (string-append dir *directory-separator* file)))
-                     (cond ((file-exists? f) (return f)) (else false))))
-                 (if %loop-returned %loop-result (%loop)))))
-           (kpsewhich file)))))
+(define (find-tex-file file . %lambda-rest-arg)
+ (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (skip-kpathsea false))
+   (when (< 0 %lambda-rest-arg-len)
+     (set! skip-kpathsea (list-ref %lambda-rest-arg 0)))
+   (let ((file.tex (string-append file ".tex")))
+     (or (and (file-exists? file.tex) file.tex)
+         (and (file-exists? file) file)
+         (and (not (null? *tex2page-inputs*))
+              (let ((%dolist-l *tex2page-inputs*) (dir false))
+                (let* ((%loop-returned false)
+                       (%loop-result 0)
+                       (return
+                        (lambda %args
+                          (set! %loop-returned true)
+                          (set! %loop-result (and (pair? %args) (car %args))))))
+                  (let %loop
+                    ()
+                    (if (null? %dolist-l) (return) false)
+                    (unless %loop-returned (set! dir (car %dolist-l)))
+                    (unless %loop-returned (set! %dolist-l (cdr %dolist-l)))
+                    (unless %loop-returned
+                      (let ((f
+                             (string-append dir *directory-separator*
+                              file.tex)))
+                        (cond ((file-exists? f) (return f)) (else false))))
+                    (unless %loop-returned
+                      (let ((f (string-append dir *directory-separator* file)))
+                        (cond ((file-exists? f) (return f)) (else false))))
+                    (if %loop-returned %loop-result (%loop))))))
+         (and (not skip-kpathsea) (kpsewhich file))))))
 
 (define (initialize-scm-words) (set! *scm-keywords* (make-table ':test equal?))
  (set! *scm-builtins* (make-table ':test equal?))
@@ -10013,9 +10022,6 @@
     ((file-exists? aux-file) (load-tex2page-data-file aux-file)
      (delete-file aux-file))
     (else false)))
- (cond
-  ((eqv? *tex-format* ':latex) (set! *emit-enabled-p* false) *emit-enabled-p*)
-  (else false))
  (start-css-file)
  (cond
   ((not (null? *toc-list*)) (set! *toc-list* (reverse *toc-list*)) *toc-list*)
@@ -13178,7 +13184,12 @@ Try the commands
 (tex-def-prim "\\skewchar" (lambda () (get-token) (eat-integer)))
 
 (tex-def-prim "\\usepackage"
- (lambda () (get-bracketed-text-if-any) (get-group) (probably-latex)))
+ (lambda ()
+   (probably-latex)
+   (get-bracketed-text-if-any)
+   (let ((sty-file (string-append (get-peeled-group) ".sty")))
+     (let ((f (find-tex-file sty-file ':skip-kpathsea)))
+       (cond (f (tex2page-file f)) (else false))))))
 
 (tex-def-prim "\\setmainfont"
  (lambda ()

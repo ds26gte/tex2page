@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2020-11-14} %last change
+\c{2020-11-15} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -261,9 +261,9 @@ The filename \p{|meta[f].tex} is tried before
 \p{|meta[f]} itself is tried.  In most modern \TeX s, the
 search is performed using the `kpathsea` library.
 
-By default, \TeX2page will look for files using the same `kpathsea`
-mechanism as \TeX.  However, it is possible to supply a
-different list of search directories via the environment
+\TeX2page also looks for files using the same `kpathsea`
+mechanism as \TeX.  However, it first looks at a
+different list of search directories given in the environment
 variable `TEX2PAGEINPUTS`.
 It may be useful to have
 files in `TEX2PAGEINPUTS` shadow files from
@@ -280,17 +280,6 @@ and semicolon-separated in Windows.  It cannot use the
 enhanced syntax (viz., `*` and `//`) that is
 typically permitted for `TEXINPUTS`.
 
-%This is analogous to TeX
-%looking for files in `TEXINPUTS`.\f{The `TEXINPUTS`
-%value can use a quite complicated syntax, which is why
-%\TeX2page uses its own environment variable instead of
-%simply reusing TeX’s `TEXINPUTS`.  However, to make a
-%virtue out of a necessity, it is quite unnecessary for
-%\TeX2page to attempt parsing most of the TeX files that
-%are accessible via `TEXINPUTS`.  Furthermore, you can
-%have files in `TEX2PAGEINPUTS` usefully shadow
-%files from `TEXINPUTS`.}
-%
 Error recovery in \TeX2page is also exactly analogous to
 \TeX, but we will postpone that discussion to
 p.~\ref{recovery}.

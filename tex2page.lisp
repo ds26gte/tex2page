@@ -34,7 +34,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20201114") ;last change
+(defparameter *tex2page-version* "20201115") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -2547,6 +2547,8 @@
 
 (defun do-documentclass ()
   (probably-latex)
+  (when (eql *tex-format* :latex)
+    (setq *emit-enabled-p* nil))
   (get-bracketed-text-if-any)
   (let ((x (get-peeled-group)))
     (when (member x '("report" "book") :test #'string=)
@@ -5773,19 +5775,21 @@
                 ((probe-file f) f)
                 (t nil)))))))
 
-(defun find-tex-file (file)
-  ;search for file.tex before file.  Search in current directory first.
-  ;If TEX2PAGEINPUTS is set search there, else use kpsewhich(1)
+(defun find-tex-file (file &optional skip-kpathsea)
+  ;search for file.tex before file.
+  ;Search in current directory first;
+  ;then in TEX2PAGEINPUTS if set;
+  ;then use kpsewhich(1)
   (let ((file.tex (string-append file ".tex")))
     (or (and (probe-file file.tex) file.tex)
         (and (probe-file file) file)
-        (if (not (null *tex2page-inputs*))
-            (dolist (dir *tex2page-inputs*)
-              (let ((f (string-append dir *directory-separator* file.tex)))
-                (when (probe-file f) (return f)))
-              (let ((f (string-append dir *directory-separator* file)))
-                (when (probe-file f) (return f))))
-          (kpsewhich file)))))
+        (and (not (null *tex2page-inputs*))
+             (dolist (dir *tex2page-inputs*)
+               (let ((f (string-append dir *directory-separator* file.tex)))
+                 (when (probe-file f) (return f)))
+               (let ((f (string-append dir *directory-separator* file)))
+                 (when (probe-file f) (return f)))))
+        (and (not skip-kpathsea) (kpsewhich file)))))
 
 (defun initialize-scm-words ()
  (setq *scm-keywords* (make-hash-table :test #'equal)
@@ -8424,8 +8428,6 @@
     (when (probe-file aux-file)
       (load-tex2page-data-file aux-file)
       (delete-file aux-file)))
-  (when (eql *tex-format* :latex)
-    (setq *emit-enabled-p* nil))
   (start-css-file)
   (unless (null *toc-list*) (setq *toc-list* (nreverse *toc-list*)))
   (unless (null *stylesheets*) (setq *stylesheets* (nreverse *stylesheets*)))
@@ -10789,7 +10791,12 @@ Try the commands
 (tex-def-prim "\\skewchar" (lambda () (get-token) (eat-integer)))
 
 (tex-def-prim "\\usepackage"
- (lambda () (get-bracketed-text-if-any) (get-group) (probably-latex)))
+  (lambda ()
+    (probably-latex)
+    (get-bracketed-text-if-any)
+    (let* ((sty-file (string-append (get-peeled-group) ".sty"))
+           (f (find-tex-file sty-file :skip-kpathsea)))
+      (when f (tex2page-file f)))))
 
 (tex-def-prim "\\setmainfont"
   (lambda () (get-bracketed-text-if-any) (get-group) (get-bracketed-text-if-any)))

@@ -2,6 +2,7 @@
 ":"; if test -z "$LISP"; then export LISP=ecl; fi
 ":"; if test "$LISP" = abcl; then exec abcl --load $0 --batch "$@"
 ":"; elif test "$LISP" = allegro; then exec alisp -L $0 -kill
+":"; elif test "$LISP" = clasp; then exec clasp --script $0 -- "$@" 2> /dev/null
 ":"; elif test "$LISP" = clisp; then exec clisp $0 -q "$@"
 ":"; elif test "$LISP" = clozure; then exec ccl -l $0 -e '(ccl:quit)' -- "$@"
 ":"; elif test "$LISP" = cmucl; then exec lisp -quiet -load $0 -eval '(ext:quit)' "$@"
@@ -34,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20201115") ;last change
+(defparameter *tex2page-version* "20220704") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -58,13 +59,11 @@
 
 (defun retrieve-env (s)
   (declare (string s))
-  #+abcl (ext:getenv s)
+  #+(or abcl clasp clisp ecl) (ext:getenv s)
   #+allegro (sys:getenv s)
-  #+clisp (ext:getenv s)
   #+clozure (ccl:getenv s)
   #+cmucl (cdr (assoc (intern s :keyword)
                       ext:*environment-list* :test #'string=))
-  #+ecl (ext:getenv s)
   #+mkcl (mkcl:getenv s)
   #+sbcl (sb-ext:posix-getenv s))
 
@@ -76,10 +75,10 @@
   (declare (string cmd))
   #+abcl (ext:run-shell-command cmd)
   #+allegro (excl:shell cmd)
-  #+clisp (ext:shell cmd)
+  #+(or clisp ecl) (ext:shell cmd)
+  #+clasp (ext:system cmd)
   #+clozure (ccl::os-command cmd)
   #+cmucl (ext:run-program "sh" (list "-c" cmd) :output t)
-  #+ecl (ext:system cmd)
   #+mkcl (mkcl:system cmd))
 
 (defun string=split (p sepc)
@@ -105,6 +104,7 @@
 
 (defparameter *tex2page-file-arg*
   (or #+abcl (nth 0 ext:*command-line-argument-list*)
+      #+clasp (elt core:*command-line-arguments* 0)
       #+clisp (nth 1 ext:*args*)
       #+clozure (nth 6 ccl:*command-line-argument-list*)
       #+cmucl (nth 6 ext:*command-line-strings*)

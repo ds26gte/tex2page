@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Last modified: 2019-11-25
+# Last modified: 2022-07-04
 
 # Set scmxlate to the pathname of scmxlate/scmxlate.scm
 # on your system, if you know it.  Otherwise let
@@ -55,7 +55,7 @@ adieu() {
 
 makeit() {
   case "$dialect" in
-    abcl|allegro|clisp|clozure|cmucl|ecl|mkcl|sbcl|sbcl-compiled)
+    abcl|allegro|clasp|clisp|clozure|cmucl|ecl|mkcl|sbcl|sbcl-compiled)
     :;;
     #bigloo|chez|chibi|chicken|gambit|gauche|guile|mitscheme|petite|plt|scm|sxm)
     chez|chicken|gambit|gauche|guile|petite|plt)
@@ -73,7 +73,7 @@ makeit() {
     --eval '(sb-ext:quit)'
     rm tex2page.fasl;;
 
-    abcl|allegro|clisp|clozure|cmucl|ecl|mkcl|sbcl)
+    abcl|allegro|clasp|clisp|clozure|cmucl|ecl|mkcl|sbcl)
     echo \":\"\; export LISP=$dialect > my-tex2page
     cat tex2page.lisp >> my-tex2page;;
 
@@ -129,6 +129,8 @@ echodialectsuggestions() {
     abclpresent=yes
   test "`which scheme 2>/dev/null|grep -v ' '`"  &&\
     chezpresent=yes
+  test "`which clasp 2>/dev/null|grep -v ' '`"  &&\
+    clasppresent=yes
   test "`which clisp 2>/dev/null|grep -v ' '`"  &&\
     clisppresent=yes
   test "`which csi 2>/dev/null|grep -v ' '`"  &&\
@@ -160,6 +162,8 @@ echodialectsuggestions() {
   echo
   test "$abclpresent" &&\
     echo \ \ ./configure --dialect=abcl
+  test "$clasppresent" &&\
+    echo \ \ ./configure --dialect=clasp
   test "$clisppresent" &&\
     echo \ \ ./configure --dialect=clisp
   test "$clozurepresent" &&\

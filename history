@@ -1,4 +1,17 @@
-Last change 2020-11-14
+Last change 2022-07-04
+
+2022 Jul 4
+
+Ported to Clasp.
+
+2020 Nov 15
+
+For LaTeX, emitting to HTML shd be turned off between \documentclass &
+  \begin{document}, not from the very start!
+Have \usepackage find & load its arg, but only if it's in cwd or
+  TEX2PAGEINPUTS.
+find-tex-file gets optarg to skip kpathsea.
+  It also has TEX2PAGEINPUTS only shadow kpathsea, not displace it completely.
 
 2020 Nov 14
 

@@ -47,7 +47,7 @@ is also created in some instances.)
 
 If you use Common Lisp, you can avoid configuration by
 setting the environment variable `LISP` to one of: `abcl`,
-`allegro`, `clisp`, `clozure`, `cmucl`, `ecl` (default), `mkcl`, `sbcl`.
+`allegro`, `clasp`, `clisp`, `clozure`, `cmucl`, `ecl` (default), `mkcl`, `sbcl`.
 This makes `tex2page.lisp` equivalent to whatever
 
   ./configure --dialect=$LISP
@@ -180,4 +180,4 @@ you if another run is necessary.
 The WWW copy of the HTML documentation is at
 http://ds26gte.github.io/tex2page/index.html.
 
-// Last modified 2019-11-25
+// Last modified 2022-07-04

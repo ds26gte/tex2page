@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20220704") ;last change
+(defparameter *tex2page-version* "20221212") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -226,7 +226,10 @@
 (defparameter **egroup** 2)
 (defparameter **math** 3)
 (defparameter **alignment** 4)
+(defparameter **eol** 5)
 (defparameter **parameter** 6)
+(defparameter **superscript** 7)
+(defparameter **subscript** 8)
 (defparameter **ignore** 9)
 (defparameter **space** 10)
 (defparameter **letter** 11)
@@ -245,17 +248,17 @@
     (cons #\space **space**)
     (cons #\% **comment**)
     (cons (code-char 0) **ignore**)
-    (cons #\return 5)
-    (cons #\newline 5) ;TeX seems to read #\newline as #\return
+    (cons #\return **eol**)
+    (cons #\newline **eol**) ;TeX seems to read #\newline as #\return
     ;Set by plain
     (cons #\{ **bgroup**) ;begin group
     (cons #\} **egroup**) ;end group
     (cons #\$ **math**) ;math shift
     (cons #\& **alignment**) ;alignment tab
     (cons #\# **parameter**) ;macro parameter
-    (cons #\^ 7) ;superscript
-    (cons #\_ 8) ;subscript
-    (cons #\tab **space**) ;space
+    (cons #\^ **superscript**)
+    (cons #\_ **subscript**)
+    (cons #\tab **space**)
     (cons #\~ **active**) ;tilde is active
     ))
 
@@ -710,6 +713,21 @@
           (setf (istream*-buffer *current-tex2page-input*) (cdr b))
           c))))
 
+(defun get-char-mod-doublehat ()
+  (let ((c (get-char)))
+    (cond ((not c) c)
+          ((= (catcode c) **superscript**)
+           (let ((c2 (get-char)))
+             (cond ((and (characterp c2) (char= c2 c))
+                    (let* ((c3 (get-char))
+                           (c3-code (and (characterp c3) (char-code c3))))
+                      (cond ((numberp c3-code)
+                             (code-char (if (>= c3-code 64) (- c3-code 64)
+                                            (+ c3-code 64))))
+                            (t (toss-back-char c3) (toss-back-char c2) c))))
+                   (t (toss-back-char c2) c))))
+          (t c))))
+
 (defun toss-back-string (s)
   (declare (string s))
   (setf (istream*-buffer *current-tex2page-input*)
@@ -764,8 +782,8 @@
   ;                    if 2nd newline found, add another to it to retain \par
   ; :all : eat all whitespace
   ;
-  (unless (/= (catcode #\space) 10)
-    (let ((newline-active-p (/= (catcode #\newline) 5))
+  (unless (/= (catcode #\space) **space**)
+    (let ((newline-active-p (/= (catcode #\newline) **eol**))
           (num-newlines-read 0)
           ;(num-spaces-read 0)
           c)
@@ -823,7 +841,7 @@
   (let ((bs (get-actual-char)))
     (unless (= (catcode bs) **escape**)
       (terror 'get-ctl-seq "Missing control sequence (" bs ")"))
-    (let ((c (get-char)))
+    (let ((c (get-char-mod-doublehat)))
       (cond ((not c) "\\ ")
             ((= (catcode c) **ignore**) "\\ ")
             ((= (catcode c) **letter**)
@@ -831,14 +849,17 @@
                (nreverse
                  (let ((s (list c #\\)))
                    (loop
-                     (let ((c (snoop-char)))
-                       (cond ((not c) (return s))
-                             ((= (catcode c) **ignore**) (return s))
-                             ((= (catcode c) **letter**)
-                              (get-char)
-                              (push c s))
-                             (t (ignorespaces :stop-before-first-newline)
-                                (return s)))))))))
+                     (let ((c (get-char-mod-doublehat)))
+                       (if c (let ((c-catcode (catcode c)))
+                               (cond ((= c-catcode **ignore**)
+                                      (toss-back-char c)
+                                      (return s))
+                                     ((= c-catcode **letter**)
+                                      (push c s))
+                                     (t (toss-back-char c)
+                                        (ignorespaces :stop-before-first-newline)
+                                        (return s))))
+                           (return s))))))))
             (t (list->string (list #\\ c)))))))
 
 ;(trace get-ctl-seq)
@@ -2091,6 +2112,8 @@
   (let ((c (get-tex-char-spec)))
     (let ((val (progn (get-equal-sign) (get-number))))
       (catcode c val))))
+
+; (trace do-catcode get-tex-char-spec)
 
 (defun do-opmac-activettchar ()
   (ignorespaces)
@@ -5981,7 +6004,7 @@
                         (cdef*-expansion y)
                         (cdef*-catcodes y)))))
 
-;(trace resolve-cdefs)
+; (trace resolve-cdefs)
 
 (defun resolve-defs (x)
   ;(format t "resolve-defs ~s~%" x)
@@ -7878,13 +7901,24 @@
 
 (defun ignorable-tex-file-p (f)
   (let ((e (or (file-extension f) "")))
-    (cond ((string-equal e ".sty") t)
-          (t (when (string-equal e ".tex")
-               (setq f (subseq f 0 (- (string-length f) 4))))
-             (cond ((string= f "opmac")
-                    (tex-gdef-0arg "\\TZPopmac" "1")
-                    t)
-                   (t (member f *tex-files-to-ignore* :test #'string-equal)))))))
+    (when (string-equal e ".tex")
+      (setq f (subseq f 0 (- (string-length f) 4))))
+    (cond ((string= f "opmac")
+           (tex-gdef-0arg "\\TZPopmac" "1")
+           t)
+          ((or (string-equal f "slatex") (string-equal f "slatex.sty"))
+           (tex-let-prim "\\scheme" "\\scm")
+           t)
+          ((string-equal f "miniltx")
+           (catcode #\@ 11)
+           t)
+          ((string-equal f "texinfo")
+           (cond ((setq *it* (actual-tex-filename "texi2p"))
+                  (tex2page-file *it*))
+                 (t (terror 'do-input "File texi2p.tex not found")))
+           t)
+          ((string-equal e ".sty") t)
+          (t (member f *tex-files-to-ignore* :test #'string-equal)))))
 
 (defun do-input ()
   (ignorespaces)
@@ -7899,13 +7933,6 @@
       (cond ((ignorable-tex-file-p f)
              ;dont process .sty files and macro files like btxmac.tex
              nil)
-            ((member f '("miniltx" "miniltx.tex") :test #'string-equal)
-             ;like above, but miniltx also makes @ a "letter"
-             (catcode #\@ 11) nil)
-            ((member f '("texinfo" "texinfo.tex") :test #'string-equal)
-             (cond ((setq *it* (actual-tex-filename "texi2p"))
-                    (tex2page-file *it*))
-                   (t (terror 'do-input "File texi2p.tex not found"))))
             ((setq *it* (actual-tex-filename f (check-input-file-timestamp-p f)))
              (tex2page-file *it*))
             (t (write-log #\() (write-log f)
@@ -10833,7 +10860,6 @@ Try the commands
 (tex-let-prim "\\setspecialsymbol" "\\scmspecialsymbol")
 (tex-let-prim "\\scmp" "\\scm")
 (tex-let-prim "\\q" "\\scm")
-(tex-let-prim "\\scheme" "\\scm")
 (tex-let-prim "\\tagref" "\\ref")
 (tex-let-prim "\\numfootnote" "\\numberedfootnote")
 (tex-let-prim "\\f" "\\numberedfootnote")
@@ -11081,5 +11107,7 @@ Try the commands
             (do-bye))
           (t (tex2page-help tex-file)))
     (output-stats)))
+
+; (trace get-number get-number-or-false do-def )
 
 (tex2page *tex2page-file-arg*)

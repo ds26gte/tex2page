@@ -282,10 +282,10 @@
       (else ""))
     htmlcolor)))
 
-;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20200201, ecl.
+;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221126, ecl.
 
 
-(define *tex2page-version* "20201115")
+(define *tex2page-version* "20221212")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -437,7 +437,13 @@
 
 (define **alignment** 4)
 
+(define **eol** 5)
+
 (define **parameter** 6)
+
+(define **superscript** 7)
+
+(define **subscript** 8)
 
 (define **ignore** 9)
 
@@ -456,15 +462,15 @@
        (cons #\  **space**)
        (cons #\% **comment**)
        (cons (integer->char 0) **ignore**)
-       (cons #\return 5)
-       (cons #\newline 5)
+       (cons #\return **eol**)
+       (cons #\newline **eol**)
        (cons #\{ **bgroup**)
        (cons #\} **egroup**)
        (cons #\$ **math**)
        (cons #\& **alignment**)
        (cons #\# **parameter**)
-       (cons #\^ 7)
-       (cons #\_ 8)
+       (cons #\^ **superscript**)
+       (cons #\_ **subscript**)
        (cons #\tab **space**)
        (cons #\~ **active**)))
 
@@ -1199,6 +1205,23 @@
          (istream*-buffer *current-tex2page-input*)
          c))))
 
+(define (get-char-mod-doublehat)
+ (let ((c (get-char)))
+   (cond ((not c) c)
+         ((= (catcode c) **superscript**)
+          (let ((c2 (get-char)))
+            (cond
+             ((and (char? c2) (char=? c2 c))
+              (let ((c3 (get-char)))
+                (let ((c3-code (and (char? c3) (char->integer c3))))
+                  (cond
+                   ((number? c3-code)
+                    (integer->char
+                     (if (>= c3-code 64) (- c3-code 64) (+ c3-code 64))))
+                   (else (toss-back-char c3) (toss-back-char c2) c)))))
+             (else (toss-back-char c2) c))))
+         (else c))))
+
 (define (toss-back-string s)
  (set!istream*-buffer *current-tex2page-input*
   (append (string->list s) (istream*-buffer *current-tex2page-input*)))
@@ -1251,8 +1274,8 @@
    (when (< 0 %lambda-rest-arg-len)
      (set! newlines (list-ref %lambda-rest-arg 0)))
    (cond
-    ((not (not (= (catcode #\ ) 10)))
-     (let ((newline-active-p (not (= (catcode #\newline) 5)))
+    ((not (not (= (catcode #\ ) **space**)))
+     (let ((newline-active-p (not (= (catcode #\newline) **eol**)))
            (num-newlines-read 0)
            (c false))
        (let* ((%loop-returned false)
@@ -1338,7 +1361,7 @@
     ((not (= (catcode bs) **escape**))
      (terror 'get-ctl-seq "Missing control sequence (" bs ")"))
     (else false))
-   (let ((c (get-char)))
+   (let ((c (get-char-mod-doublehat)))
      (cond ((not c) "\\ ")
            ((= (catcode c) **ignore**) "\\ ")
            ((= (catcode c) **letter**)
@@ -1353,13 +1376,17 @@
                           (set! %loop-result (and (pair? %args) (car %args))))))
                   (let %loop
                     ()
-                    (let ((c (snoop-char)))
-                      (cond ((not c) (return s))
-                            ((= (catcode c) **ignore**) (return s))
-                            ((= (catcode c) **letter**) (get-char)
-                             (set! s (cons c s)) s)
-                            (else (ignorespaces ':stop-before-first-newline)
-                             (return s))))
+                    (let ((c (get-char-mod-doublehat)))
+                      (if c
+                          (let ((c-catcode (catcode c)))
+                            (cond
+                             ((= c-catcode **ignore**) (toss-back-char c)
+                              (return s))
+                             ((= c-catcode **letter**) (set! s (cons c s)) s)
+                             (else (toss-back-char c)
+                              (ignorespaces ':stop-before-first-newline)
+                              (return s))))
+                          (return s)))
                     (if %loop-returned %loop-result (%loop))))))))
            (else (list->string (list #\\ c)))))))
 
@@ -9420,14 +9447,21 @@
 
 (define (ignorable-tex-file-p f)
  (let ((e (or (file-extension f) "")))
-   (cond ((string-ci=? e ".sty") true)
-         (else
+   (cond
+    ((string-ci=? e ".tex") (set! f (substring f 0 (- (string-length f) 4))) f)
+    (else false))
+   (cond ((string=? f "opmac") (tex-gdef-0arg "\\TZPopmac" "1") true)
+         ((or (string-ci=? f "slatex") (string-ci=? f "slatex.sty"))
+          (tex-let-prim "\\scheme" "\\scm") true)
+         ((string-ci=? f "miniltx") (catcode #\@ 11) true)
+         ((string-ci=? f "texinfo")
           (cond
-           ((string-ci=? e ".tex")
-            (set! f (substring f 0 (- (string-length f) 4))) f)
-           (else false))
-          (cond ((string=? f "opmac") (tex-gdef-0arg "\\TZPopmac" "1") true)
-                (else (member f *tex-files-to-ignore*)))))))
+           ((begin (set! *it* (actual-tex-filename "texi2p")) *it*)
+            (tex2page-file *it*))
+           (else (terror 'do-input "File texi2p.tex not found")))
+          true)
+         ((string-ci=? e ".sty") true)
+         (else (member f *tex-files-to-ignore*)))))
 
 (define (do-input) (ignorespaces)
  (let ((f (get-filename-possibly-braced)))
@@ -9440,12 +9474,6 @@
       ((*inputting-boilerplate-p*
         (and boilerplate-index (add1 boilerplate-index))))
       (cond ((ignorable-tex-file-p f) false)
-            ((member f '("miniltx" "miniltx.tex")) (catcode #\@ 11) false)
-            ((member f '("texinfo" "texinfo.tex"))
-             (cond
-              ((begin (set! *it* (actual-tex-filename "texi2p")) *it*)
-               (tex2page-file *it*))
-              (else (terror 'do-input "File texi2p.tex not found"))))
             ((begin
               (set! *it*
                (actual-tex-filename f (check-input-file-timestamp-p f)))
@@ -13254,8 +13282,6 @@ Try the commands
 (tex-let-prim "\\scmp" "\\scm")
 
 (tex-let-prim "\\q" "\\scm")
-
-(tex-let-prim "\\scheme" "\\scm")
 
 (tex-let-prim "\\tagref" "\\ref")
 

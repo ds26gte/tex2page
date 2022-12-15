@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221212") ;last change
+(defparameter *tex2page-version* "20221215") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -176,6 +176,11 @@
 (defparameter *directory-separator* #-windows "/" #+windows "\\")
 
 (defparameter *int-corresp-to-0* (char-code #\0))
+
+(defparameter *int-corresp-to-small-commercial-at* #xfe6b)
+
+;use only when @ is used as letter
+(defparameter *small-commercial-at* (code-char *int-corresp-to-small-commercial-at*))
 
 (defparameter *verbatim-visible-space*
   ; for the likes of verb* and {verbatim*}
@@ -609,14 +614,14 @@
           (let ((texedit-string (retrieve-env "TEXEDIT"))
                 ill-formed-texedit-p)
             (when texedit-string
-              (cond ((setq *it* (search "%d" texedit-string))
+              (cond ((progn (setq *it* (search "%d" texedit-string)) *it*)
                      (let ((i *it*))
                        (setq texedit-string (string-append (subseq texedit-string 0 i)
                                               (write-to-string *input-line-no*)
                                               (subseq texedit-string (+ i 2))))))
                     (t (setq ill-formed-texedit-p t texedit-string nil))))
             (when texedit-string
-              (cond ((setq *it* (search "%s" texedit-string))
+              (cond ((progn (setq *it* (search "%s" texedit-string)) *it*)
                      (let ((i *it*))
                        (setq texedit-string (string-append (subseq texedit-string 0 i)
                                               *current-source-file*
@@ -626,7 +631,7 @@
               (when ill-formed-texedit-p
                 (princ "Ill-formed TEXEDIT; using EDITOR.")
                 (terpri))
-              (when (setq *it* (or (retrieve-env "EDITOR") "vi"))
+              (when (progn (setq *it* (or (retrieve-env "EDITOR") "vi")) *it*)
                 (let ((e *it*))
                   (setq texedit-string
                         (string-append e
@@ -838,6 +843,7 @@
 
 (defun get-ctl-seq ()
   (ignorespaces)
+  ; (format t "get-ctl-seq catat is ~s~%" (catcode #\@))
   (let ((bs (get-actual-char)))
     (unless (= (catcode bs) **escape**)
       (terror 'get-ctl-seq "Missing control sequence (" bs ")"))
@@ -845,6 +851,7 @@
       (cond ((not c) "\\ ")
             ((= (catcode c) **ignore**) "\\ ")
             ((= (catcode c) **letter**)
+             (when (char= c #\@) (setq c *small-commercial-at*))
              (list->string
                (nreverse
                  (let ((s (list c #\\)))
@@ -855,6 +862,7 @@
                                       (toss-back-char c)
                                       (return s))
                                      ((= c-catcode **letter**)
+                                      (when (char= c #\@) (setq c *small-commercial-at*))
                                       (push c s))
                                      (t (toss-back-char c)
                                         (ignorespaces :stop-before-first-newline)
@@ -877,6 +885,7 @@
 
 (defun get-group-as-reversed-chars ()
   (ignorespaces)
+  ; (format t "ggarc catat is ~s~%" (catcode #\@))
   (let ((c (get-actual-char)))
     (when (not c) (terror 'get-group "Runaway argument?"))
     (unless (char= c #\{) (terror 'get-group "Missing {"))
@@ -886,6 +895,8 @@
           (when (not c)
             (terror 'get-group "Runaway argument?"))
           (cond (escape-p
+                  (when (and (char= c #\@) (= (catcode c) **letter**))
+                    (setq c *small-commercial-at*))
                  (push c s) (setq escape-p nil))
                 ((= (catcode c) **escape**)
                  (if *expand-escape-p*
@@ -900,14 +911,21 @@
                              escape-p nil))
                    (progn (push c s)
                           (setq escape-p t))))
+                ((= (catcode c) **comment**)
+                 (eat-till-eol))
+                ((char= c #\@)
+                 (push (if (= (catcode c) **letter**) *small-commercial-at* c) s)
+                 )
                 ((char= c #\{)
-                 (push c s) (incf nesting) (setq escape-p nil))
+                 (push c s) (incf nesting) )
                 ((char= c #\})
                  (push c s)
-                 (if (= nesting 0)  (return s)
-                   (progn (decf nesting) (setq escape-p nil))))
+                 (if (= nesting 0) (return s)
+                   (progn (decf nesting) )))
                 (t (push c s)
-                   (setq escape-p nil))))))))
+                   )))))))
+
+; (trace get-group-as-reversed-chars)
 
 (defun get-group ()
   (list->string (nreverse (get-group-as-reversed-chars))))
@@ -1100,7 +1118,7 @@
 (defun get-number-corresp-to-ctl-seq (x)
   (declare (string x))
   (cond ((string= x "\\the") (get-number-corresp-to-ctl-seq (get-ctl-seq)))
-        ((string= x "\\active") 13)
+        ((string= x "\\active") **active**)
         ;((string= x "\\pageno") *html-page-count*)
         ((string= x "\\inputlineno") *input-line-no*)
         ((string= x "\\footnotenumber") (get-gcount "\\footnotenumber"))
@@ -1112,12 +1130,15 @@
                   0))
         ((string= x "\\magstep") (get-number-or-false))
         ((find-chardef x))
-        ((setq *it* (find-countdef x)) (find-count *it*))
-        ((setq *it* (find-dimendef x)) (find-dimen *it*))
+        ((progn (setq *it* (find-countdef x)) *it*)
+         (find-count *it*))
+        ((progn (setq *it* (find-dimendef x)) *it*)
+         (find-dimen *it*))
         ((find-count x))
         ((find-dimen x))
         ;not sure about following
-        ((setq *it* (resolve-defs x)) (char-code (char *it* 0)))
+        ((progn (setq *it* (resolve-defs x)) *it*)
+         (char-code (char *it* 0)))
         ((= (string-length x) 2) (char-code (char x 1)))
         (t (string-to-number x))))
 
@@ -1200,8 +1221,9 @@
                       ((char= c closing-delim)
                        (toss-back-char c) (return s))
                       (t (push c s))))))))
-    (when (not (null rev-lbl))
-      (list->string (nreverse rev-lbl)))))
+    (if (not (null rev-lbl))
+      (list->string (nreverse rev-lbl))
+      nil)))
 
 ;functions for reading TeX tokens.  Token isn't really the right name.
 ;It's more like a TeX sexpr (texpr?), i.e. something that is treated as
@@ -1357,12 +1379,21 @@
 (defun catcode (c &optional n globalp)
   (declare (character c) (ignore globalp))
   (cond ((not n)
-         (cond ((setq *it* (assoc c *catcodes*)) (cdr *it*))
-               ((alpha-char-p c) 11)
-               (t 12)))
+         (cond ((progn (setq *it* (assoc c *catcodes*)) *it*)
+                (cdr *it*))
+               ((alpha-char-p c) **letter**)
+               ((char= c *small-commercial-at*) **letter**)
+               (t **other**)))
         (t ;ignore globalp for now
           (push (cons c n) *catcodes*)
+
+          ;fixme
+          ; (format t "pushing catcode ~c ~a at level ~a~%" c n (length *tex-env*))
+          (let ((y (top-texframe)))
+            (push (cons c n) (texframe*-catcodes y)))
+
           (funcall (if (= n 13) #'activate-cdef #'deactivate-cdef) c))))
+
 
 (defun curr-esc-char ()
   (the fixnum (car (rassoc 0 *catcodes*))))
@@ -1422,6 +1453,7 @@
 
 (defun bgroup ()
   (push (make-texframe* :catcodes *catcodes*) *tex-env*)
+  ; (format t "bgroup ~a~%" (length *tex-env*))
   (when (and *in-display-math-p* (not *math-script-mode-p*))
     (bgroup-math-hook)))
 
@@ -1431,10 +1463,13 @@
   (perform-postludes)
   (perform-aftergroups)
   (pop *tex-env*)
-  (cond ((setq *it* (top-texframe))
+  ; (format t "egroup ~a~%" (length *tex-env*))
+  (cond ((progn (setq *it* (top-texframe)) *it*)
          (setq *catcodes* (texframe*-catcodes *it*)))
         (t (terror 'egroup "This can't happen.")))
   )
+
+; (trace bgroup egroup)
 
 (defun bgroup-math-hook ()
   (let ((old-html *html*)
@@ -1631,7 +1666,7 @@
                (let ((lft-def (make-tdef*)))
                  (setf (gethash lft frame-defs) lft-def)
                  lft-def))))
-    (cond ((setq *it* (or (find-def rt) (find-math-def rt)))
+    (cond ((progn (setq *it* (or (find-def rt) (find-math-def rt))) *it*)
            ;(format t "rhs= ~s~%" *it*)
            (let ((rt-def *it*))
              (kopy-tdef lft-def rt-def)))
@@ -1743,7 +1778,8 @@
       (gethash num (texframe*-counts *primitive-texframe*))))
 
 (defun the-count (dracula)
-  (cond ((setq *it* (find-countdef dracula)) (find-count *it*))
+  (cond ((progn (setq *it* (find-countdef dracula)) *it*)
+         (find-count *it*))
         (t (terror 'the-count "Missing count register."))))
 
 (defun get-gcount (ctlseq)
@@ -1812,8 +1848,11 @@
       (gethash num (texframe*-dimens *primitive-texframe*))))
 
 (defun the-dimen (ctlseq)
-  (cond ((setq *it* (find-dimendef ctlseq)) (find-dimen *it*))
+  (cond ((progn (setq *it* (find-dimendef ctlseq)) *it*)
+         (find-dimen *it*))
         (t (terror 'the-dimen "Missing dimen register."))))
+
+; (trace the-dimen)
 
 (defun get-dimen (ctlseq)
   (cond ((the-dimen ctlseq))
@@ -1832,12 +1871,12 @@
   (unless globalp (setq globalp (globally-p)))
   (let ((cs (get-ctl-seq)))
     (get-by)
-    (cond ((setq *it* (find-countdef cs))
+    (cond ((progn (setq *it* (find-countdef cs)) *it*)
            (let* ((countnum *it*)
                   (countval (find-count countnum)))
              (unless countval (terror 'do-advance "Missing count register."))
              (tex-def-count countnum (+ countval (get-number)) globalp)))
-          ((setq *it* (find-dimendef cs))
+          ((progn (setq *it* (find-dimendef cs)) *it*)
            (let* ((dimennum *it*)
                   (dimenval (find-dimen dimennum)))
              (unless dimenval (terror 'do-advance "Missing dimen register."))
@@ -1850,12 +1889,12 @@
   (unless globalp (setq globalp (globally-p)))
   (let ((cs (get-ctl-seq)))
     (get-by)
-    (cond ((setq *it* (find-countdef cs))
+    (cond ((progn (setq *it* (find-countdef cs)) *it*)
            (let* ((countnum *it*)
                   (countval (find-count countnum)))
              (unless countval (terror 'do-multiply "Missing count register."))
              (tex-def-count countnum (* countval (get-number)) globalp)))
-          ((setq *it* (find-dimendef cs))
+          ((progn (setq *it* (find-dimendef cs)) *it*)
            (let* ((dimennum *it*)
                   (dimenval (find-dimen dimennum)))
              (unless dimenval (terror 'do-multiply "Missing dimen register."))
@@ -1866,12 +1905,12 @@
   (unless globalp (setq globalp (globally-p)))
   (let ((cs (get-ctl-seq)))
     (get-by)
-    (cond ((setq *it* (find-countdef cs))
+    (cond ((progn (setq *it* (find-countdef cs)) *it*)
            (let* ((countnum *it*)
                   (countval (find-count countnum)))
              (unless countval (terror 'do-divide "Missing count register."))
              (tex-def-count countnum (floor countval (get-number)) globalp)))
-          ((setq *it* (find-dimendef cs))
+          ((progn (setq *it* (find-dimendef cs)) *it*)
            (let* ((dimennum *it*)
                   (dimenval (find-dimen dimennum)))
              (unless dimenval (terror 'do-divide "Missing dimen register."))
@@ -2017,7 +2056,8 @@
       (gethash num (texframe*-tokses *primitive-texframe*))))
 
 (defun the-toks (ctlseq)
-  (cond ((setq *it* (find-toksdef ctlseq)) (find-toks *it*))
+  (cond ((progn (setq *it* (find-toksdef ctlseq)) *it*)
+         (find-toks *it*))
         (t (terror 'the-toks "Missing toks register."))))
 
 ;(trace the-toks)
@@ -2031,9 +2071,6 @@
   (let ((regno (get-number)))
     (get-equal-sign)
     (tex-def-toks regno (get-group) globalp)))
-;;
-
-;
 
 ;
 
@@ -2077,7 +2114,7 @@
     (tex-def-char c argpat rhs f)))
 
 (defun activate-cdef (c)
-  (let ((y (cond ((setq *it* (find-cdef-in-top-frame c))
+  (let ((y (cond ((progn (setq *it* (find-cdef-in-top-frame c)) *it*)
                   (let ((y *it*))
                     (setf (cdef*-active y) t)
                     y))
@@ -2092,11 +2129,11 @@
 
 (defun deactivate-cdef (c)
   (declare (character c))
-  (cond ((setq *it* (find-cdef-in-top-frame c))
+  (cond ((progn (setq *it* (find-cdef-in-top-frame c)) *it*)
          ;if c is active in current group, deactivate it
          (let ((y *it*))
            (setf (cdef*-active y) nil)))
-        ((setq *it* (find-cdef c))
+        ((progn (setq *it* (find-cdef c)) *it*)
          ;if c is active in an enclosing group, create a shadowing
          ;unactive def for it in the current group
          (let ((y *it*))
@@ -2191,6 +2228,7 @@
   )
 
 (defun do-subject ()
+  ; (format t "do-subject with catcode of bs being ~a~%" (catcode #\\))
   (tex-gdef-0arg "\\TIIPtitleused" "1")
   (do-end-para)
   (ignorespaces)
@@ -2211,9 +2249,12 @@
     (toss-back-string "\\def\\TIIPtitle")))
 
 (defun do-title ()
+  ; (format t "do-title with catcode of bs being ~a~%" (catcode #\\))
   (if (eq *tex-format* :latex)
     (do-latex-title)
     (do-subject)))
+
+; (trace do-title do-latex-title do-subject)
 
 (defun do-author () (toss-back-string "\\def\\TIIPauthor"))
 
@@ -2599,6 +2640,8 @@
               ((char= c #\newline) (setq newline-p t))
               (t (push c r) (setq newline-p nil)))))))
 
+; (trace get-till-par)
+
 (defun do-beginsection ()
   (ignorespaces)
   (let ((header (let ((*tabular-stack* (list :header)))
@@ -2875,7 +2918,8 @@
 
 (defun tex-string-to-html-string (s)
   (declare (string s))
-  (let ((*html* (make-html-output-stream)))
+  (let ((*html* (make-html-output-stream))
+        (*emit-enabled-p* t))
     (tex2page-string s)
     (html-output-stream-to-string *html*)))
 
@@ -3287,7 +3331,7 @@
   )
 
 (defun do-obeyspaces ()
-  (catcode #\space 13)
+  (catcode #\space **active**)
   (tex-def-char #\space '() "\\TIIPnbsp" nil))
 
 (defun do-block (z)
@@ -3960,7 +4004,7 @@
     (emit-page-node-link-start
       pageno (string-append *html-node-prefix* "index_" s))
     (emit pageno)
-    (cond ((setq *it* (gethash pageno *index-page-mention-alist*))
+    (cond ((progn (setq *it* (gethash pageno *index-page-mention-alist*)) *it*)
            (let ((n (1+ *it*)))
              (emit (number-to-roman n))
              (setf (gethash pageno *index-page-mention-alist*) n)))
@@ -4566,7 +4610,7 @@
   (show-unresolved-xrefs-and-missing-pieces))
 
 (defun set-text-width ()
-  (let ((hsize (cond ((setq *it* (find-def "\\TZPhsize"))
+  (let ((hsize (cond ((progn (setq *it* (find-def "\\TZPhsize")) *it*)
                       (tex2page-string (string-append "\\TIIPhsize=" (tdef*-expansion *it*)))
                       (the-dimen "\\TIIPhsize"))
                      ((or (tex2page-flag-boolean "\\TIIPtexlayout")
@@ -4585,7 +4629,7 @@
   (write-aux `(!lang ,(resolve-defs "\\TZPlang")))
   (write-aux `(!head-line ,(the-toks "\\headline")))
   (write-aux `(!foot-line ,(the-toks "\\footline")))
-  (when (setq *it* (find-def "\\TZPtitle"))
+  (when (progn (setq *it* (find-def "\\TZPtitle")) *it*)
     (let ((d *it*))
       (write-aux
        `(!preferred-title
@@ -4601,7 +4645,7 @@
   (when (or (tex2page-flag-boolean "\\TZPcolophondisableweblink")
             (not (tex2page-flag-boolean "\\TZPcolophonweblink")))
     (write-aux `(!colophon :dont-link-to-tex2page-website)))
-  (when (setq *it* (ctl-seq-no-arg-expand-once "\\TZPredirect"))
+  (when (progn (setq *it* (ctl-seq-no-arg-expand-once "\\TZPredirect")) *it*)
     (unless *redirect-url*
       (flag-missing-piece :html-head))
     (let ((url *it*)
@@ -5072,7 +5116,7 @@
           ((member o '(16 18) :test #'=)
            (write-log output)
            (write-log :separation-space))
-          ((setq *it* (find-ostream o))
+          ((progn (setq *it* (find-ostream o)) *it*)
            (let ((p *it*))
              (when (eq p :free) (terror 'do-write-aux))
              (princ output p)
@@ -5114,7 +5158,7 @@
            (setq p (make-istream* :stream *standard-input*))
            (unless (= i -1)
              (write-log x) (write-log #\=)))
-          ((setq *it* (find-istream i))
+          ((progn (setq *it* (find-istream i)) *it*)
            (setq p *it*)
            (when (eq p :free) (terror 'do-read)))
           (t (terror 'do-read)))
@@ -5172,19 +5216,19 @@
         (do-iftrue)
       (progn
        (when (ctl-seq-p one)
-         (setq one2 (cond ((setq *it* (find-def one))
+         (setq one2 (cond ((progn (setq *it* (find-def one)) *it*)
                            (let ((d *it*))
                              (or (tdef*-expansion d)
                                  (tdef*-prim d))))
-                          ((setq *it* (find-math-def one))
+                          ((progn (setq *it* (find-math-def one)) *it*)
                            *it*)
                           (t "UnDeFiNeD"))))
        (when (ctl-seq-p two)
-         (setq two2 (cond ((setq *it* (find-def two))
+         (setq two2 (cond ((progn (setq *it* (find-def two)) *it*)
                            (let ((d *it*))
                              (or (tdef*-expansion d)
                                  (tdef*-prim d))))
-                          ((setq *it* (find-math-def two))
+                          ((progn (setq *it* (find-math-def two)) *it*)
                            *it*)
                           (t "UnDeFiNeD"))))
        (if (or (eql one2 two2)
@@ -5197,7 +5241,7 @@
   (loop
     (let ((x (get-raw-token/is)))
       (if (ctl-seq-p x)
-        (cond ((setq *it* (resolve-defs x))
+        (cond ((progn (setq *it* (resolve-defs x)) *it*)
                (let ((z *it*))
                  (toss-back-char *invisible-space*)
                  (toss-back-string z)))
@@ -5221,7 +5265,7 @@
       (let* ((one (get-number))
              (rel (char (get-raw-token/is) 0))
              (two (get-number)))
-        (format t "one= ~s; two= ~s~%" one two)
+        ;(format t "one= ~s; two= ~s~%" one two)
         (if (funcall
               (case rel
                 (#\< #'<)
@@ -5448,7 +5492,7 @@
       (write-log :separation-space)
       (write-log "->")
       (write-log :separation-space)
-      (cond ((setq *it* (call-tex f))
+      (cond ((progn (setq *it* (call-tex f)) *it*)
              (ps-to-img *it* img-file)
              (ensure-url-reachable img-file :delete)
              (write-log img-file)
@@ -5961,7 +6005,8 @@
                (cond ((string= y "\\endrawhtml")
                       (ignorespaces) (return))
                      ((and (string= y "\\end")
-                           (setq *it* (get-grouped-environment-name-if-any)))
+                           (progn (setq *it* (get-grouped-environment-name-if-any)) *it*)
+                           )
                       (let* ((g *it*)
                              (y (find-corresp-prim (string-append x g))))
                         (cond ((string= y "\\endrawhtml")
@@ -5996,26 +6041,28 @@
                  (push c s)))))))
 
 (defun resolve-cdefs (c)
-  (when (setq *it* (find-cdef c))
+  (if (progn (setq *it* (find-cdef c)) *it*)
     (let ((y *it*))
       (get-actual-char)
       (expand-tex-macro (cdef*-optarg y)
                         (cdef*-argpat y)
                         (cdef*-expansion y)
-                        (cdef*-catcodes y)))))
+                        (cdef*-catcodes y)))
+    nil))
 
 ; (trace resolve-cdefs)
 
 (defun resolve-defs (x)
   ;(format t "resolve-defs ~s~%" x)
-  (when (setq *it* (find-def x))
+  (if (progn (setq *it* (find-def x)) *it*)
     (let ((y *it*))
-      (cond ((setq *it* (tdef*-defer y))
+      (cond ((progn (setq *it* (tdef*-defer y)) *it*)
              *it*)
             ((tdef*-thunk y)
              nil)
             ((and (null (tdef*-argpat y)) (not (tdef*-optarg y))
-                  (setq *it* (tdef*-expansion y)))
+                  (progn (setq *it* (tdef*-expansion y)) *it*)
+                  )
              *it*)
             ((and (inside-false-world-p)
                   (not (if-aware-ctl-seq-p x))
@@ -6033,9 +6080,10 @@
                                   (tdef*-argpat y)
                                   (tdef*-expansion y)
                                   (tdef*-catcodes y))
-                ))))))
+                ))))
+    nil))
 
-;(trace resolve-defs)
+; (trace resolve-defs)
 
 (defun do-expandafter ()
   (let* ((first (get-raw-token/is))
@@ -6128,6 +6176,7 @@
   (plain-count "\\suppressfontnotfounderror" 1)
   ;
   (plain-dimen "\\TIIPhsize" 0)
+  (plain-dimen (format nil "\\z~c" *small-commercial-at*) 0) ;TB p347
   (plain-dimen "\\hsize" (tex-length 6.5 :in))
   (plain-dimen "\\vsize" (tex-length 8.9 :in))
   (plain-dimen "\\maxdepth" (tex-length 4 :pt))
@@ -6213,11 +6262,12 @@
 
 (defun expand-the ()
   (let ((ctlseq (get-ctl-seq)))
-    (cond ((setq *it* (find-dimendef ctlseq))
+    (cond ((progn (setq *it* (find-dimendef ctlseq)) *it*)
            (scaled-point-to-tex-point (find-dimen *it*)))
-          ((setq *it* (get-number-corresp-to-ctl-seq ctlseq))
+          ((progn (setq *it* (get-number-corresp-to-ctl-seq ctlseq)) *it*)
            *it*)
-          ((setq *it* (find-toksdef ctlseq)) (find-toks *it*))
+          ((progn (setq *it* (find-toksdef ctlseq)) *it*)
+           (find-toks *it*))
           (t (trace-if nil "expand-the failed")))))
 
 (defun do-the ()
@@ -6226,9 +6276,9 @@
     (ignorespaces)
     (cond ((string= ctlseq "\\count")
            (emit (find-count (get-number))))
-          ((setq *it* (get-number-corresp-to-ctl-seq ctlseq))
+          ((progn (setq *it* (get-number-corresp-to-ctl-seq ctlseq)) *it*)
            (emit *it*))
-          ((setq *it* (find-toksdef ctlseq))
+          ((progn (setq *it* (find-toksdef ctlseq)) *it*)
            (tex2page-string (find-toks *it*)))
           (t (trace-if nil "do-the failed")))))
 
@@ -6268,6 +6318,7 @@
 ;(trace do-let)
 
 (defun do-def (&optional globalp expandp)
+  ; (format t "do-def catat ~s~%" (catcode #\@))
   (unless globalp (setq globalp (globally-p)))
   (unless (inside-false-world-p)
     (let ((lhs (get-raw-token/is)))
@@ -6285,16 +6336,19 @@
                                    *tex-env*)
                              *global-texframe*)
                            (t nil))))
+          ; (format t "do-def II catat ~s~%" (catcode #\@))
           (cond ((ctl-seq-p lhs) (tex-def lhs argpat rhs nil nil nil nil frame))
-                (t (tex-def-char (char lhs 0) argpat rhs frame))))))))
+                (t (tex-def-char (char lhs 0) argpat rhs frame)))
+          ; (format t "do-def III catat ~s~%" (catcode #\@))
+          )))))
 
 (defun do-newcommand (renewp)
   (ignorespaces)
   (let* ((lhs (string-trim-blanks (ungroup (get-token))))
          (optarg nil)
-         (argc (cond ((setq *it* (get-bracketed-text-if-any))
+         (argc (cond ((progn (setq *it* (get-bracketed-text-if-any)) *it*)
                       (let ((s *it*))
-                        (cond ((setq *it* (get-bracketed-text-if-any))
+                        (cond ((progn (setq *it* (get-bracketed-text-if-any)) *it*)
                                (setq optarg *it*)))
                         (read-from-string (string-trim-blanks s))))
                      (t 0)))
@@ -6316,9 +6370,9 @@
   (let* ((envname (string-trim-blanks (ungroup (get-token))))
          (bs-envname (string-append "\\" envname))
          (optarg nil)
-         (argc (cond ((setq *it* (get-bracketed-text-if-any))
+         (argc (cond ((progn (setq *it* (get-bracketed-text-if-any)) *it*)
                       (let ((s *it*))
-                        (cond ((setq *it* (get-bracketed-text-if-any))
+                        (cond ((progn (setq *it* (get-bracketed-text-if-any)) *it*)
                                (setq optarg *it*)))
                         (read-from-string (string-trim-blanks s))))
                      (t 0)))
@@ -6386,7 +6440,7 @@
         (emit-nbsp 2)))))
 
 (defun do-begin ()
-  (unless (setq *it* (get-grouped-environment-name-if-any))
+  (unless (progn (setq *it* (get-grouped-environment-name-if-any)) *it*)
     (terror 'do-begin "\\begin not followed by environment name"))
   (let ((env *it*))
     (toss-back-char *invisible-space*)
@@ -6399,7 +6453,7 @@
 ;(trace do-begin)
 
 (defun do-end ()
-  (cond ((setq *it* (get-grouped-environment-name-if-any))
+  (cond ((progn (setq *it* (get-grouped-environment-name-if-any)) *it*)
          (let ((env *it*))
            (toss-back-char *invisible-space*)
            (unless (member env '("htmlonly" "document") :test #'string=)
@@ -6750,7 +6804,7 @@
                                        "Use of macro doesn't match its definition.")))
                       (incf k))))))))))
 
-;(trace read-macro-args)
+; (trace read-macro-args)
 
 (defun expand-edef-macro (rhs)
   (declare (string rhs))
@@ -6777,7 +6831,7 @@
                                    (let ((x2 (get-raw-token/is)))
                                      (toss-back-char *invisible-space*)
                                      x2))
-                                  ((setq *it* (find-def x))
+                                  ((progn (setq *it* (find-def x)) *it*)
                                    (let ((y *it*))
                                      (cond ((and (null (tdef*-argpat y))
                                                  (not (tdef*-optarg y))
@@ -6800,7 +6854,8 @@
               (progn
                (setq k 2)
                (list
-                (cond ((setq *it* (get-bracketed-text-if-any)) *it*)
+                (cond ((progn (setq *it* (get-bracketed-text-if-any)) *it*)
+                       *it*)
                       (t optarg))))))
          (args (read-macro-args argpat k r))
          (rhs-n (string-length rhs))
@@ -6848,7 +6903,7 @@
                          (t (cons c (aux (1+ k)))))))))
        (aux 0)))))
 
-;(trace expand-tex-macro)
+; (trace expand-tex-macro)
 
 (defun do-verbatimescapechar ()
   (ignorespaces)
@@ -6862,7 +6917,7 @@
   (declare (ignore ign))
   (let ((*catcodes* *catcodes*)
         (nesting 0))
-    (catcode #\\ 12) (catcode *esc-char-verb* 0)
+    (catcode #\\ **other**) (catcode *esc-char-verb* **escape**)
     (loop
       (let ((c (get-actual-char)))
         (when (not c)
@@ -6873,7 +6928,7 @@
                  (cond ((member x '("\\ " "\\{" "\\}") :test #'string=)
                         (emit (char x 1)))
                        (t (let ((*catcodes* *catcodes*))
-                            (catcode #\\ 0)
+                            (catcode #\\ **escape**)
                             (do-tex-ctl-seq-completely x))))))
               ((char= c #\{)
                (emit #\{) (incf nesting))
@@ -7146,7 +7201,7 @@
         (cond ((char= c #\\)
                (let ((cs (get-ctl-seq)))
                  (if (string= cs "\\end")
-                     (cond ((setq *it* (get-grouped-environment-name-if-any))
+                     (cond ((progn (setq *it* (get-grouped-environment-name-if-any)) *it*)
                             (let ((e *it*))
                               (cond ((string= *it* env) (return))
                                     (t (emit-html-string cs)
@@ -7228,7 +7283,7 @@
 
 (defun scm-set-mathescape (yes-p)
   (let ((c (let ((*catcodes* *catcodes*))
-             (catcode #\\ 11) (catcode *esc-char-verb* 11)
+             (catcode #\\ **letter**) (catcode *esc-char-verb* **letter**)
              (char (ungroup (get-group)) 0))))
     (cond (yes-p (setq *slatex-math-escape* c)
                  (push *slatex-math-escape* *scm-token-delims*))
@@ -7242,7 +7297,7 @@
     (unless (string= math-text "")
       (emit "<span class=variable>")
       (let ((*catcodes* *catcodes*))
-        (catcode #\\ 11) (catcode *esc-char-verb* 11)
+        (catcode #\\ **letter**) (catcode *esc-char-verb* **letter**)
         (tex2page-string (string-append "$" math-text "$")))
       (emit "</span>"))))
 
@@ -7251,7 +7306,7 @@
     (emit "<span class=comment>")
     (when *scm-dribbling-p* (princ s *verb-stream*) (terpri *verb-stream*))
     (let ((*catcodes* *catcodes*))
-      (catcode #\\ 0) (catcode *esc-char-verb* 11)
+      (catcode #\\ **escape**) (catcode *esc-char-verb* **letter**)
       (tex2page-string s))
     (do-end-para)
     (emit "</span>")
@@ -7327,7 +7382,7 @@
   (case (scm-get-type s)
     (:special-symbol
      (let ((*catcodes* *catcodes*))
-       (catcode #\\ 0)
+       (catcode #\\ **escape**)
        (tex2page-string (gethash s *scm-special-symbols*))))
     (:keyword
      (emit "<span class=keyword>")
@@ -7367,7 +7422,7 @@
           (*verb-display-p* display-p)
           (nesting 0)
           c)
-      (catcode #\\ 12) (catcode *esc-char-verb* 0)
+      (catcode #\\ **other**) (catcode *esc-char-verb* **escape**)
       (loop
         (setq c (snoop-actual-char))
         (when (not c)
@@ -7377,7 +7432,7 @@
                  (cond ((member x '("\\ " "\\{" "\\}") :test #'string=)
                         (scm-emit-html-char (char x 1)))
                        (t (let ((*catcodes* *catcodes*))
-                            (catcode #\\ 0)
+                            (catcode #\\ **escape**)
                             (do-tex-ctl-seq-completely x))))))
               ((char= c #\{)
                (get-actual-char)
@@ -7466,7 +7521,7 @@
         ((gethash s *scm-builtins*) :builtin)
         ((gethash s *scm-variables*) :variable)
         ((string-is-flanked-by-stars-p s) :global)
-        ((setq *it* (position #\: s :test #'char=))
+        ((progn (setq *it* (position #\: s :test #'char=)) *it*)
          (if (= *it* 0) :selfeval :variable))
         ((string-is-all-dots-p s) :background) ;for Scheme's ellipsis
         ((char= (char s 0) #\#) :selfeval)
@@ -7652,14 +7707,14 @@
 
 (defun set-latex-counter-aux (counter-name addp new-value)
   (declare (string counter-name) (number new-value))
-  (cond ((setq *it* (gethash counter-name *dotted-counters*))
+  (cond ((progn (setq *it* (gethash counter-name *dotted-counters*)) *it*)
          (let ((counter *it*))
            (if addp
                (incf (counter*-value counter) new-value)
                (setf (counter*-value counter) new-value))))
         (t
           (let ((count-seq (string-append "\\" counter-name)))
-            (cond ((setq *it* (section-ctl-seq-p count-seq))
+            (cond ((progn (setq *it* (section-ctl-seq-p count-seq)) *it*)
                    (let ((n *it*))
                      (setf (gethash n *section-counters*)
                            (if addp
@@ -7681,12 +7736,12 @@
 
 (defun do-tex-prim (z)
   (let (y)
-    (cond ((setq *it* (find-def z))
+    (cond ((progn (setq *it* (find-def z)) *it*)
            (setq y *it*)
-           (cond ((setq *it* (tdef*-defer y))
+           (cond ((progn (setq *it* (tdef*-defer y)) *it*)
                   (setq y *it*)
                   (toss-back-string y))
-                 ((setq *it* (tdef*-thunk y))
+                 ((progn (setq *it* (tdef*-thunk y)) *it*)
                   (setq y *it*)
                   (funcall y))
                  (t (expand-tex-macro
@@ -7809,9 +7864,9 @@
 
 (defun do-tex-ctl-seq-completely (x)
   (declare (string x))
-  (cond ((setq *it* (resolve-defs x))
+  (cond ((progn (setq *it* (resolve-defs x)) *it*)
          (tex2page-string *it*))
-        ((setq *it* (do-tex-prim (find-corresp-prim x)))
+        ((progn (setq *it* (do-tex-prim (find-corresp-prim x))) *it*)
          (when (eq *it* :encountered-undefined-command)
            (emit x)))))
 
@@ -7820,11 +7875,12 @@
 
 (defun do-tex-ctl-seq (z)
   (declare (string z))
+  ; (format t "do-tex-ctl-seq catat is ~s~%" (catcode #\@))
   ;(format t "do-tex-ctl-seq ~s~%" z)
   ;process ctl seq z.  Return :encountered-bye if z is \bye;
   ;:encountered-endinput if z is \endinput
   (trace-if (> (the-count "\\tracingmacros") 0) z)
-  (cond ((setq *it* (resolve-defs z))
+  (cond ((progn (setq *it* (resolve-defs z)) *it*)
          ;macro body could contain \fi
          (let ((s *it*))
            (trace-if (> (the-count "\\tracingmacros") 0)
@@ -7845,10 +7901,16 @@
                       (string= next-token "\\fi"))
              (do-fi)))
          :encountered-endinput)
-        ((setq *it* (find-countdef z)) (do-count= *it* nil))
-        ((setq *it* (find-dimendef z)) (do-dimen= *it* nil))
-        ((setq *it* (find-toksdef z)) (do-toks= *it* nil))
-        (t (do-tex-prim z))))
+        ((progn (setq *it* (find-countdef z)) *it*)
+         (do-count= *it* nil))
+        ((progn (setq *it* (find-dimendef z)) *it*)
+         (do-dimen= *it* nil))
+        ((progn (setq *it* (find-toksdef z)) *it*)
+         (do-toks= *it* nil))
+        (t (do-tex-prim z)))
+  ; (format t "do-tex-ctl-seq end catat is ~s~%" (catcode #\@))
+
+  )
 
 ;(trace do-tex-ctl-seq)
 
@@ -7857,7 +7919,7 @@
     (loop
       (let ((c (snoop-actual-char)))
         (cond ((not c) (return t))
-              ((setq *it* (resolve-cdefs c))
+              ((progn (setq *it* (resolve-cdefs c)) *it*)
                (let ((s *it*))
                  (toss-back-char *invisible-space*)
                  (toss-back-string s)))
@@ -7910,10 +7972,10 @@
            (tex-let-prim "\\scheme" "\\scm")
            t)
           ((string-equal f "miniltx")
-           (catcode #\@ 11)
+           (catcode #\@ **letter**)
            t)
           ((string-equal f "texinfo")
-           (cond ((setq *it* (actual-tex-filename "texi2p"))
+           (cond ((progn (setq *it* (actual-tex-filename "texi2p")) *it*)
                   (tex2page-file *it*))
                  (t (terror 'do-input "File texi2p.tex not found")))
            t)
@@ -7933,7 +7995,7 @@
       (cond ((ignorable-tex-file-p f)
              ;dont process .sty files and macro files like btxmac.tex
              nil)
-            ((setq *it* (actual-tex-filename f (check-input-file-timestamp-p f)))
+            ((progn (setq *it* (actual-tex-filename f (check-input-file-timestamp-p f))) *it*)
              (tex2page-file *it*))
             (t (write-log #\() (write-log f)
                (write-log :separation-space) (write-log "not found)")
@@ -8026,11 +8088,10 @@
                          *bib-aux-file-suffix* ".aux")))
                 nil)
                ((member :bibliography *missing-pieces*)
-                (format t "bib missing I~%")
-
+                ; (format t "bib missing I~%")
                 t)
                (*source-changed-since-last-run-p*
-                 (format t "bib missing II~%")
+                 ; (format t "bib missing II~%")
                 (flag-missing-piece :fresh-bibliography) t)
                (t nil)))
         (run-makeindex-p
@@ -8747,7 +8808,7 @@ Try the commands
   (emit "</span>"))
 
 (defun do-math-ctl-seq (s)
-  (cond ((setq *it* (find-math-def s))
+  (cond ((progn (setq *it* (find-math-def s)) *it*)
          (funcall (tdef*-thunk *it*)))
         (t (unless *math-needs-image-p*
              (setq *math-needs-image-p* t))
@@ -8964,7 +9025,8 @@ Try the commands
 
 (tex-def-prim "\\settabs" #'do-settabs)
 (tex-def-prim "\\tabalign" #'do-tabalign)
-(tex-let-prim "\\+" "\\tabalign")
+(tex-let-prim "\\+" (lambda ()
+                      (unless (eq *tex-format* :latex) (do-tablign))))
 
 (tex-def-prim "\\item" #'do-item)
 (tex-def-prim "\\itemitem" (lambda () (do-plain-item 2)))
@@ -9408,13 +9470,13 @@ Try the commands
         (when (not c) (terror 'do-begintt "Eof inside \\begintt"))
         (cond ((char= c #\\)
                (let ((*catcodes* *catcodes*))
-                 (catcode #\\ 0)
+                 (catcode #\\ **escape**)
                  (let ((cs (get-ctl-seq)))
                    (if (string= cs "\\endtt") (return)
                        (emit-html-string cs)))))
               ((= (catcode c) **escape**) (let ((cs (get-ctl-seq)))
                                 (let ((*catcodes* *catcodes*))
-                                  (catcode #\\ 0)
+                                  (catcode #\\ **escape**)
                                   (do-tex-ctl-seq-completely cs))))
               (t (emit-html-char (get-actual-char))))))
     (emit "</pre>")
@@ -9660,7 +9722,7 @@ Try the commands
                           (scm-output-slatex-comment)))))
               ((char= c #\\)
                (let ((x (let ((*catcodes* *catcodes*))
-                          (catcode #\\ 0)
+                          (catcode #\\ **escape**)
                           (get-ctl-seq))))
                  (cond ((string= x endenv) (return))
                        ((string= x "\\end")
@@ -9674,7 +9736,7 @@ Try the commands
                        (t (scm-output-token x)))))
               ((= (catcode c) **escape**) (let ((cs (get-ctl-seq)))
                                 (let ((*catcodes* *catcodes*))
-                                  (catcode #\\ 0)
+                                  (catcode #\\ **escape**)
                                   (do-tex-ctl-seq-completely cs))))
               (t (scm-output-next-chunk)))))
     (emit "</pre></div>")
@@ -9718,7 +9780,7 @@ Try the commands
     (cond ((or (search "|see{" idx-entry)
                (search "|seealso{" idx-entry))
            (display-index-entry idx-entry *index-stream*))
-          ((setq *it* (search "|(" idx-entry))
+          ((progn (setq *it* (search "|(" idx-entry)) *it*)
            (let ((i *it*))
              (display-index-entry (subseq idx-entry 0 i) *index-stream*)
              (princ "|expandhtmlindex" *index-stream*)))
@@ -9862,14 +9924,16 @@ Try the commands
         (eval x)))))
 
 (defun do-eval (kind)
+  (bgroup)
   (let ((s (if *outer-p*
              (ungroup
               (let ((*catcodes* *catcodes*)
                     (*expand-escape-p* t))
-                (catcode #\\ 12) (catcode *esc-char-verb* 0)
+                (catcode #\\ **other**) (catcode *esc-char-verb* **escape**)
                 (get-group)))
              (tex-write-output-string
                (ungroup (get-group))))))
+    (egroup)
     (unless (inside-false-world-p)
       (when (> *html-only* 0) (setq kind :html))
       (case kind
@@ -10123,7 +10187,7 @@ Try the commands
   (do-end-para)
   (bgroup)
   (plain-count "\\TIIPopmacliststarted" 0 nil)
-  (catcode #\* 13)
+  (catcode #\* **active**)
   (tex-def-char #\* '() "\\TIIPopmacitem" nil))
 
 (tex-def-prim "\\begitems" #'do-opmac-begitems)
@@ -10497,8 +10561,8 @@ Try the commands
 (tex-def-prim "\\lstlisting" (lambda () (do-verbatim-latex "lstlisting")))
 
 (tex-def-prim "\\mailto" #'do-mailto)
-(tex-def-prim "\\makeatletter" (lambda () (catcode #\@ 11)))
-(tex-def-prim "\\makeatother" (lambda () (catcode #\@ 12)))
+(tex-def-prim "\\makeatletter" (lambda () (catcode #\@ **letter**)))
+(tex-def-prim "\\makeatother" (lambda () (catcode #\@ **other**)))
 (tex-def-prim "\\maketitle" #'do-maketitle)
 (tex-def-prim "\\marginnote" #'do-marginnote)
 (tex-def-prim "\\marginpar" #'do-marginpar)
@@ -10626,7 +10690,7 @@ Try the commands
 (defun do-verbatim-eplain ()
   (let ((*inside-eplain-verbatim-p* t)
         (*catcodes* *catcodes*))
-    (catcode #\\ 11) (catcode *esc-char-verb* 0)
+    (catcode #\\ **letter**) (catcode *esc-char-verb* **escape**)
     (loop
       (unless *inside-eplain-verbatim-p* (return))
       (let ((c (get-actual-char)))

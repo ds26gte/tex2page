@@ -1,4 +1,4 @@
-;last modified 2020-05-06
+;last modified 2022-12-15
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -- \"$@\"
@@ -147,6 +147,7 @@
   (tdef*-thunk set!tdef*-thunk)
   (texframe*-aftergroups set!texframe*-aftergroups)
   (texframe*-postludes set!texframe*-postludes)
+  (texframe*-catcodes set!texframe*-catcodes)
 
   )
 

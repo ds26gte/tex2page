@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221215") ;last change
+(defparameter *tex2page-version* "20221218") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -865,7 +865,8 @@
                                       (when (char= c #\@) (setq c *small-commercial-at*))
                                       (push c s))
                                      (t (toss-back-char c)
-                                        (ignorespaces :stop-before-first-newline)
+                                        (unless *not-processing-p*
+                                          (ignorespaces :stop-before-first-newline))
                                         (return s))))
                            (return s))))))))
             (t (list->string (list #\\ c)))))))
@@ -5058,6 +5059,7 @@
                      (let ((x (get-ctl-seq)))
                        (when (member x '("\\endimgpreamble" "\\endgifpreamble" "\\endmathpreamble")
                                      :test #'string=)
+                         (ignorespaces :stop-before-first-newline)
                          (return r))
                        (setq r (string-append r x))))
                     (t (get-actual-char)
@@ -6060,10 +6062,15 @@
              *it*)
             ((tdef*-thunk y)
              nil)
-            ((and (null (tdef*-argpat y)) (not (tdef*-optarg y))
-                  (progn (setq *it* (tdef*-expansion y)) *it*)
-                  )
-             *it*)
+            ; ((and (null (tdef*-argpat y)) (not (tdef*-optarg y))
+            ;       (progn (setq *it* (tdef*-expansion y)) *it*)
+            ;       )
+            ;  *it*)
+            ;fixme combine with else-clause below?
+            ((and (null (tdef*-argpat y)) (not (tdef*-optarg y)))
+             (expand-tex-macro nil '()
+                               (tdef*-expansion y)
+                               (tdef*-catcodes y)))
             ((and (inside-false-world-p)
                   (not (if-aware-ctl-seq-p x))
                   ;(> (length (tdef*-argpat y)) 0)
@@ -6075,12 +6082,10 @@
                 ;should this "outer" invisible sp be distinguished from regular inv sp?
                 (toss-back-char *invisible-space*)
                 )
-              (progn
-                (expand-tex-macro (tdef*-optarg y)
+              (expand-tex-macro (tdef*-optarg y)
                                   (tdef*-argpat y)
                                   (tdef*-expansion y)
-                                  (tdef*-catcodes y))
-                ))))
+                                  (tdef*-catcodes y)))))
     nil))
 
 ; (trace resolve-defs)
@@ -6768,7 +6773,8 @@
      (let ((k k) (r r))
        (loop
          (when (>= k n)
-           (when (= k 0) (ignorespaces :stop-after-first-newline))
+           (when (and (= k 0) *current-tex2page-input*)
+             (ignorespaces :stop-after-first-newline))
            (return r))
          (let ((c (elt argpat k)))
            ;eql rather than char= because \par may show up as :par?

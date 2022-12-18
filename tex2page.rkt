@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221126, ecl.
 
 
-(define *tex2page-version* "20221215")
+(define *tex2page-version* "20221218")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -1332,7 +1332,8 @@
                                 (set! c *small-commercial-at*))
                               (set! s (cons c s)))
                              (else (toss-back-char c)
-                              (ignorespaces ':stop-before-first-newline)
+                              (unless *not-processing-p*
+                                (ignorespaces ':stop-before-first-newline))
                               (return s))))
                           (return s)))
                     (if %loop-returned %loop-result (%loop))))))))
@@ -5745,6 +5746,7 @@
                    (member x
                            '("\\endimgpreamble" "\\endgifpreamble"
                              "\\endmathpreamble"))
+                 (ignorespaces ':stop-before-first-newline)
                  (return r))
                (set! r (string-append r x))))
             (else (get-actual-char) (set! r (string-append r (string c))))))
@@ -6819,10 +6821,9 @@
      (let ((y *it*))
        (cond ((begin (set! *it* (tdef*-defer y)) *it*) *it*)
              ((tdef*-thunk y) false)
-             ((and (null? (tdef*-argpat y))
-                   (not (tdef*-optarg y))
-                   (begin (set! *it* (tdef*-expansion y)) *it*))
-              *it*)
+             ((and (null? (tdef*-argpat y)) (not (tdef*-optarg y)))
+              (expand-tex-macro false null (tdef*-expansion y)
+               (tdef*-catcodes y)))
              ((and (inside-false-world-p) (not (if-aware-ctl-seq-p x))) false)
              (else
               (when *outer-p*
@@ -7523,7 +7524,8 @@
         (let %loop
           ()
           (when (>= k n)
-            (when (= k 0) (ignorespaces ':stop-after-first-newline))
+            (when (and (= k 0) *current-tex2page-input*)
+              (ignorespaces ':stop-after-first-newline))
             (return r))
           (unless %loop-returned
             (let ((c (list-ref argpat k)))

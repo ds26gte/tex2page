@@ -10074,7 +10074,7 @@ Try the commands
 
 (tex-def-prim "\\tabalign" do-tabalign)
 
-(tex-let-prim "\\+"
+(tex-def-prim "\\+"
  (lambda () (unless (eq? *tex-format* ':latex) (do-tablign))))
 
 (tex-def-prim "\\item" do-item)

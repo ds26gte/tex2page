@@ -1,10 +1,9 @@
-;last modified 2022-12-15
+;last modified 2022-12-19
 
 (cliiscm-insert
   "\":\";exec racket -f $0 -- \"$@\"
   ")
 
-(require mzlib/process)
 ;(require mzlib/trace)
 (require racket/private/more-scheme)
 

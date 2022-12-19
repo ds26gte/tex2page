@@ -1570,8 +1570,7 @@
   (setf (tdef*-thunk lft) (tdef*-thunk rt))
   (setf (tdef*-prim lft) (tdef*-prim rt))
   (setf (tdef*-defer lft) (tdef*-defer rt))
-  (setf (tdef*-catcodes lft) (tdef*-catcodes rt))
-  nil)
+  (setf (tdef*-catcodes lft) (tdef*-catcodes rt)))
 
 (defun kopy-cdef (lft rt)
   (declare (cdef* lft rt))
@@ -1579,9 +1578,7 @@
   (setf (cdef*-expansion lft) (cdef*-expansion rt))
   (setf (cdef*-optarg lft) (cdef*-optarg rt))
   (setf (cdef*-active lft) (cdef*-active rt))
-  (setf (cdef*-catcodes lft) (cdef*-catcodes rt))
-  nil
-  )
+  (setf (cdef*-catcodes lft) (cdef*-catcodes rt)))
 
 (defun cleanse-tdef (d)
   (declare (tdef* d))

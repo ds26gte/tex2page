@@ -1,6 +1,6 @@
-":";exec racket -f $0 -- "$@"
-  
-(require mzlib/process)
+#! /usr/bin/env racket
+
+#lang racket
 
 (require racket/private/more-scheme)
 
@@ -2052,7 +2052,7 @@
  (set!tdef*-optarg lft (tdef*-optarg rt))
  (set!tdef*-thunk lft (tdef*-thunk rt)) (set!tdef*-prim lft (tdef*-prim rt))
  (set!tdef*-defer lft (tdef*-defer rt))
- (set!tdef*-catcodes lft (tdef*-catcodes rt)) false)
+ (set!tdef*-catcodes lft (tdef*-catcodes rt)))
 
 (define (kopy-cdef lft rt) (set!cdef*-argpat lft (cdef*-argpat rt))
  (set!cdef*-expansion lft (cdef*-expansion rt))

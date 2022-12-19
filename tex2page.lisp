@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221218") ;last change
+(defparameter *tex2page-version* "20221219") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -8777,8 +8777,8 @@ exist, via kpsewhich(1).
 
 The output Web files are generated in the current
 directory by default.  An alternate location can be
-specified in  <jobname>.hdir, tex2page.hdir, or
-~/tex2page.hdir, where <jobname> is the basename of the
+specified in  <jobname>.hdir, .tex2page.hdir, or
+~/.tex2page.hdir, where <jobname> is the basename of the
 main TeX file.
 
 For more information on how to use tex2page, please see")
@@ -9031,7 +9031,7 @@ Try the commands
 
 (tex-def-prim "\\settabs" #'do-settabs)
 (tex-def-prim "\\tabalign" #'do-tabalign)
-(tex-let-prim "\\+" (lambda ()
+(tex-def-prim "\\+" (lambda ()
                       (unless (eq *tex-format* :latex) (do-tablign))))
 
 (tex-def-prim "\\item" #'do-item)

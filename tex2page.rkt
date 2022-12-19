@@ -285,7 +285,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221126, ecl.
 
 
-(define *tex2page-version* "20221218")
+(define *tex2page-version* "20221219")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -9704,8 +9704,8 @@ exist, via kpsewhich(1).
 
 The output Web files are generated in the current
 directory by default.  An alternate location can be
-specified in  <jobname>.hdir, tex2page.hdir, or
-~/tex2page.hdir, where <jobname> is the basename of the
+specified in  <jobname>.hdir, .tex2page.hdir, or
+~/.tex2page.hdir, where <jobname> is the basename of the
 main TeX file.
 
 For more information on how to use tex2page, please see")
@@ -10074,7 +10074,7 @@ Try the commands
 
 (tex-def-prim "\\tabalign" do-tabalign)
 
-(tex-let-prim "\\+"
+(tex-def-prim "\\+"
  (lambda () (unless (eq? *tex-format* ':latex) (do-tablign))))
 
 (tex-def-prim "\\item" do-item)

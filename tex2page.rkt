@@ -12025,6 +12025,8 @@ Try the commands
 
 (tex-def-prim "\\marginpar" do-marginpar)
 
+(tex-def-prim "\\mathit" (lambda () (do-function "\\textit")))
+
 (tex-def-prim "\\mathp" do-mathp)
 
 (tex-def-prim "\\mfpic" do-mfpic)

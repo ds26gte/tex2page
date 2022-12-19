@@ -1,0 +1,325 @@
+% r7rs.t2p
+% tex2page macro file for r7rs.tex
+% Dorai Sitaram
+% 18 Dec 2022
+% last change 2022-12-18
+
+\evalh{(!definitely-latex)}
+
+\let\TZPmathtext 1
+\let\TZPcolophondisablecredit 1
+
+\externaltitle{Revised^7 Report on the Algorithmic Language Scheme}
+
+% \title{Revised$^7$ Report on the Algorithmic Language Scheme}
+
+\def\bibname{References}
+
+\date{}
+
+\leftdisplays
+
+\TIIPobeyspacestrictly=1
+
+\let\TIIPbrORIG\TIIPbr
+
+\newcount\obeylinesstart
+
+\def\TIIPbr{\obeylinesstart=0\TIIPbrORIG}
+
+\let\indexORIG\index
+
+\let\theindexORIG\theindex
+\let\endtheindexORIG\endtheindex
+
+\ifx\TZPcommonlisp 1
+\evalh{
+  (defun index-massage (s)
+    (let ((i (- (length s) 1)) (r '()))
+      (loop
+        (when (< i 0) (return (concatenate 'string r)))
+        (let ((c (char s i)))
+          (decf i)
+          (case c
+            ((#\@ #\!) (push c r) (push #\" r))
+            (t (push c r)))))))
+}
+\else
+\evalh{
+(define index-massage
+  (lambda (s)
+    (let loop ((i (- (string-length s) 1)) (r '()))
+      (if (< i 0) (list->string r)
+          (let ((c (string-ref s i)))
+            (loop (- i 1)
+              (case c
+                ((#\@ #\!) (cons #\" (cons c r)))
+                (else (cons c r)))))))))
+}
+\fi
+
+\def\sqrt#1{(#1)^{1/2}}
+
+\def\linebreak{\evalh{(get-bracketed-text-if-any)}}
+
+\def\:{ }
+
+\let\scriptstyle\relax
+\let\small\relax
+
+\def\cal#1{\csname cal#1\endcsname}
+
+\let\thebibliographyORIG\thebibliography
+
+\def\thebibliography#1{\thebibliographyORIG{#1}%
+\addcontentsline{toc}{chapter}{\bibname}}
+
+\let\endthebibliographyORIG\endthebibliography
+
+\def\endthebibliography{\endthebibliographyORIG
+%index
+\extrapart{Alphabetic index of definitions of concepts,
+keywords, and procedures}%
+\gdef\input##1{\let\theindex\theindexORIG
+\let\endtheindex\endtheindexORIG
+\inputindex
+\let\endtheindex\relax
+}}
+
+\let\tabularORIG\tabular
+
+\def\tabular{%
+\let\tabularNext\tabularORIG
+\ifnum\sectiondnumber{0}=7
+\let\tabularNext\IMGtabular
+\fi
+\tabularNext}
+
+\let\setbox\TIIPcomment
+
+\let\indexORIG\index
+
+\let\tableofcontentsORIG\tableofcontents
+
+\ifx\TZPcommonlisp 1 \then
+\def\tableofcontents{%
+\evalh{(setq *tex-format* ':tex)}%
+\tableofcontentsORIG
+\evalh{(setq *tex-format* ':latex)}}
+\else
+\def\tableofcontents{%
+\evalh{(set! *tex-format* ':tex)}%
+\tableofcontentsORIG
+\evalh{(set! *tex-format* ':latex)}}
+\fi
+
+% the image preamble
+
+\imgpreamble
+
+{\catcode`\^^M=13 \gdef\myobeycr{\catcode`\^^M=13 \def^^M{\\}}%
+\gdef\restorecr{\catcode`\^^M=5 }}
+\newcommand{\meta}[1]{{\noindent\hbox{\rm$\langle$#1$\rangle$}}}
+\let\hyper=\meta
+
+\newenvironment{grammar}{
+  \def\:{\goesto{}}
+  \def\|{$\vert$}
+  \cf \myobeycr
+  \begin{tabbing}
+    %\qquad\quad \=
+    \qquad \= $\vert$ \= \kill
+  }{\unskip\end{tabbing}}
+
+\newcommand{\sembrack}[1]{[\![#1]\!]}
+\newcommand{\fun}[1]{\hbox{\it #1}}
+\newenvironment{semfun}{\begin{tabbing}$}{$\end{tabbing}}
+\newcommand\LOC{{\tt{}L}}
+\newcommand\NAT{{\tt{}N}}
+\newcommand\TRU{{\tt{}T}}
+\newcommand\SYM{{\tt{}Q}}
+\newcommand\CHR{{\tt{}H}}
+\newcommand\NUM{{\tt{}R}}
+\newcommand\FUN{{\tt{}F}}
+\newcommand\EXP{{\tt{}E}}
+\newcommand\STV{{\tt{}E}}
+\newcommand\STO{{\tt{}S}}
+\newcommand\ENV{{\tt{}U}}
+\newcommand\ANS{{\tt{}A}}
+\newcommand\ERR{{\tt{}X}}
+\newcommand\DP{\tt{P}}
+\newcommand\EC{{\tt{}K}}
+\newcommand\CC{{\tt{}C}}
+\newcommand\MSC{{\tt{}M}}
+\newcommand\PAI{\hbox{\EXP$_{\rm p}$}}
+\newcommand\VEC{\hbox{\EXP$_{\rm v}$}}
+\newcommand\STR{\hbox{\EXP$_{\rm s}$}}
+
+\newcommand\elt{\downarrow}
+\newcommand\drop{\dagger}
+
+\def\P{\hbox{\rm P}}
+\def\I{\hbox{\rm I}}
+\def\Ksem{\hbox{$\cal K$}}
+\def\Esem{\hbox{$\cal E$}}
+
+\def\K{\hbox{\rm K}}
+\def\I{\hbox{\rm I}}
+\def\E{\hbox{\rm E}}
+\def\C{\hbox{$\Gamma$}}
+\def\Con{\hbox{\rm Con}}
+\def\Ide{\hbox{\rm Ide}}
+\def\Exp{\hbox{\rm Exp}}
+\def\Com{\hbox{\rm Com}}
+\def\|{$\vert$}
+
+\def\Ksem{\hbox{$\cal K$}}
+\def\Esem{\hbox{$\cal E$}}
+\def\Csem{\hbox{$\cal C$}}
+
+\newcommand{\wrong}[1]{\fun{wrong }\hbox{\rm``#1''}}
+\newcommand{\go}[1]{\hbox{\hspace*{#1em}}}
+
+\newcommand{\arbno}[1]{#1\hbox{\rm*}}
+\newcommand{\atleastone}[1]{#1\hbox{$^+$}}
+\newcommand{\goesto}{$\longrightarrow$}
+
+\newcommand{\sharpfoo}[1]{{\tt\##1}}
+\newcommand{\schfalse}{\sharpfoo{f}}
+\newcommand{\schtrue}{\sharpfoo{t}}
+
+\def\sharpindex#1{}
+
+\newcommand{\singlequote}{{\tt'}}  %\char19
+\newcommand{\doublequote}{{\tt"}}
+\newcommand{\backquote}{{\tt\char18}}
+\newcommand{\backwhack}{{\tt\char`\\}}
+\newcommand{\atsign}{{\tt\char`\@}}
+\newcommand{\sharpsign}{{\tt\#}}
+\newcommand{\verticalbar}{{\tt|}}
+
+\newcommand{\ide}[1]{{\frenchspacing\tt{#1}}}
+\def\elem{\hbox{\raise.13ex\hbox{$\scriptstyle\in$}}}
+\let\cf\tt
+
+\newcommand{\dotsfoo}{$\ldots\,$}
+
+\setbox0=\hbox{\tt\Exp{} \goesto{}}  %\tt for spacing
+\setbox1=\hbox to 1\wd0{\hfil \|}
+
+\def\todo#1{}
+
+\let\latexdocument\document
+\def\document{\latexdocument\Large}
+
+\endimgpreamble
+
+\let\documentORIG\document
+
+% post preamble
+
+\def\document{\documentORIG
+
+\TIIPobeyspacestrictly=0
+
+\def\semfun{\TIIPlatexenvasimage{semfun}}
+
+\renewenvironment{grammar}{%
+%\def\>{\qquad}%
+\def\>{\ifnum\obeylinesstart=0\qquad\obeylinesstart=1\else~~~\fi}%
+\def\:{\goesto{}}%
+\def\|{$\vert$}%
+\def\={}%
+\TIIPobeylinestrictly=1%
+\cf\obeylines}{}
+
+\let\grammarORIG\grammar
+
+\def\grammar{%
+\let\grammarNext\grammarORIG
+\ifnum\sectiondnumber{0}=7
+\ifnum\sectiondnumber{1}>1
+\def\grammarNext{\TIIPlatexenvasimage{grammar}}\fi\fi
+\grammarNext}
+
+\newcommand\topnewpage[0][xyz]{#1}
+
+% kludge for \copy0 in sec 2.3
+
+\def\copy0{\verb+[ ] { } |+}
+
+\let\ide\texttt
+
+\let\PRIMeject\eject
+
+\let\eject\relax
+
+\newcount\clearchapterstarcount
+
+\def\clearchapterstar{
+\global\advance\clearchapterstarcount by 1
+\ifnum\clearchapterstarcount=2
+\let\Next\gobblegroup
+\else
+\def\Next{\chapter*}\fi
+\Next}
+
+\def\backquote{{\tt`}}
+
+\def\hyper##1{<##1>} 
+
+\renewenvironment{entry}[1]{\par##1}{\par}
+
+\def\pproto##1##2{\leftline{\underline{##2:}\enspace{\tt{}##1}}}
+
+\def\proto##1##2##3{\pproto{(\mainschindex{##1}##1{\it{}##2\/})}{##3}}
+\def\rproto##1##2##3{\proto{##1}{##2}{##3}}
+
+\renewenvironment{scheme}{\def\ev{\qquad\evalsto}%
+\TIIPobeyspacestrictly=1 %
+\def\lev{\break\qquad\qquad\evalsto}%
+\def\unspecified{{\it{}unspecified}}%
+\def\scherror{{\it{}error}}%
+\tt\obeywhitespace}{}
+
+\renewenvironment{schemenoindent}{\def\ev{\qquad\evalsto}%
+\TIIPobeyspacestrictly=1 %
+\def\lev{\par~~\evalsto}%
+\def\unspecified{{\it{}unspecified}}%
+\def\scherror{{\it{}error}}%
+\tt\obeywhitespace}{}
+
+\let\dotsfoo\dots
+
+\let\cf\tt
+
+\renewenvironment{rationale}{\begin{quotation}{\em Rationale:\enspace}}%
+{\end{quotation}}
+
+\renewenvironment{note}{\begin{quotation}{\em Note:\enspace}}%
+{\end{quotation}}
+
+\def\meta##1{<##1>}
+
+\let\hyper\meta
+
+\let\index\indexORIG
+
+\def\reallyindex##1##2##3{\indexORIG{##1@\csname##2\endcsname##1}}
+
+\long\def\theindex##1\bigskip{%
+\let\theindex\theindexORIG}
+
+\def\newenvironment##1##2##3{}
+
+\newcount\clearpagecount
+
+\let\clearpageOG\clearpage
+
+\def\clearpage{%
+  \global\advance\clearpagecount by 1
+  \ifnum\clearpagecount=1
+  \else\clearpageOG
+  \fi}
+
+}

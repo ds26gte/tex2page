@@ -10572,6 +10572,7 @@ Try the commands
 (tex-def-prim "\\maketitle" #'do-maketitle)
 (tex-def-prim "\\marginnote" #'do-marginnote)
 (tex-def-prim "\\marginpar" #'do-marginpar)
+(tex-def-prim "\\mathit" (lambda () (do-function "\\textit")))
 (tex-def-prim "\\mathp" #'do-mathp)
 (tex-def-prim "\\mfpic" #'do-mfpic)
 (tex-def-prim "\\minipage" #'do-minipage)

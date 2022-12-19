@@ -7443,7 +7443,7 @@
      (let %loop
        ()
        (let ((x (get-token/ps)))
-         (when (not x) (terror 'do-tablign "Eof in \\tabalign"))
+         (when (not x) (terror 'do-tabalign "Eof in \\tabalign"))
          (cond
           ((or (string=? x "&") (string=? x "\\cr")) (emit "<td")
            (emit cell-width) (emit ">") (bgroup)
@@ -10075,7 +10075,7 @@ Try the commands
 (tex-def-prim "\\tabalign" do-tabalign)
 
 (tex-def-prim "\\+"
- (lambda () (unless (eq? *tex-format* ':latex) (do-tablign))))
+ (lambda () (unless (eq? *tex-format* ':latex) (do-tabalign))))
 
 (tex-def-prim "\\item" do-item)
 

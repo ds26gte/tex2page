@@ -8777,8 +8777,8 @@ exist, via kpsewhich(1).
 
 The output Web files are generated in the current
 directory by default.  An alternate location can be
-specified in  <jobname>.hdir, tex2page.hdir, or
-~/tex2page.hdir, where <jobname> is the basename of the
+specified in  <jobname>.hdir, .tex2page.hdir, or
+~/.tex2page.hdir, where <jobname> is the basename of the
 main TeX file.
 
 For more information on how to use tex2page, please see")

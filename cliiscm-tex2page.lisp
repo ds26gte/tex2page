@@ -1,8 +1,10 @@
 ;last modified 2022-12-19
 
 (cliiscm-insert
-  "\":\";exec racket -f $0 -- \"$@\"
-  ")
+  "#!/usr/bin/env racket
+
+#lang racket
+")
 
 ;(require mzlib/trace)
 (require racket/private/more-scheme)
@@ -56,7 +58,12 @@
 
   )
 
-(define eval1 eval)
+(define-namespace-anchor *tex2page-namespace-anchor*)
+
+(define *tex2page-namespace* (namespace-anchor->namespace *tex2page-namespace-anchor*))
+
+(define (eval1 s)
+  (eval s *tex2page-namespace*))
 
 (define (decode-universal-time s)
   (let ((ht (and s (seconds->date s))))

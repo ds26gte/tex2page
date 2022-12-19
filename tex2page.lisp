@@ -6703,7 +6703,7 @@
     (loop
       (let ((x (get-token/ps)))
         (when (not x)
-          (terror 'do-tablign "Eof in \\tabalign"))
+          (terror 'do-tabalign "Eof in \\tabalign"))
         (cond ((or (string= x "&") (string= x "\\cr"))
                (emit "<td")
                (emit cell-width)
@@ -9032,7 +9032,7 @@ Try the commands
 (tex-def-prim "\\settabs" #'do-settabs)
 (tex-def-prim "\\tabalign" #'do-tabalign)
 (tex-def-prim "\\+" (lambda ()
-                      (unless (eq *tex-format* :latex) (do-tablign))))
+                      (unless (eq *tex-format* :latex) (do-tabalign))))
 
 (tex-def-prim "\\item" #'do-item)
 (tex-def-prim "\\itemitem" (lambda () (do-plain-item 2)))

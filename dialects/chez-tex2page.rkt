@@ -1,4 +1,4 @@
-; last change: 2017-01-20
+; last change: 2022-12-19
 
 (scmxlate-eval
  (define *chez-name*
@@ -30,9 +30,11 @@
 (define *scheme-version* (scheme-version))
 
 (scmxlate-uncall
- require
- trace
- )
+  define-namespace-anchor
+  require
+  tex2page
+  trace
+  )
 
 (scmxlate-rename
   (eof #!eof)
@@ -189,9 +191,8 @@
   (define *ghostscript* "d:\\aladdin\\gs6.0\\bin\\gswin32c")
   ))
 
-(scmxlate-ignore main)
-
 (scmxlate-ignore-define
+  *tex2page-namespace*
   decode-universal-time
   strftime)
 

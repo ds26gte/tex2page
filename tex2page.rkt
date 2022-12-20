@@ -6897,7 +6897,7 @@
  (plain-count "\\tracingmacros" 0) (plain-count "\\tracingonline" 0)
  (plain-count "\\shellescape" 1) (plain-count "\\suppressfontnotfounderror" 1)
  (plain-dimen "\\TIIPhsize" 0)
- (plain-dimen (format "\\z~c" *small-commercial-at*) 0)
+ (plain-dimen (string-append "\\z" (string *small-commercial-at*)) 0)
  (plain-dimen "\\hsize" (tex-length 6.5 ':in))
  (plain-dimen "\\vsize" (tex-length 8.9 ':in))
  (plain-dimen "\\maxdepth" (tex-length 4 ':pt))

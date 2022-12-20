@@ -1,4 +1,4 @@
-; last change 2022-07-04
+; last change 2022-12-19
 abcl ;v 1.5; WORKS!
 allegro ;v 9.0; WORKS!
 ;bigloo
@@ -11,8 +11,8 @@ clozure ;v 1.11; WORKS!
 cmucl ;v 20d; WORKS!
 ecl ;v 16.1.3; WORKS!
 gambit ;v 4.4.2; WORKS!
-gauche ;v 0.9.4; WORKS!
-guile ;v 2.0.11; WORKS!
+gauche ;v 0.9.10; WORKS!
+guile ;v 3.0.8; WORKS!
 ;ikarus
 ;kawa ;not much success, but no recent tries: stack seems to blow fairly easily
 ;larceny

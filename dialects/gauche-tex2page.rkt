@@ -1,4 +1,4 @@
-; last change: 2017-01-15
+; last change: 2022-12-19
 
 (scmxlate-cond
   ((eqv? *operating-system* 'unix)
@@ -8,13 +8,16 @@
 (define *scheme-version* 
   (string-append "Gauche " (gauche-version)))
 
-(scmxlate-ignore
+(scmxlate-ignore-define
+  *tex2page-namespace*
   with-output-to-port
   call-with-input-string
   )
 
 (scmxlate-uncall
+  define-namespace-anchor
   require
+  tex2page
   )
 
 (scmxlate-rename

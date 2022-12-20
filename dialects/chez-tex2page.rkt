@@ -1,4 +1,4 @@
-; last change: 2022-12-19
+; last change: 2022-12-20
 
 (scmxlate-eval
  (define *chez-name*
@@ -125,6 +125,9 @@
                                 (and (vector? x) (eq? (vector-ref x 0) ',s))))))))
                    )
                  (cdr %so-d)))))))
+
+(define (eval1 e)
+  (eval e (interaction-environment)))
 
 (define (petite-error . args)
   (apply error #f args))

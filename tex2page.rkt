@@ -290,7 +290,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221126, ecl.
 
 
-(define *tex2page-version* "20221219")
+(define *tex2page-version* "20221220")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -2770,20 +2770,24 @@
    (emit-newline)
    (set! *in-para-p* false)))
 
-(define (do-para)
- (cond
-  ((and *in-para-p* (pair? (ostream*-hbuffer *html*)))
-   (set!ostream*-hbuffer *html* null))
-  (else (do-end-para)
-   (let ((in-table-p
-          (and (pair? *tabular-stack*) (eq? (car *tabular-stack*) ':block))))
-     (when in-table-p (emit "</td></tr><tr><td>") (emit-newline))
-     (emit "<p>")
-     (emit-newline)
-     (set! *in-para-p* true)))))
+(define (do-para . %lambda-rest-arg)
+ (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (noindentp false))
+   (when (< 0 %lambda-rest-arg-len)
+     (set! noindentp (list-ref %lambda-rest-arg 0)))
+   (cond
+    ((and *in-para-p* (pair? (ostream*-hbuffer *html*)))
+     (set!ostream*-hbuffer *html* null))
+    (else (do-end-para)
+     (let ((in-table-p
+            (and (pair? *tabular-stack*) (eq? (car *tabular-stack*) ':block))))
+       (when in-table-p (emit "</td></tr><tr><td>") (emit-newline))
+       (emit "<p")
+       (when noindentp (emit " class=noindent"))
+       (emit ">")
+       (emit-newline)
+       (set! *in-para-p* true))))))
 
-(define (do-noindent) (do-end-para) (emit-newline) (emit "<p class=noindent>")
- (set! *in-para-p* true))
+(define (do-noindent) (do-para ':noindent))
 
 (define (do-indent)
  (let ((parindent (sp-to-pixels (the-dimen "\\parindent"))))
@@ -4074,7 +4078,16 @@
 
 (define (do-hrule) (do-end-para) (emit "<hr>") (emit-newline) (do-para))
 
-(define (do-newline) (when (>= (munch-newlines) 1) (do-para)) (emit-newline))
+(define (do-newline)
+ (when (>= (munch-newlines) 1)
+   (let ((c (snoop-actual-char)) (noindentp false))
+     (when (and c (= (catcode c) **escape**))
+       (let ((x (get-ctl-seq)))
+         (cond ((string=? x "\\noindent") (set! noindentp true))
+               (else (toss-back-char *invisible-space*)
+                (toss-back-string x)))))
+     (do-para noindentp)))
+ (emit-newline))
 
 (define (do-br)
  (if (or (find-cdef #\ ) (not (= (the-count "\\TIIPobeylinestrictly") 0)))
@@ -9894,7 +9907,7 @@ Try the commands
 
 (tex-def-prim "\\multiply" do-multiply)
 
-(tex-def-prim "\\noindent" do-noindent)
+(tex-def-prim "\\noindent" do-relax)
 
 (tex-def-prim "\\number" do-number)
 

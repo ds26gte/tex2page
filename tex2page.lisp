@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221219") ;last change
+(defparameter *tex2page-version* "20221220") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -2280,7 +2280,7 @@
     (emit-newline)
     (setq *in-para-p* nil)))
 
-(defun do-para ()
+(defun do-para (&optional (noindentp nil))
   (cond ((and *in-para-p* (consp (ostream*-hbuffer *html*)))
          ;(format t "erasing empty par space~%")
          (setf (ostream*-hbuffer *html*) '()))
@@ -2289,15 +2289,14 @@
           (let ((in-table-p (and (consp *tabular-stack*)
                                  (eq (car *tabular-stack*) ':block))))
             (when in-table-p (emit "</td></tr><tr><td>") (emit-newline))
-            (emit "<p>")
+            (emit "<p")
+            (when noindentp (emit " class=noindent"))
+            (emit ">")
             (emit-newline)
             (setq *in-para-p* t)))))
 
 (defun do-noindent ()
-  (do-end-para)
-  (emit-newline)
-  (emit "<p class=noindent>")
-  (setq *in-para-p* t))
+  (do-para :noindent))
 
 (defun do-indent ()
   (let ((parindent (sp-to-pixels (the-dimen "\\parindent"))))
@@ -3514,7 +3513,15 @@
 
 (defun do-newline ()
   ;(format t "doing do-newline~%")
-  (when (>= (munch-newlines) 1) (do-para)) (emit-newline))
+  (when (>= (munch-newlines) 1)
+    (let ((c (snoop-actual-char))
+          (noindentp nil))
+      (when (and c (= (catcode c) **escape**))
+        (let ((x (get-ctl-seq)))
+          (cond ((string= x "\\noindent") (setq noindentp t))
+                (t (toss-back-char *invisible-space*) (toss-back-string x)))))
+      (do-para noindentp)))
+  (emit-newline))
 
 (defun do-br ()
   (if (or (find-cdef #\space) (not (= (the-count "\\TIIPobeylinestrictly") 0)))
@@ -8901,7 +8908,7 @@ Try the commands
 (tex-def-prim "\\lowercase" (lambda () (do-flipcase :lccode)))
 (tex-def-prim "\\message" #'do-message)
 (tex-def-prim "\\multiply" #'do-multiply)
-(tex-def-prim "\\noindent" #'do-noindent)
+(tex-def-prim "\\noindent" #'do-relax)
 (tex-def-prim "\\number" #'do-number)
 (tex-def-prim "\\openin" (lambda () (do-open-stream :in)))
 (tex-def-prim "\\openout" (lambda () (do-open-stream :out)))

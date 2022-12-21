@@ -33,7 +33,6 @@
   define-namespace-anchor
   require
   tex2page
-  trace
   )
 
 (scmxlate-rename

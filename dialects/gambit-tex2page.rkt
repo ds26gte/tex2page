@@ -1,4 +1,4 @@
-; last change: 2017-01-17
+; last change: 2022-12-21
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -13,16 +13,17 @@
     (with-exception-handler (lambda (ex) #f)
                             (lambda () (getenv ev)))))
 
-(scmxlate-ignore
- with-output-to-port)
+(scmxlate-ignore-define
+  *tex2page-namespace*
+  )
 
 (scmxlate-uncall
- require
- trace
- )
+  define-namespace-anchor
+  require
+  tex2page
+  )
 
 (scmxlate-rename
- (eof #!eof)
  (getenv gambit-getenv)
  (substring subseq)
  )
@@ -50,14 +51,6 @@
   (lambda ()
     (inexact->exact (floor (time->seconds (current-time))))))
 
-(define-macro unless
-  (lambda (b . ee)
-    `(if (not ,b) (begin ,@ee))))
-
-(define-macro when
-  (lambda (b . ee)
-    `(if ,b (begin ,@ee))))
-
 (define-macro fluid-let
   (lambda (xvxv . ee)
     (let ((xx (map car xvxv))
@@ -74,20 +67,6 @@
            ,@(map (lambda (x old-x) `(set! ,x ,old-x)) xx old-xx)
            ,res)))))
 
-(define nreverse
-  (lambda (s)
-    (let loop ((s s) (r '()))
-      (if (null? s) r
-	  (let ((d (cdr s)))
-            (set-cdr! s r)
-	    (loop d s))))))
-
-(define andmap
-  (lambda (f s)
-    (let loop ((s s))
-      (if (null? s) #t
-          (and (f (car s)) (loop (cdr s)))))))
-
 (define ormap
   (lambda (f s)
     ;Returns true if f is true of some elt in s
@@ -95,18 +74,13 @@
       (if (null? s) #f
         (or (f (car s)) (loop (cdr s)))))))
 
-(define nconc
-  (lambda (s1 s2)
-    ;appends s1 and s2 destructively (s1 may be modified)
-    (if (null? s1) s2
-      (let loop ((r1 s1))
-        (if (null? r1) (error 'append! s1 s2)
-          (let ((r2 (cdr r1)))
-            (if (null? r2)
-                (begin
-                  (set-cdr! r1 s2)
-                  s1)
-                (loop r2))))))))
+(define (append! l1 l2)
+  (cond ((null? l1) l2)
+        ((null? l2) l1)
+        (else (let loop ((r1 l1))
+                (let ((cdr-r1 (cdr r1)))
+                  (cond ((null? cdr-r1) (set-cdr! r1 l2) l1)
+                        (else (loop cdr-r1))))))))
 
 (define (add1 n) (+ n 1))
 (define (sub1 n) (- n 1))
@@ -137,7 +111,11 @@
 
 (define strftime strftime-like)
 
+(define eval1
+  (lambda (e)
+    (eval e (interaction-environment))))
+
+(define (main arg1 . ignore)
+  (tex2page arg1))
+
 (scmxlate-postamble)
-
-;mzscheme main works just fine
-

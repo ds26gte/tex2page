@@ -1,4 +1,4 @@
-; last change: 2022-12-20
+; last change: 2022-12-21
 
 (scmxlate-eval
  (define *chez-name*
@@ -36,30 +36,10 @@
   )
 
 (scmxlate-rename
-  (eof #!eof)
   (error petite-error)
   (get-char t2p-get-char)
   (substring subseq)
   )
-
-;(define get-arg1
-;  (lambda ()
-;    (and (top-level-bound? 'arg-one) arg-one)))
-
-#|
-(scmxlate-cond
-  ((eqv? *operating-system* 'unix-doesnt-work)
-   (define (file-or-directory-modify-seconds f)
-     (let* ((x (process
-                 (string-append "stat -c \"%Y\" " f)))
-            (n (read (car x))))
-       (close-input-port (car x))
-       (close-output-port (cadr x))
-       n)))
-  (else
-    (define file-or-directory-modify-seconds
-      (lambda (f) #f))))
-|#
 
 (define-syntax defstruct
   (let* ((old-datum->syntax-object datum->syntax-object)
@@ -151,10 +131,6 @@
 (define (subseq s i . z)
   (let ((f (if (pair? z) (car z) (string-length s))))
     (substring s i f)))
-
-;(define seconds-to-human-time
-;  (lambda (secs)
-;    ""))
 
 (define (current-seconds)
   (time-second (current-time)))

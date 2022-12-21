@@ -1,4 +1,4 @@
-; last change 2022-12-20
+; last change 2022-12-21
 abcl ;v 1.5; WORKS!
 allegro ;v 9.0; WORKS!
 ;bigloo
@@ -10,7 +10,7 @@ clisp ;v 2.49; WORKS!
 clozure ;v 1.11; WORKS!
 cmucl ;v 20d; WORKS!
 ecl ;v 21.2.1; WORKS!
-gambit ;v 4.4.2; WORKS!
+gambit ;v 4.9.3; WORKS!
 gauche ;v 0.9.10; WORKS!
 guile ;v 3.0.8; WORKS!
 ;ikarus

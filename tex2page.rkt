@@ -63,6 +63,10 @@
 (define (seconds-to-human-time s)
  (strftime "%a, %b %e, %Y, %l:%M %p %Z" (seconds->date s)))
 
+(define append! append)
+
+(define reverse! reverse)
+
 (define list-position
  (lambda (x s)
    (let loop
@@ -316,7 +320,7 @@
                      ((string? %position-s)
                       (string-index %position-s %position-v))
                      (else (list-position %position-v %position-s))))))
-             (unless i (set! r (cons p r)) (return (reverse r)))
+             (unless i (set! r (cons p r)) (return (reverse! r)))
              (set! r (cons (substring p 0 i) r))
              (set! p (substring p (add1 i))))
            (if %loop-returned %loop-result (%loop)))))))
@@ -1020,7 +1024,7 @@
              (let ((border "__________________________..."))
                (let ((only-1-p (= (length ll) 1)))
                  (let ((nf (caar ll)))
-                   (let ((ll (reverse ll)))
+                   (let ((ll (reverse! ll)))
                      (let ((n1 (caar ll)))
                        (write-log "Likely error context: ")
                        (write-log *current-source-file*)
@@ -1183,7 +1187,7 @@
 
 (define (toss-back-string s)
  (set!istream*-buffer *current-tex2page-input*
-  (append (string->list s) (istream*-buffer *current-tex2page-input*))))
+  (append! (string->list s) (istream*-buffer *current-tex2page-input*))))
 
 (define (toss-back-char c)
  (set!istream*-buffer *current-tex2page-input*
@@ -1220,8 +1224,8 @@
      (let %loop
        ()
        (let ((c (get-actual-char)))
-         (cond ((not c) (return (if r (list->string (reverse r)) c)))
-               ((char=? c #\newline) (return (list->string (reverse r))))
+         (cond ((not c) (return (if r (list->string (reverse! r)) c)))
+               ((char=? c #\newline) (return (list->string (reverse! r))))
                (else (set! r (cons c r)))))
        (if %loop-returned %loop-result (%loop))))))
 
@@ -1316,7 +1320,7 @@
            ((= (catcode c) **letter**)
             (when (char=? c #\@) (set! c *small-commercial-at*))
             (list->string
-             (reverse
+             (reverse!
               (let ((s (list c #\\)))
                 (let* ((%loop-returned false)
                        (%loop-result 0)
@@ -1386,7 +1390,7 @@
                             ((member x '("\\ " "\\{" "\\}"))
                              (list->string (list (string-ref x 1))))
                             (else (tex-string-to-html-string x)))))))
-                   (set! s (append (reverse (string->list s1)) s))
+                   (set! s (append! (reverse! (string->list s1)) s))
                    (set! escape-p false))
                  (begin (set! s (cons c s)) (set! escape-p true))))
             ((= (catcode c) **comment**) (eat-till-eol))
@@ -1402,7 +1406,7 @@
             (else (set! s (cons c s)))))
          (if %loop-returned %loop-result (%loop)))))))
 
-(define (get-group) (list->string (reverse (get-group-as-reversed-chars))))
+(define (get-group) (list->string (reverse! (get-group-as-reversed-chars))))
 
 (define (get-peeled-group) (string-trim (ungroup (get-group))))
 
@@ -1427,7 +1431,7 @@
                  ((or (char-alphabetic? c) (char=? c #\*)) (get-actual-char)
                   (set! s (cons c s)))
                  ((and (pair? s) (char=? c #\})) (get-actual-char)
-                  (return (list->string (reverse s))))
+                  (return (list->string (reverse! s))))
                  (else (for-each toss-back-char s) (toss-back-char #\{)
                   (return false))))
               (if %loop-returned %loop-result (%loop)))))))))
@@ -1438,7 +1442,7 @@
        false
        (begin (get-actual-char)
         (list->string
-         (reverse
+         (reverse!
           (let ((s null) (nesting 0) (escape-p false))
             (let* ((%loop-returned false)
                    (%loop-result 0)
@@ -1503,7 +1507,7 @@
            (get-actual-char)
            (set! bracedp false))))
    (list->string
-    (reverse
+    (reverse!
      (let ((s null))
        (let* ((%loop-returned false)
               (%loop-result 0)
@@ -1525,7 +1529,7 @@
                     (let ((x (get-ctl-seq)))
                       (if (string=? x "\\jobname")
                           (set! s
-                           (append (reverse (string->list *jobname*)) s))
+                           (append! (reverse (string->list *jobname*)) s))
                           (begin (toss-back-char *invisible-space*)
                            (toss-back-string x) (return s)))))
                    (else (get-actual-char) (set! s (cons c s)))))
@@ -1537,7 +1541,7 @@
 
 (define (get-word) (ignorespaces)
  (list->string
-  (reverse
+  (reverse!
    (let ((s null))
      (let* ((%loop-returned false)
             (%loop-result 0)
@@ -1576,7 +1580,7 @@
        (unless %loop-returned (get-actual-char))
        (unless %loop-returned (set! s (cons c s)))
        (if %loop-returned %loop-result (%loop))))
-   (when (pair? s) (string->number (list->string (reverse s)) base))))
+   (when (pair? s) (string->number (list->string (reverse! s)) base))))
 
 (define (get-real) (ignorespaces)
  (let ((negative? false) (c (snoop-actual-char)))
@@ -1598,7 +1602,7 @@
                  (else (ignorespaces) (return))))
          (if %loop-returned %loop-result (%loop))))
      (if s
-         (let ((n (string->number (list->string (reverse s)))))
+         (let ((n (string->number (list->string (reverse! s)))))
            (if negative? (- n) n))
          false))))
 
@@ -1678,7 +1682,7 @@
    (when (or (not c) (not (char=? c #\{))) (terror 'get-url "Missing {"))
    (string-trim
     (list->string
-     (reverse
+     (reverse!
       (let ((nesting 0) (s null))
         (let* ((%loop-returned false)
                (%loop-result 0)
@@ -1723,7 +1727,7 @@
                       ((char=? c closing-delim) (toss-back-char c) (return s))
                       (else (set! s (cons c s)))))
               (if %loop-returned %loop-result (%loop)))))))
-   (if (not (null? rev-lbl)) (list->string (reverse rev-lbl)) false)))
+   (if (not (null? rev-lbl)) (list->string (reverse! rev-lbl)) false)))
 
 (define (get-raw-token)
  (let ((c (snoop-actual-char)))
@@ -1814,7 +1818,7 @@
 
 (define (scm-get-token)
  (list->string
-  (reverse
+  (reverse!
    (let ((s null) (esc-p false) (c false))
      (let* ((%loop-returned false)
             (%loop-result 0)
@@ -1839,19 +1843,20 @@
 (define (make-html-output-stream) (make-ostream* ':stream (open-output-string)))
 
 (define (close-html-output-stream op)
- (for-each emit (reverse (ostream*-hbuffer op))) (set!ostream*-hbuffer op null)
+ (for-each emit (reverse! (ostream*-hbuffer op)))
+ (set!ostream*-hbuffer op null)
  (let ((%close-port-arg (ostream*-stream op)))
    ((if (input-port? %close-port-arg) close-input-port close-output-port)
     %close-port-arg)))
 
 (define (html-output-stream-to-string op)
- (for-each emit (reverse (ostream*-hbuffer op))) (set!ostream*-hbuffer op null)
- (get-output-string (ostream*-stream op)))
+ (for-each emit (reverse! (ostream*-hbuffer op)))
+ (set!ostream*-hbuffer op null) (get-output-string (ostream*-stream op)))
 
 (define (emit s)
  (when *emit-enabled-p*
    (let ((p (ostream*-stream *html*)))
-     (for-each (lambda (x) (display x p)) (reverse (ostream*-hbuffer *html*)))
+     (for-each (lambda (x) (display x p)) (reverse! (ostream*-hbuffer *html*)))
      (set!ostream*-hbuffer *html* null)
      (display s p))))
 
@@ -2765,7 +2770,7 @@
  (when *in-para-p*
    (when *use-closing-p-tag-p* (emit "</p>"))
    (unless (null? *afterpar*)
-     (for-each (lambda (ap) (ap)) (reverse *afterpar*))
+     (for-each (lambda (ap) (ap)) (reverse! *afterpar*))
      (set! *afterpar* null))
    (emit-newline)
    (set! *in-para-p* false)))
@@ -3139,7 +3144,7 @@
        (let ((c (get-actual-char)))
          (cond
           ((or (not c) (and newline-p (char=? c #\newline)))
-           (return (list->string (reverse r))))
+           (return (list->string (reverse! r))))
           (newline-p
            (unless (char-whitespace? c)
              (set! r (cons #\  r))
@@ -4199,7 +4204,7 @@
                      (set! %loop-result (and (pair? %args) (car %args))))))
              (let %loop
                ()
-               (when (null? s) (return (list->string (reverse r))))
+               (when (null? s) (return (list->string (reverse! r))))
                (unless %loop-returned
                  (let ((c
                         (let* ((%pop-old-stack s)
@@ -4396,7 +4401,7 @@
    (write-log "Unresolved cross-reference")
    (when (> (length *unresolved-xrefs*) 1) (write-log "s"))
    (write-log ": ")
-   (set! *unresolved-xrefs* (reverse *unresolved-xrefs*))
+   (set! *unresolved-xrefs* (reverse! *unresolved-xrefs*))
    (write-log (car *unresolved-xrefs*))
    (for-each
     (lambda (x) (write-log #\,) (write-log ':separation-space) (write-log x))
@@ -4626,7 +4631,7 @@
                (else (set! y (cons c y))))))
          (unless %loop-returned (set! i (+ i 1)))
          (if %loop-returned %loop-result (%loop)))))
-   (list->string (reverse y))))
+   (list->string (reverse! y))))
 
 (define (expand-html-index)
  (let ((s (get-peeled-group)))
@@ -5882,12 +5887,12 @@
       (let %loop
         ()
         (let ((c (snoop-actual-char)))
-          (when (not c) (return (if (null? r) c (list->string (reverse r)))))
+          (when (not c) (return (if (null? r) c (list->string (reverse! r)))))
           (when (char=? c #\newline)
             (get-actual-char)
-            (return (list->string (reverse r))))
+            (return (list->string (reverse! r))))
           (when (char=? c #\{)
-            (return (string-append (list->string (reverse r)) (get-group))))
+            (return (string-append (list->string (reverse! r)) (get-group))))
           (set! r (cons (get-actual-char) r)))
         (if %loop-returned %loop-result (%loop)))))))
 
@@ -6074,7 +6079,7 @@
                           (set! clause (string-append clause (string c))))))
                       (if %loop-returned %loop-result (%loop))))))
               (if %loop-returned %loop-result (%loop))))
-          (list (reverse or-clauses) else-clause)))))))
+          (list (reverse! or-clauses) else-clause)))))))
 
 (define (do-ifcase)
  (let ((num (get-number)))
@@ -6813,9 +6818,9 @@
        ()
        (let ((c (snoop-actual-char)))
          (cond
-          ((not c) (set! s2 (list->string (reverse s)))
+          ((not c) (set! s2 (list->string (reverse! s)))
            (write-aux (quasiquote (!html-head (unquote s2)))) (return))
-          ((= (catcode c) **escape**) (set! s2 (list->string (reverse s)))
+          ((= (catcode c) **escape**) (set! s2 (list->string (reverse! s)))
            (write-aux (quasiquote (!html-head (unquote s2)))) (set! s null)
            (let ((x (get-ctl-seq)))
              (cond ((string=? x "\\endhtmlheadonly") (return))
@@ -7257,7 +7262,7 @@
            (if (string=? x "\\par")
                (begin (set! params (cons #\newline params))
                 (set! params (cons #\newline params)))
-               (set! params (append (reverse (string->list x)) params)))))
+               (set! params (append (reverse! (string->list x)) params)))))
         ((= (catcode c) **bgroup**) (return))
         (else
          (cond ((char=? c #\newline) (get-actual-char) (ignorespaces))
@@ -7265,11 +7270,11 @@
                (else (get-actual-char)))
          (set! params (cons c params))))
        (if %loop-returned %loop-result (%loop))))
-   (reverse params)))
+   (reverse! params)))
 
 (define (get-till-char c0)
  (list->string
-  (reverse
+  (reverse!
    (let ((s null) (nesting 0) (escape-p false))
      (let* ((%loop-returned false)
             (%loop-result 0)
@@ -7337,7 +7342,7 @@
        (let ((x (get-raw-token)))
          (when (not x) (terror 'get-halign-template "Eof in \\halign"))
          (cond
-          ((string=? x "\\cr") (set! s (cons false s)) (return (reverse s)))
+          ((string=? x "\\cr") (set! s (cons false s)) (return (reverse! s)))
           ((string=? x "#") (set! s (cons true s)))
           ((string=? x "&") (set! s (cons false s)))
           (else (set! s (cons x s)))))
@@ -7486,7 +7491,7 @@
              (set! %loop-result (and (pair? %args) (car %args))))))
      (let %loop
        ()
-       (when outer-loop-done (return (list i (list->string (reverse ss)))))
+       (when outer-loop-done (return (list i (list->string (reverse! ss)))))
        (unless %loop-returned (set! i k) (set! s null))
        (unless %loop-returned
          (let* ((%loop-returned false)
@@ -7531,7 +7536,7 @@
 
 (define (read-macro-args argpat k r)
  (let ((n (length argpat)))
-   (reverse
+   (reverse!
     (let ((k k) (r r))
       (let* ((%loop-returned false)
              (%loop-result 0)
@@ -7665,7 +7670,7 @@
                                      (and (pair? %args) (car %args))))))
                             (let %loop
                               ()
-                              (when (>= j rhs-n) (return (reverse s)))
+                              (when (>= j rhs-n) (return (reverse! s)))
                               (unless %loop-returned
                                 (let ((c (string-ref rhs j)))
                                   (cond
@@ -7673,13 +7678,13 @@
                                     (set! s (cons c s)))
                                    ((and (char=? c #\#) (> (length s) 1))
                                     (return
-                                     (append (reverse s) (cons #\  (aux j)))))
+                                     (append (reverse! s) (cons #\  (aux j)))))
                                    ((= (length s) 1)
                                     (return
-                                     (append (reverse (cons c s))
+                                     (append (reverse! (cons c s))
                                              (aux (add1 j)))))
                                    (else
-                                    (return (append (reverse s) (aux j)))))))
+                                    (return (append (reverse! s) (aux j)))))))
                               (if %loop-returned %loop-result (%loop))))))
                        ((char=? c #\#)
                         (if (= k (sub1 rhs-n))
@@ -9436,9 +9441,9 @@
      (load-tex2page-data-file aux-file)
      (delete-file aux-file)))
  (start-css-file)
- (unless (null? *toc-list*) (set! *toc-list* (reverse *toc-list*)))
- (unless (null? *stylesheets*) (set! *stylesheets* (reverse *stylesheets*)))
- (unless (null? *html-head*) (set! *html-head* (reverse *html-head*))))
+ (unless (null? *toc-list*) (set! *toc-list* (reverse! *toc-list*)))
+ (unless (null? *stylesheets*) (set! *stylesheets* (reverse! *stylesheets*)))
+ (unless (null? *html-head*) (set! *html-head* (reverse! *html-head*))))
 
 (define (update-last-modification-time f)
  (let ((s (file-or-directory-modify-seconds f)))

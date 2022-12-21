@@ -1,4 +1,4 @@
-;last modified 2022-12-19
+;last modified 2022-12-21
 
 (cliiscm-insert
   "#!/usr/bin/env racket
@@ -110,20 +110,17 @@
 (define (seconds-to-human-time s)
   (strftime "%a, %b %e, %Y, %l:%M %p %Z" (seconds->date s)))
 
+;Racket lists are immutable
+(define append! append)
+(define reverse! reverse)
+
 (cliiscm-rename
 
   (*common-lisp-version* *scheme-version*)
-  (nconc append)
-  (nreverse reverse)
+  (nconc append!)
+  (nreverse reverse!)
   (read-from-string string->number)
   (search substring?)
-  (string-to-number string->number)
-  ;(with-output-to-string cl-with-output-to-string)
-
-  )
-
-(cliiscm-rename
-
   (gethash table-get)
   (make-hash-table make-table)
   (maphash table-for-each)
@@ -157,6 +154,13 @@
 
   )
 
+(define list-position
+  (lambda (x s)
+    (let loop ((s s) (i 0))
+      (cond ((null? s) false)
+            ((eq? (car s) x) i)
+            (else (loop (cdr s) (+ i 1)))))))
+
 ;(defstruct structname [field | (field default-value)] ...)
 ;
 ;creates
@@ -169,13 +173,6 @@
 ;in which it case it sets field to init-value.  Otherwise,
 ;it sets field to default-value, if such was provided in
 ;the defstruct call
-
-(define list-position
-  (lambda (x s)
-    (let loop ((s s) (i 0))
-      (cond ((null? s) false)
-            ((eq? (car s) x) i)
-            (else (loop (cdr s) (+ i 1)))))))
 
 (defmacro defstruct (s . ff)
   (let ((s-s (symbol->string s)) (n (length ff)))
@@ -335,23 +332,6 @@
                                     s)))
                       (loop r (cdr dd) s))
                   (loop2 (- q 1) r (cons char s)))))))))
-
-#|
-(define (nreverse s)
-  (let loop ((s s) (r '()))
-    (if (null? s) r
-        (let ((d (cdr s)))
-          (set-cdr! s r)
-          (loop d s)))))
-
-(define (nconc l1 l2)
-  (cond ((null? l1) l2)
-        ((null? l2) l1)
-        (else (let loop ((l1 l1))
-                (let ((l1.cdr (cdr l1)))
-                  (cond ((null? l1.cdr) (set-cdr! l1 l2))
-                        (else (loop l1.cdr))))))))
-|#
 
 (define (string-index s c)
   ;returns the leftmost index of s where c occurs

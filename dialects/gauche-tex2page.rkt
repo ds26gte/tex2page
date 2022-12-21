@@ -1,4 +1,4 @@
-; last change: 2022-12-19
+; last change: 2022-12-21
 
 (scmxlate-cond
   ((eqv? *operating-system* 'unix)
@@ -28,15 +28,8 @@
   )
 
 (scmxlate-rename-define
-  (*january-number* 0)
-  (*anno-domini-at-0* 1900)
   (strftime sys-strftime) 
-  (nreverse reverse!)
-  (nconc append!)
   )
-
-(define (strftime-n fmt s)
-  (sys-strftime fmt (sys-localtime s)))
 
 (define (add1 n) (+ n 1))
 (define (sub1 n) (- n 1))
@@ -110,7 +103,6 @@
                (lambda (x)
                  (and (vector? x) (eq? (vector-ref x 0) ',s))))))))    ))
 
-
 (define (disable-load-for-tex2page f) #f)
 
 (define file-or-directory-modify-seconds
@@ -125,8 +117,6 @@
 (define date-week-day (lambda (tm) (slot-ref tm 'wday)))
 (define date-dst? (lambda (tm) (slot-ref tm 'isdst)))
 (define date-time-zone-offset (lambda (tm) #f))
-
-(define eof (with-input-from-string "" read-char))
 
 (define (string-upcase s)
   (list->string (map char-upcase (string->list s))))

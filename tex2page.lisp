@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221220") ;last change
+(defparameter *tex2page-version* "20221221") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -191,7 +191,6 @@
 (defparameter *aux-file-suffix* "-Z-A.lisp")
 (defparameter *bib-aux-file-suffix* "-Z-B")
 (defparameter *css-file-suffix* "-Z-S.css")
-(defparameter *eval4tex-file-suffix* "-Z-E.lisp")
 ;(defparameter *html-node-prefix* "node_")
 (defparameter *html-node-prefix* "TAG:__tex2page_")
 (defparameter *html-page-suffix* "-Z-H-")
@@ -296,7 +295,6 @@
 (defvar *equation-numbered-p* t)
 (defvar *equation-position* 0)
 (defvar *esc-char-verb* #\|)
-(defvar *eval-for-tex-only-p* nil)
 (defvar *expand-escape-p* nil)
 (defvar *external-label-tables* nil)
 
@@ -487,14 +485,18 @@
   (let ((slash (position #\/ f :test #'char= :from-end t)))
     (when slash (setq f (subseq f (1+ slash))))
     (let ((dot (position #\. f :test #'char= :from-end t)))
-      (if dot (subseq f 0 dot) f))))
+      (if (and dot (> dot 0))
+          (subseq f 0 dot)
+          f))))
 
 (defun file-extension (f)
   (declare (string f))
   (let ((slash (position #\/ f :test #'char= :from-end t))
         (dot (position #\. f :test #'char= :from-end t)))
-    (if (and dot (not (= dot 0)) (or (not slash) (< (1+ slash) dot)))
-        (subseq f dot) nil)))
+    (and dot
+         (not (= dot 0))
+         (or (not slash) (< (1+ slash) dot))
+         (subseq f dot))))
 
 (defun ensure-file-deleted (f)
   (declare (string f))
@@ -1394,7 +1396,6 @@
             (push (cons c n) (texframe*-catcodes y)))
 
           (funcall (if (= n 13) #'activate-cdef #'deactivate-cdef) c))))
-
 
 (defun curr-esc-char ()
   (the fixnum (car (rassoc 0 *catcodes*))))
@@ -5857,11 +5858,12 @@
     (or (and (probe-file file.tex) file.tex)
         (and (probe-file file) file)
         (and (not (null *tex2page-inputs*))
-             (dolist (dir *tex2page-inputs*)
-               (let ((f (string-append dir *directory-separator* file.tex)))
-                 (when (probe-file f) (return f)))
-               (let ((f (string-append dir *directory-separator* file)))
-                 (when (probe-file f) (return f)))))
+             (some (lambda (dir)
+                     (or (let ((f (string-append dir *directory-separator* file.tex)))
+                           (and (probe-file f) f))
+                         (let ((f (string-append dir *directory-separator* file)))
+                           (and (probe-file f) f))))
+                   *tex2page-inputs*))
         (and (not skip-kpathsea) (kpsewhich file)))))
 
 (defun initialize-scm-words ()
@@ -8042,17 +8044,6 @@
 
 ;
 
-(defun eval-for-tex-only ()
-  (setq *eval-for-tex-only-p* t)
-  (do-end-page)
-  (ensure-file-deleted *html-page*) ;??
-  (setq *main-tex-file* nil)
-  (setq *html-page* ".eval4texignore")
-  (setq *html*
-        (make-ostream* :stream
-                     (open *html-page* :direction :output
-                           :if-exists :supersede))))
-
 (defun expand-ctl-seq-into-string (cs)
     (let ((*html* (make-html-output-stream)))
       (do-tex-ctl-seq cs))
@@ -8121,8 +8112,6 @@
     (when run-bibtex-p (run-bibtex))
     ;makeindex
     (when run-makeindex-p (run-makeindex))
-    ;eval4tex
-    (load (string-append *jobname* *eval4tex-file-suffix*) :if-does-not-exist nil)
     ;metapost
     (mapc
      (lambda (f)
@@ -8141,8 +8130,8 @@
      *missing-eps-files*)))
 
 (defun first-file-that-exists (&rest ff)
-  (dolist (f ff)
-    (when (probe-file f) (return f))))
+  (some (lambda (f)
+          (and (probe-file f) f)) ff))
 
 (defun file-in-home (f)
   (let ((home (retrieve-env "HOME")))
@@ -9894,32 +9883,31 @@ Try the commands
 (defun do-epsfbox ()
   (get-bracketed-text-if-any)
   (let ((f (get-filename-possibly-braced)))
-    (unless *eval-for-tex-only-p*
-      (let ((epsf-x-size (get-dimen "\\epsfxsize"))
-            (epsf-y-size (get-dimen "\\epsfysize")))
-        (cond ((and (= epsf-x-size 0) (= epsf-y-size 0))
-               (let ((img-file-stem (next-html-image-file-stem)))
-                 (lazily-make-epsf-image-file f img-file-stem)
-                 (source-img-file img-file-stem)))
-              (t (unless (= epsf-x-size 0) (tex2page-string "\\epsfxsize=0pt"))
-                 (unless (= epsf-y-size 0) (tex2page-string "\\epsfysize=0pt"))
-                 (let ((*imgpreamble-inferred*
-                        (cons :epsfbox *imgpreamble-inferred*)))
-                   (call-with-html-image-stream
-                    (lambda (o)
-                      (unless (= epsf-x-size 0)
-                        (princ "\\epsfxsize=" o)
-                        (princ epsf-x-size o)
-                        (princ "sp" o)
-                        (terpri o))
-                      (unless (= epsf-y-size 0)
-                        (princ "\\epsfysize=" o)
-                        (princ epsf-y-size o)
-                        (princ "sp" o)
-                        (terpri o))
-                      (princ "\\epsfbox{" o)
-                      (princ f o)
-                      (princ #\} o))))))))))
+    (let ((epsf-x-size (get-dimen "\\epsfxsize"))
+          (epsf-y-size (get-dimen "\\epsfysize")))
+      (cond ((and (= epsf-x-size 0) (= epsf-y-size 0))
+             (let ((img-file-stem (next-html-image-file-stem)))
+               (lazily-make-epsf-image-file f img-file-stem)
+               (source-img-file img-file-stem)))
+            (t (unless (= epsf-x-size 0) (tex2page-string "\\epsfxsize=0pt"))
+               (unless (= epsf-y-size 0) (tex2page-string "\\epsfysize=0pt"))
+               (let ((*imgpreamble-inferred*
+                       (cons :epsfbox *imgpreamble-inferred*)))
+                 (call-with-html-image-stream
+                   (lambda (o)
+                     (unless (= epsf-x-size 0)
+                       (princ "\\epsfxsize=" o)
+                       (princ epsf-x-size o)
+                       (princ "sp" o)
+                       (terpri o))
+                     (unless (= epsf-y-size 0)
+                       (princ "\\epsfysize=" o)
+                       (princ epsf-y-size o)
+                       (princ "sp" o)
+                       (terpri o))
+                     (princ "\\epsfbox{" o)
+                     (princ f o)
+                     (princ #\} o)))))))))
 
 (tex-def-prim "\\epsfbox" #'do-epsfbox)
 
@@ -11028,7 +11016,6 @@ Try the commands
         (*equation-numbered-p* t)
         (*equation-position* 0)
         (*esc-char-verb* #\|)
-        (*eval-for-tex-only-p* nil)
         (*external-label-tables* (make-hash-table :test #'equal))
         ;
         (*footnote-list* '())

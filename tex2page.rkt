@@ -274,6 +274,19 @@
          ((char=? (string-ref s i) c) i)
          (else (loop (- i 1))))))
 
+(define (file-stem-name f)
+ (let ((slash (string-reverse-index f #\/)))
+   (when slash (set! f (substring f (add1 slash))))
+   (let ((dot (string-reverse-index f #\.)))
+     (if (and dot (> dot 0)) (substring f 0 dot) f))))
+
+(define (file-extension f)
+ (let ((slash (string-reverse-index f #\/)) (dot (string-reverse-index f #\.)))
+   (and dot
+        (not (= dot 0))
+        (or (not slash) (< (add1 slash) dot))
+        (substring f dot))))
+
 (define (read-6hex i)
  (let* ((x (read i))
         (htmlcolor
@@ -294,7 +307,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221126, ecl.
 
 
-(define *tex2page-version* "20221220")
+(define *tex2page-version* "20221221")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -404,8 +417,6 @@
 (define *bib-aux-file-suffix* "-Z-B")
 
 (define *css-file-suffix* "-Z-S.css")
-
-(define *eval4tex-file-suffix* "-Z-E.lisp")
 
 (define *html-node-prefix* "TAG:__tex2page_")
 
@@ -529,8 +540,6 @@
 (define *equation-position* 0)
 
 (define *esc-char-verb* #\|)
-
-(define *eval-for-tex-only-p* false)
 
 (define *expand-escape-p* false)
 
@@ -812,47 +821,6 @@
 
 (define (gen-temp-string) (set! *temp-string-count* (+ *temp-string-count* 1))
  (string-append "Temp_" (write-to-string *temp-string-count*)))
-
-(define (file-stem-name f)
- (let ((slash
-        (let ((%position-v #\/)
-              (%position-s f)
-              (%ee (list ':test char=? ':from-end true)))
-          (cond
-           ((string? %position-s)
-            (string-reverse-index %position-s %position-v))
-           (else (list-position %position-v %position-s))))))
-   (when slash (set! f (substring f (add1 slash))))
-   (let ((dot
-          (let ((%position-v #\.)
-                (%position-s f)
-                (%ee (list ':test char=? ':from-end true)))
-            (cond
-             ((string? %position-s)
-              (string-reverse-index %position-s %position-v))
-             (else (list-position %position-v %position-s))))))
-     (if dot (substring f 0 dot) f))))
-
-(define (file-extension f)
- (let ((slash
-        (let ((%position-v #\/)
-              (%position-s f)
-              (%ee (list ':test char=? ':from-end true)))
-          (cond
-           ((string? %position-s)
-            (string-reverse-index %position-s %position-v))
-           (else (list-position %position-v %position-s)))))
-       (dot
-        (let ((%position-v #\.)
-              (%position-s f)
-              (%ee (list ':test char=? ':from-end true)))
-          (cond
-           ((string? %position-s)
-            (string-reverse-index %position-s %position-v))
-           (else (list-position %position-v %position-s))))))
-   (if (and dot (not (= dot 0)) (or (not slash) (< (add1 slash) dot)))
-       (substring f dot)
-       false)))
 
 (define (ensure-file-deleted f) (when (file-exists? f) (delete-file f)))
 
@@ -6676,27 +6644,14 @@
      (or (and (file-exists? file.tex) file.tex)
          (and (file-exists? file) file)
          (and (not (null? *tex2page-inputs*))
-              (let ((%dolist-l *tex2page-inputs*) (dir false))
-                (let* ((%loop-returned false)
-                       (%loop-result 0)
-                       (return
-                        (lambda %args
-                          (set! %loop-returned true)
-                          (set! %loop-result (and (pair? %args) (car %args))))))
-                  (let %loop
-                    ()
-                    (if (null? %dolist-l) (return) false)
-                    (unless %loop-returned (set! dir (car %dolist-l)))
-                    (unless %loop-returned (set! %dolist-l (cdr %dolist-l)))
-                    (unless %loop-returned
-                      (let ((f
-                             (string-append dir *directory-separator*
-                              file.tex)))
-                        (when (file-exists? f) (return f))))
-                    (unless %loop-returned
-                      (let ((f (string-append dir *directory-separator* file)))
-                        (when (file-exists? f) (return f))))
-                    (if %loop-returned %loop-result (%loop))))))
+              (ormap
+               (lambda (dir)
+                 (or
+                  (let ((f (string-append dir *directory-separator* file.tex)))
+                    (and (file-exists? f) f))
+                  (let ((f (string-append dir *directory-separator* file)))
+                    (and (file-exists? f) f))))
+               *tex2page-inputs*))
          (and (not skip-kpathsea) (kpsewhich file))))))
 
 (define (initialize-scm-words) (set! *scm-keywords* (make-table ':test equal?))
@@ -8932,29 +8887,6 @@
       (tex2page-file
        (actual-tex-filename f (check-input-file-timestamp-p f)))))))
 
-(define (eval-for-tex-only) (set! *eval-for-tex-only-p* true) (do-end-page)
- (ensure-file-deleted *html-page*) (set! *main-tex-file* false)
- (set! *html-page* ".eval4texignore")
- (set! *html*
-  (make-ostream* ':stream
-   (let* ((%f *html-page*)
-          (%ee (list ':direction ':output ':if-exists ':supersede))
-          (%direction (memv ':direction %ee))
-          (%if-exists (memv ':if-exists %ee))
-          (%if-does-not-exist ':error)
-          (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-     (when %direction (set! %direction (cadr %direction)))
-     (when %if-exists (set! %if-exists (cadr %if-exists)))
-     (when %if-does-not-exist-from-user
-       (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-     (cond
-      ((eqv? %direction ':output)
-       (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-         (delete-file %f))
-       (open-output-file %f))
-      ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-      (else (open-input-file %f)))))))
-
 (define (expand-ctl-seq-into-string cs)
  (fluid-let ((*html* (make-html-output-stream))) (do-tex-ctl-seq cs))
  (html-output-stream-to-string *html*))
@@ -9020,11 +8952,6 @@
               (else false))))
    (when run-bibtex-p (run-bibtex))
    (when run-makeindex-p (run-makeindex))
-   (let* ((%f (string-append *jobname* *eval4tex-file-suffix*))
-          (%ee (list ':if-does-not-exist false))
-          (%if-does-not-exist (cadr (memv ':if-does-not-exist %ee))))
-     (cond ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-           (else (load %f))))
    (for-each
     (lambda (f)
       (when (file-exists? f)
@@ -9041,20 +8968,7 @@
     *missing-eps-files*)))
 
 (define (first-file-that-exists . ff)
- (let ((%dolist-l ff) (f false))
-   (let* ((%loop-returned false)
-          (%loop-result 0)
-          (return
-           (lambda %args
-             (set! %loop-returned true)
-             (set! %loop-result (and (pair? %args) (car %args))))))
-     (let %loop
-       ()
-       (if (null? %dolist-l) (return) false)
-       (unless %loop-returned (set! f (car %dolist-l)))
-       (unless %loop-returned (set! %dolist-l (cdr %dolist-l)))
-       (unless %loop-returned (when (file-exists? f) (return f)))
-       (if %loop-returned %loop-result (%loop))))))
+ (ormap (lambda (f) (and (file-exists? f) f)) ff))
 
 (define (file-in-home f)
  (let ((home (getenv "HOME")))
@@ -11236,33 +11150,32 @@ Try the commands
 
 (define (do-epsfbox) (get-bracketed-text-if-any)
  (let ((f (get-filename-possibly-braced)))
-   (unless *eval-for-tex-only-p*
-     (let ((epsf-x-size (get-dimen "\\epsfxsize"))
-           (epsf-y-size (get-dimen "\\epsfysize")))
-       (cond
-        ((and (= epsf-x-size 0) (= epsf-y-size 0))
-         (let ((img-file-stem (next-html-image-file-stem)))
-           (lazily-make-epsf-image-file f img-file-stem)
-           (source-img-file img-file-stem)))
-        (else (unless (= epsf-x-size 0) (tex2page-string "\\epsfxsize=0pt"))
-         (unless (= epsf-y-size 0) (tex2page-string "\\epsfysize=0pt"))
-         (fluid-let
-          ((*imgpreamble-inferred* (cons ':epsfbox *imgpreamble-inferred*)))
-          (call-with-html-image-stream
-           (lambda (o)
-             (unless (= epsf-x-size 0)
-               (display "\\epsfxsize=" o)
-               (display epsf-x-size o)
-               (display "sp" o)
-               (newline o))
-             (unless (= epsf-y-size 0)
-               (display "\\epsfysize=" o)
-               (display epsf-y-size o)
-               (display "sp" o)
-               (newline o))
-             (display "\\epsfbox{" o)
-             (display f o)
-             (display #\} o))))))))))
+   (let ((epsf-x-size (get-dimen "\\epsfxsize"))
+         (epsf-y-size (get-dimen "\\epsfysize")))
+     (cond
+      ((and (= epsf-x-size 0) (= epsf-y-size 0))
+       (let ((img-file-stem (next-html-image-file-stem)))
+         (lazily-make-epsf-image-file f img-file-stem)
+         (source-img-file img-file-stem)))
+      (else (unless (= epsf-x-size 0) (tex2page-string "\\epsfxsize=0pt"))
+       (unless (= epsf-y-size 0) (tex2page-string "\\epsfysize=0pt"))
+       (fluid-let
+        ((*imgpreamble-inferred* (cons ':epsfbox *imgpreamble-inferred*)))
+        (call-with-html-image-stream
+         (lambda (o)
+           (unless (= epsf-x-size 0)
+             (display "\\epsfxsize=" o)
+             (display epsf-x-size o)
+             (display "sp" o)
+             (newline o))
+           (unless (= epsf-y-size 0)
+             (display "\\epsfysize=" o)
+             (display epsf-y-size o)
+             (display "sp" o)
+             (newline o))
+           (display "\\epsfbox{" o)
+           (display f o)
+           (display #\} o)))))))))
 
 (tex-def-prim "\\epsfbox" do-epsfbox)
 
@@ -12704,7 +12617,6 @@ Try the commands
    (*doctype* *doctype*) (*dotted-counters* (make-table ':test equal?))
    (*dumping-nontex-p* false) (*emit-enabled-p* true) (*equation-number* false)
    (*equation-numbered-p* true) (*equation-position* 0) (*esc-char-verb* #\|)
-   (*eval-for-tex-only-p* false)
    (*external-label-tables* (make-table ':test equal?)) (*footnote-list* null)
    (*footnote-sym* 0)
    (*global-texframe* (make-texframe* ':catcodes *catcodes*))

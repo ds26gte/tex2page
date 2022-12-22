@@ -350,6 +350,22 @@
           ((char=? (string-ref s i) c) i)
           (else (loop (- i 1))))))
 
+(define (file-stem-name f)
+  (let ((slash (string-reverse-index f #\/)))
+    (when slash (set! f (substring f (add1 slash))))
+    (let ((dot (string-reverse-index f #\.)))
+      (if (and dot (> dot 0))
+          (substring f 0 dot)
+          f))))
+
+(define (file-extension f)
+  (let ((slash (string-reverse-index f #\/))
+        (dot (string-reverse-index f #\.)))
+    (and dot
+         (not (= dot 0))
+         (or (not slash) (< (add1 slash) dot))
+         (substring f dot))))
+
 (define (read-6hex i)
   (let* ((x (read i))
          (htmlcolor (string-upcase

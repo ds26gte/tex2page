@@ -2,7 +2,7 @@
 % tex2page macro file for r7rs.tex
 % Dorai Sitaram
 % 18 Dec 2022
-% last change 2022-12-19
+% last change 2022-12-18
 
 \evalh{(!definitely-latex)}
 
@@ -266,7 +266,7 @@ keywords, and procedures}%
 
 \def\backquote{{\tt`}}
 
-\def\hyper##1{<##1>}
+\def\hyper##1{<##1>} 
 
 \renewenvironment{entry}[1]{\par##1}{\par}
 
@@ -321,7 +321,5 @@ keywords, and procedures}%
   \ifnum\clearpagecount=1
   \else\clearpageOG
   \fi}
-
-\newcommand{\var}[1]{\hbox{\it{}#1\/}}
 
 }

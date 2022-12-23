@@ -1,4 +1,4 @@
-; last change 2022-12-21
+; last change 2022-12-23
 abcl ;v 1.5; WORKS!
 allegro ;v 9.0; WORKS!
 ;bigloo
@@ -16,7 +16,7 @@ guile ;v 3.0.8; WORKS!
 ;ikarus
 ;kawa ;not much success, but no recent tries: stack seems to blow fairly easily
 ;larceny
-;mitscheme
+mitscheme ;v 11.2; WORKS!
 mkcl ;v 1.1.10; WORKS!
 petite ;v 9.5.3; WORKS!
 ;plt ;lib version for PLT: not quite yet

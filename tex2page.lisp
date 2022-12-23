@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221221") ;last change
+(defparameter *tex2page-version* "20221223") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -81,17 +81,17 @@
   #+cmucl (ext:run-program "sh" (list "-c" cmd) :output t)
   #+mkcl (mkcl:system cmd))
 
-(defun string=split (p sepc)
-  ;convert a Unix path into a Lisp list
-  (if (not p) '()
-    (let ((p p) (r '()))
-      (loop
-        (let ((i (position sepc p :test #'char=)))
-          (unless i (push p r) (return (nreverse r)))
-          (push (subseq p 0 i) r)
-          (setq p (subseq p (1+ i))))))))
+(defun string=split (s sep)
+  (declare (string s) (character sep))
+  (let ((s s) (r '()))
+    (loop
+      (let ((i (position sep s :test #'char=)))
+        (unless i (push s r) (return (nreverse r)))
+        (push (subseq s 0 i) r)
+        (setq s (subseq s (1+ i)))))))
 
 (defun system-with-visual (cmd)
+  (declare (string cmd))
   (cond #+(or ecl mkcl)
         (t (let ((s (string=split cmd #\space)))
              (#+ecl ext:run-program #+mkcl mkcl:run-program
@@ -11119,7 +11119,7 @@ Try the commands
         (*tex-format* :plain)
         (*tex-if-stack* '())
         (*tex-output-format* nil)
-        (*tex2page-inputs* (string=split (retrieve-env "TEX2PAGEINPUTS") *path-separator*))
+        (*tex2page-inputs* (string=split (or (retrieve-env "TEX2PAGEINPUTS") "") *path-separator*))
         (*title* nil)
         (*toc-list* '())
         (*toc-page* nil)

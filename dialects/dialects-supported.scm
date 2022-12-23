@@ -7,7 +7,7 @@ chez ;v 9.5.3; WORKS!
 chicken ;v 4.10; WORKS!
 clasp
 clisp ;v 2.49; WORKS!
-clozure ;v 1.11; WORKS!
+clozure ;v 1.12.1; WORKS!
 cmucl ;v 20d; WORKS!
 ecl ;v 21.2.1; WORKS!
 gambit ;v 4.9.3; WORKS!

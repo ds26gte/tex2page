@@ -207,24 +207,7 @@
        (let ((c (car al)))
          (if (equ? (car c) k) c (loop (cdr al)))))))
 
-(define-syntax rassoc
- (lambda (%so)
-   (datum->syntax %so
-    (let ((%so-d (syntax->datum %so)))
-      (apply
-       (lambda (k al . z)
-         (quasiquote
-          (scheme-rassoc (unquote k) (unquote al)
-           (unquote (if (null? z) 'eqv? (cadr z))))))
-       (cdr %so-d))))))
-
-(define (scheme-rassoc k al equ)
- (let loop
-   ((al al))
-   (if (null? al)
-       false
-       (let ((c (car al)))
-         (if (equ (cdr c) k) c (loop (cdr al)))))))
+(define (rassoc v al) (ormap (lambda (c) (and (eqv? (cdr c) v) c)) al))
 
 (define (write-to-string n . z)
  (if (pair? z)
@@ -274,6 +257,13 @@
          ((char=? (string-ref s i) c) i)
          (else (loop (- i 1))))))
 
+(define (string=split s sep)
+ (let loop
+   ((s s) (r '()))
+   (let ((i (string-reverse-index s sep)))
+     (cond (i (loop (substring s 0 i) (cons (substring s (+ i 1)) r)))
+           (else (cons s r))))))
+
 (define (file-stem-name f)
  (let ((slash (string-reverse-index f #\/)))
    (when slash (set! f (substring f (add1 slash))))
@@ -307,36 +297,13 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221126, ecl.
 
 
-(define *tex2page-version* "20221221")
+(define *tex2page-version* "20221223")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
 (define *tex2page-copyright-notice*
  (string-append "Copyright (C) 1997-" (substring *tex2page-version* 0 4)
   " Dorai Sitaram"))
-
-(define (string=split p sepc)
- (if (not p)
-     null
-     (let ((p p) (r null))
-       (let* ((%loop-returned false)
-              (%loop-result 0)
-              (return
-               (lambda %args
-                 (set! %loop-returned true)
-                 (set! %loop-result (and (pair? %args) (car %args))))))
-         (let %loop
-           ()
-           (let ((i
-                  (let ((%position-v sepc) (%position-s p))
-                    (cond
-                     ((string? %position-s)
-                      (string-index %position-s %position-v))
-                     (else (list-position %position-v %position-s))))))
-             (unless i (set! r (cons p r)) (return (reverse! r)))
-             (set! r (cons (substring p 0 i) r))
-             (set! p (substring p (add1 i))))
-           (if %loop-returned %loop-result (%loop)))))))
 
 (define (sys-copy-file src dst)
  (system (string-append "cp -p" " " src " " dst)))
@@ -12655,7 +12622,7 @@ Try the commands
    (*tex-env* null) (*tex-format* ':plain) (*tex-if-stack* null)
    (*tex-output-format* false)
    (*tex2page-inputs*
-    (string=split (getenv "TEX2PAGEINPUTS") *path-separator*))
+    (string=split (or (getenv "TEX2PAGEINPUTS") "") *path-separator*))
    (*title* false) (*toc-list* null) (*toc-page* false)
    (*unresolved-xrefs* null) (*using-bibliography-p* false)
    (*using-chapters-p* false) (*using-index-p* false) (*verb-display-p* false)

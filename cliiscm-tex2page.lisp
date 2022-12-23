@@ -1,4 +1,4 @@
-;last modified 2022-12-21
+;last modified 2022-12-23
 
 (cliiscm-insert
   "#!/usr/bin/env racket
@@ -110,7 +110,8 @@
 (define (seconds-to-human-time s)
   (strftime "%a, %b %e, %Y, %l:%M %p %Z" (seconds->date s)))
 
-;Racket lists are immutable
+;Racket lists are immutable; however, keep these nonlossy names so
+;Schemes were lists are mutable can exploit that fact
 (define append! append)
 (define reverse! reverse)
 
@@ -227,11 +228,6 @@
              (lambda (x)
                (and (vector? x) (eq? (vector-ref x 0) ',s)))))))))
 
-#|
-(defmacro cl-with-output-to-string (ignore-wots-arg . body)
-  `(with-output-to-string (lambda () ,@body)))
-|#
-
 (defmacro cl-with-output-to-string (ignore-wots-arg . body)
   (list 'with-output-to-string
         (list* 'lambda '() body)))
@@ -285,15 +281,11 @@
           (if (equ? (car c) k) c
               (loop (cdr al)))))))
 
-(defmacro rassoc (k al . z)
-  `(scheme-rassoc ,k ,al ,(if (null? z) 'eqv? (cadr z))))
-
-(define (scheme-rassoc k al equ)
-  (let loop ((al al))
-    (if (null? al) false
-        (let ((c (car al)))
-          (if (equ (cdr c) k) c
-              (loop (cdr al)))))))
+(define (rassoc v al)
+  ;we only use it on alists where the values are eqv-able
+  (ormap (lambda (c)
+           (and (eqv? (cdr c) v) c))
+         al))
 
 (define (write-to-string n . z)
   (if (pair? z)
@@ -349,6 +341,12 @@
     (cond ((< i 0) false)
           ((char=? (string-ref s i) c) i)
           (else (loop (- i 1))))))
+
+(define (string=split s sep)
+  (let loop ((s s) (r '()))
+    (let ((i (string-reverse-index s sep)))
+      (cond (i (loop (substring s 0 i) (cons (substring s (+ i 1)) r)))
+            (else (cons s r))))))
 
 (define (file-stem-name f)
   (let ((slash (string-reverse-index f #\/)))

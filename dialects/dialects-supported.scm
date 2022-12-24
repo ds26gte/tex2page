@@ -1,8 +1,8 @@
-; last change 2022-12-23
-abcl ;v 1.5; WORKS!
+; last change 2022-12-24
+abcl ;v 1.9.0; WORKS!
 allegro ;v 9.0; WORKS!
 ;bigloo
-chez ;v 9.5.3; WORKS!
+chez ;v 9.5.9; WORKS!
 ;chibi ;v 0.10.0
 chicken ;v 4.10; WORKS!
 clasp
@@ -18,7 +18,7 @@ guile ;v 3.0.8; WORKS!
 ;larceny
 mitscheme ;v 11.2; WORKS!
 mkcl ;v 1.1.10; WORKS!
-petite ;v 9.5.3; WORKS!
+petite ;v 9.5.9; WORKS!
 ;plt ;lib version for PLT: not quite yet
 ;pscheme
 racket ;v 8.6; WORKS!
@@ -29,7 +29,7 @@ sbcl-compiled ;v 2.2.3; WORKS!
 ;scm ;v 5f3
 ;scsh
 ;stk ;RIP?
-;stklos ;not sure
+stklos ;v 1.70; WORKS!
 ;sxm
 ;umbscheme
 ;ypsilon ;does not work; token buffer overflows while reading string

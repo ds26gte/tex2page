@@ -1,4 +1,4 @@
-; last change: 2022-12-21
+; last change: 2022-12-24
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -108,8 +108,6 @@
                (file-info-last-modification-time (file-info f)))))))
 
 (scmxlate-include "seconds-to-date.scm")
-
-(define strftime strftime-like)
 
 (define eval1
   (lambda (e)

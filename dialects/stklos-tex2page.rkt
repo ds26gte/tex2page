@@ -1,28 +1,31 @@
-;last change: 2003-06-21
+;last change: 2022-12-24
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
   (scmxlate-insert
-   "\":\"; exec stklos -f $0 -- \"$@\""
-   "
+    "#!/usr/bin/env stklos-script
+    ")))
 
-")))
+(define *scheme-version*
+  (string-append "STklos " (version)))
 
-(define *scheme-version* "STklos")
-
-
-(scmxlate-ignore
- table
- main
- call-with-input-string
- with-output-to-port)
+(scmxlate-ignore-define
+  *tex2page-namespace*
+  table
+  )
 
 (scmxlate-uncall
- require)
+  define-namespace-anchor
+  require
+  tex2page)
 
-(scmxlate-rename-define
- (table-put! hash-table-put!)
- (table-for-each hash-table-for-each))
+(scmxlate-rename
+  (ormap any)
+  (substring subseq)
+  )
+
+(define (eval1 e)
+  (eval e (interaction-environment)))
 
 (define make-table
   (lambda z
@@ -31,77 +34,56 @@
         (make-hash-table (cadr z)))))
 
 (define table-get
-  (lambda (ht k . d)
-    (hash-table-get ht k
-                    (if (null? d) #f (car d)))))
+  (lambda (k ht . d)
+    (hash-table-ref ht k
+                    (lambda ()
+                      (if (null? d) #f (car d))))))
 
-(define andmap every)
+(define (table-put! k tbl v)
+  (hash-table-set! tbl k v))
 
-(scmxlate-rename
- ;STKlos seems to have primitives named emit, main
- (emit em1t) 
- (main ma1n)
- (string-index str1ng-index)
- (ormap any)
- (andmap every)
- ;label as a struct name fails (?)
- (label lab3l)
- (make-label make-lab3l)
- (label.src lab3l.src)
- (label.page lab3l.page)
- (label.name lab3l.name)
- (label.value lab3l.value)
- )
+(define (table-for-each p tbl)
+  (hash-table-for-each tbl p))
 
-(define get-arg1
-  (lambda ()
-    (let ((pa (argv)))
-      ;argv used to be a vector in older versions
-      (cond ((vector? pa)
-             (and (> (vector-length pa) 0) (vector-ref pa 0)))
-            ((list? pa)
-             (and (> (length pa) 0) (list-ref pa 0)))))))
+(define (add1 n) (+ n 1))
+(define (sub1 n) (- n 1))
 
-(scmxlate-cond
- ((eqv? *operating-system* 'unix)
-  (define delete-file
-    (lambda (f)
-      (system (string-append "rm " f))))
-  )
+(define (string-trim s)
+  (let ((orig-n (string-length s)))
+    (let ((i 0) (n orig-n))
+      (let loop ((k i))
+        (cond ((>= k n) (set! i n))
+              ((char-whitespace? (string-ref s k))
+               (loop (+ k 1)))
+              (else (set! i k))))
+      (let loop ((k (- n 1)))
+        (cond ((<= k i) (set! n (+ k 1)))
+              ((char-whitespace? (string-ref s k))
+               (loop (- k 1)))
+              (else (set! n (+ k 1)))))
+      (if (and (= i 0) (= n orig-n)) s
+        (substring s i n)))))
 
-((eqv? *operating-system* 'windows)
- (define delete-file
-   (lambda (f)
-     (system (string-append "del " f))))
- ))
+(define (subseq s i . z)
+  (let ((f (if (pair? z) (car z) (string-length s))))
+    (substring s i f)))
 
-;(define delete-file
-;  (lambda (f) #t))
-
+(define (string=split s sep)
+  (string-split s (string sep)))
 
 (define file-or-directory-modify-seconds
-  (lambda (f) #f))
-
-(define eof (call-with-input-string "" read))
-
-;(define reverse!
-;  (lambda (s)
-;    (let loop ((s s) (r '()))
-;      (if (null? s) r
-;	  (let ((d (cdr s)))
-;            (set-cdr! s r)
-;	    (loop d s))))))
-
-;(define ormap
-;  (lambda (f s)
-;    ;Returns true if f is true of some elt in s
-;    (let loop ((s s))
-;      (if (null? s) #f
-;        (or (f (car s)) (loop (cdr s)))))))
-
+  (lambda (f)
+    (let-values ([(tmpf o) (create-temp-file)])
+      (close-port o)
+      (system (string-append "stat -c %W " f " > " tmpf))
+      (let ([n (call-with-input-file tmpf read)])
+        (delete-file tmpf)
+        n))))
 
 (scmxlate-include "seconds-to-date.scm")
 
 (scmxlate-postamble)
 
-(tex2page (get-arg1))
+(let ((pa (argv)))
+  (when (> (length pa) 0)
+    (tex2page (car pa))))

@@ -1,4 +1,4 @@
-;last modified 2022-12-23
+;last modified 2022-12-24
 
 (cliiscm-insert
   "#!/usr/bin/env racket
@@ -111,7 +111,7 @@
   (strftime "%a, %b %e, %Y, %l:%M %p %Z" (seconds->date s)))
 
 ;Racket lists are immutable; however, keep these nonlossy names so
-;Schemes were lists are mutable can exploit that fact
+;Schemes where lists are mutable can exploit that fact
 (define append! append)
 (define reverse! reverse)
 
@@ -176,21 +176,25 @@
 ;the defstruct call
 
 (defmacro defstruct (s . ff)
-  (let ((s-s (symbol->string s)) (n (length ff)))
+  (let ((string-to-keyword
+          (lambda (s)
+            (if (symbol? ':shibboleth) ;i.e., not STklos
+                (string->symbol (string-append ":" s))
+                (string->keyword s))))
+        (s-s (symbol->string s)) (n (length ff)))
     (let* ((n+1 (+ n 1))
            (vv (make-vector n+1)))
       (let loop ((i 1) (ff ff))
         (if (< i n+1)
             (let ((f (car ff)))
-              (vector-set! vv i (if (pair? f) (cadr f) (not 't)))
+              (vector-set! vv i (and (pair? f) (cadr f)))
               (loop (+ i 1) (cdr ff)))
             0))
       (let* ((ff-without-colons
                (map (lambda (f)
                       (symbol->string (if (pair? f) (car f) f))) ff))
              (ff-with-colons
-               (map (lambda (f)
-                      (string->symbol (string-append ":" f)))
+               (map string-to-keyword
                     ff-without-colons)))
         `(begin
            (define ,(string->symbol (string-append "make-" s-s))

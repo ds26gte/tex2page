@@ -81,22 +81,26 @@
     (let ((%so-d (syntax->datum %so)))
       (apply
        (lambda (s . ff)
-         (let ((s-s (symbol->string s)) (n (length ff)))
+         (let ((string-to-keyword
+                (lambda (s)
+                  (if (symbol? ':shibboleth)
+                      (string->symbol (string-append ":" s))
+                      (string->keyword s))))
+               (s-s (symbol->string s))
+               (n (length ff)))
            (let* ((n+1 (+ n 1)) (vv (make-vector n+1)))
              (let loop
                ((i 1) (ff ff))
                (if (< i n+1)
                    (let ((f (car ff)))
-                     (vector-set! vv i (if (pair? f) (cadr f) (not 't)))
+                     (vector-set! vv i (and (pair? f) (cadr f)))
                      (loop (+ i 1) (cdr ff)))
                    0))
              (let* ((ff-without-colons
                      (map
                       (lambda (f) (symbol->string (if (pair? f) (car f) f)))
                       ff))
-                    (ff-with-colons
-                     (map (lambda (f) (string->symbol (string-append ":" f)))
-                          ff-without-colons)))
+                    (ff-with-colons (map string-to-keyword ff-without-colons)))
                (quasiquote
                 (begin
                  (define (unquote (string->symbol (string-append "make-" s-s)))

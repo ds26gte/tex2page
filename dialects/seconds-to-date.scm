@@ -1,4 +1,5 @@
-;last change: 2003-05-31
+;last change: 2022-12-24
+;created < 2003-05-31
 
 (define *days-in-a-mo*
   (vector 31 28 31 30 31 30
@@ -12,7 +13,6 @@
     (or (and (= (modulo y 4) 0)
              (> (modulo y 100) 0))
         (= (modulo y 400) 0))))
-
 
 (define seconds->date
   ;decode-seconds-since-epoch
@@ -59,7 +59,7 @@
                           (loop (- d d2) (+ mo 1))
                           ;we're in the right month.  the days
                           ;not subtracted give day-of-month.
-                          ;but we want days to be 1-based, not 0-based, 
+                          ;but we want days to be 1-based, not 0-based,
                           ;so add 1.  Years are
                           ;1900-based, so subtract
                           ;1900.
@@ -79,7 +79,7 @@
 (define date-year (lambda (v) (vector-ref v 5)))
 (define date-week-day (lambda (v) (vector-ref v 6)))
 
-;The time struct returned follows POSIX convention. 
+;The time struct returned follows POSIX convention.
 ;In particular, January is 0, Sunday is 0, and the
 ;years are those since 1900 C.E.
 
@@ -94,3 +94,6 @@
 (define *anno-domini-at-0* 1900)
 
 (scmxlate-include "fake-strftime.scm")
+
+(scmxlate-rename-define
+  (strftime strftime-like))

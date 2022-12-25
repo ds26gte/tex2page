@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221223") ;last change
+(defparameter *tex2page-version* "20221225") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -505,26 +505,30 @@
 (defun write-aux (e)
   (unless *aux-stream*
     (let ((f (string-append *aux-dir/* *jobname* *aux-file-suffix*)))
-      (setq *aux-stream* (open f :direction :output :if-exists :supersede))))
+      (ensure-file-deleted f)
+      (setq *aux-stream* (open f :direction :output))))
   (prin1 e *aux-stream*) (terpri *aux-stream*))
 
 (defun write-label (e)
   (unless *label-stream*
     (let ((f (string-append *aux-dir/* *jobname* *label-file-suffix*)))
-      (setq *label-stream* (open f :direction :output :if-exists :supersede))))
+      (ensure-file-deleted f)
+      (setq *label-stream* (open f :direction :output))))
   (prin1 e *label-stream*)
   (terpri *label-stream*))
 
 (defun write-bib-aux (x)
   (unless *bib-aux-stream*
     (let ((f (string-append *aux-dir/* *jobname* *bib-aux-file-suffix* ".aux")))
-      (setq *bib-aux-stream* (open f :direction :output :if-exists :supersede))))
+      (ensure-file-deleted f)
+      (setq *bib-aux-stream* (open f :direction :output))))
   (princ x *bib-aux-stream*))
 
 (defun write-log (x &optional log-file-only-p)
   (unless *log-stream*
-    (setq *log-file* (string-append *aux-dir/* *jobname* ".hlog")
-          *log-stream* (open *log-file* :direction :output :if-exists :supersede)))
+    (setq *log-file* (string-append *aux-dir/* *jobname* ".hlog"))
+    (ensure-file-deleted *log-file*)
+    (setq *log-stream* (open *log-file* :direction :output)))
   (when (and *write-log-possible-break-p* (characterp x)
              (member x '(#\) #\] #\} #\,) :test #'char=))
     (setq *write-log-possible-break-p* nil))
@@ -4431,10 +4435,10 @@
                   (string-append *aux-dir/* *jobname* *html-page-suffix*
                     (write-to-string *html-page-count*)
                     *output-extension*))
+            (ensure-file-deleted *html-page*)
             (setq *html*
                   (make-ostream* :stream
-                               (open *html-page* :direction :output
-                                     :if-exists :supersede)))
+                               (open *html-page* :direction :output)))
             (do-start)))))
 
 ;(trace do-eject)
@@ -4837,8 +4841,8 @@
   (declare (function p))
   (let* ((img-file-stem (next-html-image-file-stem))
          (aux-tex-file (string-append img-file-stem ".tex")))
-    (with-open-file (o aux-tex-file :direction :output
-                       :if-exists :supersede)
+    (ensure-file-deleted aux-tex-file)
+    (with-open-file (o aux-tex-file :direction :output)
       (dump-tex-preamble o)
       (funcall p o)
       (dump-tex-postamble o))
@@ -5046,8 +5050,8 @@
 (defun dump-imgdef (f)
   (declare (string f))
   (let ((aux-tex-file (string-append f ".tex")))
-    (with-open-file (o aux-tex-file :direction :output
-                       :if-exists :supersede)
+    (ensure-file-deleted aux-tex-file)
+    (with-open-file (o aux-tex-file :direction :output)
       (dump-tex-preamble o)
       (princ (ungroup (get-group)) o)
       (dump-tex-postamble o))))
@@ -5083,7 +5087,8 @@
           (ecase type
             (:out
              (setq f (add-dot-tex-if-no-extension-provided f))
-             (open f :direction :output :if-exists :supersede))
+             (ensure-file-deleted f)
+             (open f :direction :output))
             (:in
              (setq f (actual-tex-filename f))
              (make-istream* :stream (open f :direction :input)))))))
@@ -5515,8 +5520,8 @@
 
 (defun call-with-lazy-image-stream (eps-file img-file-stem p)
   (let ((aux-tex-file (string-append img-file-stem ".tex")))
-    (with-open-file (o aux-tex-file :direction :output
-                       :if-exists :supersede)
+    (ensure-file-deleted aux-tex-file)
+    (with-open-file (o aux-tex-file :direction :output)
       (dump-tex-preamble o)
       (funcall p o)
       (dump-tex-postamble o))
@@ -5630,8 +5635,8 @@
   (setq *mfpic-file-stem* (get-filename-possibly-braced))
   (when *mfpic-stream* (close *mfpic-stream*))
   (let ((f (string-append *mfpic-file-stem* *mfpic-tex-file-suffix*)))
-    (setq *mfpic-stream* (open f :direction :output
-                             :if-exists :supersede)))
+    (ensure-file-deleted f)
+    (setq *mfpic-stream* (open f :direction :output)))
   (setq *mfpic-file-num* 0)
   (princ "\\input mfpic \\usemetapost " *mfpic-stream*)
   (terpri *mfpic-stream*)
@@ -7138,13 +7143,14 @@
     (when *verb-stream* (close *verb-stream*))
     (push f *verb-written-files*)
     (when (string-equal e ".mp") (push f *mp-files*))
-    (setq *verb-stream* (open f :direction :output :if-exists :supersede))))
+    (ensure-file-deleted f)
+    (setq *verb-stream* (open f :direction :output))))
 
 (defun verb-ensure-output-stream ()
   (unless *verb-stream*
     (let ((output-file (string-append *jobname* ".txt")))
-      (setq *verb-stream* (open output-file :direction :output
-                              :if-exists :supersede)))))
+      (ensure-file-deleted output-file)
+      (setq *verb-stream* (open output-file :direction :output)))))
 
 (defun dump-groupoid (p)
   (declare (stream p))
@@ -8495,8 +8501,8 @@
         }
         ")
           (let ((css-file (string-append *aux-dir/* *jobname* *css-file-suffix*)))
-            (setq *css-stream* (open css-file :direction :output
-                                     :if-exists :supersede))
+            (ensure-file-deleted css-file)
+            (setq *css-stream* (open css-file :direction :output))
             (unless (or (tex2page-flag-boolean "\\TIIPsinglepage")
                         (tex2page-flag-boolean "\\TZPsinglepage"))
               (princ *basic-style* *css-stream*))))
@@ -8689,48 +8695,49 @@
   (setq *infructuous-calls-to-tex2page* n))
 
 (defun load-tex2page-data-file (f)
-  (with-open-file (i f :direction :input :if-does-not-exist nil)
-    (when i
-      (let ((*current-source-file* f) (*input-line-no* 0)
-                                      e directive)
-        (loop
-          (setq e (read i nil nil))
-          (unless e (return))
-          (setq directive (car e))
-          (incf *input-line-no*)
-          (apply
-            (case directive
-              (!colophon #'!colophon)
-              (!default-title #'!default-title)
-              (!definitely-latex #'!definitely-latex)
-              (!doctype #'!doctype)
-              (!external-labels #'!external-labels)
-              (!foot-line #'!foot-line)
-              (!head-line #'!head-line)
-              (!html-head #'!html-head)
-              (!html-redirect #'!html-redirect)
-              (!index #'!index)
-              (!index-page #'!index-page)
-              (!infructuous-calls-to-tex2page #'!infructuous-calls-to-tex2page)
-              (!label #'!label)
-              (!lang #'!lang)
-              (!last-modification-time #'!last-modification-time)
-              (!last-page-number #'!last-page-number)
-              (!opmac-iis #'!opmac-iis)
-              (!preferred-title #'!preferred-title)
-              (!script #'!script)
-              (!single-page #'!single-page)
-              (!slides #'!slides)
-              (!stylesheet #'!stylesheet)
-              (!tex-like-layout #'!tex-like-layout)
-              (!tex-text #'!tex-text)
-              (!toc-entry #'!toc-entry)
-              (!toc-page #'!toc-page)
-              (!using-chapters #'!using-chapters)
-              (!using-external-program #'!using-external-program)
-              (t (terror 'load-tex2page-data-file
-                         "Fatal aux file error " directive "; I'm stymied.")))
-            (cdr e)))))))
+  (when (probe-file f)
+    (with-open-file (i f :direction :input)
+      (when i
+        (let ((*current-source-file* f) (*input-line-no* 0)
+                                        e directive)
+          (loop
+            (setq e (read i nil nil))
+            (unless e (return))
+            (setq directive (car e))
+            (incf *input-line-no*)
+            (apply
+              (case directive
+                (!colophon #'!colophon)
+                (!default-title #'!default-title)
+                (!definitely-latex #'!definitely-latex)
+                (!doctype #'!doctype)
+                (!external-labels #'!external-labels)
+                (!foot-line #'!foot-line)
+                (!head-line #'!head-line)
+                (!html-head #'!html-head)
+                (!html-redirect #'!html-redirect)
+                (!index #'!index)
+                (!index-page #'!index-page)
+                (!infructuous-calls-to-tex2page #'!infructuous-calls-to-tex2page)
+                (!label #'!label)
+                (!lang #'!lang)
+                (!last-modification-time #'!last-modification-time)
+                (!last-page-number #'!last-page-number)
+                (!opmac-iis #'!opmac-iis)
+                (!preferred-title #'!preferred-title)
+                (!script #'!script)
+                (!single-page #'!single-page)
+                (!slides #'!slides)
+                (!stylesheet #'!stylesheet)
+                (!tex-like-layout #'!tex-like-layout)
+                (!tex-text #'!tex-text)
+                (!toc-entry #'!toc-entry)
+                (!toc-page #'!toc-page)
+                (!using-chapters #'!using-chapters)
+                (!using-external-program #'!using-external-program)
+                (t (terror 'load-tex2page-data-file
+                           "Fatal aux file error " directive "; I'm stymied.")))
+              (cdr e))))))))
 
 (defun tex2page-help (not-a-file)
   (unless not-a-file (setq not-a-file "--missing-arg"))
@@ -9773,8 +9780,8 @@ Try the commands
     (unless *index-stream*
       (let ((idx-file (string-append *aux-dir/* *jobname*
                         *index-file-suffix* ".idx")))
-        (setq *index-stream* (open idx-file :direction :output
-                                 :if-exists :supersede))))
+        (ensure-file-deleted idx-file)
+        (setq *index-stream* (open idx-file :direction :output))))
     (princ "\\indexentry{" *index-stream*)
     (cond ((or (search "|see{" idx-entry)
                (search "|seealso{" idx-entry))
@@ -11154,9 +11161,9 @@ Try the commands
             (setq *subjobname* *jobname*
                   *html-page*
                   (string-append *aux-dir/* *jobname* *output-extension*))
+            (ensure-file-deleted *html-page*)
             (setq *html* (make-ostream* :stream
-                                      (open *html-page* :direction :output
-                                            :if-exists :supersede)))
+                                      (open *html-page* :direction :output)))
             (do-start)
             (let ((*html-only* (1+ *html-only*)))
               (tex2page-file-if-exists (file-in-home ".tex2page.t2p"))

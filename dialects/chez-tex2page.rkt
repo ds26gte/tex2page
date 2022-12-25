@@ -1,4 +1,4 @@
-; last change: 2022-12-23
+; last change: 2022-12-25
 
 (scmxlate-eval
  (define *chez-name*
@@ -39,6 +39,10 @@
   (error petite-error)
   (get-char t2p-get-char)
   (substring subseq)
+  )
+
+(scmxlate-rename-define
+  (ensure-file-deleted delete-file)
   )
 
 (define (eval1 e)

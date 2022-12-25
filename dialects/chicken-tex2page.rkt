@@ -31,6 +31,9 @@
   tex2page
   )
 
+(scmxlate-rename-define
+  (ensure-file-deleted delete-file*))
+
 (scmxlate-rename
   ; (remove chicken-remove)
   (seconds->date seconds->local-time)

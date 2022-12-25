@@ -301,7 +301,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221126, ecl.
 
 
-(define *tex2page-version* "20221223")
+(define *tex2page-version* "20221225")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -798,70 +798,22 @@
 (define (write-aux e)
  (unless *aux-stream*
    (let ((f (string-append *aux-dir/* *jobname* *aux-file-suffix*)))
-     (set! *aux-stream*
-      (let* ((%f f)
-             (%ee (list ':direction ':output ':if-exists ':supersede))
-             (%direction (memv ':direction %ee))
-             (%if-exists (memv ':if-exists %ee))
-             (%if-does-not-exist ':error)
-             (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-        (when %direction (set! %direction (cadr %direction)))
-        (when %if-exists (set! %if-exists (cadr %if-exists)))
-        (when %if-does-not-exist-from-user
-          (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-        (cond
-         ((eqv? %direction ':output)
-          (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-            (delete-file %f))
-          (open-output-file %f))
-         ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-         (else (open-input-file %f)))))))
+     (ensure-file-deleted f)
+     (set! *aux-stream* (open-output-file f))))
  (write e *aux-stream*) (newline *aux-stream*))
 
 (define (write-label e)
  (unless *label-stream*
    (let ((f (string-append *aux-dir/* *jobname* *label-file-suffix*)))
-     (set! *label-stream*
-      (let* ((%f f)
-             (%ee (list ':direction ':output ':if-exists ':supersede))
-             (%direction (memv ':direction %ee))
-             (%if-exists (memv ':if-exists %ee))
-             (%if-does-not-exist ':error)
-             (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-        (when %direction (set! %direction (cadr %direction)))
-        (when %if-exists (set! %if-exists (cadr %if-exists)))
-        (when %if-does-not-exist-from-user
-          (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-        (cond
-         ((eqv? %direction ':output)
-          (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-            (delete-file %f))
-          (open-output-file %f))
-         ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-         (else (open-input-file %f)))))))
+     (ensure-file-deleted f)
+     (set! *label-stream* (open-output-file f))))
  (write e *label-stream*) (newline *label-stream*))
 
 (define (write-bib-aux x)
  (unless *bib-aux-stream*
    (let ((f (string-append *aux-dir/* *jobname* *bib-aux-file-suffix* ".aux")))
-     (set! *bib-aux-stream*
-      (let* ((%f f)
-             (%ee (list ':direction ':output ':if-exists ':supersede))
-             (%direction (memv ':direction %ee))
-             (%if-exists (memv ':if-exists %ee))
-             (%if-does-not-exist ':error)
-             (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-        (when %direction (set! %direction (cadr %direction)))
-        (when %if-exists (set! %if-exists (cadr %if-exists)))
-        (when %if-does-not-exist-from-user
-          (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-        (cond
-         ((eqv? %direction ':output)
-          (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-            (delete-file %f))
-          (open-output-file %f))
-         ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-         (else (open-input-file %f)))))))
+     (ensure-file-deleted f)
+     (set! *bib-aux-stream* (open-output-file f))))
  (display x *bib-aux-stream*))
 
 (define (write-log x . %lambda-rest-arg)
@@ -870,24 +822,8 @@
      (set! log-file-only-p (list-ref %lambda-rest-arg 0)))
    (unless *log-stream*
      (set! *log-file* (string-append *aux-dir/* *jobname* ".hlog"))
-     (set! *log-stream*
-      (let* ((%f *log-file*)
-             (%ee (list ':direction ':output ':if-exists ':supersede))
-             (%direction (memv ':direction %ee))
-             (%if-exists (memv ':if-exists %ee))
-             (%if-does-not-exist ':error)
-             (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-        (when %direction (set! %direction (cadr %direction)))
-        (when %if-exists (set! %if-exists (cadr %if-exists)))
-        (when %if-does-not-exist-from-user
-          (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-        (cond
-         ((eqv? %direction ':output)
-          (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-            (delete-file %f))
-          (open-output-file %f))
-         ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-         (else (open-input-file %f))))))
+     (ensure-file-deleted *log-file*)
+     (set! *log-stream* (open-output-file *log-file*)))
    (when
        (and *write-log-possible-break-p*
             (char? x)
@@ -4958,25 +4894,8 @@
      (set! *html-page*
       (string-append *aux-dir/* *jobname* *html-page-suffix*
        (write-to-string *html-page-count*) *output-extension*))
-     (set! *html*
-      (make-ostream* ':stream
-       (let* ((%f *html-page*)
-              (%ee (list ':direction ':output ':if-exists ':supersede))
-              (%direction (memv ':direction %ee))
-              (%if-exists (memv ':if-exists %ee))
-              (%if-does-not-exist ':error)
-              (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-         (when %direction (set! %direction (cadr %direction)))
-         (when %if-exists (set! %if-exists (cadr %if-exists)))
-         (when %if-does-not-exist-from-user
-           (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-         (cond
-          ((eqv? %direction ':output)
-           (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-             (delete-file %f))
-           (open-output-file %f))
-          ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-          (else (open-input-file %f))))))
+     (ensure-file-deleted *html-page*)
+     (set! *html* (make-ostream* ':stream (open-output-file *html-page*)))
      (do-start)))))
 
 (define (output-html-preamble)
@@ -5342,26 +5261,8 @@
    (when (< 0 %lambda-rest-arg-len) (set! alt (list-ref %lambda-rest-arg 0)))
    (let ((img-file-stem (next-html-image-file-stem)))
      (let ((aux-tex-file (string-append img-file-stem ".tex")))
-       (let ((o
-              (let* ((%f aux-tex-file)
-                     (%ee (list ':direction ':output ':if-exists ':supersede))
-                     (%direction (memv ':direction %ee))
-                     (%if-exists (memv ':if-exists %ee))
-                     (%if-does-not-exist ':error)
-                     (%if-does-not-exist-from-user
-                      (memv ':if-does-not-exist %ee)))
-                (when %direction (set! %direction (cadr %direction)))
-                (when %if-exists (set! %if-exists (cadr %if-exists)))
-                (when %if-does-not-exist-from-user
-                  (set! %if-does-not-exist
-                   (cadr %if-does-not-exist-from-user)))
-                (cond
-                 ((eqv? %direction ':output)
-                  (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-                    (delete-file %f))
-                  (open-output-file %f))
-                 ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-                 (else (open-input-file %f))))))
+       (ensure-file-deleted aux-tex-file)
+       (let ((o (open-output-file aux-tex-file)))
          (let ((%with-open-file-res
                 (begin (dump-tex-preamble o) (p o) (dump-tex-postamble o))))
            (when o ((if (input-port? o) close-input-port close-output-port) o))
@@ -5663,24 +5564,8 @@
 
 (define (dump-imgdef f)
  (let ((aux-tex-file (string-append f ".tex")))
-   (let ((o
-          (let* ((%f aux-tex-file)
-                 (%ee (list ':direction ':output ':if-exists ':supersede))
-                 (%direction (memv ':direction %ee))
-                 (%if-exists (memv ':if-exists %ee))
-                 (%if-does-not-exist ':error)
-                 (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-            (when %direction (set! %direction (cadr %direction)))
-            (when %if-exists (set! %if-exists (cadr %if-exists)))
-            (when %if-does-not-exist-from-user
-              (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-            (cond
-             ((eqv? %direction ':output)
-              (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-                (delete-file %f))
-              (open-output-file %f))
-             ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-             (else (open-input-file %f))))))
+   (ensure-file-deleted aux-tex-file)
+   (let ((o (open-output-file aux-tex-file)))
      (let ((%with-open-file-res
             (begin (dump-tex-preamble o) (display (ungroup (get-group)) o)
              (dump-tex-postamble o))))
@@ -5728,26 +5613,8 @@
             (case type
               ((:out)
                (set! f (add-dot-tex-if-no-extension-provided f))
-               (let* ((%f f)
-                      (%ee (list ':direction ':output ':if-exists ':supersede))
-                      (%direction (memv ':direction %ee))
-                      (%if-exists (memv ':if-exists %ee))
-                      (%if-does-not-exist ':error)
-                      (%if-does-not-exist-from-user
-                       (memv ':if-does-not-exist %ee)))
-                 (when %direction (set! %direction (cadr %direction)))
-                 (when %if-exists (set! %if-exists (cadr %if-exists)))
-                 (when %if-does-not-exist-from-user
-                   (set! %if-does-not-exist
-                    (cadr %if-does-not-exist-from-user)))
-                 (cond
-                  ((eqv? %direction ':output)
-                   (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-                     (delete-file %f))
-                   (open-output-file %f))
-                  ((and (not %if-does-not-exist) (not (file-exists? %f)))
-                   false)
-                  (else (open-input-file %f)))))
+               (ensure-file-deleted f)
+               (open-output-file f))
               ((:in)
                (set! f (actual-tex-filename f))
                (make-istream* ':stream (open-input-file f)))
@@ -6213,24 +6080,8 @@
 
 (define (call-with-lazy-image-stream eps-file img-file-stem p)
  (let ((aux-tex-file (string-append img-file-stem ".tex")))
-   (let ((o
-          (let* ((%f aux-tex-file)
-                 (%ee (list ':direction ':output ':if-exists ':supersede))
-                 (%direction (memv ':direction %ee))
-                 (%if-exists (memv ':if-exists %ee))
-                 (%if-does-not-exist ':error)
-                 (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-            (when %direction (set! %direction (cadr %direction)))
-            (when %if-exists (set! %if-exists (cadr %if-exists)))
-            (when %if-does-not-exist-from-user
-              (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-            (cond
-             ((eqv? %direction ':output)
-              (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-                (delete-file %f))
-              (open-output-file %f))
-             ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-             (else (open-input-file %f))))))
+   (ensure-file-deleted aux-tex-file)
+   (let ((o (open-output-file aux-tex-file)))
      (let ((%with-open-file-res
             (begin (dump-tex-preamble o) (p o) (dump-tex-postamble o))))
        (when o ((if (input-port? o) close-input-port close-output-port) o))
@@ -6352,24 +6203,8 @@
      ((if (input-port? %close-port-arg) close-input-port close-output-port)
       %close-port-arg)))
  (let ((f (string-append *mfpic-file-stem* *mfpic-tex-file-suffix*)))
-   (set! *mfpic-stream*
-    (let* ((%f f)
-           (%ee (list ':direction ':output ':if-exists ':supersede))
-           (%direction (memv ':direction %ee))
-           (%if-exists (memv ':if-exists %ee))
-           (%if-does-not-exist ':error)
-           (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-      (when %direction (set! %direction (cadr %direction)))
-      (when %if-exists (set! %if-exists (cadr %if-exists)))
-      (when %if-does-not-exist-from-user
-        (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-      (cond
-       ((eqv? %direction ':output)
-        (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-          (delete-file %f))
-        (open-output-file %f))
-       ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-       (else (open-input-file %f))))))
+   (ensure-file-deleted f)
+   (set! *mfpic-stream* (open-output-file f)))
  (set! *mfpic-file-num* 0)
  (display "\\input mfpic \\usemetapost " *mfpic-stream*)
  (newline *mfpic-stream*) (display "\\opengraphsfile{" *mfpic-stream*)
@@ -7889,46 +7724,14 @@
           %close-port-arg)))
      (set! *verb-written-files* (cons f *verb-written-files*))
      (when (string-ci=? e ".mp") (set! *mp-files* (cons f *mp-files*)))
-     (set! *verb-stream*
-      (let* ((%f f)
-             (%ee (list ':direction ':output ':if-exists ':supersede))
-             (%direction (memv ':direction %ee))
-             (%if-exists (memv ':if-exists %ee))
-             (%if-does-not-exist ':error)
-             (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-        (when %direction (set! %direction (cadr %direction)))
-        (when %if-exists (set! %if-exists (cadr %if-exists)))
-        (when %if-does-not-exist-from-user
-          (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-        (cond
-         ((eqv? %direction ':output)
-          (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-            (delete-file %f))
-          (open-output-file %f))
-         ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-         (else (open-input-file %f))))))))
+     (ensure-file-deleted f)
+     (set! *verb-stream* (open-output-file f)))))
 
 (define (verb-ensure-output-stream)
  (unless *verb-stream*
    (let ((output-file (string-append *jobname* ".txt")))
-     (set! *verb-stream*
-      (let* ((%f output-file)
-             (%ee (list ':direction ':output ':if-exists ':supersede))
-             (%direction (memv ':direction %ee))
-             (%if-exists (memv ':if-exists %ee))
-             (%if-does-not-exist ':error)
-             (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-        (when %direction (set! %direction (cadr %direction)))
-        (when %if-exists (set! %if-exists (cadr %if-exists)))
-        (when %if-does-not-exist-from-user
-          (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-        (cond
-         ((eqv? %direction ':output)
-          (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-            (delete-file %f))
-          (open-output-file %f))
-         ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-         (else (open-input-file %f))))))))
+     (ensure-file-deleted output-file)
+     (set! *verb-stream* (open-output-file output-file)))))
 
 (define (dump-groupoid p) (ignorespaces)
  (let ((write-char write-char) (d (get-actual-char)))
@@ -9290,24 +9093,8 @@
         }
         ")
  (let ((css-file (string-append *aux-dir/* *jobname* *css-file-suffix*)))
-   (set! *css-stream*
-    (let* ((%f css-file)
-           (%ee (list ':direction ':output ':if-exists ':supersede))
-           (%direction (memv ':direction %ee))
-           (%if-exists (memv ':if-exists %ee))
-           (%if-does-not-exist ':error)
-           (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-      (when %direction (set! %direction (cadr %direction)))
-      (when %if-exists (set! %if-exists (cadr %if-exists)))
-      (when %if-does-not-exist-from-user
-        (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-      (cond
-       ((eqv? %direction ':output)
-        (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-          (delete-file %f))
-        (open-output-file %f))
-       ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-       (else (open-input-file %f)))))
+   (ensure-file-deleted css-file)
+   (set! *css-stream* (open-output-file css-file))
    (unless
        (or (tex2page-flag-boolean "\\TIIPsinglepage")
            (tex2page-flag-boolean "\\TZPsinglepage"))
@@ -9488,88 +9275,74 @@
  (set! *infructuous-calls-to-tex2page* n))
 
 (define (load-tex2page-data-file f)
- (let ((i
-        (let* ((%f f)
-               (%ee (list ':direction ':input ':if-does-not-exist false))
-               (%direction (memv ':direction %ee))
-               (%if-exists (memv ':if-exists %ee))
-               (%if-does-not-exist ':error)
-               (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-          (when %direction (set! %direction (cadr %direction)))
-          (when %if-exists (set! %if-exists (cadr %if-exists)))
-          (when %if-does-not-exist-from-user
-            (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-          (cond
-           ((eqv? %direction ':output)
-            (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-              (delete-file %f))
-            (open-output-file %f))
-           ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-           (else (open-input-file %f))))))
-   (let ((%with-open-file-res
-          (when i
-            (let ((%fluid-var-*current-source-file* f)
-                  (%fluid-var-*input-line-no* 0)
-                  (e false)
-                  (directive false))
-              (fluid-let
-               ((*current-source-file* %fluid-var-*current-source-file*)
-                (*input-line-no* %fluid-var-*input-line-no*))
-               (let* ((%loop-returned false)
-                      (%loop-result 0)
-                      (return
-                       (lambda %args
-                         (set! %loop-returned true)
-                         (set! %loop-result (and (pair? %args) (car %args))))))
-                 (let %loop
-                   ()
-                   (set! e
-                    (let ((%read-res (read i)))
-                      (when (eof-object? %read-res) (set! %read-res false))
-                      %read-res))
-                   (unless e (return))
-                   (unless %loop-returned (set! directive (car e)))
-                   (unless %loop-returned
-                     (set! *input-line-no* (+ *input-line-no* 1)))
-                   (unless %loop-returned
-                     (apply
-                      (case directive
-                        ((!colophon) !colophon)
-                        ((!default-title) !default-title)
-                        ((!definitely-latex) !definitely-latex)
-                        ((!doctype) !doctype)
-                        ((!external-labels) !external-labels)
-                        ((!foot-line) !foot-line)
-                        ((!head-line) !head-line)
-                        ((!html-head) !html-head)
-                        ((!html-redirect) !html-redirect)
-                        ((!index) !index)
-                        ((!index-page) !index-page)
-                        ((!infructuous-calls-to-tex2page)
-                         !infructuous-calls-to-tex2page)
-                        ((!label) !label)
-                        ((!lang) !lang)
-                        ((!last-modification-time) !last-modification-time)
-                        ((!last-page-number) !last-page-number)
-                        ((!opmac-iis) !opmac-iis)
-                        ((!preferred-title) !preferred-title)
-                        ((!script) !script)
-                        ((!single-page) !single-page)
-                        ((!slides) !slides)
-                        ((!stylesheet) !stylesheet)
-                        ((!tex-like-layout) !tex-like-layout)
-                        ((!tex-text) !tex-text)
-                        ((!toc-entry) !toc-entry)
-                        ((!toc-page) !toc-page)
-                        ((!using-chapters) !using-chapters)
-                        ((!using-external-program) !using-external-program)
-                        (else
-                         (terror 'load-tex2page-data-file
-                          "Fatal aux file error " directive "; I'm stymied.")))
-                      (cdr e)))
-                   (if %loop-returned %loop-result (%loop)))))))))
-     (when i ((if (input-port? i) close-input-port close-output-port) i))
-     %with-open-file-res)))
+ (when (file-exists? f)
+   (let ((i (open-input-file f)))
+     (let ((%with-open-file-res
+            (when i
+              (let ((%fluid-var-*current-source-file* f)
+                    (%fluid-var-*input-line-no* 0)
+                    (e false)
+                    (directive false))
+                (fluid-let
+                 ((*current-source-file* %fluid-var-*current-source-file*)
+                  (*input-line-no* %fluid-var-*input-line-no*))
+                 (let* ((%loop-returned false)
+                        (%loop-result 0)
+                        (return
+                         (lambda %args
+                           (set! %loop-returned true)
+                           (set! %loop-result
+                            (and (pair? %args) (car %args))))))
+                   (let %loop
+                     ()
+                     (set! e
+                      (let ((%read-res (read i)))
+                        (when (eof-object? %read-res) (set! %read-res false))
+                        %read-res))
+                     (unless e (return))
+                     (unless %loop-returned (set! directive (car e)))
+                     (unless %loop-returned
+                       (set! *input-line-no* (+ *input-line-no* 1)))
+                     (unless %loop-returned
+                       (apply
+                        (case directive
+                          ((!colophon) !colophon)
+                          ((!default-title) !default-title)
+                          ((!definitely-latex) !definitely-latex)
+                          ((!doctype) !doctype)
+                          ((!external-labels) !external-labels)
+                          ((!foot-line) !foot-line)
+                          ((!head-line) !head-line)
+                          ((!html-head) !html-head)
+                          ((!html-redirect) !html-redirect)
+                          ((!index) !index)
+                          ((!index-page) !index-page)
+                          ((!infructuous-calls-to-tex2page)
+                           !infructuous-calls-to-tex2page)
+                          ((!label) !label)
+                          ((!lang) !lang)
+                          ((!last-modification-time) !last-modification-time)
+                          ((!last-page-number) !last-page-number)
+                          ((!opmac-iis) !opmac-iis)
+                          ((!preferred-title) !preferred-title)
+                          ((!script) !script)
+                          ((!single-page) !single-page)
+                          ((!slides) !slides)
+                          ((!stylesheet) !stylesheet)
+                          ((!tex-like-layout) !tex-like-layout)
+                          ((!tex-text) !tex-text)
+                          ((!toc-entry) !toc-entry)
+                          ((!toc-page) !toc-page)
+                          ((!using-chapters) !using-chapters)
+                          ((!using-external-program) !using-external-program)
+                          (else
+                           (terror 'load-tex2page-data-file
+                            "Fatal aux file error " directive
+                            "; I'm stymied.")))
+                        (cdr e)))
+                     (if %loop-returned %loop-result (%loop)))))))))
+       (when i ((if (input-port? i) close-input-port close-output-port) i))
+       %with-open-file-res))))
 
 (define (tex2page-help not-a-file)
  (unless not-a-file (set! not-a-file "--missing-arg"))
@@ -10995,24 +10768,8 @@ Try the commands
    (unless *index-stream*
      (let ((idx-file
             (string-append *aux-dir/* *jobname* *index-file-suffix* ".idx")))
-       (set! *index-stream*
-        (let* ((%f idx-file)
-               (%ee (list ':direction ':output ':if-exists ':supersede))
-               (%direction (memv ':direction %ee))
-               (%if-exists (memv ':if-exists %ee))
-               (%if-does-not-exist ':error)
-               (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-          (when %direction (set! %direction (cadr %direction)))
-          (when %if-exists (set! %if-exists (cadr %if-exists)))
-          (when %if-does-not-exist-from-user
-            (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-          (cond
-           ((eqv? %direction ':output)
-            (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-              (delete-file %f))
-            (open-output-file %f))
-           ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-           (else (open-input-file %f)))))))
+       (ensure-file-deleted idx-file)
+       (set! *index-stream* (open-output-file idx-file))))
    (display "\\indexentry{" *index-stream*)
    (cond
     ((or (substring? "|see{" idx-entry) (substring? "|seealso{" idx-entry))
@@ -12643,25 +12400,8 @@ Try the commands
   (cond
    (*main-tex-file* (set! *subjobname* *jobname*)
     (set! *html-page* (string-append *aux-dir/* *jobname* *output-extension*))
-    (set! *html*
-     (make-ostream* ':stream
-      (let* ((%f *html-page*)
-             (%ee (list ':direction ':output ':if-exists ':supersede))
-             (%direction (memv ':direction %ee))
-             (%if-exists (memv ':if-exists %ee))
-             (%if-does-not-exist ':error)
-             (%if-does-not-exist-from-user (memv ':if-does-not-exist %ee)))
-        (when %direction (set! %direction (cadr %direction)))
-        (when %if-exists (set! %if-exists (cadr %if-exists)))
-        (when %if-does-not-exist-from-user
-          (set! %if-does-not-exist (cadr %if-does-not-exist-from-user)))
-        (cond
-         ((eqv? %direction ':output)
-          (when (and (eqv? %if-exists ':supersede) (file-exists? %f))
-            (delete-file %f))
-          (open-output-file %f))
-         ((and (not %if-does-not-exist) (not (file-exists? %f))) false)
-         (else (open-input-file %f))))))
+    (ensure-file-deleted *html-page*)
+    (set! *html* (make-ostream* ':stream (open-output-file *html-page*)))
     (do-start)
     (fluid-let ((*html-only* (add1 *html-only*)))
      (tex2page-file-if-exists (file-in-home ".tex2page.t2p"))

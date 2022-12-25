@@ -1,4 +1,4 @@
-; last change: 2022-12-24
+; last change: 2022-12-25
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -34,7 +34,7 @@
 
 (define (remove y xx)
   (let loop ((xx xx) (r '()))
-    (if (null? xx) (nreverse r)
+    (if (null? xx) (reverse! r)
       (let ((x (car xx)))
         (loop (cdr xx)
               (if (equal? x y) r

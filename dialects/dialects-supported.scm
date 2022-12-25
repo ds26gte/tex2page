@@ -1,10 +1,10 @@
-; last change 2022-12-24
+; last change 2022-12-25
 abcl ;v 1.9.0; WORKS!
 allegro ;v 9.0; WORKS!
 ;bigloo
 chez ;v 9.5.9; WORKS!
 ;chibi ;v 0.10.0
-chicken ;v 4.10; WORKS!
+chicken ;v 5.3.1; WORKS!
 clasp
 clisp ;v 2.49; WORKS!
 clozure ;v 1.12.1; WORKS!

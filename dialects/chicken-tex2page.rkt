@@ -1,45 +1,59 @@
-; last change: 2017-01-03
+; last change: 2022-12-25
 
-(scmxlate-cond
- ((eqv? *operating-system* 'unix)
-  (scmxlate-insert
-   (string-append
-    "\":\";"
-    "exec csi -quiet -batch $0 -eval '(tex2page \"'$1'\")'"
-    "
-"))))
+(scmxlate-insert
+  (string-append
+    "#!/usr/local/bin/csi -ss\n\n"))
+
+(import
+  (chicken file)
+  (chicken file posix)
+  (chicken io)
+  (chicken platform)
+  (chicken port)
+  (chicken pretty-print)
+  (chicken process)
+  (chicken process-context)
+  (chicken time)
+  (chicken time posix)
+  )
 
 (define *scheme-version*
   (string-append "Chicken " (chicken-version)))
 
-;(declare (uses extras srfi-1 posix))
 
-(use extras)
-(use srfi-1)
-(use posix)
-
-(scmxlate-ignore
- main
+(scmxlate-ignore-define
+  *tex2page-namespace*
 )
 
 (scmxlate-uncall
- require
- trace
- )
-
-(scmxlate-rename-define
-  (eval1 eval)
-  (*january-number* 0)
-  (*anno-domini-at-0* 1900)
+  define-namespace-anchor
+  require
+  tex2page
   )
 
 (scmxlate-rename
-  (eof #!eof)
-  (remove chicken-remove)
+  ; (remove chicken-remove)
   (seconds->date seconds->local-time)
   )
 
-(define nreverse
+(define eval1
+  (lambda (e)
+    (eval e (interaction-environment))))
+
+(define (list* . args)
+  (let ((a (car args)) (d (cdr args)))
+    (if (null? d) a
+        (cons a (apply list* d)))))
+
+(define (append! l1 l2)
+  (cond ((null? l1) l2)
+        ((null? l2) l1)
+        (else (let loop ((r1 l1))
+                (let ((cdr-r1 (cdr r1)))
+                  (cond ((null? cdr-r1) (set-cdr! r1 l2) l1)
+                        (else (loop cdr-r1))))))))
+
+(define reverse!
   (lambda (s)
     (let loop ((s s) (r '()))
       (if (null? s) r
@@ -48,14 +62,15 @@
 	    (loop d s))))))
 
 (define (string-is-flanked-by-stars-p s)
+  ;Chicken's char=? is not variadic
   (let ((n (string-length s)))
     (and (>= n 3)
          (char=? (string-ref s 0) #\*)
          (char=? (string-ref s (sub1 n)) #\*))))
 
-(define (chicken-remove y xx)
+(define (remove y xx)
   (let loop ((xx xx) (r '()))
-    (if (null? xx) (nreverse r)
+    (if (null? xx) (reverse! r)
       (let ((x (car xx)))
         (loop (cdr xx)
               (if (equal? x y) r
@@ -101,11 +116,12 @@
       (if (null? s) #f
         (or (f (car s)) (loop (cdr s)))))))
 
-(define andmap
-  (lambda (f s)
-    (let loop ((s s))
-      (if (null? s) #t
-          (and (f (car s)) (loop (cdr s)))))))
+(scmxlate-postamble)
+
+(define (main cla)
+  (tex2page
+    (and (>= (length cla) 1)
+         (car cla))))
 
 ; Felix says: To compile, do
 ; csc my-tex2page -o whatever -b -O2

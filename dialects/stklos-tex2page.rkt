@@ -1,15 +1,14 @@
-;last change: 2022-12-24
+;last change: 2022-12-26
 
 (scmxlate-cond
- ((eqv? *operating-system* 'unix)
-  (scmxlate-insert
-    "#!/usr/bin/env stklos-script
-    ")))
+  ((eqv? *operating-system* 'unix)
+   (scmxlate-insert
+     "#!/usr/bin/env stklos-script\n")))
 
 (define *scheme-version*
   (string-append "STklos " (version)))
 
-(scmxlate-ignore-define
+(scmxlate-ignoredef
   *tex2page-namespace*
   table
   )
@@ -21,23 +20,22 @@
 
 (scmxlate-rename
   (ormap any)
+  (remove delete)
   (substring subseq)
   )
 
 (define (eval1 e)
   (eval e (interaction-environment)))
 
-(define make-table
-  (lambda z
-    (if (null? z)
-        (make-hash-table)
-        (make-hash-table (cadr z)))))
+(define (make-table . z)
+  (if (null? z)
+      (make-hash-table)
+      (make-hash-table (cadr z))))
 
-(define table-get
-  (lambda (k ht . d)
-    (hash-table-ref ht k
-                    (lambda ()
-                      (if (null? d) #f (car d))))))
+(define (table-get k ht . d)
+  (hash-table-ref ht k
+                  (lambda ()
+                    (if (null? d) #f (car d)))))
 
 (define (table-put! k tbl v)
   (hash-table-set! tbl k v))
@@ -46,6 +44,7 @@
   (hash-table-for-each tbl p))
 
 (define (add1 n) (+ n 1))
+
 (define (sub1 n) (- n 1))
 
 (define (string-trim s)
@@ -71,19 +70,17 @@
 (define (string=split s sep)
   (string-split s (string sep)))
 
-(define file-or-directory-modify-seconds
-  (lambda (f)
-    (let-values ([(tmpf o) (create-temp-file)])
-      (close-port o)
-      (system (string-append "stat -c %W " f " > " tmpf))
-      (let ([n (call-with-input-file tmpf read)])
-        (delete-file tmpf)
-        n))))
+(define (file-or-directory-modify-seconds f)
+  (let-values ([(tmpf o) (create-temp-file)])
+    (close-port o)
+    (system (string-append "stat -c %W " f " > " tmpf))
+    (let ([n (call-with-input-file tmpf read)])
+      (delete-file tmpf)
+      n)))
 
 (scmxlate-include "seconds-to-date.scm")
 
 (scmxlate-postamble)
 
-(let ((pa (argv)))
-  (when (> (length pa) 0)
-    (tex2page (car pa))))
+(let ((cla (argv)))
+  (tex2page (and (> (length cla) 0) (car cla))))

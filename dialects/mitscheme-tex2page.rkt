@@ -1,4 +1,4 @@
-;last change: 2022-12-23
+;last change: 2022-12-26
 
 (scmxlate-cond
   ((eqv? *operating-system* 'unix)
@@ -15,7 +15,7 @@
 (define *scheme-version*
   (string-append "MIT Scheme " (get-subsystem-version-string "release")))
 
-(scmxlate-ignore-define
+(scmxlate-ignoredef
   *tex2page-namespace*
   )
 
@@ -35,9 +35,10 @@
  (list* cons*)
  (add1 1+)
  (sub1 -1+)
+ (remove delete)
  )
 
-(scmxlate-rename-define
+(scmxlate-ignoredef-rename
   (seconds-to-human-time file-time->local-time-string)
   (string-index string-find-next-char)
   (string-reverse-index string-find-previous-char)

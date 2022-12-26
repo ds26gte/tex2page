@@ -1,4 +1,4 @@
-; last change: 2022-12-25
+; last change: 2022-12-26
 
 (scmxlate-insert
   (string-append
@@ -20,8 +20,7 @@
 (define *scheme-version*
   (string-append "Chicken " (chicken-version)))
 
-
-(scmxlate-ignore-define
+(scmxlate-ignoredef
   *tex2page-namespace*
 )
 
@@ -31,11 +30,10 @@
   tex2page
   )
 
-(scmxlate-rename-define
+(scmxlate-ignoredef-rename
   (ensure-file-deleted delete-file*))
 
 (scmxlate-rename
-  ; (remove chicken-remove)
   (seconds->date seconds->local-time)
   )
 

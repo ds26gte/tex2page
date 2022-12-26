@@ -1,4 +1,4 @@
-;last modified 2022-12-24
+;last modified 2022-12-26
 
 (cliiscm-insert
   "#!/usr/bin/env racket
@@ -40,6 +40,8 @@
 (cliiscm-ignore-def
 
   *tex2page-file-arg*
+  close-input-port
+  close-output-port
   list->string
   string->list
   string-append
@@ -65,6 +67,8 @@
 (define (eval1 s)
   (eval s *tex2page-namespace*))
 
+(define *week-day-names* (vector "Sun" "Mon" "Tues" "Wed" "Thurs" "Fri" "Sat"))
+
 (define (decode-universal-time s)
   (let ((ht (and s (seconds->date s))))
     ;s m h d mo y
@@ -81,7 +85,6 @@
         (mo (date-month d))
         (y (date-year d))
         (dow (date-week-day d))
-        (dst (date-dst? d))
         (tzsec (date-time-zone-offset d)))
     (let ((tz (and tzsec (/ tzsec 3600))))
       (string-append

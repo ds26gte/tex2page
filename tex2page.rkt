@@ -26,6 +26,8 @@
 
 (define (eval1 s) (eval s *tex2page-namespace*))
 
+(define *week-day-names* (vector "Sun" "Mon" "Tues" "Wed" "Thurs" "Fri" "Sat"))
+
 (define (decode-universal-time s)
  (let ((ht (and s (seconds->date s))))
    (cond
@@ -45,7 +47,6 @@
        (mo (date-month d))
        (y (date-year d))
        (dow (date-week-day d))
-       (dst (date-dst? d))
        (tzsec (date-time-zone-offset d)))
    (let ((tz (and tzsec (/ tzsec 3600))))
      (string-append (vector-ref *week-day-names* dow) ", "
@@ -339,8 +340,6 @@
          "Oct"
          "Nov"
          "Dec"))
-
-(define *week-day-names* (vector "Mon" "Tues" "Wed" "Thurs" "Fri" "Sat" "Sun"))
 
 (define *enable-write-18-p* true)
 
@@ -1719,10 +1718,7 @@
 
 (define (close-html-output-stream op)
  (for-each emit (reverse! (ostream*-hbuffer op)))
- (set!ostream*-hbuffer op null)
- (let ((%close-port-arg (ostream*-stream op)))
-   ((if (input-port? %close-port-arg) close-input-port close-output-port)
-    %close-port-arg)))
+ (set!ostream*-hbuffer op null) (close-output-port (ostream*-stream op)))
 
 (define (html-output-stream-to-string op)
  (for-each emit (reverse! (ostream*-hbuffer op)))
@@ -3087,15 +3083,8 @@
        num))))
 
 (define (do-caption) (do-end-para)
- (let ((i-fig
-        (let ((%position-v ':figure) (%position-s *tabular-stack*))
-          (cond ((string? %position-s) (string-index %position-s %position-v))
-                (else (list-position %position-v %position-s))))))
-   (let ((i-tbl
-          (let ((%position-v ':table) (%position-s *tabular-stack*))
-            (cond
-             ((string? %position-s) (string-index %position-s %position-v))
-             (else (list-position %position-v %position-s))))))
+ (let ((i-fig (list-position ':figure *tabular-stack*)))
+   (let ((i-tbl (list-position ':table *tabular-stack*)))
      (let ((type
             (cond
              ((and (not i-fig) (not i-tbl))
@@ -4055,19 +4044,9 @@
 (define (get-label)
  (let ((lbl (get-peeled-group)))
    (let ((i
-          (or
-           (let ((%position-v #\ ) (%position-s lbl))
-             (cond
-              ((string? %position-s) (string-index %position-s %position-v))
-              (else (list-position %position-v %position-s))))
-           (let ((%position-v #\tab) (%position-s lbl))
-             (cond
-              ((string? %position-s) (string-index %position-s %position-v))
-              (else (list-position %position-v %position-s))))
-           (let ((%position-v #\newline) (%position-s lbl))
-             (cond
-              ((string? %position-s) (string-index %position-s %position-v))
-              (else (list-position %position-v %position-s)))))))
+          (or (string-index lbl #\ )
+              (string-index lbl #\tab)
+              (string-index lbl #\newline))))
      (if (not i)
          lbl
          (let ((s (string->list lbl)) (r null) (whitep false))
@@ -4963,43 +4942,15 @@
  (close-html-output-stream *html*))
 
 (define (close-all-open-streams)
- (when *aux-stream*
-   (let ((%close-port-arg *aux-stream*))
-     ((if (input-port? %close-port-arg) close-input-port close-output-port)
-      %close-port-arg)))
- (when *css-stream*
-   (let ((%close-port-arg *css-stream*))
-     ((if (input-port? %close-port-arg) close-input-port close-output-port)
-      %close-port-arg)))
- (when *index-stream*
-   (let ((%close-port-arg *index-stream*))
-     ((if (input-port? %close-port-arg) close-input-port close-output-port)
-      %close-port-arg)))
- (when *label-stream*
-   (let ((%close-port-arg *label-stream*))
-     ((if (input-port? %close-port-arg) close-input-port close-output-port)
-      %close-port-arg)))
- (when *bib-aux-stream*
-   (let ((%close-port-arg *bib-aux-stream*))
-     ((if (input-port? %close-port-arg) close-input-port close-output-port)
-      %close-port-arg)))
- (when *verb-stream*
-   (let ((%close-port-arg *verb-stream*))
-     ((if (input-port? %close-port-arg) close-input-port close-output-port)
-      %close-port-arg)))
- (table-for-each
-  (lambda (k v)
-    (unless (eq? v ':free)
-      (let ((%close-port-arg v))
-        ((if (input-port? %close-port-arg) close-input-port close-output-port)
-         %close-port-arg))))
+ (when *aux-stream* (close-output-port *aux-stream*))
+ (when *css-stream* (close-output-port *css-stream*))
+ (when *index-stream* (close-output-port *index-stream*))
+ (when *label-stream* (close-output-port *label-stream*))
+ (when *bib-aux-stream* (close-output-port *bib-aux-stream*))
+ (when *verb-stream* (close-output-port *verb-stream*))
+ (table-for-each (lambda (k v) (unless (eq? v ':free) (close-input-port v)))
   *input-streams*)
- (table-for-each
-  (lambda (k v)
-    (unless (eq? v ':free)
-      (let ((%close-port-arg v))
-        ((if (input-port? %close-port-arg) close-input-port close-output-port)
-         %close-port-arg))))
+ (table-for-each (lambda (k v) (unless (eq? v ':free) (close-output-port v)))
   *output-streams*))
 
 (define (output-stats) (write-log ':separation-newline)
@@ -5016,11 +4967,7 @@
      (unless (= *img-file-tally* 1) (write-log #\s)))
    (write-log ")."))
   (else (write-log "No pages of output.")))
- (write-log #\newline)
- (when *log-stream*
-   (let ((%close-port-arg *log-stream*))
-     ((if (input-port? %close-port-arg) close-input-port close-output-port)
-      %close-port-arg)))
+ (write-log #\newline) (when *log-stream* (close-output-port *log-stream*))
  (display "Transcript written on ") (display *log-file*) (display ".")
  (newline))
 
@@ -5629,15 +5576,10 @@
      (let ((o (get-number)))
        (let ((c (table-get o sl)))
          (when (eq? c ':free) (terror 'do-close-stream))
-         (let ((%close-port-arg
-                (case type
-                  ((:out) c)
-                  ((:in) (istream*-stream c))
-                  (else (error 'ecase "0xdeadc0de")))))
-           ((if (input-port? %close-port-arg)
-                close-input-port
-                close-output-port)
-            %close-port-arg))
+         (case type
+           ((:out) (close-output-port c))
+           ((:in) (close-input-port (istream*-stream c)))
+           (else (error 'ecase "0xdeadc0de")))
          (table-put! o sl ':free))))))
 
 (define (tex-write-output-string s)
@@ -6198,10 +6140,7 @@
 
 (define (do-mfpic-opengraphsfile)
  (set! *mfpic-file-stem* (get-filename-possibly-braced))
- (when *mfpic-stream*
-   (let ((%close-port-arg *mfpic-stream*))
-     ((if (input-port? %close-port-arg) close-input-port close-output-port)
-      %close-port-arg)))
+ (when *mfpic-stream* (close-output-port *mfpic-stream*))
  (let ((f (string-append *mfpic-file-stem* *mfpic-tex-file-suffix*)))
    (ensure-file-deleted f)
    (set! *mfpic-stream* (open-output-file f)))
@@ -6223,10 +6162,7 @@
  (tex-def-prim "\\mfpframesep" eat-dimen) (tex-def-prim "\\mftitle" get-group))
 
 (define (do-mfpic-closegraphsfile) (display "\\closegraphsfile" *mfpic-stream*)
- (newline *mfpic-stream*)
- (let ((%close-port-arg *mfpic-stream*))
-   ((if (input-port? %close-port-arg) close-input-port close-output-port)
-    %close-port-arg))
+ (newline *mfpic-stream*) (close-output-port *mfpic-stream*)
  (let ((tex-f (string-append *mfpic-file-stem* *mfpic-tex-file-suffix*))
        (mp-f (string-append *mfpic-file-stem* ".mp")))
    (unless (file-exists? mp-f)
@@ -7718,10 +7654,7 @@
  (let ((f (get-filename-possibly-braced)))
    (let ((e (file-extension f)))
      (unless e (set! e ".tex") (set! f (string-append f e)))
-     (when *verb-stream*
-       (let ((%close-port-arg *verb-stream*))
-         ((if (input-port? %close-port-arg) close-input-port close-output-port)
-          %close-port-arg)))
+     (when *verb-stream* (close-output-port *verb-stream*))
      (set! *verb-written-files* (cons f *verb-written-files*))
      (when (string-ci=? e ".mp") (set! *mp-files* (cons f *mp-files*)))
      (ensure-file-deleted f)
@@ -8188,13 +8121,7 @@
        ((table-get s *scm-builtins*) ':builtin)
        ((table-get s *scm-variables*) ':variable)
        ((string-is-flanked-by-stars-p s) ':global)
-       ((begin
-         (set! *it*
-          (let ((%position-v #\:) (%position-s s))
-            (cond
-             ((string? %position-s) (string-index %position-s %position-v))
-             (else (list-position %position-v %position-s)))))
-         *it*)
+       ((begin (set! *it* (string-index s #\:)) *it*)
         (if (= *it* 0) ':selfeval ':variable))
        ((string-is-all-dots-p s) ':background)
        ((char=? (string-ref s 0) #\#) ':selfeval)
@@ -8273,14 +8200,7 @@
         (lambda ()
           (set! *math-mode-p* old-math-mode-p)
           (set! *in-display-math-p* old-in-display-math-p)))))
-   (let ((border-width
-          (if
-           (let ((%position-v #\|) (%position-s (get-group)))
-             (cond
-              ((string? %position-s) (string-index %position-s %position-v))
-              (else (list-position %position-v %position-s))))
-           1
-           0)))
+   (let ((border-width (if (string-index (get-group) #\|) 1 0)))
      (set! *tabular-stack* (cons ':tabular *tabular-stack*))
      (emit "<table border=")
      (emit border-width)

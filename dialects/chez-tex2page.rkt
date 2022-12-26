@@ -1,4 +1,4 @@
-; last change: 2022-12-25
+; last change: 2022-12-26
 
 (scmxlate-eval
  (define *chez-name*
@@ -35,13 +35,18 @@
   tex2page
   )
 
+(scmxlate-ignoredef
+  *tex2page-namespace*
+  )
+
 (scmxlate-rename
   (error petite-error)
   (get-char t2p-get-char)
   (substring subseq)
+  (date-time-zone-offset date-zone-offset)
   )
 
-(scmxlate-rename-define
+(scmxlate-ignoredef-rename
   (ensure-file-deleted delete-file)
   )
 
@@ -78,41 +83,13 @@
 (define (file-or-directory-modify-seconds f)
   (time-second (file-modification-time f)))
 
-(define (seconds-to-human-time s)
-  (let ((d (date-and-time
-             (time-utc->date
-               (make-time 'time-utc 0 s)))))
-    (string-append
-      (substring d 0 10)
-      ","
-      (substring d 20 24))))
-
-(define (set-start-time)
-  (let* ((dat (date-and-time))
-         (mo (substring dat 4 7))
-         (dy (string->number (substring dat 8 10)))
-         (hr (string->number (substring dat 11 13)))
-         (mi (string->number (substring dat 14 16)))
-         (yr (string->number (substring dat 20 24))))
-    (set! mo
-      (cdr (assoc mo
-                  '(("Jan" . 1) ("Feb" . 2) ("Mar" . 3) ("Apr" . 4)
-                                ("May" . 5) ("Jun" . 6) ("Jul" . 7) ("Aug" . 8)
-                                ("Sep" . 9) ("Oct" . 10) ("Nov" . 11) ("Dec" . 12)))))
-    (tex-def-count "\\time" (+ (* 60 hr) mi) #t)
-    (tex-def-count "\\day" dy #t)
-    (tex-def-count "\\month" mo #t)
-    (tex-def-count "\\year" yr #t)))
+(define (seconds->date s)
+  (time-utc->date (make-time 'time-utc 0 s)))
 
 (scmxlate-cond
  ((eqv? *operating-system* 'windows)
   (define *ghostscript* "d:\\aladdin\\gs6.0\\bin\\gswin32c")
   ))
-
-(scmxlate-ignore-define
-  *tex2page-namespace*
-  decode-universal-time
-  strftime)
 
 (define (string-trim s)
   (let ((orig-n (string-length s)))
@@ -132,5 +109,6 @@
 
 (scmxlate-postamble)
 
-(let ((pa (command-line-arguments)))
-  (tex2page (car pa)))
+(let ((cla (command-line-arguments)))
+  (tex2page
+    (and (>= (length cla) 1) (car cla))))

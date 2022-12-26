@@ -53,6 +53,21 @@
 (defmacro string-length (s)
   `(length ,s))
 
+(defmacro string-index (s c)
+  `(position ,c ,s))
+
+(defmacro string-reverse-index (s c)
+  `(position ,c ,s :from-end t))
+
+(defmacro list-position (x L)
+  `(position ,x ,L))
+
+(defmacro close-input-port (p)
+  `(close ,p))
+
+(defmacro close-output-port (p)
+  `(close ,p))
+
 (defparameter *tex2page-copyright-notice*
   (string-append "Copyright (C) 1997-"
     (subseq *tex2page-version* 0 4) " Dorai Sitaram"))
@@ -85,7 +100,7 @@
   (declare (string s) (character sep))
   (let ((s s) (r '()))
     (loop
-      (let ((i (position sep s :test #'char=)))
+      (let ((i (string-index s sep)))
         (unless i (push s r) (return (nreverse r)))
         (push (subseq s 0 i) r)
         (setq s (subseq s (1+ i)))))))
@@ -482,17 +497,17 @@
 
 (defun file-stem-name (f)
   (declare (string f))
-  (let ((slash (position #\/ f :test #'char= :from-end t)))
+  (let ((slash (string-reverse-index f #\/)))
     (when slash (setq f (subseq f (1+ slash))))
-    (let ((dot (position #\. f :test #'char= :from-end t)))
+    (let ((dot (string-reverse-index f #\.)))
       (if (and dot (> dot 0))
           (subseq f 0 dot)
           f))))
 
 (defun file-extension (f)
   (declare (string f))
-  (let ((slash (position #\/ f :test #'char= :from-end t))
-        (dot (position #\. f :test #'char= :from-end t)))
+  (let ((slash (string-reverse-index f #\/))
+        (dot (string-reverse-index f #\.)))
     (and dot
          (not (= dot 0))
          (or (not slash) (< (1+ slash) dot))
@@ -1118,7 +1133,7 @@
 (defun string-to-number (s &optional (base 10))
   (declare (string s)
            (type (member 8 10 16) base))
-  (if (position #\: s :test #'char=) nil
+  (if (string-index s #\:) nil
     (let ((n (let ((*read-base* base)) (read-from-string s nil))))
       (if (numberp n) n nil))))
 
@@ -1340,7 +1355,7 @@
 (defun close-html-output-stream (op)
   (mapc #'emit (nreverse (ostream*-hbuffer op)))
   (setf (ostream*-hbuffer op) '())
-  (close (ostream*-stream op)))
+  (close-output-port (ostream*-stream op)))
 
 (defun html-output-stream-to-string (op)
   (mapc #'emit (nreverse (ostream*-hbuffer op)))
@@ -2710,8 +2725,8 @@
 
 (defun do-caption ()
   (do-end-para)
-  (let* ((i-fig (position :figure *tabular-stack*))
-         (i-tbl (position :table *tabular-stack*))
+  (let* ((i-fig (list-position :figure *tabular-stack*))
+         (i-tbl (list-position :table *tabular-stack*))
          (type (cond ((and (not i-fig) (not i-tbl))
                       (terror 'do-caption "Mislaid \\caption"))
                      ((not i-fig) :table)
@@ -3611,9 +3626,9 @@
 
 (defun get-label ()
   (let* ((lbl (get-peeled-group))
-         (i (or (position #\space lbl :test #'char=)
-                (position #\tab lbl :test #'char=)
-                (position #\newline lbl :test #'char=))))
+         (i (or (string-index lbl #\space)
+                (string-index lbl #\tab)
+                (string-index lbl #\newline))))
     (if (not i) lbl
       (let ((s (string->list lbl)) (r '()) (whitep nil))
         (loop
@@ -4550,20 +4565,20 @@
   (close-html-output-stream *html*))
 
 (defun close-all-open-streams ()
-  (when *aux-stream* (close *aux-stream*))
-  (when *css-stream* (close *css-stream*))
-  (when *index-stream* (close *index-stream*))
-  (when *label-stream* (close *label-stream*))
-  (when *bib-aux-stream* (close *bib-aux-stream*))
-  (when *verb-stream* (close *verb-stream*))
+  (when *aux-stream* (close-output-port *aux-stream*))
+  (when *css-stream* (close-output-port *css-stream*))
+  (when *index-stream* (close-output-port *index-stream*))
+  (when *label-stream* (close-output-port *label-stream*))
+  (when *bib-aux-stream* (close-output-port *bib-aux-stream*))
+  (when *verb-stream* (close-output-port *verb-stream*))
   (maphash
    (lambda (k v)
      (declare (ignore k))
-     (unless (eq v :free) (close v))) *input-streams*)
+     (unless (eq v :free) (close-input-port v))) *input-streams*)
   (maphash
    (lambda (k v)
      (declare (ignore k))
-     (unless (eq v :free) (close v))) *output-streams*))
+     (unless (eq v :free) (close-output-port v))) *output-streams*))
 
 (defun output-stats ()
   (write-log :separation-newline)
@@ -4585,7 +4600,7 @@
          (write-log ")."))
         (t (write-log "No pages of output.")))
   (write-log #\newline)
-  (when *log-stream* (close *log-stream*))
+  (when *log-stream* (close-output-port *log-stream*))
   (princ "Transcript written on ")
   (princ *log-file*)
   (princ ".")
@@ -5099,9 +5114,9 @@
          (o (get-number))
          (c (gethash o sl)))
     (when (eq c :free) (terror 'do-close-stream))
-    (close (ecase type
-             (:out c)
-             (:in (istream*-stream c))))
+    (ecase type
+      (:out (close-output-port c))
+      (:in (close-input-port (istream*-stream c))))
     (setf (gethash o sl) :free)))
 
 ;(trace do-open-stream do-close-stream)
@@ -5633,7 +5648,7 @@
 
 (defun do-mfpic-opengraphsfile ()
   (setq *mfpic-file-stem* (get-filename-possibly-braced))
-  (when *mfpic-stream* (close *mfpic-stream*))
+  (when *mfpic-stream* (close-output-port *mfpic-stream*))
   (let ((f (string-append *mfpic-file-stem* *mfpic-tex-file-suffix*)))
     (ensure-file-deleted f)
     (setq *mfpic-stream* (open f :direction :output)))
@@ -5660,7 +5675,7 @@
 (defun do-mfpic-closegraphsfile ()
   (princ "\\closegraphsfile" *mfpic-stream*)
   (terpri *mfpic-stream*)
-  (close *mfpic-stream*)
+  (close-output-port *mfpic-stream*)
   (let ((tex-f (string-append *mfpic-file-stem* *mfpic-tex-file-suffix*))
         (mp-f (string-append *mfpic-file-stem* ".mp")))
     (unless (probe-file mp-f)
@@ -7140,7 +7155,7 @@
   (let* ((f (get-filename-possibly-braced))
          (e (file-extension f)))
     (unless e (setq e ".tex") (setq f (string-append f e)))
-    (when *verb-stream* (close *verb-stream*))
+    (when *verb-stream* (close-output-port *verb-stream*))
     (push f *verb-written-files*)
     (when (string-equal e ".mp") (push f *mp-files*))
     (ensure-file-deleted f)
@@ -7539,7 +7554,7 @@
         ((gethash s *scm-builtins*) :builtin)
         ((gethash s *scm-variables*) :variable)
         ((string-is-flanked-by-stars-p s) :global)
-        ((progn (setq *it* (position #\: s :test #'char=)) *it*)
+        ((progn (setq *it* (string-index s #\:)) *it*)
          (if (= *it* 0) :selfeval :variable))
         ((string-is-all-dots-p s) :background) ;for Scheme's ellipsis
         ((char= (char s 0) #\#) :selfeval)
@@ -7621,7 +7636,7 @@
      (lambda ()
        (setq *math-mode-p* old-math-mode-p)
        (setq *in-display-math-p* old-in-display-math-p)))))
-  (let ((border-width (if (position #\| (get-group) :test #'char=) 1 0)))
+  (let ((border-width (if (string-index (get-group) #\|) 1 0)))
     (push :tabular *tabular-stack*)
     (emit "<table border=")
     (emit border-width)

@@ -49,6 +49,13 @@
   (lambda (f s)
     (there-exists? s f)))
 
+(define index-of
+  (lambda (s x)
+    (let loop ((s s) (i 0))
+      (cond ((null? s) false)
+            ((eq? (car s) x) i)
+            (else (loop (cdr s) (+ i 1)))))))
+
 (define eval1 (lambda (x) (eval x user-initial-environment)))
 
 (define current-seconds

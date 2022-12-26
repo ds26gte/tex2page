@@ -62,6 +62,13 @@
             (set-cdr! s r)
 	    (loop d s))))))
 
+(define index-of
+  (lambda (s x)
+    (let loop ((s s) (i 0))
+      (cond ((null? s) false)
+            ((eq? (car s) x) i)
+            (else (loop (cdr s) (+ i 1)))))))
+
 (define (string-is-flanked-by-stars-p s)
   ;Chicken's char=? is not variadic
   (let ((n (string-length s)))

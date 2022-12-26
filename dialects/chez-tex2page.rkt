@@ -13,18 +13,15 @@
   (scmxlate-insert
     "#! /usr/local/bin/"
     *chez-name*
-    " --script
-"
+    " --script\n\n"
     ))
 
  ((eqv? *operating-system* 'windows)
   (scmxlate-insert
-   (string-append
     "\":\";dosify=$(echo $0|sed -e 's,^//\\(.\\)/,\\1:/,')
-\":\";echo \"(define arg-one \\\"$1\\\")(load \\\"$dosify\\\")(exit)\"|exec "
+    \":\";echo \"(define arg-one \\\"$1\\\")(load \\\"$dosify\\\")(exit)\"|exec "
     *chez-name*
-    ";exit
-")))
+    ";exit\n"))
  )
 
 (define *scheme-version* (scheme-version))
@@ -40,7 +37,7 @@
   )
 
 (scmxlate-rename
-  (error petite-error)
+  (error chez-error)
   (get-char t2p-get-char)
   (substring subseq)
   (date-time-zone-offset date-zone-offset)
@@ -53,7 +50,7 @@
 (define (eval1 e)
   (eval e (interaction-environment)))
 
-(define (petite-error . args)
+(define (chez-error . args)
   (apply error #f args))
 
 (define (read-line i)
@@ -72,6 +69,13 @@
          (v (p i)))
     (close-input-port i)
     v))
+
+(define index-of
+  (lambda (s x)
+    (let loop ((s s) (i 0))
+      (cond ((null? s) false)
+            ((eq? (car s) x) i)
+            (else (loop (cdr s) (+ i 1)))))))
 
 (define (subseq s i . z)
   (let ((f (if (pair? z) (car z) (string-length s))))

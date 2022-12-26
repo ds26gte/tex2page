@@ -69,6 +69,13 @@
 (define (string-upcase s)
   (list->string (map char-upcase (string->list s))))
 
+(define index-of
+  (lambda (s x)
+    (let loop ((s s) (i 0))
+      (cond ((null? s) false)
+            ((eq? (car s) x) i)
+            (else (loop (cdr s) (+ i 1)))))))
+
 (define (subseq s i . z)
   (let ((f (if (pair? z) (car z) (string-length s))))
     (substring s i f)))

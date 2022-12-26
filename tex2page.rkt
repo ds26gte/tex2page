@@ -68,14 +68,6 @@
 
 (define reverse! reverse)
 
-(define list-position
- (lambda (x s)
-   (let loop
-     ((s s) (i 0))
-     (cond ((null? s) false)
-           ((eq? (car s) x) i)
-           (else (loop (cdr s) (+ i 1)))))))
-
 (define-syntax defstruct
  (lambda (%so)
    (datum->syntax %so
@@ -125,8 +117,8 @@
                         (if (null? fvfv)
                             0
                             (begin
-                             (vector-set! st
-                              (+ (list-position (car fvfv) ff) 1) (cadr fvfv))
+                             (vector-set! st (+ (index-of ff (car fvfv)) 1)
+                              (cadr fvfv))
                              (loop (cddr fvfv)))))
                       st)))
                  (unquote-splicing
@@ -3081,8 +3073,8 @@
        num))))
 
 (define (do-caption) (do-end-para)
- (let ((i-fig (list-position ':figure *tabular-stack*)))
-   (let ((i-tbl (list-position ':table *tabular-stack*)))
+ (let ((i-fig (index-of *tabular-stack* ':figure)))
+   (let ((i-tbl (index-of *tabular-stack* ':table)))
      (let ((type
             (cond
              ((and (not i-fig) (not i-tbl))
@@ -9188,69 +9180,66 @@
  (when (file-exists? f)
    (let ((i (open-input-file f)))
      (let ((%with-open-input-file-result
-            (when i
-              (let ((%fluid-var-*current-source-file* f)
-                    (%fluid-var-*input-line-no* 0)
-                    (e false)
-                    (directive false))
-                (fluid-let
-                 ((*current-source-file* %fluid-var-*current-source-file*)
-                  (*input-line-no* %fluid-var-*input-line-no*))
-                 (let* ((%loop-returned false)
-                        (%loop-result 0)
-                        (return
-                         (lambda %args
-                           (set! %loop-returned true)
-                           (set! %loop-result
-                            (and (pair? %args) (car %args))))))
-                   (let %loop
-                     ()
-                     (set! e
-                      (let ((%read-res (read i)))
-                        (when (eof-object? %read-res) (set! %read-res false))
-                        %read-res))
-                     (unless e (return))
-                     (unless %loop-returned (set! directive (car e)))
-                     (unless %loop-returned
-                       (set! *input-line-no* (+ *input-line-no* 1)))
-                     (unless %loop-returned
-                       (apply
-                        (case directive
-                          ((!colophon) !colophon)
-                          ((!default-title) !default-title)
-                          ((!definitely-latex) !definitely-latex)
-                          ((!doctype) !doctype)
-                          ((!external-labels) !external-labels)
-                          ((!foot-line) !foot-line)
-                          ((!head-line) !head-line)
-                          ((!html-head) !html-head)
-                          ((!html-redirect) !html-redirect)
-                          ((!index) !index)
-                          ((!index-page) !index-page)
-                          ((!infructuous-calls-to-tex2page)
-                           !infructuous-calls-to-tex2page)
-                          ((!label) !label)
-                          ((!lang) !lang)
-                          ((!last-modification-time) !last-modification-time)
-                          ((!last-page-number) !last-page-number)
-                          ((!opmac-iis) !opmac-iis)
-                          ((!preferred-title) !preferred-title)
-                          ((!script) !script)
-                          ((!single-page) !single-page)
-                          ((!slides) !slides)
-                          ((!stylesheet) !stylesheet)
-                          ((!tex-like-layout) !tex-like-layout)
-                          ((!tex-text) !tex-text)
-                          ((!toc-entry) !toc-entry)
-                          ((!toc-page) !toc-page)
-                          ((!using-chapters) !using-chapters)
-                          ((!using-external-program) !using-external-program)
-                          (else
-                           (terror 'load-tex2page-data-file
-                            "Fatal aux file error " directive
-                            "; I'm stymied.")))
-                        (cdr e)))
-                     (if %loop-returned %loop-result (%loop)))))))))
+            (let ((%fluid-var-*current-source-file* f)
+                  (%fluid-var-*input-line-no* 0)
+                  (e false)
+                  (directive false))
+              (fluid-let
+               ((*current-source-file* %fluid-var-*current-source-file*)
+                (*input-line-no* %fluid-var-*input-line-no*))
+               (let* ((%loop-returned false)
+                      (%loop-result 0)
+                      (return
+                       (lambda %args
+                         (set! %loop-returned true)
+                         (set! %loop-result (and (pair? %args) (car %args))))))
+                 (let %loop
+                   ()
+                   (set! e
+                    (let ((%read-res (read i)))
+                      (when (eof-object? %read-res) (set! %read-res false))
+                      %read-res))
+                   (unless e (return))
+                   (unless %loop-returned (set! directive (car e)))
+                   (unless %loop-returned
+                     (set! *input-line-no* (+ *input-line-no* 1)))
+                   (unless %loop-returned
+                     (apply
+                      (case directive
+                        ((!colophon) !colophon)
+                        ((!default-title) !default-title)
+                        ((!definitely-latex) !definitely-latex)
+                        ((!doctype) !doctype)
+                        ((!external-labels) !external-labels)
+                        ((!foot-line) !foot-line)
+                        ((!head-line) !head-line)
+                        ((!html-head) !html-head)
+                        ((!html-redirect) !html-redirect)
+                        ((!index) !index)
+                        ((!index-page) !index-page)
+                        ((!infructuous-calls-to-tex2page)
+                         !infructuous-calls-to-tex2page)
+                        ((!label) !label)
+                        ((!lang) !lang)
+                        ((!last-modification-time) !last-modification-time)
+                        ((!last-page-number) !last-page-number)
+                        ((!opmac-iis) !opmac-iis)
+                        ((!preferred-title) !preferred-title)
+                        ((!script) !script)
+                        ((!single-page) !single-page)
+                        ((!slides) !slides)
+                        ((!stylesheet) !stylesheet)
+                        ((!tex-like-layout) !tex-like-layout)
+                        ((!tex-text) !tex-text)
+                        ((!toc-entry) !toc-entry)
+                        ((!toc-page) !toc-page)
+                        ((!using-chapters) !using-chapters)
+                        ((!using-external-program) !using-external-program)
+                        (else
+                         (terror 'load-tex2page-data-file
+                          "Fatal aux file error " directive "; I'm stymied.")))
+                      (cdr e)))
+                   (if %loop-returned %loop-result (%loop))))))))
        (close-input-port i)
        %with-open-input-file-result))))
 

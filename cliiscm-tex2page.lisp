@@ -43,6 +43,7 @@
   close-input-port
   close-output-port
   list->string
+  index-of
   string->list
   string-append
   string-length
@@ -158,13 +159,6 @@
 
   )
 
-(define list-position
-  (lambda (x s)
-    (let loop ((s s) (i 0))
-      (cond ((null? s) false)
-            ((eq? (car s) x) i)
-            (else (loop (cdr s) (+ i 1)))))))
-
 ;(defstruct structname [field | (field default-value)] ...)
 ;
 ;creates
@@ -213,7 +207,7 @@
                  (let loop ((fvfv fvfv))
                    (if (null? fvfv) 0
                        (begin
-                         (vector-set! st (+ (list-position (car fvfv) ff) 1)
+                         (vector-set! st (+ (index-of ff (car fvfv)) 1)
                                       (cadr fvfv))
                          (loop (cddr fvfv)))))
                  st)))

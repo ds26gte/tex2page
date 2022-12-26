@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Jul 18, 2003
-# last modified 2022-12-20
+# last modified 2022-12-26
 
 sed -e 's/	/ /g' tex2page.rkt |\
 sed -e 's/ \ *$//' |\
@@ -39,7 +39,9 @@ eval1 \
 strftime string-index string-reverse-index
 
 rename '(define-syntax' '(almost-define-syntax'
+rename '(index-of' '(list-index'
 rename '(list\*' '(cons*'
+rename '(string->keyword' '(string->symbol'
 
 uncall define-namespace-anchor require tex2page
 

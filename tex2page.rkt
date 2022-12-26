@@ -302,7 +302,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221126, ecl.
 
 
-(define *tex2page-version* "20221225")
+(define *tex2page-version* "20221226")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -4574,7 +4574,7 @@
    (emit "<span class=item style=\"position: absolute; left: -")
    (emit parindent)
    (emit "pt\">")
-   (tex2page-string (get-group))
+   (tex2page-string (get-token))
    (ignorespaces)
    (emit-nbsp 2)
    (emit "</span></span>")))

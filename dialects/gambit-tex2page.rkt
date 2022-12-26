@@ -1,4 +1,4 @@
-; last change: 2022-12-25
+; last change: 2022-12-26
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -13,7 +13,7 @@
     (with-exception-handler (lambda (ex) #f)
                             (lambda () (getenv ev)))))
 
-(scmxlate-ignore-define
+(scmxlate-ignoredef
   *tex2page-namespace*
   )
 

@@ -1,4 +1,4 @@
-;last change: 2022-12-24
+;last change: 2022-12-26
 ;created < 2003-05-31
 
 (define *days-in-a-mo*
@@ -95,5 +95,5 @@
 
 (scmxlate-include "fake-strftime.scm")
 
-(scmxlate-rename-define
+(scmxlate-ignoredef-rename
   (strftime strftime-like))

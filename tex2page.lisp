@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221225") ;last change
+(defparameter *tex2page-version* "20221226") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -4114,7 +4114,7 @@
     (emit "<span class=item style=\"position: absolute; left: -")
     (emit parindent)
     (emit "pt\">")
-    (tex2page-string (get-group))
+    (tex2page-string (get-token))
     (ignorespaces)
     (emit-nbsp 2)
     (emit "</span></span>")))

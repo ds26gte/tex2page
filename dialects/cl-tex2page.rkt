@@ -1,4 +1,4 @@
-; last change: 2017-01-03
+; last change: 2022-12-26
 
 ;works with CLISP, Clozure CL, CMU CL, ECL, SBCL; but scmxlate
 ;translation to CL is mostly for verification (of scmxlate?) these days.
@@ -108,7 +108,7 @@
 
  ")
 
-(scmxlate-ignore-define
+(scmxlate-ignoredef
   decode-universal-time
   strftime
   subseq
@@ -235,7 +235,7 @@
  (string-reverse-index #'string-reverse-index)
  )
 
-(scmxlate-rename-define
+(scmxlate-ignoredef-rename
   (cl-with-output-to-string with-output-to-string)
   (*epoch* 1900)
   (eval1 #'eval)
@@ -273,7 +273,7 @@
                (lisp-implementation-type) " "
                (lisp-implementation-version)))
 
-(scmxlate-rename-define
+(scmxlate-ignoredef-rename
  (*scheme-version* *common-lisp-version*))
 
 (defun number-to-roman (n &optional upcasep)

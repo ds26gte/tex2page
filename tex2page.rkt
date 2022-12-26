@@ -299,7 +299,7 @@
       (else ""))
     htmlcolor)))
 
-;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221126, ecl.
+;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221226, ecl.
 
 
 (define *tex2page-version* "20221226")
@@ -868,7 +868,7 @@
        (let ((nf (+ n1 n -1)))
          (let ((ll
                 (let ((ip (open-input-file *current-source-file*)))
-                  (let ((%with-open-file-res
+                  (let ((%with-open-input-file-result
                          (let ((i 1) (ll null))
                            (let* ((%loop-returned false)
                                   (%loop-result 0)
@@ -890,10 +890,8 @@
                                         (set! ll (cons (cons i l) ll)))
                                        (else (return ll))))
                                (if %loop-returned %loop-result (%loop)))))))
-                    (when ip
-                      ((if (input-port? ip) close-input-port close-output-port)
-                       ip))
-                    %with-open-file-res))))
+                    (close-input-port ip)
+                    %with-open-input-file-result))))
            (unless (null? ll)
              (let ((border "__________________________..."))
                (let ((only-1-p (= (length ll) 1)))
@@ -1000,13 +998,13 @@
  (unless (file-exists? f)
    (terror 'call-with-input-file/buffered "I can't find file " f))
  (let ((i (open-input-file f)))
-   (let ((%with-open-file-res
+   (let ((%with-open-input-file-result
           (fluid-let
            ((*current-tex2page-input* (make-istream* ':stream i))
             (*current-source-file* f) (*input-line-no* 1))
            (th))))
-     (when i ((if (input-port? i) close-input-port close-output-port) i))
-     %with-open-file-res)))
+     (close-input-port i)
+     %with-open-input-file-result)))
 
 (define (call-with-input-string/buffered s th)
  (fluid-let
@@ -4398,7 +4396,7 @@
      (system (string-append "echo -n \\;base64, >> " tmpf))
      (system (string-append "base64 -w0 < " f " >> " tmpf))
      (let ((i (open-input-file tmpf)))
-       (let ((%with-open-file-res
+       (let ((%with-open-input-file-result
               (let* ((%loop-returned false)
                      (%loop-result 0)
                      (return
@@ -4418,8 +4416,8 @@
                            %read-char-res)))
                     (if c (emit c) (return)))
                   (if %loop-returned %loop-result (%loop))))))
-         (when i ((if (input-port? i) close-input-port close-output-port) i))
-         %with-open-file-res))
+         (close-input-port i)
+         %with-open-input-file-result))
      (ensure-file-deleted tmpf)))
   (else (emit (ensure-url-reachable f)))))
 
@@ -5210,10 +5208,10 @@
      (let ((aux-tex-file (string-append img-file-stem ".tex")))
        (ensure-file-deleted aux-tex-file)
        (let ((o (open-output-file aux-tex-file)))
-         (let ((%with-open-file-res
+         (let ((%with-open-output-file-result
                 (begin (dump-tex-preamble o) (p o) (dump-tex-postamble o))))
-           (when o ((if (input-port? o) close-input-port close-output-port) o))
-           %with-open-file-res))
+           (close-output-port o)
+           %with-open-output-file-result))
        (tex-to-img img-file-stem)
        (source-img-file img-file-stem alt)))))
 
@@ -5513,11 +5511,11 @@
  (let ((aux-tex-file (string-append f ".tex")))
    (ensure-file-deleted aux-tex-file)
    (let ((o (open-output-file aux-tex-file)))
-     (let ((%with-open-file-res
+     (let ((%with-open-output-file-result
             (begin (dump-tex-preamble o) (display (ungroup (get-group)) o)
              (dump-tex-postamble o))))
-       (when o ((if (input-port? o) close-input-port close-output-port) o))
-       %with-open-file-res))))
+       (close-output-port o)
+       %with-open-output-file-result))))
 
 (define (do-img-preamble)
  (set! *imgpreamble*
@@ -5921,7 +5919,7 @@
              (when (file-exists? logfile)
                (let ((fine-p
                       (let ((i (open-input-file logfile)))
-                        (let ((%with-open-file-res
+                        (let ((%with-open-input-file-result
                                (let ((x false))
                                  (let* ((%loop-returned false)
                                         (%loop-result 0)
@@ -5945,12 +5943,8 @@
                                      (if %loop-returned
                                          %loop-result
                                          (%loop)))))))
-                          (when i
-                            ((if (input-port? i)
-                                 close-input-port
-                                 close-output-port)
-                             i))
-                          %with-open-file-res))))
+                          (close-input-port i)
+                          %with-open-input-file-result))))
                  (when fine-p
                    (unless (eq? tex-output-format ':pdf)
                      (let ((ps-file (string-append f ".ps")))
@@ -6024,10 +6018,10 @@
  (let ((aux-tex-file (string-append img-file-stem ".tex")))
    (ensure-file-deleted aux-tex-file)
    (let ((o (open-output-file aux-tex-file)))
-     (let ((%with-open-file-res
+     (let ((%with-open-output-file-result
             (begin (dump-tex-preamble o) (p o) (dump-tex-postamble o))))
-       (when o ((if (input-port? o) close-input-port close-output-port) o))
-       %with-open-file-res))
+       (close-output-port o)
+       %with-open-output-file-result))
    (if (file-exists? eps-file)
        (tex-to-img img-file-stem)
        (set! *missing-eps-files*
@@ -6361,15 +6355,13 @@
    (let ((f
           (and (file-exists? tmpf)
                (let ((i (open-input-file tmpf)))
-                 (let ((%with-open-file-res
+                 (let ((%with-open-input-file-result
                         (let ((%read-line-res (read-line i)))
                           (when (eof-object? %read-line-res)
                             (set! %read-line-res false))
                           %read-line-res)))
-                   (when i
-                     ((if (input-port? i) close-input-port close-output-port)
-                      i))
-                   %with-open-file-res)))))
+                   (close-input-port i)
+                   %with-open-input-file-result)))))
      (ensure-file-deleted tmpf)
      (if (not f)
          false
@@ -7490,7 +7482,7 @@
       ((and f (file-exists? f)) (do-end-para) (bgroup)
        (emit "<pre class=verbatim>")
        (let ((p (open-input-file f)))
-         (let ((%with-open-file-res
+         (let ((%with-open-input-file-result
                 (let* ((%loop-returned false)
                        (%loop-result 0)
                        (return
@@ -7511,8 +7503,8 @@
                       (when (not c) (return))
                       (emit-html-char c))
                     (if %loop-returned %loop-result (%loop))))))
-           (when p ((if (input-port? p) close-input-port close-output-port) p))
-           %with-open-file-res))
+           (close-input-port p)
+           %with-open-input-file-result))
        (emit "</pre>") (egroup) (do-para))
       (else (non-fatal-error "File " f0 " not found"))))))
 
@@ -7611,7 +7603,7 @@
                 ((and f (file-exists? f)) (do-end-para) (bgroup)
                  (emit "<pre class=verbatim>")
                  (let ((i (open-input-file f)))
-                   (let ((%with-open-file-res
+                   (let ((%with-open-input-file-result
                           (cond
                            ((and s1 n1 s2 n2 (char=? s1 #\-) (char=? s2 #\+))
                             (opmac-verbinput-skip-lines i (+ n n1))
@@ -7642,10 +7634,8 @@
                            (else
                             (terror 'do-opmac-verbinput "Malformed \\verbinput"
                              s1 n1 s2 n2 f)))))
-                     (when i
-                       ((if (input-port? i) close-input-port close-output-port)
-                        i))
-                     %with-open-file-res))
+                     (close-input-port i)
+                     %with-open-input-file-result))
                  (table-put! f *opmac-verbinput-table* n) (emit "</pre>")
                  (egroup) (do-para))
                 (else (non-fatal-error "File " f0 " not found")))))))))))
@@ -9197,7 +9187,7 @@
 (define (load-tex2page-data-file f)
  (when (file-exists? f)
    (let ((i (open-input-file f)))
-     (let ((%with-open-file-res
+     (let ((%with-open-input-file-result
             (when i
               (let ((%fluid-var-*current-source-file* f)
                     (%fluid-var-*input-line-no* 0)
@@ -9261,8 +9251,8 @@
                             "; I'm stymied.")))
                         (cdr e)))
                      (if %loop-returned %loop-result (%loop)))))))))
-       (when i ((if (input-port? i) close-input-port close-output-port) i))
-       %with-open-file-res))))
+       (close-input-port i)
+       %with-open-input-file-result))))
 
 (define (tex2page-help not-a-file)
  (unless not-a-file (set! not-a-file "--missing-arg"))

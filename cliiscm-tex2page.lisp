@@ -37,7 +37,7 @@
 
 (define *package* false)
 
-(cliiscm-ignore-def
+(cliiscm-ignoredef
 
   *tex2page-file-arg*
   close-input-port
@@ -50,7 +50,7 @@
 
   )
 
-(cliiscm-rename-def
+(cliiscm-ignoredef-rename
 
   (char-whitespace-p char-whitespace?)
   (string-to-number string->number)

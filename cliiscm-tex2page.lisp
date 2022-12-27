@@ -1,4 +1,4 @@
-;last modified 2022-12-26
+;last modified 2022-12-27
 
 (cliiscm-insert
   "#!/usr/bin/env racket
@@ -229,9 +229,12 @@
              (lambda (x)
                (and (vector? x) (eq? (vector-ref x 0) ',s)))))))))
 
+; (defmacro cl-with-output-to-string (ignore-wots-arg . body)
+;   (list 'with-output-to-string
+;         (list* 'lambda '() body)))
+
 (defmacro cl-with-output-to-string (ignore-wots-arg . body)
-  (list 'with-output-to-string
-        (list* 'lambda '() body)))
+  `(with-output-to-string (lambda () ,@body)))
 
 (defstruct table (test eqv?) (alist '()))
 

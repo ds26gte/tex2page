@@ -156,7 +156,8 @@
     (let ((%so-d (syntax->datum %so)))
       (apply
        (lambda (ignore-wots-arg . body)
-         (list 'with-output-to-string (list* 'lambda '() body)))
+         (quasiquote
+          (with-output-to-string (lambda () (unquote-splicing body)))))
        (cdr %so-d))))))
 
 (defstruct table (test eqv?) (alist '()))
@@ -294,7 +295,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221226, ecl.
 
 
-(define *tex2page-version* "20221226")
+(define *tex2page-version* "20221227")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -1419,8 +1420,7 @@
            (cond ((not c) (return s))
                  ((or (char-whitespace? c)
                       (= (catcode c) **comment**)
-                      (= (catcode c))
-                      **escape**)
+                      (= (catcode c) **escape**))
                   (return s))
                  (else (get-actual-char) (set! s (cons c s)))))
          (if %loop-returned %loop-result (%loop))))))))

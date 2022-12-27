@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221226") ;last change
+(defparameter *tex2page-version* "20221227") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -1070,7 +1070,7 @@
                         (cond ((not c) (return s))
                               ((or (char-whitespace-p c)
                                    (= (catcode c) **comment**)
-                                   (= (catcode c)) **escape**)
+                                   (= (catcode c) **escape**))
                                (return s))
                               (t (get-actual-char)
                                  (push c s)))))))))

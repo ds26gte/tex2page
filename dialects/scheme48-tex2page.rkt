@@ -1,4 +1,4 @@
-; last change: 2016-12-14
+; last change: 2022-12-27
 
 (scmxlate-insert
  ";The structures
@@ -12,13 +12,8 @@
 
 (define *scheme-version* "Scheme 48")
 
-(scmxlate-ignore
- main
- )
-
-
 (define *int-corresp-to-nul*
- (- (char->integer #\a) 97)) 
+ (- (char->integer #\a) 97))
 
 (define s48-int-to-char
   (lambda (n)
@@ -30,18 +25,17 @@
     (- (char->integer c)
        *int-corresp-to-nul*)))
 
-
 (scmxlate-rename
  (char->integer s48-char-to-int)
  (integer->char s48-int-to-char)
+ (substring subseq)
  )
-
 
 (define get-arg1
   (lambda () #f))
 
-(scmxlate-uncall 
-  require 
+(scmxlate-uncall
+  require
   main
   )
 
@@ -95,6 +89,11 @@
 ;           ,@(map (lambda (x old-x) `(set! ,x ,old-x)) xx old-xx)
 ;           ,res)))))
 
+(define (list* . args)
+  (let ((a (car args)) (d (cdr args)))
+    (if (null? d) a
+        (cons a (apply list* d)))))
+
 (define reverse!
   (lambda (s)
     (let loop ((s s) (r '()))
@@ -123,11 +122,9 @@
       (if (null? s) #f
         (or (f (car s)) (loop (cdr s)))))))
 
-(define andmap
-  (lambda (f s)
-    (let loop ((s s))
-      (if (null? s) #t
-          (and (f (car s)) (loop (cdr s)))))))
+(define (subseq s i . z)
+  (let ((f (if (pair? z) (car z) (string-length s))))
+    (substring s i f)))
 
 (define read-line
   (lambda (i)
@@ -143,10 +140,7 @@
   (lambda (f)
     (accessible? f (access-mode read))))
 
-
 (define flush-output (lambda z #f))
-
-
 
 (define call-with-input-string
   (lambda (s p)
@@ -186,8 +180,3 @@
 
 (scmxlate-include "temp-file.scm")
 (scmxlate-include "with-port.scm")
-
-(define eof
-  (read (make-string-input-port "")))
-
-; ex:ft=scheme

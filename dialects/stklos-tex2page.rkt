@@ -1,4 +1,4 @@
-;last change: 2022-12-26
+;last change: 2022-12-28
 
 (scmxlate-cond
   ((eqv? *operating-system* 'unix)
@@ -9,7 +9,6 @@
   (string-append "STklos " (version)))
 
 (scmxlate-ignoredef
-  *tex2page-namespace*
   table
   )
 
@@ -24,8 +23,7 @@
   (substring subseq)
   )
 
-(define (eval1 e)
-  (eval e (interaction-environment)))
+(define *tex2page-namespace* (interaction-environment))
 
 (define (make-table . z)
   (if (null? z)
@@ -67,12 +65,11 @@
   (let ((f (if (pair? z) (car z) (string-length s))))
     (substring s i f)))
 
-(define index-of
-  (lambda (s x)
-    (let loop ((s s) (i 0))
-      (cond ((null? s) false)
-            ((eq? (car s) x) i)
-            (else (loop (cdr s) (+ i 1)))))))
+(define (index-of s x)
+  (let loop ((s s) (i 0))
+    (cond ((null? s) false)
+          ((eq? (car s) x) i)
+          (else (loop (cdr s) (+ i 1))))))
 
 (define (string=split s sep)
   (string-split s (string sep)))

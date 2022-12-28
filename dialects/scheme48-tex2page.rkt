@@ -1,4 +1,4 @@
-; last change: 2022-12-27
+; last change: 2022-12-28
 
 (scmxlate-insert
  ";The structures
@@ -15,15 +15,13 @@
 (define *int-corresp-to-nul*
  (- (char->integer #\a) 97))
 
-(define s48-int-to-char
-  (lambda (n)
-    (integer->char
-     (+ n *int-corresp-to-nul*))))
+(define (s48-int-to-char n)
+  (integer->char
+    (+ n *int-corresp-to-nul*)))
 
-(define s48-char-to-int
-  (lambda (c)
+(define (s48-char-to-int c)
     (- (char->integer c)
-       *int-corresp-to-nul*)))
+       *int-corresp-to-nul*))
 
 (scmxlate-rename
  (char->integer s48-char-to-int)
@@ -31,8 +29,7 @@
  (substring subseq)
  )
 
-(define get-arg1
-  (lambda () #f))
+(define (get-arg1 ) #f)
 
 (scmxlate-uncall
   require
@@ -94,89 +91,76 @@
     (if (null? d) a
         (cons a (apply list* d)))))
 
-(define reverse!
-  (lambda (s)
-    (let loop ((s s) (r '()))
-      (if (null? s) r
-          (let ((d (cdr s)))
-            (set-cdr! s r)
-            (loop d s))))))
+(define (reverse! s)
+  (let loop ((s s) (r '()))
+    (if (null? s) r
+        (let ((d (cdr s)))
+          (set-cdr! s r)
+          (loop d s)))))
 
-(define append!
-  (lambda (s1 s2)
-    ;appends s1 and s2 destructively (s1 may be modified)
-    (if (null? s1) s2
+(define (append! s1 s2)
+  ;appends s1 and s2 destructively (s1 may be modified)
+  (if (null? s1) s2
       (let loop ((r1 s1))
         (if (null? r1) (error 'append! s1 s2)
-          (let ((r2 (cdr r1)))
-            (if (null? r2)
-                (begin
-                  (set-cdr! r1 s2)
-                  s1)
-                (loop r2))))))))
+            (let ((r2 (cdr r1)))
+              (if (null? r2)
+                  (begin
+                    (set-cdr! r1 s2)
+                    s1)
+                  (loop r2)))))))
 
-(define ormap
-  (lambda (f s)
-    ;Returns true if f is true of some elt in s
-    (let loop ((s s))
-      (if (null? s) #f
-        (or (f (car s)) (loop (cdr s)))))))
+(define (ormap f s)
+  ;Returns true if f is true of some elt in s
+  (let loop ((s s))
+    (if (null? s) #f
+        (or (f (car s)) (loop (cdr s))))))
 
 (define (subseq s i . z)
   (let ((f (if (pair? z) (car z) (string-length s))))
     (substring s i f)))
 
-(define read-line
-  (lambda (i)
-    (let ((c (peek-char i)))
-      (if (eof-object? c) c
-          (let loop ((r '()))
-            (let ((c (read-char i)))
-              (if (or (eof-object? c) (char=? c #\newline))
-                  (list->string (reverse! r))
-                  (loop (cons c r)))))))))
+(define (read-line i)
+  (let ((c (peek-char i)))
+    (if (eof-object? c) c
+        (let loop ((r '()))
+          (let ((c (read-char i)))
+            (if (or (eof-object? c) (char=? c #\newline))
+                (list->string (reverse! r))
+                (loop (cons c r))))))))
 
-(define file-exists?
-  (lambda (f)
-    (accessible? f (access-mode read))))
+(define (file-exists? f)
+  (accessible? f (access-mode read)))
 
-(define flush-output (lambda z #f))
+(define (flush-output . z) #f)
 
-(define call-with-input-string
-  (lambda (s p)
-    (p (make-string-input-port s))))
+(define (call-with-input-string s p)
+  (p (make-string-input-port s)))
 
-(define file-or-directory-modify-seconds
-  (lambda (f)
-    (time-seconds
-     (file-info-last-modification
+(define (file-or-directory-modify-seconds f)
+  (time-seconds
+    (file-info-last-modification
       (get-file-info f)))
-    ;(file-info:mtime (file-info f))
-    ))
+  ;(file-info:mtime (file-info f))
+  )
 
-'(define seconds-to-human-time
-  (lambda (secs)
-    (time->string
-     (make-time secs))))
+'(define (seconds-to-human-time secs)
+   (time->string
+     (make-time secs)))
 
 (scmxlate-include "seconds-to-date.scm")
 
-(define current-seconds
-  (lambda () #f))
+(define (current-seconds ) #f)
 
-(define eval1
-  (lambda (e)
-    (eval e (scheme-report-environment 5))))
+(define *tex2page-namespace* (scheme-report-environment 5))
 
-(define do-evalh
-  (lambda (s)
-    (let ((f "./.evalh.scm"))
-      (call-with-output-file f
-        (lambda (o)
-          (display s o)))
-      (load f)
-      (unlink f)
-)))
+(define (do-evalh s)
+  (let ((f "./.evalh.scm"))
+    (call-with-output-file f
+      (lambda (o)
+        (display s o)))
+    (load f)
+    (unlink f)))
 
 (scmxlate-include "temp-file.scm")
 (scmxlate-include "with-port.scm")

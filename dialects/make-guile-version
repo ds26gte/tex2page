@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Jul 18, 2003
-# last modified 2022-12-26
+# last modified 2022-12-28
 
 sed -e 's/	/ /g' tex2page.rkt |\
 sed -e 's/ \ *$//' |\
@@ -19,6 +19,7 @@ function ignoredef() {
 }
 
 function rename() {
+  # echo doing rename "$@"
   sed -e 's/'$1'/'$2'/g' my-tex2page > .sedtmp
   mv .sedtmp my-tex2page
 }
@@ -35,13 +36,33 @@ ignoredef \
 '\*scheme-version\*' \
 '\*tex2page-namespace\*' \
 call-with-input-string \
-eval1 \
-strftime string-index string-reverse-index
+strftime \
+string-index\
+string-reverse-index
 
+rename '(add1' '(1+'
+rename '(current-seconds' '(current-time'
+rename '(date-day' '(tm:mday'
+rename '(date-hour' '(tm:hour'
+rename '(date-minute' '(tm:min'
+rename '(date-month' '(tm:mon'
+rename '(date-time-zone-offset' '(tm:gmtoff'
+rename '(date-week-day' '(tm:wday'
+rename '(date-year' '(tm:year'
 rename '(define-syntax' '(almost-define-syntax'
+rename '(flush-output' '(force-output'
 rename '(index-of' '(list-index'
 rename '(list\*' '(cons*'
+rename '(ormap' '(or-map'
+rename '(remove' '(delete'
+rename '(seconds->date' '(localtime'
 rename '(string->keyword' '(string->symbol'
+rename '(string-reverse-index' '(string-rindex'
+rename '(sub1' '(1-'
+rename '\([^-f]\)false' '\1#f'
+rename '\([^-:]\)null\([^?]\)' '\1`()\2'
+rename 'null$' '`()'
+rename '\([^-f]\)true' '\1#t'
 
 uncall define-namespace-anchor require tex2page
 
@@ -56,34 +77,11 @@ cat > guile.preamble <<EOF
 exec guile -e main -s \$0 \"\$@\"
 !#
 
-(define current-seconds current-time)
-(define date-day tm:mday)
-(define date-hour tm:hour)
-(define date-minute tm:min)
-(define date-month tm:mon)
-(define date-year tm:year)
-(define date-week-day tm:wday)
-(define date-dst? tm:isdst)
-(define date-time-zone-offset tm:gmtoff)
-(define eof the-eof-object)
-(define false #f)
-(define flush-output force-output)
-(define null '())
-(define ormap or-map)
-(define seconds->date localtime)
-(define string-reverse-index string-rindex)
-(define true #t)
-(define add1 1+)
-(define sub1 1-)
-(define remove delete)
-
 (define *scheme-version*
   (string-append "Guile " (version)
     (if (getenv "COMSPEC") " windows" " unix")))
 
-(define eval1
-  (lambda (e)
-    (eval e (interaction-environment))))
+(define *tex2page-namespace* (interaction-environment))
 
 (define-macro fluid-let
   (lambda (xvxv . ee)
@@ -101,19 +99,17 @@ exec guile -e main -s \$0 \"\$@\"
            ,@(map (lambda (x old-x) \`(set! ,x ,old-x)) xx old-xx)
            ,res)))))
 
-(define file-or-directory-modify-seconds
-  (lambda (f) (vector-ref (stat f) 9)))
+(define (file-or-directory-modify-seconds f) (vector-ref (stat f) 9))
 
-(define read-line
-  (lambda (i)
-    (let ((c (peek-char i)))
-      (if (eof-object? c)
+(define (read-line i)
+  (let ((c (peek-char i)))
+    (if (eof-object? c)
         c
         (let loop ((r (quote ())))
           (let ((c (read-char i)))
             (if (or (eof-object? c) (char=? c #\newline))
-              (list->string (reverse! r))
-              (loop (cons c r)))))))))
+                (list->string (reverse! r))
+                (loop (cons c r))))))))
 
 (define-macro almost-define-syntax
   (lambda (name proc)
@@ -123,11 +119,10 @@ exec guile -e main -s \$0 \"\$@\"
                  (syntax->datum (lambda (x) x)))
               (,proc (cons 'defstruct _args)))))))
 
-(define main
-  (lambda (args)
-    (tex2page
-      (and (>= (length args) 2)
-           (list-ref args 1)))))
+(define (main args)
+  (tex2page
+    (and (>= (length args) 2)
+         (list-ref args 1))))
 EOF
 
 sed -e '1s/^/DUMMY_LINE\n/' my-tex2page |\

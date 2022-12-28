@@ -292,7 +292,7 @@
          al))
 
 (define (write-to-string n . z)
-  (if (pair? z)
+  (if (pair? z) ;i.e.  :base 16
       (number->string (if (inexact? n) (inexact->exact n) n) 16)
       (number->string n)))
 
@@ -351,22 +351,6 @@
     (let ((i (string-reverse-index s sep)))
       (cond (i (loop (substring s 0 i) (cons (substring s (+ i 1)) r)))
             (else (cons s r))))))
-
-(define (file-stem-name f)
-  (let ((slash (string-reverse-index f #\/)))
-    (when slash (set! f (substring f (add1 slash))))
-    (let ((dot (string-reverse-index f #\.)))
-      (if (and dot (> dot 0))
-          (substring f 0 dot)
-          f))))
-
-(define (file-extension f)
-  (let ((slash (string-reverse-index f #\/))
-        (dot (string-reverse-index f #\.)))
-    (and dot
-         (not (= dot 0))
-         (or (not slash) (< (add1 slash) dot))
-         (substring f dot))))
 
 (define (read-6hex i)
   (let* ((x (read i))

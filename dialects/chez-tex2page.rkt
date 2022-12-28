@@ -1,4 +1,4 @@
-; last change: 2022-12-26
+; last change: 2022-12-28
 
 (scmxlate-eval
  (define *chez-name*
@@ -32,10 +32,6 @@
   tex2page
   )
 
-(scmxlate-ignoredef
-  *tex2page-namespace*
-  )
-
 (scmxlate-rename
   (error chez-error)
   (get-char t2p-get-char)
@@ -47,8 +43,7 @@
   (ensure-file-deleted delete-file)
   )
 
-(define (eval1 e)
-  (eval e (interaction-environment)))
+(define *tex2page-namespace* (interaction-environment))
 
 (define (chez-error . args)
   (apply error #f args))
@@ -70,12 +65,11 @@
     (close-input-port i)
     v))
 
-(define index-of
-  (lambda (s x)
-    (let loop ((s s) (i 0))
-      (cond ((null? s) false)
-            ((eq? (car s) x) i)
-            (else (loop (cdr s) (+ i 1)))))))
+(define (index-of s x)
+  (let loop ((s s) (i 0))
+    (cond ((null? s) false)
+          ((eq? (car s) x) i)
+          (else (loop (cdr s) (+ i 1))))))
 
 (define (subseq s i . z)
   (let ((f (if (pair? z) (car z) (string-length s))))

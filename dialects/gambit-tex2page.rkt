@@ -1,4 +1,4 @@
-; last change: 2022-12-26
+; last change: 2022-12-28
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -13,10 +13,6 @@
     (with-exception-handler (lambda (ex) #f)
                             (lambda () (getenv ev)))))
 
-(scmxlate-ignoredef
-  *tex2page-namespace*
-  )
-
 (scmxlate-uncall
   define-namespace-anchor
   require
@@ -27,6 +23,8 @@
  (getenv gambit-getenv)
  (substring subseq)
  )
+
+(define *tex2page-namespace* (interaction-environment))
 
 (define (subseq s i . z)
   (let ((f (if (pair? z) (car z) (string-length s))))
@@ -115,10 +113,6 @@
                (file-info-last-modification-time (file-info f)))))))
 
 (scmxlate-include "seconds-to-date.scm")
-
-(define eval1
-  (lambda (e)
-    (eval e (interaction-environment))))
 
 (define (main arg1 . ignore)
   (tex2page arg1))

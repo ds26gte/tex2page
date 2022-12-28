@@ -1,4 +1,4 @@
-;last change: 2022-12-26
+;last change: 2022-12-28
 
 (scmxlate-cond
   ((eqv? *operating-system* 'unix)
@@ -14,10 +14,6 @@
 
 (define *scheme-version*
   (string-append "MIT Scheme " (get-subsystem-version-string "release")))
-
-(scmxlate-ignoredef
-  *tex2page-namespace*
-  )
 
 (scmxlate-uncall
   define-namespace-anchor
@@ -39,29 +35,24 @@
  )
 
 (scmxlate-ignoredef-rename
+  (*tex2page-namespace* user-initial-environment)
   (seconds-to-human-time file-time->local-time-string)
   (string-index string-find-next-char)
   (string-reverse-index string-find-previous-char)
   (substring? string-search-forward)
   )
 
-(define ormap
-  (lambda (f s)
-    (there-exists? s f)))
+(define (ormap f s)
+  (there-exists? s f))
 
-(define index-of
-  (lambda (s x)
-    (let loop ((s s) (i 0))
-      (cond ((null? s) false)
-            ((eq? (car s) x) i)
-            (else (loop (cdr s) (+ i 1)))))))
+(define (index-of s x)
+  (let loop ((s s) (i 0))
+    (cond ((null? s) false)
+          ((eq? (car s) x) i)
+          (else (loop (cdr s) (+ i 1))))))
 
-(define eval1 (lambda (x) (eval x user-initial-environment)))
-
-(define current-seconds
-  (lambda ()
-    (universal-time->file-time
-     (get-universal-time))))
+(define (current-seconds)
+  (universal-time->file-time (get-universal-time)))
 
 (scmxlate-postamble)
 

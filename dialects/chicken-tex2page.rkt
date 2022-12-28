@@ -1,4 +1,4 @@
-; last change: 2022-12-26
+; last change: 2022-12-28
 
 (scmxlate-insert
   (string-append
@@ -20,10 +20,6 @@
 (define *scheme-version*
   (string-append "Chicken " (chicken-version)))
 
-(scmxlate-ignoredef
-  *tex2page-namespace*
-)
-
 (scmxlate-uncall
   define-namespace-anchor
   require
@@ -37,9 +33,7 @@
   (seconds->date seconds->local-time)
   )
 
-(define eval1
-  (lambda (e)
-    (eval e (interaction-environment))))
+(define *tex2page-namespace* (interaction-environment))
 
 (define (list* . args)
   (let ((a (car args)) (d (cdr args)))
@@ -54,20 +48,18 @@
                   (cond ((null? cdr-r1) (set-cdr! r1 l2) l1)
                         (else (loop cdr-r1))))))))
 
-(define reverse!
-  (lambda (s)
-    (let loop ((s s) (r '()))
-      (if (null? s) r
-	  (let ((d (cdr s)))
-            (set-cdr! s r)
-	    (loop d s))))))
+(define (reverse! s)
+  (let loop ((s s) (r '()))
+    (if (null? s) r
+        (let ((d (cdr s)))
+          (set-cdr! s r)
+          (loop d s)))))
 
-(define index-of
-  (lambda (s x)
-    (let loop ((s s) (i 0))
-      (cond ((null? s) false)
-            ((eq? (car s) x) i)
-            (else (loop (cdr s) (+ i 1)))))))
+(define (index-of s x)
+  (let loop ((s s) (i 0))
+    (cond ((null? s) false)
+          ((eq? (car s) x) i)
+          (else (loop (cdr s) (+ i 1))))))
 
 (define (string-is-flanked-by-stars-p s)
   ;Chicken's char=? is not variadic
@@ -103,26 +95,24 @@
       (if (and (= i 0) (= n orig-n)) s
           (substring s i n)))))
 
-(define strftime
-  (lambda (ignore d)
+(define (strftime ignore d)
     (let ((s (time->string d))
           (tz (get-environment-variable "TZ")))
       (string-append
         (substring s 0 (- (string-length s) 1))
-        (if tz (string-append " " tz) "")))))
+        (if tz (string-append " " tz) ""))))
 
-(define date-minute (lambda (v) (vector-ref v 1)))
-(define date-hour (lambda (v) (vector-ref v 2)))
-(define date-day (lambda (v) (vector-ref v 3)))
-(define date-month (lambda (v) (vector-ref v 4)))
-(define date-year (lambda (v) (vector-ref v 5)))
+(define (date-minute v) (vector-ref v 1))
+(define (date-hour v) (vector-ref v 2))
+(define (date-day v) (vector-ref v 3))
+(define (date-month v) (vector-ref v 4))
+(define (date-year v) (vector-ref v 5))
 
-(define ormap
-  (lambda (f s)
-    ;Returns true if f is true of some elt in s
-    (let loop ((s s))
-      (if (null? s) #f
-        (or (f (car s)) (loop (cdr s)))))))
+(define (ormap f s)
+  ;Returns true if f is true of some elt in s
+  (let loop ((s s))
+    (if (null? s) #f
+        (or (f (car s)) (loop (cdr s))))))
 
 (scmxlate-postamble)
 

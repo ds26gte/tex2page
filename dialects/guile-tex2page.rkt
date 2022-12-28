@@ -1,4 +1,4 @@
-; last change: 2012-04-21
+; last change: 2022-12-28
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -10,6 +10,8 @@
 
 (define *scheme-version*
   (string-append "Guile " (version)))
+
+(define *tex2page-namespace* (interaction-environment))
 
 (scmxlate-ignore
  call-with-input-string
@@ -38,20 +40,7 @@
 
 (scmxlate-uncall
  require
- trace
- ;main
  )
-
-(define *return* #\return)
-(define *tab* #\tab)
-
-(define andmap and-map)
-
-(scmxlate-cond
- ((>= *dialect-version* 1.6)
-  (define eval1
-    (lambda (e)
-      (eval e (interaction-environment))))))
 
 (define-macro unless
   (lambda (b . ee)

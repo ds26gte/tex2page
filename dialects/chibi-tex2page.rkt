@@ -1,4 +1,4 @@
-;last modified 2022-12-21
+;last modified 2022-12-28
 
 ;TBD
 
@@ -7,9 +7,7 @@
   require
   )
 
-(scmxlate-ignore-define
-  *tex2page-namespace*
-  )
-
 (define *scheme-version*
   "Chibi")
+
+(define *tex2page-namespace* (interaction-environment))

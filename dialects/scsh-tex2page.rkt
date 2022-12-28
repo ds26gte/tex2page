@@ -1,4 +1,4 @@
-;last change: 2003-07-17
+;last change: 2022-12-28
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -9,6 +9,8 @@
 
 (define *scheme-version* 
   (string-append "Scsh " scsh-version-string))
+
+(define *tex2page-namespace* (interaction-environment))
 
 (scmxlate-uncall
  require
@@ -75,11 +77,6 @@
            (let ((,res (begin ,@ee)))
              ,@(map (lambda (x old-x) `(set! ,x ,old-x)) xx old-xx)
              ,res))))))
-
-(define eval1
-  (lambda (e)
-    (eval e ;(scheme-report-environment 5)
-          (interaction-environment))))
 
 (define do-evalh
   (lambda (s)

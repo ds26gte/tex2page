@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221227") ;last change
+(defparameter *tex2page-version* "20221228") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -3435,18 +3435,16 @@
     (:pt 65536)
     (:pc (* 12 (scaled-point-equivalent-of :pt)))
     (:in (* 72.27 (scaled-point-equivalent-of :pt)))
-    (:bp (* (/ 72) (scaled-point-equivalent-of :in)))
+    (:bp (* 1/72 (scaled-point-equivalent-of :in)))
     (:cm (* (/ 2.54) (scaled-point-equivalent-of :in)))
     (:mm (* 0.1 (scaled-point-equivalent-of :cm)))
-    (:dd (* (/ 1238 1157) (scaled-point-equivalent-of :pt)))
+    (:dd (* 1238/1157 (scaled-point-equivalent-of :pt)))
     (:cc (* 12 (scaled-point-equivalent-of :dd)))
     (:sp 1)
     ;
-    ;(:em (* 10 (scaled-point-equivalent-of :pt)))
-    ;(:ex (* 4.5 (scaled-point-equivalent-of :pt)))
-    ;
     (:em (* 16 (scaled-point-equivalent-of :pt)))
     (:ex (* .45 (scaled-point-equivalent-of :em)))
+    (:mu (* 1/18 (scaled-point-equivalent-of :em)))
     ;
     (t (terror 'scaled-point-equivalent-of
                "Illegal unit of measure " unit))))
@@ -3485,6 +3483,7 @@
                   ((eat-word "pc") (tex-length 1 :pc))
                   ((eat-word "pt") (tex-length 1 :pt))
                   ((eat-word "sp") 1)
+                  ((and *math-mode-p* (eat-word "mu")) (tex-length 1 :mu))
                   (t 1)))))))
 
 (defun get-points () (/ (get-scaled-points) 65536.0))

@@ -282,7 +282,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221226, ecl.
 
 
-(define *tex2page-version* "20221227")
+(define *tex2page-version* "20221228")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -3862,14 +3862,15 @@
    ((:pt) 65536)
    ((:pc) (* 12 (scaled-point-equivalent-of ':pt)))
    ((:in) (* 72.27 (scaled-point-equivalent-of ':pt)))
-   ((:bp) (* (/ 72) (scaled-point-equivalent-of ':in)))
+   ((:bp) (* 1/72 (scaled-point-equivalent-of ':in)))
    ((:cm) (* (/ 2.54) (scaled-point-equivalent-of ':in)))
    ((:mm) (* 0.1 (scaled-point-equivalent-of ':cm)))
-   ((:dd) (* (/ 1238 1157) (scaled-point-equivalent-of ':pt)))
+   ((:dd) (* 1238/1157 (scaled-point-equivalent-of ':pt)))
    ((:cc) (* 12 (scaled-point-equivalent-of ':dd)))
    ((:sp) 1)
    ((:em) (* 16 (scaled-point-equivalent-of ':pt)))
    ((:ex) (* 0.45 (scaled-point-equivalent-of ':em)))
+   ((:mu) (* 1/18 (scaled-point-equivalent-of ':em)))
    (else (terror 'scaled-point-equivalent-of "Illegal unit of measure " unit))))
 
 (define (tex-length num unit) (* num (scaled-point-equivalent-of unit)))
@@ -3907,6 +3908,7 @@
                  ((eat-word "pc") (tex-length 1 ':pc))
                  ((eat-word "pt") (tex-length 1 ':pt))
                  ((eat-word "sp") 1)
+                 ((and *math-mode-p* (eat-word "mu")) (tex-length 1 ':mu))
                  (else 1)))))))
 
 (define (get-points) (/ (get-scaled-points) 65536.0))

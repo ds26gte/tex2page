@@ -57,7 +57,6 @@
   (string-to-number string->number)
   (string-trim-blanks string-trim)
   (retrieve-env getenv)
-  (s-with-output-to-string with-output-to-string)
   (system-with-visual system)
   (*this-package* false)
 

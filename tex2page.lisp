@@ -68,10 +68,6 @@
 (defmacro close-output-port (p)
   `(close ,p))
 
-(defmacro s-with-output-to-string (p)
-  `(with-output-to-string (*standard-output*)
-     ,@(cddr p)))
-
 (defparameter *tex2page-copyright-notice*
   (string-append "Copyright (C) 1997-"
     (subseq *tex2page-version* 0 4) " Dorai Sitaram"))
@@ -9962,9 +9958,8 @@ Try the commands
       (case kind
         (:quiet (do-eval-string s))
         (t (tex2page-string
-             (s-with-output-to-string
-               (lambda ()
-                 (do-eval-string s))))
+             (with-output-to-string (*standard-output*)
+               (do-eval-string s)))
            #|
           (let ((o (make-string-output-stream)))
              (let ((*standard-output* o))

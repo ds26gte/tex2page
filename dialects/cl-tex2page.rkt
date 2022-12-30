@@ -1,4 +1,4 @@
-; last change: 2022-12-26
+; last change: 2022-12-29
 
 ;works with CLISP, Clozure CL, CMU CL, ECL, SBCL; but scmxlate
 ;translation to CL is mostly for verification (of scmxlate?) these days.
@@ -236,7 +236,6 @@
  )
 
 (scmxlate-ignoredef-rename
-  (cl-with-output-to-string with-output-to-string)
   (*epoch* 1900)
   (eval1 #'eval)
   (list-position #'position)

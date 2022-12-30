@@ -1,4 +1,4 @@
-;last modified 2022-12-27
+;last modified 2022-12-29
 
 (cliiscm-insert
   "#!/usr/bin/env racket
@@ -57,7 +57,9 @@
   (string-to-number string->number)
   (string-trim-blanks string-trim)
   (retrieve-env getenv)
+  (s-with-output-to-string with-output-to-string)
   (system-with-visual system)
+  (*this-package* false)
 
   )
 
@@ -76,7 +78,6 @@
     (cond (ht (list false (date-minute ht) (date-hour ht)
                     (date-day ht) (date-month ht) (date-year ht)))
           (else (list false false false
-                      false false false
                       false false false)))))
 
 (define (strftime ignore-format d)
@@ -130,7 +131,6 @@
   (make-hash-table make-table)
   (maphash table-for-each)
   (remhash table-rem)
-  (with-output-to-string cl-with-output-to-string)
 
   )
 
@@ -228,13 +228,6 @@
            (define ,(string->symbol (string-append s-s "?"))
              (lambda (x)
                (and (vector? x) (eq? (vector-ref x 0) ',s)))))))))
-
-; (defmacro cl-with-output-to-string (ignore-wots-arg . body)
-;   (list 'with-output-to-string
-;         (list* 'lambda '() body)))
-
-(defmacro cl-with-output-to-string (ignore-wots-arg . body)
-  `(with-output-to-string (lambda () ,@body)))
 
 (defstruct table (test eqv?) (alist '()))
 

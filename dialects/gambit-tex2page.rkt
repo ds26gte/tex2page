@@ -1,4 +1,4 @@
-; last change: 2022-12-28
+; last change: 2022-12-29
 
 (scmxlate-cond
  ((eqv? *operating-system* 'unix)
@@ -44,10 +44,6 @@
         (loop (cdr xx)
               (if (equal? x y) r
                 (cons x r)))))))
-
-(define-macro cl-with-output-to-string 
-  (lambda (ignore-wots-arg . body)
-    `(with-output-to-string '() (lambda () ,@body))))
 
 (define (string-upcase s)
   (list->string (map char-upcase (string->list s))))

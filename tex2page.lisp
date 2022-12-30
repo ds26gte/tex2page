@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221228") ;last change
+(defparameter *tex2page-version* "20221229") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -67,6 +67,10 @@
 
 (defmacro close-output-port (p)
   `(close ,p))
+
+(defmacro s-with-output-to-string (p)
+  `(with-output-to-string (*standard-output*)
+     ,@(cddr p)))
 
 (defparameter *tex2page-copyright-notice*
   (string-append "Copyright (C) 1997-"
@@ -516,6 +520,7 @@
 (defun ensure-file-deleted (f)
   (declare (string f))
   (when (probe-file f) (delete-file f)))
+
 
 (defun write-aux (e)
   (unless *aux-stream*
@@ -9957,8 +9962,9 @@ Try the commands
       (case kind
         (:quiet (do-eval-string s))
         (t (tex2page-string
-             (with-output-to-string (*standard-output*)
-               (do-eval-string s)))
+             (s-with-output-to-string
+               (lambda ()
+                 (do-eval-string s))))
            #|
           (let ((o (make-string-output-stream)))
              (let ((*standard-output* o))

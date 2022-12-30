@@ -38,7 +38,7 @@
            (date-day ht)
            (date-month ht)
            (date-year ht)))
-    (else (list false false false false false false false false false)))))
+    (else (list false false false false false false)))))
 
 (define (strftime ignore-format d)
  (let ((m (date-minute d))
@@ -148,16 +148,6 @@
                   (lambda (x)
                     (and (vector? x)
                          (eq? (vector-ref x 0) '(unquote s)))))))))))
-       (cdr %so-d))))))
-
-(define-syntax cl-with-output-to-string
- (lambda (%so)
-   (datum->syntax %so
-    (let ((%so-d (syntax->datum %so)))
-      (apply
-       (lambda (ignore-wots-arg . body)
-         (quasiquote
-          (with-output-to-string (lambda () (unquote-splicing body)))))
        (cdr %so-d))))))
 
 (defstruct table (test eqv?) (alist '()))
@@ -282,7 +272,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221226, ecl.
 
 
-(define *tex2page-version* "20221228")
+(define *tex2page-version* "20221229")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -688,8 +678,6 @@
 (define *tex-output-format* false)
 
 (define *tex2page-inputs* null)
-
-(define *this-package* *package*)
 
 (define *title* false)
 
@@ -10843,8 +10831,7 @@ Try the commands
        ((:quiet) (do-eval-string s))
        (else
         (tex2page-string
-         (cl-with-output-to-string ((current-output-port))
-          (do-eval-string s))))))))
+         (with-output-to-string (lambda () (do-eval-string s)))))))))
 
 (tex-def-prim "\\eval" (lambda () (do-eval ':both)))
 
@@ -12271,12 +12258,12 @@ Try the commands
    (*opmac-list-style* #\o) (*opmac-nonum-p* false) (*opmac-notoc-p* false)
    (*opmac-verbinput-table* (make-table ':test equal?)) (*outer-p* true)
    (*output-streams* (make-table)) (*outputting-external-title-p* false)
-   (*outputting-to-non-html-p* false) (*package* *this-package*)
-   (*quote-level* 0) (*reading-control-sequence-p* false)
-   (*recent-node-name* false) (*redirect-delay* false) (*redirect-url* false)
-   (*reg-num-count* 255) (*scm-builtins* false) (*scm-dribbling-p* false)
-   (*scm-keywords* false) (*scm-special-symbols* false) (*scm-variables* false)
-   (*scripts* null) (*section-counter-dependencies* (make-table))
+   (*outputting-to-non-html-p* false) (*package* false) (*quote-level* 0)
+   (*reading-control-sequence-p* false) (*recent-node-name* false)
+   (*redirect-delay* false) (*redirect-url* false) (*reg-num-count* 255)
+   (*scm-builtins* false) (*scm-dribbling-p* false) (*scm-keywords* false)
+   (*scm-special-symbols* false) (*scm-variables* false) (*scripts* null)
+   (*section-counter-dependencies* (make-table))
    (*section-counters* (make-table)) (*slatex-math-escape* false)
    (*source-changed-since-last-run-p* false) (*start-time* (current-seconds))
    (*stylesheets* null) (*subjobname* false) (*tabular-stack* null)

@@ -6,7 +6,6 @@
 #lang racket
 ")
 
-;(require mzlib/trace)
 (require racket/private/more-scheme)
 
 (cliiscm-uncall
@@ -15,6 +14,45 @@
   in-package
   tex2page
   trace
+
+  )
+
+(cliiscm-rename
+
+  (*common-lisp-version* *scheme-version*)
+  (nconc append!)
+  (nreverse reverse!)
+  (read-from-string string->number)
+  (search substring?)
+  (gethash table-get)
+  (make-hash-table make-table)
+  (maphash table-for-each)
+  (remhash table-rem)
+
+  )
+
+(cliiscm-defsetf
+
+  (istream*-buffer set!istream*-buffer)
+  (cdef*-active set!cdef*-active)
+  (cdef*-argpat set!cdef*-argpat)
+  (cdef*-catcodes set!cdef*-catcodes)
+  (cdef*-expansion set!cdef*-expansion)
+  (cdef*-optarg set!cdef*-optarg)
+  (counter*-value set!counter*-value)
+  (ostream*-hbuffer set!ostream*-hbuffer)
+  (table-get table-put!)
+  (tdef*-active set!tdef*-active)
+  (tdef*-argpat set!tdef*-argpat)
+  (tdef*-catcodes set!tdef*-catcodes)
+  (tdef*-defer set!tdef*-defer)
+  (tdef*-expansion set!tdef*-expansion)
+  (tdef*-optarg set!tdef*-optarg)
+  (tdef*-prim set!tdef*-prim)
+  (tdef*-thunk set!tdef*-thunk)
+  (texframe*-aftergroups set!texframe*-aftergroups)
+  (texframe*-postludes set!texframe*-postludes)
+  (texframe*-catcodes set!texframe*-catcodes)
 
   )
 
@@ -45,6 +83,7 @@
   list->string
   index-of
   string->list
+  string->number
   string-append
   string-length
   system
@@ -54,7 +93,6 @@
 (cliiscm-ignoredef-rename
 
   (char-whitespace-p char-whitespace?)
-  (string-to-number string->number)
   (string-trim-blanks string-trim)
   (retrieve-env getenv)
   (system-with-visual system)
@@ -118,45 +156,6 @@
 ;Schemes where lists are mutable can exploit that fact
 (define append! append)
 (define reverse! reverse)
-
-(cliiscm-rename
-
-  (*common-lisp-version* *scheme-version*)
-  (nconc append!)
-  (nreverse reverse!)
-  (read-from-string string->number)
-  (search substring?)
-  (gethash table-get)
-  (make-hash-table make-table)
-  (maphash table-for-each)
-  (remhash table-rem)
-
-  )
-
-(cliiscm-defsetf
-
-  (istream*-buffer set!istream*-buffer)
-  (cdef*-active set!cdef*-active)
-  (cdef*-argpat set!cdef*-argpat)
-  (cdef*-catcodes set!cdef*-catcodes)
-  (cdef*-expansion set!cdef*-expansion)
-  (cdef*-optarg set!cdef*-optarg)
-  (counter*-value set!counter*-value)
-  (ostream*-hbuffer set!ostream*-hbuffer)
-  (table-get table-put!)
-  (tdef*-active set!tdef*-active)
-  (tdef*-argpat set!tdef*-argpat)
-  (tdef*-catcodes set!tdef*-catcodes)
-  (tdef*-defer set!tdef*-defer)
-  (tdef*-expansion set!tdef*-expansion)
-  (tdef*-optarg set!tdef*-optarg)
-  (tdef*-prim set!tdef*-prim)
-  (tdef*-thunk set!tdef*-thunk)
-  (texframe*-aftergroups set!texframe*-aftergroups)
-  (texframe*-postludes set!texframe*-postludes)
-  (texframe*-catcodes set!texframe*-catcodes)
-
-  )
 
 ;(defstruct structname [field | (field default-value)] ...)
 ;

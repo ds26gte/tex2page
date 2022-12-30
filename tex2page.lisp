@@ -1089,7 +1089,7 @@
       (get-actual-char)
       (push c s))
     (when (consp s)
-      (string-to-number
+      (string->number
         (list->string (nreverse s)) base))))
 
 (defun get-real ()
@@ -1131,7 +1131,7 @@
            (get-actual-char) (ignorespaces :stop-before-first-newline))
           (t (toss-back-char #\t)))))
 
-(defun string-to-number (s &optional (base 10))
+(defun string->number (s &optional (base 10))
   (declare (string s)
            (type (member 8 10 16) base))
   (if (string-index s #\:) nil
@@ -1163,7 +1163,7 @@
         ((progn (setq *it* (resolve-defs x)) *it*)
          (char-code (char *it* 0)))
         ((= (string-length x) 2) (char-code (char x 1)))
-        (t (string-to-number x))))
+        (t (string->number x))))
 
 (defun get-number-or-false ()
   (ignorespaces)
@@ -2456,7 +2456,7 @@
 
 (defun section-ctl-seq-p (s)
   (declare (string s))
-  (cond ((string= s "\\sectiond") (string-to-number (ungroup (get-token))))
+  (cond ((string= s "\\sectiond") (string->number (ungroup (get-token))))
         ((string= s "\\part") -1)
         ((string= s "\\chapter") 0)
         ;optional [...] after section commands?
@@ -2594,7 +2594,7 @@
 
 (defun section-type-to-depth (sectype)
   (declare (string sectype))
-  (cond ((string-to-number sectype))
+  (cond ((string->number sectype))
         ((string= sectype "chapter") 0)
         ((string= sectype "section") 1)
         ((string= sectype "subsection") 2)
@@ -3027,7 +3027,7 @@
           (when (< i 0) (return))
           (let* ((fv (elt *footnote-list* i))
                  (fnmark (footnotev*-mark fv))
-                 (fnno (string-to-number fnmark))
+                 (fnno (string->number fnmark))
                  (fncalltag (footnotev*-caller fv)))
             (do-para)
             (emit "<span class=footnotemark>")
@@ -6279,7 +6279,7 @@
   (plain-count "\\mag" (get-number) nil))
 
 (defun do-magstep ()
-  (case (string-to-number (get-token-or-peeled-group))
+  (case (string->number (get-token-or-peeled-group))
     (1 "1000")
     (2 "1200")
     (3 "1440")
@@ -7558,7 +7558,7 @@
          (if (= *it* 0) :selfeval :variable))
         ((string-is-all-dots-p s) :background) ;for Scheme's ellipsis
         ((char= (char s 0) #\#) :selfeval)
-        ((string-to-number s) :selfeval)
+        ((string->number s) :selfeval)
         (t :variable)))
 
 (defun eat-star ()
@@ -7726,12 +7726,12 @@
 
 (defun do-addtocounter ()
   (let* ((counter-name (get-peeled-group))
-         (new-value (string-to-number (get-token-or-peeled-group))))
+         (new-value (string->number (get-token-or-peeled-group))))
     (set-latex-counter-aux counter-name t new-value)))
 
 (defun do-setcounter ()
   (let* ((counter-name (get-peeled-group))
-         (new-value (string-to-number (get-token-or-peeled-group))))
+         (new-value (string->number (get-token-or-peeled-group))))
     (set-latex-counter-aux counter-name nil new-value)))
 
 (defun do-stepcounter ()

@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221230") ;last change
+(defparameter *tex2page-version* "20221231") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -335,6 +335,7 @@
 (defvar *in-alltt-p* nil)
 (defvar *in-display-math-p* nil)
 (defvar *in-para-p* nil)
+(defvar *in-para-started-p* nil)
 (defvar *in-small-caps-p* nil)
 (defvar *includeonly-list* nil)
 (defvar *index-count* nil)
@@ -516,7 +517,6 @@
 (defun ensure-file-deleted (f)
   (declare (string f))
   (when (probe-file f) (delete-file f)))
-
 
 (defun write-aux (e)
   (unless *aux-stream*
@@ -1354,9 +1354,12 @@
   (make-ostream* :stream (make-string-output-stream)))
 
 (defun close-html-output-stream (op)
-  (mapc #'emit (nreverse (ostream*-hbuffer op)))
-  (setf (ostream*-hbuffer op) '())
-  (close-output-port (ostream*-stream op)))
+  (let ((p (ostream*-stream op))
+        (backed-up-spaces (ostream*-hbuffer op)))
+    (when (consp backed-up-spaces)
+      (setf (ostream*-hbuffer op) '())
+      (mapc (lambda (x) (princ x p)) (nreverse backed-up-spaces)))
+    (close-output-port p)))
 
 (defun html-output-stream-to-string (op)
   (mapc #'emit (nreverse (ostream*-hbuffer op)))
@@ -1365,10 +1368,12 @@
 
 (defun emit (s)
   (when *emit-enabled-p*
-    (let ((p (ostream*-stream *html*)))
-      (mapc (lambda (x) (princ x p))
-            (nreverse (ostream*-hbuffer *html*)))
-      (setf (ostream*-hbuffer *html*) '())
+    (let* ((p (ostream*-stream *html*))
+           (backed-up-spaces (ostream*-hbuffer *html*)))
+      (when (consp backed-up-spaces)
+        (setf (ostream*-hbuffer *html*) '())
+        (mapc (lambda (x) (princ x p)) (nreverse backed-up-spaces)))
+      (unless *in-para-started-p* (setq *in-para-started-p* t))
       (princ s p))))
 
 (defun emit-space (s)
@@ -2243,7 +2248,7 @@
   (tex2page-string (string-append "\\let\\\\\\break " title))
   (egroup)
   (emit "</h1>")
-  (do-noindent)
+  (do-para :noindent)
   )
 
 (defun do-subject ()
@@ -2302,24 +2307,28 @@
     (setq *in-para-p* nil)))
 
 (defun do-para (&optional (noindentp nil))
-  (cond ((and *in-para-p* (consp (ostream*-hbuffer *html*)))
-         ; (format t "erasing empty par space~%")
-         (setf (ostream*-hbuffer *html*) '()))
-        (t
-          (do-end-para)
-          (let ((in-table-p (and (consp *tabular-stack*)
-                                 (eq (car *tabular-stack*) ':block))))
-            (when in-table-p (emit "</td></tr><tr><td>") (emit-newline))
-            (emit "<p")
-            (when noindentp (emit " class=noindent"))
-            (emit ">")
-            (emit-newline)
-            (setq *in-para-p* t)))))
+  (when (consp (ostream*-hbuffer *html*))
+    (setf (ostream*-hbuffer *html*) '()))
+  (unless (and *in-para-p* (not *in-para-started-p*))
+    (do-end-para)
+    (let ((in-table-p (and (consp *tabular-stack*)
+                           (eq (car *tabular-stack*) ':block))))
+      (when in-table-p (emit "</td></tr><tr><td>") (emit-newline))
+      (emit "<p")
+      (when noindentp (emit " class=noindent"))
+      (emit ">")
+      (emit-newline)
+      (setq *in-para-p* t
+            *in-para-started-p* noindentp))))
 
 ; (trace do-para)
 
 (defun do-noindent ()
-  (do-para :noindent))
+  (when (and *in-para-p* (not *in-para-started-p*))
+    (when (consp (ostream*-hbuffer *html*))
+      (setf (ostream*-hbuffer *html*) '()))
+    (do-end-para)
+    (do-para :noindent)))
 
 ; (trace do-noindent)
 
@@ -2581,7 +2590,7 @@
       (emit "</h")
       (emit htmlnum)
       (emit ">")
-      (do-noindent)
+      (do-para :noindent)
       ;(emit-newline)
       ;(do-para)
       (let ((tocdepth (get-gcount "\\tocdepth")))
@@ -2893,7 +2902,7 @@
     (write-aux `(!toc-page ,*html-page-count*))
     (cond ((null *toc-list*) (flag-missing-piece :toc)
            (non-fatal-error "Table of contents not generated; rerun TeX2page"))
-          (t (do-noindent)
+          (t (do-para :noindent)
              (let ((tocdepth (get-gcount "\\tocdepth")))
                (mapc
                 (lambda (x)
@@ -2912,7 +2921,7 @@
                               (tex2page-flag-boolean "\\TZPtexlayout"))
                           (do-bigskip :medskip)
                           (do-para))
-                      (do-noindent)
+                      (do-para :noindent)
                       (emit "<b>")
                       (emit-newline))
                     (indent-n-levels lvl)
@@ -3346,7 +3355,7 @@
 (defun do-obeylines ()
   (ignorespaces :stop-after-first-newline)
   ;(when (eql (snoop-actual-char) #\newline) (get-actual-char))
-  ;(do-noindent)
+  ;(do-para :noindent)
   (activate-cdef #\newline)
   ;(tex-def-char #\newline '() "\\TIIPpar" nil)
   (tex-def-char #\newline '() "\\TIIPbr" nil)
@@ -3538,13 +3547,16 @@
 (defun do-newline ()
   ;(format t "doing do-newline~%")
   (when (>= (munch-newlines) 1)
-    (let ((c (snoop-actual-char))
-          (noindentp nil))
-      (when (and c (= (catcode c) **escape**))
-        (let ((x (get-ctl-seq)))
-          (cond ((string= x "\\noindent") (setq noindentp t))
-                (t (toss-back-char *invisible-space*) (toss-back-string x)))))
-      (do-para noindentp)))
+    ; (do-end-para)
+    (do-para)
+    ; (let ((c (snoop-actual-char))
+    ;       (noindentp nil))
+    ;   (when (and c (= (catcode c) **escape**))
+    ;     (let ((x (get-ctl-seq)))
+    ;       (cond ((string= x "\\noindent") (setq noindentp t))
+    ;             (t (toss-back-char *invisible-space*) (toss-back-string x)))))
+    ;   (do-para noindentp)))
+    )
   (emit-newline))
 
 ; (trace do-newline)
@@ -4129,7 +4141,7 @@
 
 (defun do-textindent ()
   (let ((parindent (sp-to-pixels (the-dimen "\\parindent"))))
-    (do-noindent)
+    (do-para :noindent)
     (emit "<span style=\"margin-left: ")
     (emit parindent)
     (emit "pt\"></span>")
@@ -4148,7 +4160,7 @@
                       (tex-string-to-html-string (get-till-par)))))
     (do-end-para)
     (emit "<div class=\"proclaim medskip\"><b>")
-    (do-noindent)
+    (do-para :noindent)
     (emit head)
     (emit ".</b>")
     (emit-nbsp 2)
@@ -4181,7 +4193,7 @@
   (do-end-para)
   (pop-tabular-stack :itemize)
   (emit "</ul>")
-  (do-noindent))
+  (do-para :noindent))
 
 (defun do-enumerate ()
   (do-end-para)
@@ -4197,7 +4209,7 @@
   (pop-tabular-stack :enumerate)
   (do-end-para)
   (emit "</ol>")
-  (do-noindent))
+  (do-para :noindent))
 
 (defun do-opmac-list-style ()
   (ignorespaces)
@@ -4210,9 +4222,7 @@
   (emit (case type (:medskip "medskip") (:bigskip "bigskip") (t "smallskip")))
   (emit "></div>")
   (emit-newline)
-  (emit "<p style=\"margin-top: 0pt; margin-bottom: 0pt\">")
-  (setq *in-para-p* t)
-  (emit-newline))
+  (do-para))
 
 (defun do-hspace ()
   (ignorespaces)
@@ -4899,7 +4909,7 @@
        (when display-p (emit "</td></tr></table>"))
        (when display-p
          (emit "</div>")
-         (do-noindent))))))
+         (do-para :noindent))))))
 
 (defun do-display-math (tex-string)
   (do-end-para)
@@ -4914,7 +4924,7 @@
         (lambda (o) (princ "$$" o) (princ tex-string o) (princ "$$" o))
         tex-string)
        (emit "</div>")
-       (do-noindent))
+       (do-para :noindent))
     (do-math-fragment tex-string :display)))
 
 (defun tex-math-delim-string (type)
@@ -6806,7 +6816,7 @@
        (loop
          (when (>= k n)
            (when (and (= k 0) *current-tex2page-input*)
-             (ignorespaces :stop-after-first-newline))
+             (ignorespaces :stop-before-first-newline))
            (return r))
          (let ((c (elt argpat k)))
            ;eql rather than char= because \par may show up as :par?
@@ -7016,7 +7026,7 @@
     (funcall (if (char= d #\{) #'do-verb-braced #'do-verb-delimed) d)
     (cond (*outputting-external-title-p* nil)
           (*verb-display-p* (emit "</pre>")
-                            (do-noindent))
+                            (do-para :noindent))
           (t (emit "</code>"))))
   (egroup))
 
@@ -7487,7 +7497,7 @@
     (egroup)
     (cond ((not display-p) (emit "</code>"))
           (t (emit "</pre>")
-             (do-noindent)))))
+             (do-para :noindent)))))
 
 (defun do-scm-delimed (result-p)
   (let* ((d (get-actual-char))
@@ -7506,7 +7516,7 @@
         (scm-output-next-chunk)))
     (cond ((not display-p) (emit "</code>"))
           (t (emit "</pre>") ;(do-para)
-             (do-noindent)))))
+             (do-para :noindent)))))
 
 (defun do-scm (&optional result-p)
   (cond (*outputting-external-title-p* (do-verb))
@@ -7534,7 +7544,7 @@
           (scm-output-next-chunk)))))
   (emit "</pre>")
   (egroup)
-  (do-noindent))
+  (do-para :noindent))
 
 (defun do-scmdribble ()
   (verb-ensure-output-stream)
@@ -7882,7 +7892,9 @@
         ((char= c #\|)
          (if (eq (car *tabular-stack*) :ruled-table)
              (do-ruledtable-colsep) (emit c)))
-        ((char= c #\newline) (do-newline))
+        ((char= c #\newline)
+         ; (format t "doing do-tex-char newline~%")
+         (do-newline))
         (t
          (cond (*math-mode-p*
                 (case c
@@ -8924,7 +8936,7 @@ Try the commands
 (tex-def-prim "\\lowercase" (lambda () (do-flipcase :lccode)))
 (tex-def-prim "\\message" #'do-message)
 (tex-def-prim "\\multiply" #'do-multiply)
-(tex-def-prim "\\noindent" #'do-relax)
+(tex-def-prim "\\noindent" #'do-noindent)
 (tex-def-prim "\\number" #'do-number)
 (tex-def-prim "\\openin" (lambda () (do-open-stream :in)))
 (tex-def-prim "\\openout" (lambda () (do-open-stream :out)))
@@ -9768,7 +9780,7 @@ Try the commands
               (t (scm-output-next-chunk)))))
     (emit "</pre></div>")
     (egroup)
-    (cond (display-p (do-noindent))
+    (cond (display-p (do-para :noindent))
           (in-table-p (emit "</td><td>")))))
 
 (tex-def-prim "\\schemedisplay" (lambda () (do-scm-slatex-lines "schemedisplay" t nil)))
@@ -10250,7 +10262,7 @@ Try the commands
           ((#\o #\- #\x #\X) "u")
           (t "o")))
   (emit "l>")
-  (do-noindent))
+  (do-para :noindent))
 
 (tex-def-prim "\\enditems" #'do-opmac-enditems)
 
@@ -10474,7 +10486,7 @@ Try the commands
      (pop-tabular-stack :description)
      (do-end-para)
      (emit "</dd></dl>")
-     (do-noindent)))
+     (do-para :noindent)))
 (tex-def-prim "\\endeqnarray" (lambda () (do-end-equation :eqnarray)))
 (tex-def-prim "\\endequation" (lambda () (do-end-equation :equation)))
 (tex-def-prim "\\endenumerate" #'do-endenumerate)

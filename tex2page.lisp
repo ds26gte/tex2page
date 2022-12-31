@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221229") ;last change
+(defparameter *tex2page-version* "20221230") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -2303,7 +2303,7 @@
 
 (defun do-para (&optional (noindentp nil))
   (cond ((and *in-para-p* (consp (ostream*-hbuffer *html*)))
-         ;(format t "erasing empty par space~%")
+         ; (format t "erasing empty par space~%")
          (setf (ostream*-hbuffer *html*) '()))
         (t
           (do-end-para)
@@ -2316,8 +2316,12 @@
             (emit-newline)
             (setq *in-para-p* t)))))
 
+; (trace do-para)
+
 (defun do-noindent ()
   (do-para :noindent))
+
+; (trace do-noindent)
 
 (defun do-indent ()
   (let ((parindent (sp-to-pixels (the-dimen "\\parindent"))))
@@ -3542,6 +3546,8 @@
                 (t (toss-back-char *invisible-space*) (toss-back-string x)))))
       (do-para noindentp)))
   (emit-newline))
+
+; (trace do-newline)
 
 (defun do-br ()
   (if (or (find-cdef #\space) (not (= (the-count "\\TIIPobeylinestrictly") 0)))
@@ -9500,8 +9506,9 @@ Try the commands
                                   (do-tex-ctl-seq-completely cs))))
               (t (emit-html-char (get-actual-char))))))
     (emit "</pre>")
-    (egroup))
-  (do-noindent))
+    (egroup)))
+
+; (trace do-begintt)
 
 (tex-def-prim "\\begintt" #'do-begintt)
 

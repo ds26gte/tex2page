@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2022-07-04} %last change
+\c{2022-12-30} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -1033,14 +1033,14 @@ For HTML, the page numbers listed for an index entry are
 of course the HTML page numbers, and are furthermore
 links to them.  Two things need be noted:
 
-\item(i) The link in the index goes directly to the spot where
+(i) The link in the index goes directly to the spot where
 the corresponding `\index` command was called.  This
 is convenient, especially as the target HTML page could
 be arbitrarily long, and it may not be as easy to hunt
 for the occurrence of the indexed item as on a paper
 page.
 
-\item(ii) An index entry could link to the same HTML page
+(ii) An index entry could link to the same HTML page
 several times.  In the print index, a page would be mentioned
 only once per entry, but since an HTML page could
 be equivalent to many contiguous paper pages, it makes
@@ -1483,20 +1483,18 @@ the time of last change of the source document, and the
 second line identifying \TeX2page and linking to its website.
 
 \index{TZPcolophonlastpage@`\TZPcolophonlastpage`}
-\item(i) To put the colophon on the last rather than the first page,
+(i) To put the colophon on the last rather than the first page,
 
 \begintt
 \let\TZPcolophonlastpage=1
 \endtt
 
-\iffalse
-\n If this request is to have meaning, it should be made in the document
-before the text for the second HTML page starts.  Otherwise, the default
-first-page placement of the colophon will have already taken effect.
-\fi
+% If this request is to have meaning, it should be made in the document
+% before the text for the second HTML page starts.  Otherwise, the default
+% first-page placement of the colophon will have already taken effect.
 
 \index{TZPcolophondisabletimestamp@`\TZPcolophondisabletimestamp`}
-\item(ii) To avoid mentioning the timestamp of the document in the
+(ii) To avoid mentioning the timestamp of the document in the
 colophon,
 
 \begintt
@@ -1508,14 +1506,14 @@ Lisp is incapable of determining a file’s write date, \TeX2page will
 not mention the timestamp, regardless of the `\TZPcolophondisabletimestamp` setting.
 
 \index{TZPcolophondisablecredit@`\TZPcolophondisablecredit`}
-\item(iii) To avoid crediting \TeX2page in the colophon,
+(iii) To avoid crediting \TeX2page in the colophon,
 
 \begintt
 \let\TZPcolophondisablecredit=1
 \endtt
 
 \index{TZPcolophondisableweblink@`\TZPcolophondisableweblink`}
-\item(iv) To avoid linking to the \TeX2page website in the colophon,
+(iv) To avoid linking to the \TeX2page website in the colophon,
 
 \begintt
 \let\TZPcolophondisableweblink=1
@@ -1566,8 +1564,8 @@ These flags specify the conversion tactics used
 for generating HTML-suitable images from the user’s graphics
 requests.  \TeX2page invokes a combination of \TeX\ and
 Dvips~\cite{dvips} to create a PostScript version of the
-graphic, and then Ghostscript~\cite{gs} and either \item(i) the
-NetPBM library~\cite{netpbm}, or \item(ii) the ImageMagick
+graphic, and then Ghostscript~\cite{gs} and either (i) the
+NetPBM library~\cite{netpbm}, or (ii) the ImageMagick
 library~\cite{imagemagick}, to convert the PS into the
 HTML-suitable image.
 
@@ -1651,7 +1649,7 @@ By default, \TeX2page produces block paragraphs with about a
 baseline’s worth of vertical space separating paragraphs, and text width
 expands to fill the browser width, allowing for some margins.
 
-\item(i) To produce more \TeX-like layout, i.e., with no parskip and
+(i) To produce more \TeX-like layout, i.e., with no parskip and
 with some parindent,
 with the page width not exceeding `\hsize`,
 with left and top margins that are an inch greater than
@@ -1714,7 +1712,7 @@ non-zero.
 
 \index{TZPhsize@`\TZPhsize`}
 %
-\item(ii) If you don’t really need a full-blown \TeX-like layout, but would
+(ii) If you don’t really need a full-blown \TeX-like layout, but would
 still like to have the HTML page’s text width be no more than,
 say, 6.25 inches, you could have
 
@@ -1726,7 +1724,7 @@ The `\TZPhsize` value overrides the `\hsize` value, whether
 or not you set `\TZPtexlayout`.
 
 \index{TZPrightjustify@`\TZPrightjustify`}
-\item(iii) Because it is too drastic a change, `\TZPtexlayout=1` will not cause
+(iii) Because it is too drastic a change, `\TZPtexlayout=1` will not cause
 text to be right-justified.  To make that happen,
 
 \begintt
@@ -1737,7 +1735,7 @@ Setting `\TZPrightjustify` has no effect unless `\TZPtexlayout` is
 also set.
 
 \index{TZPtextext@`\TZPtextext`}
-\item(iv) Finally, \TeX\ uses pseudo-ligatures to convert
+(iv) Finally, \TeX\ uses pseudo-ligatures to convert
 occurrences of \p{`}, `'`, \p{``}, \p{''}, `--`, and `---`
 in the source to left quote, right quote, left double quote,
 right double quote, en-dash, and em-dash respectively.
@@ -1794,7 +1792,7 @@ presentation.
 
 \index{TZPredirect@`\TZPredirect`}
 \index{TZPredirectseconds@`\TZPredirectseconds`}
-\item(i) If you wish your HTML output to immediately redirect elsewhere,
+(i) If you wish your HTML output to immediately redirect elsewhere,
 set the flag `\TZPredirect` to contain the target URL.
 
 \begintt
@@ -1813,7 +1811,7 @@ Not all browsers support automatic redirection. The (original)
 page therefore includes an informative sentence containing the
 link to the desired page, which the user can explicitly click.
 
-\item(ii) By default, the redirection takes place in 5 seconds. To change
+(ii) By default, the redirection takes place in 5 seconds. To change
 this, set `\TZPredirectseconds`, e.g.,
 
 \begintt
@@ -1959,7 +1957,7 @@ style sheets available on the Web are the W3C Core
 Styles~\cite{w3ccorestyles} and Google Fonts~\cite{googlefonts}.
 Here are two examples of using the latter:
 
-\item(i) To use Libre Baskerville for your body text:
+(i) To use Libre Baskerville for your body text:
 
 \begintt
 \ifx\shipout\UnDeFiNeD % HTML only
@@ -1974,7 +1972,7 @@ body {
 \endtt
 
 \index{oldstyle@`\oldstyle`}
-\item(ii) \TeX2page has a CSS class `.oldstyle` in place for translating
+(ii) \TeX2page has a CSS class `.oldstyle` in place for translating
 \TeX’s `\oldstyle` macro. However, for this to actually show up
 as something meaningful in your HTML, e.g.,
 
@@ -2024,7 +2022,7 @@ a \verb&cdr&.
 \endquote
 The \TeX2page version of `\verb` adds a couple more features:
 
-\item(i)
+(i)
 You can use
 matching braces to enclose its
 argument, provided the latter does not contain unmatched
@@ -2044,7 +2042,7 @@ typesets ‘\verb{Imagining a Conscious Robot}’ as a section
 title.
 \endquote
 
-\item(ii) If `\verb`’s argument commences with a newline, it is
+(ii) If `\verb`’s argument commences with a newline, it is
 set as a display.  E.g.,
 
 \begintt
@@ -2309,19 +2307,19 @@ syntax-highlighting to show.)
 
 Seven categories of code text are distinguished:
 
-\item(i) background punctuation;
+(i) background punctuation;
 
-\item(ii) self-evaluating atoms (numbers, booleans, characters, strings);
+(ii) self-evaluating atoms (numbers, booleans, characters, strings);
 
-\item(iii) syntactic keywords;
+(iii) syntactic keywords;
 
-\item(iv) builtin variables;
+(iv) builtin variables;
 
-\item(v) global or special variables, viz., identifiers that begin and end with an asterisk;
+(v) global or special variables, viz., identifiers that begin and end with an asterisk;
 
-\item(vi) other variables; and
+(vi) other variables; and
 
-\item(vii) comments.
+(vii) comments.
 
 To distinguish between the categories of Lisp code
 text, \TeX2page uses a style class called `scheme`
@@ -2694,7 +2692,7 @@ for
 
 There are two ways to load a graphic specified in MetaPost:
 
-\item(i) You can have MetaPost convert the spec to EPS, and
+(i) You can have MetaPost convert the spec to EPS, and
 then use a utility like `epstopdf` to convert the EPS to PDF.
 Let’s start with a MetaPost file
 \urlh{mpexample.html}{`lambda.mp`}. At the OS shell, type:
@@ -2752,7 +2750,7 @@ source file. See p.~\ref{write18}.}
   }%
 \fi
 
-\item(ii) Alternatively, you can have MetaPost directly convert
+(ii) Alternatively, you can have MetaPost directly convert
 the spec to
 PNG. In `lambda.mp`, change the `outputformat` setting to `png`,
 i.e.,
@@ -3335,10 +3333,10 @@ setting the count registers
 `\tracingcommands` and `\tracingmacros` to a positive integer causes
 more log information.
 
-\item(i) Setting  `\tracingcommands=1` tells \TeX2page to log all calls
+(i) Setting  `\tracingcommands=1` tells \TeX2page to log all calls
 to atomic commands.
 
-\item(ii) Setting  `\tracingmacros=1` tells
+(ii) Setting  `\tracingmacros=1` tells
 \TeX2page to log all macro expansions.
 
 You may turn on
@@ -3348,19 +3346,19 @@ and `\tracingmacros=0` respectively.
 
 \index{tracingall@`\tracingall`}
 
-\item(iii) The command `\tracingall` turns {\em on} both
+(iii) The command `\tracingall` turns {\em on} both
 `\tracingcommands` and `\tracingmacros`.
 
 \index{errmessage@`\errmessage`}
 
-\item(iv) The command `\errmessage` can be used to generate
+(iv) The command `\errmessage` can be used to generate
 meaningful error messages.  \TeX2page, like \TeX, ceases
 processing the document on encountering
 `\errmessage`.
 
 \index{message@`\message`}
 
-\item(v) The command `\message`
+(v) The command `\message`
 can be used to print helpful information at selected
 points in the document.   \LaTeX\ users may
 prefer `\typeout`, which does the same thing.
@@ -3536,11 +3534,11 @@ This method may not always work but is so easy that
 it’s worth a try.  It should work for most
 dialects on Unix.
 
-\item(i) Type `./configure --help` at your OS command line
+(i) Type `./configure --help` at your OS command line
 to get the list of dialects supported.
 If your dialect \p{|meta[D]} is one of them,
 
-\item(ii) Type  \p{./configure --dialect=|meta[D]}
+(ii) Type  \p{./configure --dialect=|meta[D]}
 
 \n If all goes well, this will create
 `tex2page`, a version of \TeX2page that’s suited to \p{|meta[D]}.
@@ -3751,14 +3749,14 @@ directory.  To avoid cluttering up
 your working directory, you can specify a different target directory
 using one of the following three files:
 
-\item(i) \p{|meta[jobname].hdir} in the working directory, i.e.,
+(i) \p{|meta[jobname].hdir} in the working directory, i.e.,
 a file with the same basename as the input document but with
 extension `.hdir`.  For `jobname.tex`, this would
 be `jobname.hdir`.
 
-\item(ii) `.tex2page.hdir` in the working directory.
+(ii) `.tex2page.hdir` in the working directory.
 
-\item(iii) `.tex2page.hdir` in the user’s `HOME` directory.
+(iii) `.tex2page.hdir` in the user’s `HOME` directory.
 
 \n The first line of the first of these files that exists
 is taken to be the name of the target directory.  If none of

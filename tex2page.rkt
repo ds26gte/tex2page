@@ -272,7 +272,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221226, ecl.
 
 
-(define *tex2page-version* "20221229")
+(define *tex2page-version* "20221230")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -10305,8 +10305,7 @@ Try the commands
               (do-tex-ctl-seq-completely cs))))
           (else (emit-html-char (get-actual-char))))
          (if %loop-returned %loop-result (%loop))))))
-  (emit "</pre>") (egroup))
- (do-noindent))
+  (emit "</pre>") (egroup)))
 
 (tex-def-prim "\\begintt" do-begintt)
 

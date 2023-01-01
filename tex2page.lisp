@@ -4725,15 +4725,15 @@
       (write-aux '(!auto-margin))
       (princ "body { margin: auto; }" *css-stream*)
       (terpri *css-stream*))
+    (let ((vert-margin (sp-to-ems (+ (tex-length 0.5 :in) ; 1in is too much!
+                                     (the-dimen "\\voffset")))))
+      (princ "body { margin-top: " *css-stream*)
+      (princ vert-margin *css-stream*)
+      (princ "em; margin-bottom: " *css-stream*)
+      (princ vert-margin *css-stream*)
+      (princ "em; }" *css-stream*)
+      (terpri *css-stream*))
     (when tex-layout-p
-      (let ((vert-margin (sp-to-ems (+ (tex-length 0.5 :in) ; 1in is too much!
-                                       (the-dimen "\\voffset")))))
-        (princ "body { margin-top: " *css-stream*)
-        (princ vert-margin *css-stream*)
-        (princ "em; margin-bottom: " *css-stream*)
-        (princ vert-margin *css-stream*)
-        (princ "em; }" *css-stream*)
-        (terpri *css-stream*))
       (when (or (tex2page-flag-boolean "\\TZPrightjustify")
                 (not (tex2page-flag-boolean "\\TZPraggedright")))
         (princ "body { text-align: justify; }" *css-stream*)

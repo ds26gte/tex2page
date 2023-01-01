@@ -5053,15 +5053,15 @@
      (write-aux '(!auto-margin))
      (display "body { margin: auto; }" *css-stream*)
      (newline *css-stream*))
+   (let ((vert-margin
+          (sp-to-ems (+ (tex-length 0.5 ':in) (the-dimen "\\voffset")))))
+     (display "body { margin-top: " *css-stream*)
+     (display vert-margin *css-stream*)
+     (display "em; margin-bottom: " *css-stream*)
+     (display vert-margin *css-stream*)
+     (display "em; }" *css-stream*)
+     (newline *css-stream*))
    (when tex-layout-p
-     (let ((vert-margin
-            (sp-to-ems (+ (tex-length 0.5 ':in) (the-dimen "\\voffset")))))
-       (display "body { margin-top: " *css-stream*)
-       (display vert-margin *css-stream*)
-       (display "em; margin-bottom: " *css-stream*)
-       (display vert-margin *css-stream*)
-       (display "em; }" *css-stream*)
-       (newline *css-stream*))
      (when
          (or (tex2page-flag-boolean "\\TZPrightjustify")
              (not (tex2page-flag-boolean "\\TZPraggedright")))

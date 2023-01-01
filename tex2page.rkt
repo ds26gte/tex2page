@@ -8209,17 +8209,19 @@
      ()
      (ignorespaces)
      (let ((c (snoop-actual-char)))
-       (unless (and (char? c) (char=? c #\\)) (return))
-       (let ((x (get-ctl-seq)))
-         (cond ((string=? x "\\hline") true)
-               ((string=? x "\\multicolumn")
-                (let ((n (ungroup (get-token))))
-                  (get-token)
-                  (emit " colspan=")
-                  (emit n)
-                  (return)))
-               (else (toss-back-char *invisible-space*) (toss-back-string x)
-                (return)))))
+       (cond
+        ((and (char? c) (char=? c #\\))
+         (let ((x (get-ctl-seq)))
+           (cond ((string=? x "\\hline") true)
+                 ((string=? x "\\multicolumn")
+                  (let ((n (ungroup (get-token))))
+                    (get-token)
+                    (emit " colspan=")
+                    (emit n)
+                    (return)))
+                 (else (toss-back-char *invisible-space*) (toss-back-string x)
+                  (return)))))
+        (else (return))))
      (if %loop-returned %loop-result (%loop))))
  (emit ">") (bgroup))
 
@@ -8380,7 +8382,7 @@
        ((or (char=? c #\<) (char=? c #\>) (char=? c #\")) (emit-html-char c))
        ((= (catcode c) **alignment**)
         (cond
-         (*tabular-stack*
+         ((pair? *tabular-stack*)
           (case (car *tabular-stack*)
             ((:pmatrix :eqalign :displaylines :mathbox)
              (emit "&#xa0;</td><td class=centerline>&#xa0;"))
@@ -8400,9 +8402,11 @@
             ((:ruled-table) (do-ruledtable-colsep))))
          (else (emit-html-char c))))
        ((char=? c #\|)
-        (if (eq? (car *tabular-stack*) ':ruled-table)
-            (do-ruledtable-colsep)
-            (emit c)))
+        (if
+         (and (pair? *tabular-stack*)
+              (eq? (car *tabular-stack*) ':ruled-table))
+         (do-ruledtable-colsep)
+         (emit c)))
        ((char=? c #\newline) (do-newline))
        (else
         (cond
@@ -9203,11 +9207,9 @@
                     (let ((%read-res (read i)))
                       (when (eof-object? %read-res) (set! %read-res false))
                       %read-res))
-                   (unless e (return))
-                   (unless %loop-returned (set! directive (car e)))
-                   (unless %loop-returned
-                     (set! *input-line-no* (+ *input-line-no* 1)))
-                   (unless %loop-returned
+                   (cond
+                    (e (set! directive (car e))
+                     (set! *input-line-no* (+ *input-line-no* 1))
                      (apply
                       (case directive
                         ((!auto-margin) !auto-margin)
@@ -9244,6 +9246,7 @@
                          (terror 'load-tex2page-data-file
                           "Fatal aux file error " directive "; I'm stymied.")))
                       (cdr e)))
+                    (else (return)))
                    (if %loop-returned %loop-result (%loop))))))))
        (close-input-port i)
        %with-open-input-file-result))))

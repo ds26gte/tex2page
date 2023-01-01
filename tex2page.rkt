@@ -5076,6 +5076,11 @@
    (newline *css-stream*)
    (display ".navigation { color: black; font-style: normal; }" *css-stream*)
    (newline *css-stream*))
+ (when (tex2page-flag-boolean "\\TZPautomargin")
+   (write-aux '(!auto-margin))
+   (newline *css-stream*)
+   (display "body { margin: auto; }" *css-stream*)
+   (newline *css-stream*))
  (set-text-width)
  (unless (tex2page-flag-boolean "\\TZPtextext")
    (write-aux (quasiquote (!tex-text 1)))))
@@ -9043,6 +9048,8 @@
 
 (define (!tex-like-layout) (tex-def-0arg "\\TIIPtexlayout" "1"))
 
+(define (!auto-margin) (tex-def-0arg "\\TZPautomargin" "1"))
+
 (define (!head-line e) (tex-def-toksdef "\\headline" false e true))
 
 (define (!foot-line e) (tex-def-toksdef "\\footline" false e true))
@@ -9198,6 +9205,7 @@
                    (unless %loop-returned
                      (apply
                       (case directive
+                        ((!auto-margin) !auto-margin)
                         ((!colophon) !colophon)
                         ((!default-title) !default-title)
                         ((!definitely-latex) !definitely-latex)

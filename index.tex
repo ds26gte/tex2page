@@ -1723,19 +1723,39 @@ say, 6.25 inches, you could have
 The `\TZPhsize` value overrides the `\hsize` value, whether
 or not you set `\TZPtexlayout`.
 
+\index{TZPautomargin@`\TZPautomargin`}
+%
+(iii) To keep the body of the page horizontally centered, i.e.,
+with equal left and right margins, use
+
+\begintt
+\let\TZPautomargin=1
+\endtt
+%
+Note this centers the body as a block, {\em not} the individual lines
+(which would not be readable at all).
+
+`\TZPautomargin` is ideally combined with a `\TZPhsize` setting so the text
+remains a readably compact width however much you zoom out.
+You may also use it alongside `\TZPtexlayout`, in which case the
+`\hoffset` (left margin) setting is ignored.
+
 \index{TZPrightjustify@`\TZPrightjustify`}
-(iii) Because it is too drastic a change, `\TZPtexlayout=1` will not cause
-text to be right-justified.  To make that happen,
+%
+(iv) Because it is too drastic a change, `\TZPtexlayout=1` will not cause
+text to be right-justified.  If you really want it, use
 
 \begintt
 \let\TZPrightjustify=1
 \endtt
 %
 Setting `\TZPrightjustify` has no effect unless `\TZPtexlayout` is
-also set.
+also set. Use them together if you want to most closely mimic the
+print output.
 
 \index{TZPtextext@`\TZPtextext`}
-(iv) Finally, \TeX\ uses pseudo-ligatures to convert
+%
+(v) Finally, \TeX\ uses pseudo-ligatures to convert
 occurrences of \p{`}, `'`, \p{``}, \p{''}, `--`, and `---`
 in the source to left quote, right quote, left double quote,
 right double quote, en-dash, and em-dash respectively.
@@ -1749,7 +1769,8 @@ disable the ligatures,
 \let\TZPtextext=0
 \endtt
 %
-In this case, you also have to ensure that the fonts you use in \XeTeX\ do not have `mapping=tex-text`.
+In this case, you also have to ensure that the fonts you use in
+\XeTeX\ do not have `mapping=tex-text`.
 
 \beginsection Making a slideshow
 
@@ -3737,10 +3758,11 @@ Lisp or Scheme, thanks to another aux file called
 `jobname-Z-E-D.lisp`. When loaded in Lisp, `jobname-Z-E.lisp`
 will create a series of aux \TeX\ files `jobname-Z-E-1.tex`,
 etc., which are inserted back into `jobmame.tex` on a
-subsequent run of \TeX. (As a convenience, running \TeX2page on
-`jobname.tex` will also process any `jobname-Z-E.lisp` if it
-exists, although the `jobname-Z-E-*.tex` aren’t needed by
-\TeX2page itself.)
+subsequent run of \TeX.
+% (As a convenience, running \TeX2page on
+% `jobname.tex` will also process any `jobname-Z-E.lisp` if it
+% exists, although the `jobname-Z-E-*.tex` aren’t needed by
+% \TeX2page itself.)
 
 \index{hdir file@`.hdir` file}
 

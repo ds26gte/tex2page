@@ -4667,6 +4667,9 @@
 
 ;(trace set-text-width)
 
+; \TZP...  : control sequences settable by user to modify tex2page behavior
+; \TIIP... : control sequences private to tex2page internals
+
 (defun note-down-tex2page-flags ()
   (write-aux `(!lang ,(resolve-defs "\\TZPlang")))
   (write-aux `(!head-line ,(the-toks "\\headline")))
@@ -4744,6 +4747,11 @@
     (princ "pt; }" *css-stream*)
     (terpri *css-stream*)
     (princ ".navigation { color: black; font-style: normal; }" *css-stream*)
+    (terpri *css-stream*))
+  (when (tex2page-flag-boolean "\\TZPautomargin")
+    (write-aux '(!auto-margin))
+    (terpri *css-stream*)
+    (princ "body { margin: auto; }" *css-stream*)
     (terpri *css-stream*))
   (set-text-width)
   (unless (tex2page-flag-boolean "\\TZPtextext")
@@ -8596,6 +8604,9 @@
 (defun !tex-like-layout ()
   (tex-def-0arg "\\TIIPtexlayout" "1"))
 
+(defun !auto-margin ()
+  (tex-def-0arg "\\TZPautomargin" "1"))
+
 (defun !head-line (e) (tex-def-toksdef "\\headline" nil e t))
 
 (defun !foot-line (e) (tex-def-toksdef "\\footline" nil e t))
@@ -8741,6 +8752,7 @@
           (incf *input-line-no*)
           (apply
             (case directive
+              (!auto-margin #'!auto-margin)
               (!colophon #'!colophon)
               (!default-title #'!default-title)
               (!definitely-latex #'!definitely-latex)

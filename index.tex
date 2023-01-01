@@ -22,7 +22,7 @@
 \c{Download
 \urlh{https://github.com/ds26gte/tex2page}{Version \fmtversion}}
 \else
-\c{2022-12-31} %last change
+\c{2023-01-01} %last change
 %\ifx\shipout\UnDeFiNeD
 %\c{(A copy is included in
 %\urlh{http://www.plt-scheme.org}{PLT Scheme})}
@@ -551,7 +551,15 @@ to have \TeX2page ignore such fragments in your document
 is  to use
 \TeX\ conditionals, and indeed to exploit the
 fact that \TeX2page does not know certain \TeX\ commands
-such as `\shipout`:
+such as `\shipout`:\f{%
+\index{ifdefined@`\ifdefined`}
+Here, `\UnDeFiNeD` is chosen because it is
+a control sequence that is (presumably) undefined. If perchance
+you defined it, replace it with something else, e.g.,
+`\forHTMLonly`, `\ForTheWeb`. If using a modern PDF-producing
+\TeX, you can use `\ifdefined`, and thus avoid having to come up
+with arbitrary undefined control sequences. Note that with
+`\ifdefined\shipout` it’s the else-branch that’s HTML-only.}
 
 \index{ifx@`\ifx`}
 \index{shipout@`\shipout`}
@@ -1982,7 +1990,7 @@ Here are two examples of using the latter:
 
 \begintt
 \ifx\shipout\UnDeFiNeD % HTML only
-\inputcss https://fonts.googleapis.com/css?family=Libre+Baskerville
+\inputcss https://fonts.googleapis.com/css?family=Libre+Baskerville&display=swap
 
 \cssblock
 body {
@@ -2006,7 +2014,7 @@ a font that has oldstyle numerals:
 
 \begintt
 \ifx\shipout\UnDeFiNeD % HTML only
-\input https://fonts.googleapis.com/css?family=Linden+Hill
+\inputcss https://fonts.googleapis.com/css?family=Linden+Hill&display=swap
 
 \cssblock
 .oldstyle {
@@ -3334,8 +3342,9 @@ tacked on as arguments to the editor,
 with a `+` preceding the
 line number.  This argument style works for all `vi`
 and `emacs` clones.\f{\TeX\ itself uses just `TEXEDIT`.
-It does not fall back to `EDITOR` or `vi` if
-`TEXEDIT` is not set.  But most Unix programs that
+In the scenarios I've tried, it does not appear to check `EDITOR` if
+`TEXEDIT` is not set, going directly to a system default
+editor, typically `vi` (or whatever `vi` is linked to).  But most Unix programs that
 reach for an editor do tend to use `EDITOR`, and failing that,
 `vi`, so \TeX2page does the same.}
 

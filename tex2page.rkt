@@ -283,6 +283,8 @@
 (define (sys-copy-file src dst)
  (system (string-append "cp -p" " " src " " dst)))
 
+(define *epoch* (if null 1970 1900))
+
 (define *month-names*
  (vector "January"
          "February"
@@ -4972,7 +4974,8 @@
  (when *last-modification-time*
    (write-aux
     (quasiquote
-     (!last-modification-time (unquote *last-modification-time*) 1900))))
+     (!last-modification-time (unquote *last-modification-time*)
+      (unquote *epoch*)))))
  (for-each (lambda (th) (th)) *afterbye*) (close-all-open-streams)
  (call-external-programs-if-necessary)
  (show-unresolved-xrefs-and-missing-pieces))
@@ -9076,13 +9079,12 @@
 (define (!index index-number html-page-number)
  (table-put! index-number *index-table* html-page-number))
 
-(define (!last-modification-time s . %lambda-rest-arg)
- (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (epoch 1900))
-   (when (< 0 %lambda-rest-arg-len) (set! epoch (list-ref %lambda-rest-arg 0)))
+(define (!last-modification-time s recorded-epoch)
+ (let ((lxx-years 2208988800))
    (set! *last-modification-time*
-    (case epoch
-      ((1900) s)
-      ((1970) (+ s 2208988800))
+    (case recorded-epoch
+      ((1900) (if (= *epoch* 1900) s (- s lxx-years)))
+      ((1970) (if (= *epoch* 1900) (+ s lxx-years) s))
       (else (error 'ecase "0xdeadc0de"))))))
 
 (define (!last-page-number n) (set! *last-page-number* n))

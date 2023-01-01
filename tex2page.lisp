@@ -138,6 +138,12 @@
                #+(and unix (not (or linux cygwin darwin sunos))) "Unix"
                #+windows "Windows"))
 
+(defparameter *epoch*
+  (if '() ;i.e., Scheme
+      1970
+      ;Common Lisp
+      1900))
+
 (defparameter *month-names*
   (vector "January" "February" "March" "April" "May" "June" "July" "August"
           "September" "October" "November" "December"))
@@ -4644,7 +4650,7 @@
   (write-aux `(!last-page-number ,*last-page-number*))
   (do-end-page)
   (when *last-modification-time*
-    (write-aux `(!last-modification-time ,*last-modification-time* 1900)))
+    (write-aux `(!last-modification-time ,*last-modification-time* ,*epoch*)))
   (mapc (lambda (th) (funcall th)) *afterbye*)
   ;(note-down-tex2page-flags)
   (close-all-open-streams)
@@ -8631,12 +8637,13 @@
 (defun !index (index-number html-page-number)
   (setf (gethash index-number *index-table*) html-page-number))
 
-(defun !last-modification-time (s &optional (epoch 1900))
-  (declare (type (member 1900 1970) epoch))
+(defun !last-modification-time (s recorded-epoch)
+  (declare (type (member 1900 1970) recorded-epoch))
+  (let ((lxx-years #.(encode-universal-time 0 0 0 1 1 1970 0)))
   (setq *last-modification-time*
-        (ecase epoch
-          (1900 s)
-          (1970 (+ s #.(encode-universal-time 0 0 0 1 1 1970 0))))))
+        (ecase recorded-epoch
+          (1900 (if (= *epoch* 1900) s (- s lxx-years)))
+          (1970 (if (= *epoch* 1900) (+ s lxx-years) s))))))
 
 (defun !last-page-number (n) (setq *last-page-number* n))
 

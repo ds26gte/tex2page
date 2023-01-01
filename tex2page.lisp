@@ -4513,6 +4513,7 @@
   (emit "<meta name=robots content=\"index,follow\">")
   (emit-newline)
   (mapc #'emit *html-head*)
+  (emit-newline)
   (emit "</head>")
   (emit-newline)
   (emit "<body>")
@@ -6082,6 +6083,7 @@
                                                          #'do-htmlheadonly)))
                        (t (write-aux `(!html-head ,x))))))
               (t (get-actual-char)
+                 (when (char= c #\newline) (setq c #\space))
                  (push c s)))))))
 
 (defun resolve-cdefs (c)

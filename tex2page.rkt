@@ -4874,8 +4874,8 @@
  (emit "<meta charset=\"utf-8\">") (emit-newline) (output-external-title)
  (link-stylesheets) (link-scripts)
  (emit "<meta name=robots content=\"index,follow\">") (emit-newline)
- (for-each emit *html-head*) (emit "</head>") (emit-newline) (emit "<body>")
- (emit-newline) (emit "<div")
+ (for-each emit *html-head*) (emit-newline) (emit "</head>") (emit-newline)
+ (emit "<body>") (emit-newline) (emit "<div")
  (when
      (or (tex2page-flag-boolean "\\TIIPslides")
          (tex2page-flag-boolean "\\TZPslides"))
@@ -6500,7 +6500,8 @@
                     (let ((f (get-filename-possibly-braced)))
                       (call-with-input-file/buffered f do-htmlheadonly)))
                    (else (write-aux (quasiquote (!html-head (unquote x))))))))
-          (else (get-actual-char) (set! s (cons c s)))))
+          (else (get-actual-char) (when (char=? c #\newline) (set! c #\ ))
+           (set! s (cons c s)))))
        (if %loop-returned %loop-result (%loop))))))
 
 (define (resolve-cdefs c)

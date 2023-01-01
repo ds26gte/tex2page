@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20221231") ;last change
+(defparameter *tex2page-version* "20230101") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -7328,7 +7328,8 @@
     (cond ((and *slatex-math-escape* (char= c *slatex-math-escape*))
            (scm-escape-into-math))
           ((char= c #\;) (scm-output-comment) (do-end-para))
-          ((char= c #\") (scm-output-string)) ((char= c #\#) (scm-output-hash))
+          ((char= c #\") (scm-output-string))
+          ((char= c #\#) (scm-output-hash))
           ((char= c #\,) (get-actual-char) (emit "<span class=keyword>")
            (scm-emit-html-char c)
            (let ((c (snoop-actual-char)))
@@ -7418,9 +7419,9 @@
     (loop
       (let ((c (get-actual-char)))
         (case c
-          (#\" (unless esc-p (return))
-           (scm-emit-html-char c)
-           (setq esc-p nil))
+          (#\" (cond (esc-p (scm-emit-html-char c)
+                            (setq esc-p nil))
+                     (t (return))))
           (#\\ (scm-emit-html-char c)
            (setq esc-p (not esc-p)))
           (t (scm-emit-html-char c)

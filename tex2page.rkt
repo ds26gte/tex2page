@@ -272,7 +272,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221226, ecl.
 
 
-(define *tex2page-version* "20221231")
+(define *tex2page-version* "20230101")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -7906,9 +7906,8 @@
        (let ((c (get-actual-char)))
          (case c
            ((#\")
-            (unless esc-p (return))
-            (scm-emit-html-char c)
-            (set! esc-p false))
+            (cond (esc-p (scm-emit-html-char c) (set! esc-p false))
+                  (else (return))))
            ((#\\) (scm-emit-html-char c) (set! esc-p (not esc-p)))
            (else (scm-emit-html-char c) (set! esc-p false))))
        (if %loop-returned %loop-result (%loop)))))

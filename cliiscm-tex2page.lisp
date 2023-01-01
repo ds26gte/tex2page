@@ -1,4 +1,4 @@
-;last modified 2022-12-29
+;last modified 2023-01-01
 
 (cliiscm-insert
   "#!/usr/bin/env racket
@@ -106,6 +106,8 @@
 
 (define (eval1 s)
   (eval s *tex2page-namespace*))
+
+(define *epoch-year* 1970)
 
 (define *week-day-names* (vector "Sun" "Mon" "Tues" "Wed" "Thurs" "Fri" "Sat"))
 

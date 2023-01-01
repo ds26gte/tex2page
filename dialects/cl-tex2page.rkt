@@ -1,4 +1,4 @@
-; last change: 2022-12-29
+; last change: 2023-01-01
 
 ;works with CLISP, Clozure CL, CMU CL, ECL, SBCL; but scmxlate
 ;translation to CL is mostly for verification (of scmxlate?) these days.
@@ -207,13 +207,6 @@
     (tex-def-count "\\month" m t)
     (tex-def-count "\\year" y t)))
 
-(defun !last-modification-time (s &optional (epoch 1900))
-  (setq
-   *last-modification-time*
-   (ecase epoch
-     (1900 s)
-     (1970 (+ s #.(encode-universal-time 0 0 0 1 1 1970 0))))))
-
 (defun string->number (s &optional (base 10))
   (if (position #\: s :test #'char=) nil
     (let ((n (let ((*read-base* base)) (read-from-string s nil))))
@@ -236,7 +229,7 @@
  )
 
 (scmxlate-ignoredef-rename
-  (*epoch* 1900)
+  (*epoch-year* 1900)
   (eval1 #'eval)
   (list-position #'position)
   (*return* #\return)

@@ -26,6 +26,8 @@
 
 (define (eval1 s) (eval s *tex2page-namespace*))
 
+(define *epoch-year* 1970)
+
 (define *week-day-names* (vector "Sun" "Mon" "Tues" "Wed" "Thurs" "Fri" "Sat"))
 
 (define (decode-universal-time s)
@@ -282,8 +284,6 @@
 
 (define (sys-copy-file src dst)
  (system (string-append "cp -p" " " src " " dst)))
-
-(define *epoch* (if null 1970 1900))
 
 (define *month-names*
  (vector "January"
@@ -4975,7 +4975,7 @@
    (write-aux
     (quasiquote
      (!last-modification-time (unquote *last-modification-time*)
-      (unquote *epoch*)))))
+      (unquote *epoch-year*)))))
  (for-each (lambda (th) (th)) *afterbye*) (close-all-open-streams)
  (call-external-programs-if-necessary)
  (show-unresolved-xrefs-and-missing-pieces))
@@ -9079,12 +9079,12 @@
 (define (!index index-number html-page-number)
  (table-put! index-number *index-table* html-page-number))
 
-(define (!last-modification-time s recorded-epoch)
+(define (!last-modification-time s recorded-epoch-year)
  (let ((lxx-years 2208988800))
    (set! *last-modification-time*
-    (case recorded-epoch
-      ((1900) (if (= *epoch* 1900) s (- s lxx-years)))
-      ((1970) (if (= *epoch* 1900) (+ s lxx-years) s))
+    (case recorded-epoch-year
+      ((1900) (if (= *epoch-year* 1900) s (- s lxx-years)))
+      ((1970) (if (= *epoch-year* 1900) (+ s lxx-years) s))
       (else (error 'ecase "0xdeadc0de"))))))
 
 (define (!last-page-number n) (set! *last-page-number* n))

@@ -1,4 +1,4 @@
-;last change: 2022-12-28
+;last change: 2023-01-01
 
 (scmxlate-cond
   ((eqv? *operating-system* 'unix)
@@ -82,7 +82,9 @@
       (delete-file tmpf)
       n)))
 
-(scmxlate-include "seconds-to-date.scm")
+(define (date-time-zone-offset d)
+  ;STklos's date-tz's result is opposite in sign to Racket's date-time-zone-offset's
+  (- (date-tz d)))
 
 (scmxlate-postamble)
 

@@ -4674,23 +4674,25 @@
 (define (do-htmlcolophon)
  (call-with-input-string/buffered (ungroup (get-group))
   (lambda ()
-    (let* ((%loop-returned false)
-           (%loop-result 0)
-           (return
-            (lambda %args
-              (set! %loop-returned true)
-              (set! %loop-result (and (pair? %args) (car %args))))))
-      (let %loop
-        ()
-        (ignorespaces ':all)
-        (let ((c (snoop-actual-char)))
+    (let ((c false))
+      (let* ((%loop-returned false)
+             (%loop-result 0)
+             (return
+              (lambda %args
+                (set! %loop-returned true)
+                (set! %loop-result (and (pair? %args) (car %args))))))
+        (let %loop
+          ()
+          (ignorespaces ':all)
+          (set! c (snoop-actual-char))
           (when (not c) (return))
-          (let ((directive
-                 (string->symbol
-                  (string-append ":" (string-upcase (scm-get-token))))))
-            (!colophon directive)
-            (write-aux (quasiquote (!colophon (unquote directive))))))
-        (if %loop-returned %loop-result (%loop)))))))
+          (unless %loop-returned
+            (let ((directive
+                   (string->symbol
+                    (string-append ":" (string-upcase (scm-get-token))))))
+              (!colophon directive)
+              (write-aux (quasiquote (!colophon (unquote directive))))))
+          (if %loop-returned %loop-result (%loop))))))))
 
 (define (output-colophon)
  (let ((colophon-mentions-last-mod-time-p
@@ -5580,20 +5582,22 @@
   ((*html* (make-html-output-stream)) (*outputting-to-non-html-p* true))
   (call-with-input-string/buffered s
    (lambda ()
-     (let* ((%loop-returned false)
-            (%loop-result 0)
-            (return
-             (lambda %args
-               (set! %loop-returned true)
-               (set! %loop-result (and (pair? %args) (car %args))))))
-       (let %loop
-         ()
-         (let ((c (snoop-actual-char)))
+     (let ((c false))
+       (let* ((%loop-returned false)
+              (%loop-result 0)
+              (return
+               (lambda %args
+                 (set! %loop-returned true)
+                 (set! %loop-result (and (pair? %args) (car %args))))))
+         (let %loop
+           ()
+           (set! c (snoop-actual-char))
            (when (not c) (return))
-           (case c
-             ((#\\) (do-tex-ctl-seq (get-ctl-seq)))
-             (else (emit-html-char (get-actual-char)))))
-         (if %loop-returned %loop-result (%loop))))))
+           (unless %loop-returned
+             (case c
+               ((#\\) (do-tex-ctl-seq (get-ctl-seq)))
+               (else (emit-html-char (get-actual-char)))))
+           (if %loop-returned %loop-result (%loop)))))))
   (html-output-stream-to-string *html*)))
 
 (define (do-write-aux o)
@@ -7274,54 +7278,56 @@
 (define (expand-edef-macro rhs)
  (fluid-let ((*not-processing-p* true))
   (let ((tmp-stream (open-output-string)))
-    (call-with-input-string/buffered rhs
-     (lambda ()
-       (let* ((%loop-returned false)
-              (%loop-result 0)
-              (return
-               (lambda %args
-                 (set! %loop-returned true)
-                 (set! %loop-result (and (pair? %args) (car %args))))))
-         (let %loop
-           ()
-           (let ((c (snoop-actual-char)))
+    (let ((c false))
+      (call-with-input-string/buffered rhs
+       (lambda ()
+         (let* ((%loop-returned false)
+                (%loop-result 0)
+                (return
+                 (lambda %args
+                   (set! %loop-returned true)
+                   (set! %loop-result (and (pair? %args) (car %args))))))
+           (let %loop
+             ()
+             (set! c (snoop-actual-char))
              (when (not c) (return))
-             (display
-              (cond
-               ((= (catcode c) **escape**)
-                (let ((x (get-ctl-seq)))
-                  (toss-back-char *invisible-space*)
-                  (cond
-                   ((or (string=? x "\\the") (string=? x "\\number"))
-                    (let ((x2 (get-raw-token/is)))
-                      (toss-back-char *invisible-space*)
-                      (toss-back-string x2)
-                      (cond
-                       ((ctl-seq-p x2)
-                        (cond ((string=? x "\\the") (expand-the))
-                              ((string=? x "\\number") (get-number))
-                              (else 3735929054)))
-                       (else x))))
-                   ((string=? x "\\noexpand")
-                    (let ((x2 (get-raw-token/is)))
-                      (toss-back-char *invisible-space*)
-                      x2))
-                   ((begin (set! *it* (find-def x)) *it*)
-                    (let ((y *it*))
-                      (cond
-                       ((and (null? (tdef*-argpat y))
-                             (not (tdef*-optarg y))
-                             (not (tdef*-thunk y))
-                             (not (tdef*-prim y))
-                             (not (tdef*-defer y)))
+             (unless %loop-returned
+               (display
+                (cond
+                 ((= (catcode c) **escape**)
+                  (let ((x (get-ctl-seq)))
+                    (toss-back-char *invisible-space*)
+                    (cond
+                     ((or (string=? x "\\the") (string=? x "\\number"))
+                      (let ((x2 (get-raw-token/is)))
                         (toss-back-char *invisible-space*)
-                        (toss-back-string (tdef*-expansion y)) "")
-                       (else x))))
-                   (else x))))
-               (else (get-actual-char) c))
-              tmp-stream))
-           (if %loop-returned %loop-result (%loop))))))
-    (get-output-string tmp-stream))))
+                        (toss-back-string x2)
+                        (cond
+                         ((ctl-seq-p x2)
+                          (cond ((string=? x "\\the") (expand-the))
+                                ((string=? x "\\number") (get-number))
+                                (else 3735929054)))
+                         (else x))))
+                     ((string=? x "\\noexpand")
+                      (let ((x2 (get-raw-token/is)))
+                        (toss-back-char *invisible-space*)
+                        x2))
+                     ((begin (set! *it* (find-def x)) *it*)
+                      (let ((y *it*))
+                        (cond
+                         ((and (null? (tdef*-argpat y))
+                               (not (tdef*-optarg y))
+                               (not (tdef*-thunk y))
+                               (not (tdef*-prim y))
+                               (not (tdef*-defer y)))
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string (tdef*-expansion y)) "")
+                         (else x))))
+                     (else x))))
+                 (else (get-actual-char) c))
+                tmp-stream))
+             (if %loop-returned %loop-result (%loop))))))
+      (get-output-string tmp-stream)))))
 
 (define (expand-tex-macro optarg argpat rhs lexical-catcodes)
  (let ((k 0))
@@ -7474,35 +7480,37 @@
 (define (do-verbatiminput) (ignorespaces)
  (let ((f0 (get-filename-possibly-braced)))
    (let ((f (find-tex-file f0)))
-     (cond
-      ((and f (file-exists? f)) (do-end-para) (bgroup)
-       (emit "<pre class=verbatim>")
-       (let ((p (open-input-file f)))
-         (let ((%with-open-input-file-result
-                (let* ((%loop-returned false)
-                       (%loop-result 0)
-                       (return
-                        (lambda %args
-                          (set! %loop-returned true)
-                          (set! %loop-result (and (pair? %args) (car %args))))))
-                  (let %loop
-                    ()
-                    (let ((c
-                           (let* ((%read-char-port p)
-                                  (%read-char-res
-                                   (if %read-char-port
-                                       (read-char %read-char-port)
-                                       (read-char))))
-                             (when (eof-object? %read-char-res)
-                               (set! %read-char-res false))
-                             %read-char-res)))
+     (let ((c false))
+       (cond
+        ((and f (file-exists? f)) (do-end-para) (bgroup)
+         (emit "<pre class=verbatim>")
+         (let ((p (open-input-file f)))
+           (let ((%with-open-input-file-result
+                  (let* ((%loop-returned false)
+                         (%loop-result 0)
+                         (return
+                          (lambda %args
+                            (set! %loop-returned true)
+                            (set! %loop-result
+                             (and (pair? %args) (car %args))))))
+                    (let %loop
+                      ()
+                      (set! c
+                       (let* ((%read-char-port p)
+                              (%read-char-res
+                               (if %read-char-port
+                                   (read-char %read-char-port)
+                                   (read-char))))
+                         (when (eof-object? %read-char-res)
+                           (set! %read-char-res false))
+                         %read-char-res))
                       (when (not c) (return))
-                      (emit-html-char c))
-                    (if %loop-returned %loop-result (%loop))))))
-           (close-input-port p)
-           %with-open-input-file-result))
-       (emit "</pre>") (egroup) (do-para))
-      (else (non-fatal-error "File " f0 " not found"))))))
+                      (unless %loop-returned (emit-html-char c))
+                      (if %loop-returned %loop-result (%loop))))))
+             (close-input-port p)
+             %with-open-input-file-result))
+         (emit "</pre>") (egroup) (do-para))
+        (else (non-fatal-error "File " f0 " not found")))))))
 
 (define (get-char-definitely c0) (ignorespaces)
  (let ((c (get-actual-char)))
@@ -7541,23 +7549,23 @@
 
 (define (opmac-verbinput-print-lines i n)
  (if (eq? n true)
-     (let* ((%loop-returned false)
-            (%loop-result 0)
-            (return
-             (lambda %args
-               (set! %loop-returned true)
-               (set! %loop-result (and (pair? %args) (car %args))))))
-       (let %loop
-         ()
-         (let ((x
-                (let ((%read-line-res (read-line i)))
-                  (when (eof-object? %read-line-res)
-                    (set! %read-line-res false))
-                  %read-line-res)))
+     (let ((x false))
+       (let* ((%loop-returned false)
+              (%loop-result 0)
+              (return
+               (lambda %args
+                 (set! %loop-returned true)
+                 (set! %loop-result (and (pair? %args) (car %args))))))
+         (let %loop
+           ()
+           (set! x
+            (let ((%read-line-res (read-line i)))
+              (when (eof-object? %read-line-res) (set! %read-line-res false))
+              %read-line-res))
            (when (not x) (return))
-           (emit-html-string x)
-           (emit-newline))
-         (if %loop-returned %loop-result (%loop))))
+           (unless %loop-returned (emit-html-string x))
+           (unless %loop-returned (emit-newline))
+           (if %loop-returned %loop-result (%loop)))))
      (let ((%dotimes-n n) (_ 0))
        (let* ((%loop-returned false)
               (%loop-result 0)
@@ -7653,11 +7661,11 @@
      (set! *verb-stream* (open-output-file output-file)))))
 
 (define (dump-groupoid p) (ignorespaces)
- (let ((write-char write-char) (d (get-actual-char)))
+ (let ((write-char write-char) (d (get-actual-char)) (c false))
    (unless p (set! write-char (lambda (x y) false)))
    (case d
      ((#\{)
-      (let ((nesting 0) (c false))
+      (let ((nesting 0))
         (let* ((%loop-returned false)
                (%loop-result 0)
                (return
@@ -7686,10 +7694,10 @@
                 (set! %loop-result (and (pair? %args) (car %args))))))
         (let %loop
           ()
-          (let ((c (get-actual-char)))
-            (when (not c) (terror 'dump-groupoid "Eof inside verbatim"))
-            (when (char=? c d) (return))
-            (write-char c p))
+          (set! c (get-actual-char))
+          (when (not c) (terror 'dump-groupoid "Eof inside verbatim"))
+          (when (char=? c d) (return))
+          (unless %loop-returned (write-char c p))
           (if %loop-returned %loop-result (%loop))))))))
 
 (define (do-makehtmlimage) (ignorespaces)
@@ -8199,18 +8207,19 @@
  (do-tabular-multicolumn))
 
 (define (do-tabular-multicolumn)
- (let* ((%loop-returned false)
-        (%loop-result 0)
-        (return
-         (lambda %args
-           (set! %loop-returned true)
-           (set! %loop-result (and (pair? %args) (car %args))))))
-   (let %loop
-     ()
-     (ignorespaces)
-     (let ((c (snoop-actual-char)))
-       (cond
-        ((and (char? c) (char=? c #\\))
+ (let ((c false))
+   (let* ((%loop-returned false)
+          (%loop-result 0)
+          (return
+           (lambda %args
+             (set! %loop-returned true)
+             (set! %loop-result (and (pair? %args) (car %args))))))
+     (let %loop
+       ()
+       (ignorespaces)
+       (set! c (snoop-actual-char))
+       (unless (and (char? c) (char=? c #\\)) (return))
+       (unless %loop-returned
          (let ((x (get-ctl-seq)))
            (cond ((string=? x "\\hline") true)
                  ((string=? x "\\multicolumn")
@@ -8221,9 +8230,9 @@
                     (return)))
                  (else (toss-back-char *invisible-space*) (toss-back-string x)
                   (return)))))
-        (else (return))))
-     (if %loop-returned %loop-result (%loop))))
- (emit ">") (bgroup))
+       (if %loop-returned %loop-result (%loop))))
+   (emit ">")
+   (bgroup)))
 
 (define (do-ruledtable-colsep) (emit-newline) (emit "</td><td") (ignorespaces)
  (let ((c (snoop-actual-char)))
@@ -9207,9 +9216,11 @@
                     (let ((%read-res (read i)))
                       (when (eof-object? %read-res) (set! %read-res false))
                       %read-res))
-                   (cond
-                    (e (set! directive (car e))
-                     (set! *input-line-no* (+ *input-line-no* 1))
+                   (unless e (return))
+                   (unless %loop-returned (set! directive (car e)))
+                   (unless %loop-returned
+                     (set! *input-line-no* (+ *input-line-no* 1)))
+                   (unless %loop-returned
                      (apply
                       (case directive
                         ((!auto-margin) !auto-margin)
@@ -9246,7 +9257,6 @@
                          (terror 'load-tex2page-data-file
                           "Fatal aux file error " directive "; I'm stymied.")))
                       (cdr e)))
-                    (else (return)))
                    (if %loop-returned %loop-result (%loop))))))))
        (close-input-port i)
        %with-open-input-file-result))))
@@ -10513,44 +10523,48 @@ Try the commands
 (define (do-scm-set-keywords)
  (call-with-input-string/buffered (ungroup (get-group))
   (lambda ()
-    (let* ((%loop-returned false)
-           (%loop-result 0)
-           (return
-            (lambda %args
-              (set! %loop-returned true)
-              (set! %loop-result (and (pair? %args) (car %args))))))
-      (let %loop
-        ()
-        (ignorespaces ':all)
-        (let ((c (snoop-actual-char)))
+    (let ((c false))
+      (let* ((%loop-returned false)
+             (%loop-result 0)
+             (return
+              (lambda %args
+                (set! %loop-returned true)
+                (set! %loop-result (and (pair? %args) (car %args))))))
+        (let %loop
+          ()
+          (ignorespaces ':all)
+          (set! c (snoop-actual-char))
           (when (not c) (return))
-          (let ((s (scm-get-token)))
-            (table-put! s *scm-builtins* false)
-            (table-put! s *scm-variables* false)
-            (table-put! s *scm-keywords* true)))
-        (if %loop-returned %loop-result (%loop)))))))
+          (unless %loop-returned
+            (let ((s (scm-get-token)))
+              (table-put! s *scm-builtins* false)
+              (table-put! s *scm-variables* false)
+              (table-put! s *scm-keywords* true)))
+          (if %loop-returned %loop-result (%loop))))))))
 
 (tex-def-prim "\\scmkeyword" do-scm-set-keywords)
 
 (define (do-scm-set-builtins)
  (call-with-input-string/buffered (ungroup (get-group))
   (lambda ()
-    (let* ((%loop-returned false)
-           (%loop-result 0)
-           (return
-            (lambda %args
-              (set! %loop-returned true)
-              (set! %loop-result (and (pair? %args) (car %args))))))
-      (let %loop
-        ()
-        (ignorespaces ':all)
-        (let ((c (snoop-actual-char)))
+    (let ((c false))
+      (let* ((%loop-returned false)
+             (%loop-result 0)
+             (return
+              (lambda %args
+                (set! %loop-returned true)
+                (set! %loop-result (and (pair? %args) (car %args))))))
+        (let %loop
+          ()
+          (ignorespaces ':all)
+          (set! c (snoop-actual-char))
           (when (not c) (return))
-          (let ((s (scm-get-token)))
-            (table-put! s *scm-keywords* false)
-            (table-put! s *scm-variables* false)
-            (table-put! s *scm-builtins* true)))
-        (if %loop-returned %loop-result (%loop)))))))
+          (unless %loop-returned
+            (let ((s (scm-get-token)))
+              (table-put! s *scm-keywords* false)
+              (table-put! s *scm-variables* false)
+              (table-put! s *scm-builtins* true)))
+          (if %loop-returned %loop-result (%loop))))))))
 
 (tex-def-prim "\\scmbuiltin" do-scm-set-builtins)
 
@@ -10559,22 +10573,24 @@ Try the commands
 (define (do-scm-set-variables)
  (call-with-input-string/buffered (ungroup (get-group))
   (lambda ()
-    (let* ((%loop-returned false)
-           (%loop-result 0)
-           (return
-            (lambda %args
-              (set! %loop-returned true)
-              (set! %loop-result (and (pair? %args) (car %args))))))
-      (let %loop
-        ()
-        (ignorespaces ':all)
-        (let ((c (snoop-actual-char)))
+    (let ((c false))
+      (let* ((%loop-returned false)
+             (%loop-result 0)
+             (return
+              (lambda %args
+                (set! %loop-returned true)
+                (set! %loop-result (and (pair? %args) (car %args))))))
+        (let %loop
+          ()
+          (ignorespaces ':all)
+          (set! c (snoop-actual-char))
           (when (not c) (return))
-          (let ((s (scm-get-token)))
-            (table-put! s *scm-builtins* false)
-            (table-put! s *scm-keywords* false)
-            (table-put! s *scm-variables* true)))
-        (if %loop-returned %loop-result (%loop)))))))
+          (unless %loop-returned
+            (let ((s (scm-get-token)))
+              (table-put! s *scm-builtins* false)
+              (table-put! s *scm-keywords* false)
+              (table-put! s *scm-variables* true)))
+          (if %loop-returned %loop-result (%loop))))))))
 
 (tex-def-prim "\\scmvariable" do-scm-set-variables)
 

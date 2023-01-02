@@ -176,7 +176,7 @@
       (decode-universal-time s)
       (declare (ignore sec))
     (format nil "~a, ~a ~a, ~a, ~a:~a~a ~am ~a ~a"
-            (svref *week-day-names* dow)
+            (svref *week-day-names* (mod (1+ dow) 7))
             (svref *short-month-names* (1- mo))
             d
             y

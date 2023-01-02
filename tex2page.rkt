@@ -28,8 +28,6 @@
 
 (define *epoch-year* 1970)
 
-(define *week-day-names* (vector "Sun" "Mon" "Tues" "Wed" "Thurs" "Fri" "Sat"))
-
 (define (decode-universal-time s)
  (let ((ht (and s (seconds->date s))))
    (cond
@@ -312,6 +310,8 @@
          "Oct"
          "Nov"
          "Dec"))
+
+(define *week-day-names* (vector "Sun" "Mon" "Tues" "Wed" "Thurs" "Fri" "Sat"))
 
 (define *enable-write-18-p* true)
 

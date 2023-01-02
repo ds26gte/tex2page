@@ -150,7 +150,7 @@
           "July" "Aug" "Sept" "Oct" "Nov" "Dec"))
 
 (defparameter *week-day-names*
-  (vector "Mon" "Tues" "Wed" "Thurs" "Fri" "Sat" "Sun"))
+  (vector "Sun" "Mon" "Tues" "Wed" "Thurs" "Fri" "Sat"))
 
 (defparameter *enable-write-18-p*
   ;true if you want \write18{command} to execute command as an OS
@@ -4278,7 +4278,7 @@
     (decode-universal-time s)
     (declare (ignore sec))
     (string-append
-      (svref *week-day-names* dow)
+      (svref *week-day-names* (mod (1+ dow) 7))
       ", "
       (svref *short-month-names* (1- mo))
       " "

@@ -4,6 +4,8 @@
 
 (require racket/private/more-scheme)
 
+(require racket/trace)
+
 (define *operating-system*
  (if (getenv "COMSPEC")
      (let ((term (getenv "TERM")))
@@ -272,7 +274,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221226, ecl.
 
 
-(define *tex2page-version* "20230101")
+(define *tex2page-version* "20230103")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -907,7 +909,7 @@
                        (write-log "/")))))))))))))
 
 (define (edit-offending-file)
- (let ((calling-from-text-editor-p (getenv "VIMRUNTIME")))
+ (let ((calling-from-text-editor-p (getenv "VIMRUNTIME")) (it false))
    (unless calling-from-text-editor-p
      (display "Type E to edit your file, X to quit.")
      (newline)
@@ -925,32 +927,28 @@
          (let ((texedit-string (getenv "TEXEDIT")) (ill-formed-texedit-p false))
            (when texedit-string
              (cond
-              ((begin (set! *it* (substring? "%d" texedit-string)) *it*)
-               (let ((i *it*))
-                 (set! texedit-string
-                  (string-append (substring texedit-string 0 i)
-                   (write-to-string *input-line-no*)
-                   (substring texedit-string (+ i 2))))))
+              ((begin (set! it (substring? "%d" texedit-string)) it)
+               (set! texedit-string
+                (string-append (substring texedit-string 0 it)
+                 (write-to-string *input-line-no*)
+                 (substring texedit-string (+ it 2)))))
               (else (set! ill-formed-texedit-p true)
                (set! texedit-string false))))
            (when texedit-string
              (cond
-              ((begin (set! *it* (substring? "%s" texedit-string)) *it*)
-               (let ((i *it*))
-                 (set! texedit-string
-                  (string-append (substring texedit-string 0 i)
-                   *current-source-file* (substring texedit-string (+ i 2))))))
+              ((begin (set! it (substring? "%s" texedit-string)) it)
+               (set! texedit-string
+                (string-append (substring texedit-string 0 it)
+                 *current-source-file* (substring texedit-string (+ it 2)))))
               (else (set! ill-formed-texedit-p true)
                (set! texedit-string false))))
            (unless texedit-string
              (when ill-formed-texedit-p
                (display "Ill-formed TEXEDIT; using EDITOR.")
                (newline))
-             (when (begin (set! *it* (or (getenv "EDITOR") "vi")) *it*)
-               (let ((e *it*))
-                 (set! texedit-string
-                  (string-append e " +" (write-to-string *input-line-no*) " "
-                   *current-source-file*)))))
+             (set! texedit-string
+              (string-append (or (getenv "EDITOR") "vi") " +"
+               (write-to-string *input-line-no*) " " *current-source-file*)))
            (when texedit-string (system texedit-string))))))))
 
 (define (trace-if write-p . args)
@@ -1767,7 +1765,7 @@
      (set! globalp (list-ref %lambda-rest-arg 1)))
    (cond
     ((not n)
-     (cond ((begin (set! *it* (assoc c *catcodes*)) *it*) (cdr *it*))
+     (cond ((begin (set! n (assoc c *catcodes*)) n) (cdr n))
            ((char-alphabetic? c) **letter**)
            ((char=? c *small-commercial-at*) **letter**)
            (else **other**)))
@@ -1992,11 +1990,11 @@
               (let ((lft-def (make-tdef*)))
                 (table-put! lft frame-defs lft-def)
                 lft-def))))
-     (cond
-      ((begin (set! *it* (or (find-def rt) (find-math-def rt))) *it*)
-       (let ((rt-def *it*))
-         (kopy-tdef lft-def rt-def)))
-      (else (cleanse-tdef lft-def))))))
+     (let ((it false))
+       (cond
+        ((begin (set! it (or (find-def rt) (find-math-def rt))) it)
+         (kopy-tdef lft-def it))
+        (else (cleanse-tdef lft-def)))))))
 
 (define (tex-let-general lhs rhs frame)
  (if (ctl-seq-p rhs)
@@ -2020,11 +2018,11 @@
      (table-put! ctlseq (texframe*-chardefs *global-texframe*) num))))
 
 (define (do-chardef)
- (let ((cltseq (get-raw-token/is)))
+ (let ((ctlseq (get-raw-token/is)))
    (get-equal-sign)
    (let ((num (get-number-or-false)))
      (unless num (terror 'do-chardef))
-     (tex-def-chardef cltseq num (globally-p)))))
+     (tex-def-chardef ctlseq num (globally-p)))))
 
 (define (find-chardef ctlseq)
  (or
@@ -2083,11 +2081,11 @@
      (table-put! regno (texframe*-counts *global-texframe*) num))))
 
 (define (do-countdef)
- (let ((cltseq (get-raw-token/is)))
+ (let ((ctlseq (get-raw-token/is)))
    (get-equal-sign)
    (let ((n (get-number-or-false)))
      (unless n (terror 'do-countdef "Missing number."))
-     (tex-def-countdef cltseq n 0 (globally-p)))))
+     (tex-def-countdef ctlseq n 0 (globally-p)))))
 
 (define (do-newcount . %lambda-rest-arg)
  (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (globalp false))
@@ -2103,8 +2101,8 @@
   (table-get num (texframe*-counts *primitive-texframe*))))
 
 (define (the-count dracula)
- (cond ((begin (set! *it* (find-countdef dracula)) *it*) (find-count *it*))
-       (else (terror 'the-count "Missing count register."))))
+ (let ((n (find-countdef dracula)))
+   (if n (find-count n) (terror 'the-count "Missing count register."))))
 
 (define (get-gcount ctlseq)
  (table-get (find-countdef ctlseq) (texframe*-counts *global-texframe*) 0))
@@ -2163,11 +2161,11 @@
      (table-put! regno (texframe*-dimens *global-texframe*) num))))
 
 (define (do-dimendef)
- (let ((cltseq (get-raw-token/is)))
+ (let ((ctlseq (get-raw-token/is)))
    (get-equal-sign)
    (let ((n (get-scaled-points)))
      (unless n (terror 'do-dimendef "Missing number."))
-     (tex-def-dimendef cltseq n 0 (globally-p)))))
+     (tex-def-dimendef ctlseq n 0 (globally-p)))))
 
 (define (do-newdimen . %lambda-rest-arg)
  (let ((%lambda-rest-arg-len (length %lambda-rest-arg)) (globalp false))
@@ -2203,19 +2201,17 @@
    (when (< 0 %lambda-rest-arg-len)
      (set! globalp (list-ref %lambda-rest-arg 0)))
    (unless globalp (set! globalp (globally-p)))
-   (let ((cs (get-ctl-seq)))
+   (let ((cs (get-ctl-seq)) (it false))
      (get-by)
      (cond
-      ((begin (set! *it* (find-countdef cs)) *it*)
-       (let ((countnum *it*))
-         (let ((countval (find-count countnum)))
-           (unless countval (terror 'do-advance "Missing count register."))
-           (tex-def-count countnum (+ countval (get-number)) globalp))))
-      ((begin (set! *it* (find-dimendef cs)) *it*)
-       (let ((dimennum *it*))
-         (let ((dimenval (find-dimen dimennum)))
-           (unless dimenval (terror 'do-advance "Missing dimen register."))
-           (tex-def-dimen dimennum (+ dimenval (get-scaled-points)) globalp))))
+      ((begin (set! it (find-countdef cs)) it)
+       (let ((countval (find-count it)))
+         (unless countval (terror 'do-advance "Missing count register."))
+         (tex-def-count it (+ countval (get-number)) globalp)))
+      ((begin (set! it (find-dimendef cs)) it)
+       (let ((dimenval (find-dimen it)))
+         (unless dimenval (terror 'do-advance "Missing dimen register."))
+         (tex-def-dimen it (+ dimenval (get-scaled-points)) globalp)))
       (else (terror 'do-advance "Missing register."))))))
 
 (define (do-multiply . %lambda-rest-arg)
@@ -2223,19 +2219,17 @@
    (when (< 0 %lambda-rest-arg-len)
      (set! globalp (list-ref %lambda-rest-arg 0)))
    (unless globalp (set! globalp (globally-p)))
-   (let ((cs (get-ctl-seq)))
+   (let ((cs (get-ctl-seq)) (it false))
      (get-by)
      (cond
-      ((begin (set! *it* (find-countdef cs)) *it*)
-       (let ((countnum *it*))
-         (let ((countval (find-count countnum)))
-           (unless countval (terror 'do-multiply "Missing count register."))
-           (tex-def-count countnum (* countval (get-number)) globalp))))
-      ((begin (set! *it* (find-dimendef cs)) *it*)
-       (let ((dimennum *it*))
-         (let ((dimenval (find-dimen dimennum)))
-           (unless dimenval (terror 'do-multiply "Missing dimen register."))
-           (tex-def-dimen dimennum (* dimenval (get-number)) globalp))))
+      ((begin (set! it (find-countdef cs)) it)
+       (let ((countval (find-count it)))
+         (unless countval (terror 'do-multiply "Missing count register."))
+         (tex-def-count it (* countval (get-number)) globalp)))
+      ((begin (set! it (find-dimendef cs)) it)
+       (let ((dimenval (find-dimen it)))
+         (unless dimenval (terror 'do-multiply "Missing dimen register."))
+         (tex-def-dimen it (* dimenval (get-number)) globalp)))
       (else (terror 'do-multiply "Missing register."))))))
 
 (define (do-divide . %lambda-rest-arg)
@@ -2243,19 +2237,17 @@
    (when (< 0 %lambda-rest-arg-len)
      (set! globalp (list-ref %lambda-rest-arg 0)))
    (unless globalp (set! globalp (globally-p)))
-   (let ((cs (get-ctl-seq)))
+   (let ((cs (get-ctl-seq)) (it false))
      (get-by)
      (cond
-      ((begin (set! *it* (find-countdef cs)) *it*)
-       (let ((countnum *it*))
-         (let ((countval (find-count countnum)))
-           (unless countval (terror 'do-divide "Missing count register."))
-           (tex-def-count countnum (quotient countval (get-number)) globalp))))
-      ((begin (set! *it* (find-dimendef cs)) *it*)
-       (let ((dimennum *it*))
-         (let ((dimenval (find-dimen dimennum)))
-           (unless dimenval (terror 'do-divide "Missing dimen register."))
-           (tex-def-dimen dimennum (quotient dimenval (get-number)) globalp))))
+      ((begin (set! it (find-countdef cs)) it)
+       (let ((countval (find-count it)))
+         (unless countval (terror 'do-divide "Missing count register."))
+         (tex-def-count it (quotient countval (get-number)) globalp)))
+      ((begin (set! it (find-dimendef cs)) it)
+       (let ((dimenval (find-dimen it)))
+         (unless dimenval (terror 'do-divide "Missing dimen register."))
+         (tex-def-dimen it (quotient dimenval (get-number)) globalp)))
       (else (terror 'do-divide "Missing register."))))))
 
 (define (tex-def-newread ctlseq . %lambda-rest-arg)
@@ -2497,30 +2489,22 @@
              (tex-def-char c argpat rhs f))))))))
 
 (define (activate-cdef c)
- (let ((y
-        (cond
-         ((begin (set! *it* (find-cdef-in-top-frame c)) *it*)
-          (let ((y *it*))
-            (set!cdef*-active y true)
-            y))
-         (else
-          (let ((d (find-cdef c)))
-            (let ((y (ensure-cdef c (top-texframe))))
-              (when d (kopy-cdef y d))
-              (set!cdef*-active y true)
-              y))))))
+ (let ((y (find-cdef-in-top-frame c)))
+   (unless y
+     (set! y (ensure-cdef c (top-texframe)))
+     (let ((d (find-cdef c)))
+       (when d (kopy-cdef y d))))
+   (set!cdef*-active y true)
    (add-postlude-to-top-frame (lambda () (set!cdef*-active y false)))))
 
 (define (deactivate-cdef c)
  (cond
   ((begin (set! *it* (find-cdef-in-top-frame c)) *it*)
-   (let ((y *it*))
-     (set!cdef*-active y false)))
+   (set!cdef*-active *it* false))
   ((begin (set! *it* (find-cdef c)) *it*)
-   (let ((y *it*))
-     (let ((d (ensure-cdef c (top-texframe))))
-       (kopy-cdef d y)
-       (set!cdef*-active d false))))))
+   (let ((d (ensure-cdef c (top-texframe))))
+     (kopy-cdef d *it*)
+     (set!cdef*-active d false)))))
 
 (define (do-undefcsactive) (ignorespaces)
  (deactivate-cdef (string-ref (get-ctl-seq) 1)))
@@ -4476,16 +4460,14 @@
  (let ((s (get-peeled-group)))
    (let ((n (string->number s)))
      (let ((pageno (table-get n *index-table*)))
-       (emit-page-node-link-start pageno
-        (string-append *html-node-prefix* "index_" s))
-       (emit pageno)
-       (cond
-        ((begin (set! *it* (table-get pageno *index-page-mention-alist*)) *it*)
-         (let ((n (add1 *it*)))
-           (emit (number-to-roman n))
-           (table-put! pageno *index-page-mention-alist* n)))
-        (else (table-put! pageno *index-page-mention-alist* 1)))
-       (emit-link-stop)))))
+       (let ((page-mention
+              (add1 (table-get pageno *index-page-mention-alist* 0))))
+         (emit-page-node-link-start pageno
+          (string-append *html-node-prefix* "index_" s))
+         (emit pageno)
+         (unless (= page-mention 1) (emit (number-to-roman page-mention)))
+         (table-put! pageno *index-page-mention-alist* page-mention)
+         (emit-link-stop))))))
 
 (define (do-see-also)
  (let ((other-entry (get-group)))
@@ -4983,29 +4965,30 @@
  (show-unresolved-xrefs-and-missing-pieces))
 
 (define (set-text-width)
- (let ((hsize
-        (cond
-         ((begin (set! *it* (find-def "\\TZPhsize")) *it*)
-          (tex2page-string
-           (string-append "\\TIIPhsize=" (tdef*-expansion *it*)))
-          (the-dimen "\\TIIPhsize"))
-         ((or (tex2page-flag-boolean "\\TIIPtexlayout")
-              (tex2page-flag-boolean "\\TZPtexlayout"))
-          (the-dimen "\\hsize"))
-         (else false))))
-   (when hsize
-     (display "body { max-width: " *css-stream*)
-     (display (sp-to-pixels hsize) *css-stream*)
-     (display "pt; }" *css-stream*)
-     (newline *css-stream*))))
+ (let ((it false))
+   (let ((hsize
+          (cond
+           ((begin (set! it (find-def "\\TZPhsize")) it)
+            (tex2page-string
+             (string-append "\\TIIPhsize=" (tdef*-expansion it)))
+            (the-dimen "\\TIIPhsize"))
+           ((or (tex2page-flag-boolean "\\TIIPtexlayout")
+                (tex2page-flag-boolean "\\TZPtexlayout"))
+            (the-dimen "\\hsize"))
+           (else false))))
+     (when hsize
+       (display "body { max-width: " *css-stream*)
+       (display (sp-to-pixels hsize) *css-stream*)
+       (display "pt; }" *css-stream*)
+       (newline *css-stream*)))))
 
 (define (note-down-tex2page-flags)
  (let ((tex-layout-p (tex2page-flag-boolean "\\TZPtexlayout")))
    (write-aux (quasiquote (!lang (unquote (resolve-defs "\\TZPlang")))))
    (write-aux (quasiquote (!head-line (unquote (the-toks "\\headline")))))
    (write-aux (quasiquote (!foot-line (unquote (the-toks "\\footline")))))
-   (when (begin (set! *it* (find-def "\\TZPtitle")) *it*)
-     (let ((d *it*))
+   (let ((d (find-def "\\TZPtitle")))
+     (when d
        (write-aux
         (quasiquote
          (!preferred-title
@@ -5024,12 +5007,12 @@
        (or (tex2page-flag-boolean "\\TZPcolophondisableweblink")
            (not (tex2page-flag-boolean "\\TZPcolophonweblink")))
      (write-aux (quasiquote (!colophon ':dont-link-to-tex2page-website))))
-   (when (begin (set! *it* (ctl-seq-no-arg-expand-once "\\TZPredirect")) *it*)
-     (unless *redirect-url* (flag-missing-piece ':html-head))
-     (let ((url *it*)
-           (seconds (ctl-seq-no-arg-expand-once "\\TZPredirectseconds")))
-       (write-aux
-        (quasiquote (!html-redirect (unquote url) (unquote seconds))))))
+   (let ((url (ctl-seq-no-arg-expand-once "\\TZPredirect")))
+     (when url
+       (unless *redirect-url* (flag-missing-piece ':html-head))
+       (let ((seconds (ctl-seq-no-arg-expand-once "\\TZPredirectseconds")))
+         (write-aux
+          (quasiquote (!html-redirect (unquote url) (unquote seconds)))))))
    (when (tex2page-flag-boolean "\\TZPslides")
      (write-aux '(!slides))
      (write-aux '(!single-page))
@@ -5601,15 +5584,13 @@
   (html-output-stream-to-string *html*)))
 
 (define (do-write-aux o)
- (let ((output (tex-write-output-string (get-peeled-group))))
+ (let ((output (tex-write-output-string (get-peeled-group))) (it false))
    (cond ((and (= o 18) *enable-write-18-p*) (system output))
          ((member o '(16 18)) (write-log output)
           (write-log ':separation-space))
-         ((begin (set! *it* (find-ostream o)) *it*)
-          (let ((p *it*))
-            (when (eq? p ':free) (terror 'do-write-aux))
-            (display output p)
-            (display #\  p)))
+         ((begin (set! it (find-ostream o)) it)
+          (when (eq? it ':free) (terror 'do-write-aux)) (display output it)
+          (display #\  it))
          (else (terror 'do-write-aux)))))
 
 (define (do-wlog)
@@ -5649,16 +5630,17 @@
    (let ((i (get-number)))
      (let ((x (begin (get-to) (get-ctl-seq))))
        (let ((p false))
-         (cond
-          ((member i '(-1 16))
-           (set! p (make-istream* ':stream (current-input-port)))
-           (unless (= i -1) (write-log x) (write-log #\=)))
-          ((begin (set! *it* (find-istream i)) *it*) (set! p *it*)
-           (when (eq? p ':free) (terror 'do-read)))
-          (else (terror 'do-read)))
-         ((if globalp tex-gdef-0arg tex-def-0arg) x
-          (let ((line (read-tex-line p)))
-            (if (not line) "" line))))))))
+         (let ((it false))
+           (cond
+            ((member i '(-1 16))
+             (set! p (make-istream* ':stream (current-input-port)))
+             (unless (= i -1) (write-log x) (write-log #\=)))
+            ((begin (set! it (find-istream i)) it) (set! p it)
+             (when (eq? p ':free) (terror 'do-read)))
+            (else (terror 'do-read)))
+           ((if globalp tex-gdef-0arg tex-def-0arg) x
+            (let ((line (read-tex-line p)))
+              (if (not line) "" line)))))))))
 
 (define (do-typein)
  (let ((ctlseq (get-bracketed-text-if-any))
@@ -5699,31 +5681,30 @@
    (let ((two (get-raw-token/is)))
      (let ((one2 one))
        (let ((two2 two))
-         (ignorespaces)
-         (if (string=? one two)
-             (do-iftrue)
-             (begin
-              (when (ctl-seq-p one)
-                (set! one2
-                 (cond
-                  ((begin (set! *it* (find-def one)) *it*)
-                   (let ((d *it*))
-                     (or (tdef*-expansion d) (tdef*-prim d))))
-                  ((begin (set! *it* (find-math-def one)) *it*) *it*)
-                  (else "UnDeFiNeD"))))
-              (when (ctl-seq-p two)
-                (set! two2
-                 (cond
-                  ((begin (set! *it* (find-def two)) *it*)
-                   (let ((d *it*))
-                     (or (tdef*-expansion d) (tdef*-prim d))))
-                  ((begin (set! *it* (find-math-def two)) *it*) *it*)
-                  (else "UnDeFiNeD"))))
-              (if
-               (or (eqv? one2 two2)
-                   (and (string? one2) (string? two2) (string=? one2 two2)))
+         (let ((it false))
+           (ignorespaces)
+           (if (string=? one two)
                (do-iftrue)
-               (do-iffalse)))))))))
+               (begin
+                (when (ctl-seq-p one)
+                  (set! one2
+                   (cond
+                    ((begin (set! it (find-def one)) it)
+                     (or (tdef*-expansion it) (tdef*-prim it)))
+                    ((find-math-def one))
+                    (else "UnDeFiNeD"))))
+                (when (ctl-seq-p two)
+                  (set! two2
+                   (cond
+                    ((begin (set! it (find-def two)) it)
+                     (or (tdef*-expansion it) (tdef*-prim it)))
+                    ((find-math-def two))
+                    (else "UnDeFiNeD"))))
+                (if
+                 (or (eqv? one2 two2)
+                     (and (string? one2) (string? two2) (string=? one2 two2)))
+                 (do-iftrue)
+                 (do-iffalse))))))))))
 
 (define (do-if-get-atomic)
  (let* ((%loop-returned false)
@@ -5734,13 +5715,11 @@
            (set! %loop-result (and (pair? %args) (car %args))))))
    (let %loop
      ()
-     (let ((x (get-raw-token/is)))
+     (let ((x (get-raw-token/is)) (it false))
        (if (ctl-seq-p x)
            (cond
-            ((begin (set! *it* (resolve-defs x)) *it*)
-             (let ((z *it*))
-               (toss-back-char *invisible-space*)
-               (toss-back-string z)))
+            ((begin (set! it (resolve-defs x)) it)
+             (toss-back-char *invisible-space*) (toss-back-string it))
             (else (return x)))
            (return x)))
      (if %loop-returned %loop-result (%loop)))))
@@ -5997,21 +5976,22 @@
 (define (tex-to-img f) (set! *img-file-tally* (+ *img-file-tally* 1))
  (let ((img-file (string-append f (find-img-file-extn))))
    (let ((fq-img-file (string-append *aux-dir/* img-file)))
-     (unless (file-exists? fq-img-file)
-       (write-log ':separation-space)
-       (write-log #\{)
-       (write-log (string-append f ".tex"))
-       (write-log ':separation-space)
-       (write-log "->")
-       (write-log ':separation-space)
-       (cond
-        ((begin (set! *it* (call-tex f)) *it*) (ps-to-img *it* img-file)
-         (ensure-url-reachable img-file ':delete) (write-log img-file)
-         (for-each (lambda (e) (ensure-file-deleted (string-append f e)))
-          '(".log" ".pdf" ".tex")))
-        (else (write-log "failed, try manually")))
-       (write-log #\})
-       (write-log ':separation-space)))))
+     (let ((it false))
+       (unless (file-exists? fq-img-file)
+         (write-log ':separation-space)
+         (write-log #\{)
+         (write-log (string-append f ".tex"))
+         (write-log ':separation-space)
+         (write-log "->")
+         (write-log ':separation-space)
+         (cond
+          ((begin (set! it (call-tex f)) it) (ps-to-img it img-file)
+           (ensure-url-reachable img-file ':delete) (write-log img-file)
+           (for-each (lambda (e) (ensure-file-deleted (string-append f e)))
+            '(".log" ".pdf" ".tex")))
+          (else (write-log "failed, try manually")))
+         (write-log #\})
+         (write-log ':separation-space))))))
 
 (define (call-with-lazy-image-stream eps-file img-file-stem p)
  (let ((aux-tex-file (string-append img-file-stem ".tex")))
@@ -6476,20 +6456,20 @@
              ((= (catcode c) **escape**)
               (let ((x (get-ctl-seq)))
                 (let ((y (find-corresp-prim x)))
-                  (cond ((string=? y "\\endrawhtml") (ignorespaces) (return))
-                        ((and (string=? y "\\end")
-                              (begin
-                               (set! *it*
-                                (get-grouped-environment-name-if-any))
-                               *it*))
-                         (let ((g *it*))
-                           (let ((y (find-corresp-prim (string-append x g))))
+                  (let ((it false))
+                    (cond ((string=? y "\\endrawhtml") (ignorespaces) (return))
+                          ((and (string=? y "\\end")
+                                (begin
+                                 (set! it
+                                  (get-grouped-environment-name-if-any))
+                                 it))
+                           (let ((y (find-corresp-prim (string-append x it))))
                              (cond
                               ((string=? y "\\endrawhtml") (ignorespaces)
                                (return))
-                              (else (emit "\\end{") (emit g) (emit "}"))))))
-                        ((string=? x "\\\\") (emit c) (toss-back-char c))
-                        (else (emit x))))))
+                              (else (emit "\\end{") (emit it) (emit "}")))))
+                          ((string=? x "\\\\") (emit c) (toss-back-char c))
+                          (else (emit x)))))))
              (else (get-actual-char) (emit c))))
      (if %loop-returned %loop-result (%loop)))))
 
@@ -6521,29 +6501,26 @@
        (if %loop-returned %loop-result (%loop))))))
 
 (define (resolve-cdefs c)
- (if (begin (set! *it* (find-cdef c)) *it*)
-     (let ((y *it*))
-       (get-actual-char)
-       (expand-tex-macro (cdef*-optarg y) (cdef*-argpat y) (cdef*-expansion y)
-        (cdef*-catcodes y)))
-     false))
+ (let ((y (find-cdef c)))
+   (and y
+        (begin (get-actual-char)
+         (expand-tex-macro (cdef*-optarg y) (cdef*-argpat y)
+          (cdef*-expansion y) (cdef*-catcodes y))))))
 
 (define (resolve-defs x)
- (if (begin (set! *it* (find-def x)) *it*)
-     (let ((y *it*))
-       (cond ((begin (set! *it* (tdef*-defer y)) *it*) *it*)
-             ((tdef*-thunk y) false)
-             ((and (null? (tdef*-argpat y)) (not (tdef*-optarg y)))
-              (expand-tex-macro false null (tdef*-expansion y)
-               (tdef*-catcodes y)))
-             ((and (inside-false-world-p) (not (if-aware-ctl-seq-p x))) false)
-             (else
-              (when *outer-p*
-                (set! *outer-p* false)
-                (toss-back-char *invisible-space*))
-              (expand-tex-macro (tdef*-optarg y) (tdef*-argpat y)
-               (tdef*-expansion y) (tdef*-catcodes y)))))
-     false))
+ (let ((y (find-def x)))
+   (cond ((not y) false)
+         ((tdef*-defer y))
+         ((tdef*-thunk y) false)
+         ((and (null? (tdef*-argpat y)) (not (tdef*-optarg y)))
+          (expand-tex-macro false null (tdef*-expansion y) (tdef*-catcodes y)))
+         ((and (inside-false-world-p) (not (if-aware-ctl-seq-p x))) false)
+         (else
+          (when *outer-p*
+            (set! *outer-p* false)
+            (toss-back-char *invisible-space*))
+          (expand-tex-macro (tdef*-optarg y) (tdef*-argpat y)
+           (tdef*-expansion y) (tdef*-catcodes y))))))
 
 (define (do-expandafter)
  (let ((first (get-raw-token/is)))
@@ -6669,29 +6646,29 @@
  (string-append (write-to-string (/ sp 65536.0)) "pt"))
 
 (define (expand-the)
- (let ((ctlseq (get-ctl-seq)))
+ (let ((ctlseq (get-ctl-seq)) (it false))
    (cond
-    ((begin (set! *it* (find-dimendef ctlseq)) *it*)
-     (scaled-point-to-tex-point (find-dimen *it*)))
-    ((begin (set! *it* (get-number-corresp-to-ctl-seq ctlseq)) *it*) *it*)
-    ((begin (set! *it* (find-toksdef ctlseq)) *it*) (find-toks *it*))
+    ((begin (set! it (find-dimendef ctlseq)) it)
+     (scaled-point-to-tex-point (find-dimen it)))
+    ((get-number-corresp-to-ctl-seq ctlseq))
+    ((begin (set! it (find-toksdef ctlseq)) it) (find-toks it))
     (else (trace-if false "expand-the failed")))))
 
 (define (do-the)
- (let ((ctlseq (get-ctl-seq)))
+ (let ((ctlseq (get-ctl-seq)) (it false))
    (ignorespaces)
    (cond ((string=? ctlseq "\\count") (emit (find-count (get-number))))
-         ((begin (set! *it* (get-number-corresp-to-ctl-seq ctlseq)) *it*)
-          (emit *it*))
-         ((begin (set! *it* (find-toksdef ctlseq)) *it*)
-          (tex2page-string (find-toks *it*)))
+         ((begin (set! it (get-number-corresp-to-ctl-seq ctlseq)) it)
+          (emit it))
+         ((begin (set! it (find-toksdef ctlseq)) it)
+          (tex2page-string (find-toks it)))
          (else (trace-if false "do-the failed")))))
 
 (define (do-arabic)
  (let ((counter-name (ungroup (get-group))))
    (let ((counter (table-get counter-name *dotted-counters*)))
      (let ((it false))
-       (cond ((set! it (counter*-value counter)) (emit it))
+       (cond ((begin (set! it (counter*-value counter)) it) (emit it))
              (else (trace-if false "do-arabic failed")))))))
 
 (define (find-corresp-prim ctlseq)
@@ -6759,22 +6736,20 @@
 (define (do-newcommand renewp) (ignorespaces)
  (let ((lhs (string-trim (ungroup (get-token)))))
    (let ((optarg false))
-     (let ((argc
-            (cond
-             ((begin (set! *it* (get-bracketed-text-if-any)) *it*)
-              (let ((s *it*))
-                (cond
-                 ((begin (set! *it* (get-bracketed-text-if-any)) *it*)
-                  (set! optarg *it*)))
-                (string->number (string-trim s))))
-             (else 0))))
-       (let ((rhs (ungroup (get-token))))
-         (let ((ok-to-def-p (or renewp (not (find-def lhs)))))
-           (tex-def lhs (latex-argnum-to-plain-argpat argc) rhs optarg false
-            false false false)
-           (unless ok-to-def-p
-             (trace-if (> (the-count "\\tracingcommands") 0) lhs
-              " already defined"))))))))
+     (let ((it false))
+       (let ((argc
+              (cond
+               ((begin (set! it (get-bracketed-text-if-any)) it)
+                (set! optarg (get-bracketed-text-if-any))
+                (string->number (string-trim it)))
+               (else 0))))
+         (let ((rhs (ungroup (get-token))))
+           (let ((ok-to-def-p (or renewp (not (find-def lhs)))))
+             (tex-def lhs (latex-argnum-to-plain-argpat argc) rhs optarg false
+              false false false)
+             (unless ok-to-def-p
+               (trace-if (> (the-count "\\tracingcommands") 0) lhs
+                " already defined")))))))))
 
 (define (do-newcounter)
  (let ((counter-name (ungroup (get-group))))
@@ -6785,25 +6760,23 @@
  (let ((envname (string-trim (ungroup (get-token)))))
    (let ((bs-envname (string-append "\\" envname)))
      (let ((optarg false))
-       (let ((argc
-              (cond
-               ((begin (set! *it* (get-bracketed-text-if-any)) *it*)
-                (let ((s *it*))
-                  (cond
-                   ((begin (set! *it* (get-bracketed-text-if-any)) *it*)
-                    (set! optarg *it*)))
-                  (string->number (string-trim s))))
-               (else 0))))
-         (let ((beginning
-                (string-append "\\begingroup " (ungroup (get-token)))))
-           (let ((ending (string-append (ungroup (get-token)) "\\endgroup")))
-             (let ((ok-to-def-p (or renewp (not (find-def bs-envname)))))
-               (tex-def bs-envname (latex-argnum-to-plain-argpat argc)
-                beginning optarg false false false false)
-               (tex-def (string-append "\\end" envname) null ending false false
-                false false false)
-               (unless ok-to-def-p
-                 (trace-if true "{" envname "} already defined"))))))))))
+       (let ((it false))
+         (let ((argc
+                (cond
+                 ((begin (set! it (get-bracketed-text-if-any)) it)
+                  (set! optarg (get-bracketed-text-if-any))
+                  (string->number (string-trim it)))
+                 (else 0))))
+           (let ((beginning
+                  (string-append "\\begingroup " (ungroup (get-token)))))
+             (let ((ending (string-append (ungroup (get-token)) "\\endgroup")))
+               (let ((ok-to-def-p (or renewp (not (find-def bs-envname)))))
+                 (tex-def bs-envname (latex-argnum-to-plain-argpat argc)
+                  beginning optarg false false false false)
+                 (tex-def (string-append "\\end" envname) null ending false
+                  false false false false)
+                 (unless ok-to-def-p
+                   (trace-if true "{" envname "} already defined")))))))))))
 
 (define (tex-def-dotted-count counter-name sec-num)
  (when sec-num
@@ -6855,9 +6828,8 @@
              (emit-nbsp 2))))))))
 
 (define (do-begin)
- (unless (begin (set! *it* (get-grouped-environment-name-if-any)) *it*)
-   (terror 'do-begin "\\begin not followed by environment name"))
- (let ((env *it*))
+ (let ((env (get-grouped-environment-name-if-any)))
+   (unless env (terror 'do-begin "\\begin not followed by environment name"))
    (toss-back-char *invisible-space*)
    (toss-back-string (string-append "\\" env))
    (unless
@@ -6868,15 +6840,14 @@
      (do-end-para))))
 
 (define (do-end)
- (cond
-  ((begin (set! *it* (get-grouped-environment-name-if-any)) *it*)
-   (let ((env *it*))
-     (toss-back-char *invisible-space*)
+ (let ((env (get-grouped-environment-name-if-any)))
+   (cond
+    (env (toss-back-char *invisible-space*)
      (unless (member env '("htmlonly" "document"))
        (do-end-para)
        (toss-back-string "\\endgroup"))
-     (toss-back-string (string-append "\\end" env))))
-  (else (toss-back-char *invisible-space*) (toss-back-string "\\TIIPbye"))))
+     (toss-back-string (string-append "\\end" env)))
+    (else (toss-back-char *invisible-space*) (toss-back-string "\\TIIPbye")))))
 
 (define (latex-argnum-to-plain-argpat n)
  (let ((n n) (s null))
@@ -7279,55 +7250,55 @@
  (fluid-let ((*not-processing-p* true))
   (let ((tmp-stream (open-output-string)))
     (let ((c false))
-      (call-with-input-string/buffered rhs
-       (lambda ()
-         (let* ((%loop-returned false)
-                (%loop-result 0)
-                (return
-                 (lambda %args
-                   (set! %loop-returned true)
-                   (set! %loop-result (and (pair? %args) (car %args))))))
-           (let %loop
-             ()
-             (set! c (snoop-actual-char))
-             (when (not c) (return))
-             (unless %loop-returned
-               (display
-                (cond
-                 ((= (catcode c) **escape**)
-                  (let ((x (get-ctl-seq)))
-                    (toss-back-char *invisible-space*)
-                    (cond
-                     ((or (string=? x "\\the") (string=? x "\\number"))
-                      (let ((x2 (get-raw-token/is)))
-                        (toss-back-char *invisible-space*)
-                        (toss-back-string x2)
-                        (cond
-                         ((ctl-seq-p x2)
-                          (cond ((string=? x "\\the") (expand-the))
-                                ((string=? x "\\number") (get-number))
-                                (else 3735929054)))
-                         (else x))))
-                     ((string=? x "\\noexpand")
-                      (let ((x2 (get-raw-token/is)))
-                        (toss-back-char *invisible-space*)
-                        x2))
-                     ((begin (set! *it* (find-def x)) *it*)
-                      (let ((y *it*))
-                        (cond
-                         ((and (null? (tdef*-argpat y))
-                               (not (tdef*-optarg y))
-                               (not (tdef*-thunk y))
-                               (not (tdef*-prim y))
-                               (not (tdef*-defer y)))
+      (let ((it false))
+        (call-with-input-string/buffered rhs
+         (lambda ()
+           (let* ((%loop-returned false)
+                  (%loop-result 0)
+                  (return
+                   (lambda %args
+                     (set! %loop-returned true)
+                     (set! %loop-result (and (pair? %args) (car %args))))))
+             (let %loop
+               ()
+               (set! c (snoop-actual-char))
+               (when (not c) (return))
+               (unless %loop-returned
+                 (display
+                  (cond
+                   ((= (catcode c) **escape**)
+                    (let ((x (get-ctl-seq)))
+                      (toss-back-char *invisible-space*)
+                      (cond
+                       ((or (string=? x "\\the") (string=? x "\\number"))
+                        (let ((x2 (get-raw-token/is)))
                           (toss-back-char *invisible-space*)
-                          (toss-back-string (tdef*-expansion y)) "")
-                         (else x))))
-                     (else x))))
-                 (else (get-actual-char) c))
-                tmp-stream))
-             (if %loop-returned %loop-result (%loop))))))
-      (get-output-string tmp-stream)))))
+                          (toss-back-string x2)
+                          (cond
+                           ((ctl-seq-p x2)
+                            (cond ((string=? x "\\the") (expand-the))
+                                  ((string=? x "\\number") (get-number))
+                                  (else 3735929054)))
+                           (else x))))
+                       ((string=? x "\\noexpand")
+                        (let ((x2 (get-raw-token/is)))
+                          (toss-back-char *invisible-space*)
+                          x2))
+                       ((begin (set! it (find-def x)) it)
+                        (cond
+                         ((and (null? (tdef*-argpat it))
+                               (not (tdef*-optarg it))
+                               (not (tdef*-thunk it))
+                               (not (tdef*-prim it))
+                               (not (tdef*-defer it)))
+                          (toss-back-char *invisible-space*)
+                          (toss-back-string (tdef*-expansion it)) "")
+                         (else x)))
+                       (else x))))
+                   (else (get-actual-char) c))
+                  tmp-stream))
+               (if %loop-returned %loop-result (%loop))))))
+        (get-output-string tmp-stream))))))
 
 (define (expand-tex-macro optarg argpat rhs lexical-catcodes)
  (let ((k 0))
@@ -7335,10 +7306,7 @@
           (if (not optarg)
               null
               (begin (set! k 2)
-               (list
-                (cond
-                 ((begin (set! *it* (get-bracketed-text-if-any)) *it*) *it*)
-                 (else optarg)))))))
+               (list (cond ((get-bracketed-text-if-any)) (else optarg)))))))
      (let ((args (read-macro-args argpat k r)))
        (let ((rhs-n (string-length rhs)))
          (fluid-let ((*catcodes* lexical-catcodes))
@@ -7719,39 +7687,38 @@
 
 (define (do-verbatim-latex env) (do-end-para) (bgroup)
  (emit "<pre class=verbatim>")
- (fluid-let ((*verb-visible-space-p* (eat-star)))
-  (when (string=? env "Verbatim") (get-bracketed-text-if-any))
-  (when *verb-visible-space-p* (set! env (string-append env "*")))
-  (munched-a-newline-p)
-  (let ((%fluid-var-*ligatures-p* false) (c false))
-    (fluid-let ((*ligatures-p* %fluid-var-*ligatures-p*))
-     (let* ((%loop-returned false)
-            (%loop-result 0)
-            (return
-             (lambda %args
-               (set! %loop-returned true)
-               (set! %loop-result (and (pair? %args) (car %args))))))
-       (let %loop
-         ()
-         (set! c (snoop-actual-char))
-         (when (not c) (terror 'do-verbatim-latex "Eof inside verbatim"))
-         (cond
-          ((char=? c #\\)
-           (let ((cs (get-ctl-seq)))
-             (if (string=? cs "\\end")
-                 (cond
-                  ((begin (set! *it* (get-grouped-environment-name-if-any))
-                    *it*)
-                   (let ((e *it*))
-                     (cond ((string=? *it* env) (return))
+ (let ((%fluid-var-*verb-visible-space-p* (eat-star)) (it false))
+   (fluid-let ((*verb-visible-space-p* %fluid-var-*verb-visible-space-p*))
+    (when (string=? env "Verbatim") (get-bracketed-text-if-any))
+    (when *verb-visible-space-p* (set! env (string-append env "*")))
+    (munched-a-newline-p)
+    (let ((%fluid-var-*ligatures-p* false) (c false))
+      (fluid-let ((*ligatures-p* %fluid-var-*ligatures-p*))
+       (let* ((%loop-returned false)
+              (%loop-result 0)
+              (return
+               (lambda %args
+                 (set! %loop-returned true)
+                 (set! %loop-result (and (pair? %args) (car %args))))))
+         (let %loop
+           ()
+           (set! c (snoop-actual-char))
+           (when (not c) (terror 'do-verbatim-latex "Eof inside verbatim"))
+           (cond
+            ((char=? c #\\)
+             (let ((cs (get-ctl-seq)))
+               (if (string=? cs "\\end")
+                   (cond
+                    ((begin (set! it (get-grouped-environment-name-if-any)) it)
+                     (cond ((string=? it env) (return))
                            (else (emit-html-string cs) (emit-html-char #\{)
-                            (emit-html-string e) (emit-html-char #\})))))
-                  (else (emit-html-string cs)))
-                 (begin (emit-html-string cs)))))
-          ((char=? c #\ ) (get-actual-char)
-           (emit (if *verb-visible-space-p* *verbatim-visible-space* #\ )))
-          (else (emit-html-char (get-actual-char))))
-         (if %loop-returned %loop-result (%loop)))))))
+                            (emit-html-string it) (emit-html-char #\}))))
+                    (else (emit-html-string cs)))
+                   (begin (emit-html-string cs)))))
+            ((char=? c #\ ) (get-actual-char)
+             (emit (if *verb-visible-space-p* *verbatim-visible-space* #\ )))
+            (else (emit-html-char (get-actual-char))))
+           (if %loop-returned %loop-result (%loop))))))))
  (emit "</pre>") (egroup) (do-para))
 
 (define (do-endverbatim-eplain) (set! *inside-eplain-verbatim-p* false))
@@ -8295,35 +8262,31 @@
 (define (set-latex-counter-aux counter-name addp new-value)
  (cond
   ((begin (set! *it* (table-get counter-name *dotted-counters*)) *it*)
-   (let ((counter *it*))
-     (if addp
-         (set!counter*-value counter (+ (counter*-value counter) new-value))
-         (set!counter*-value counter new-value))))
+   (if addp
+       (set!counter*-value *it* (+ (counter*-value *it*) new-value))
+       (set!counter*-value *it* new-value)))
   (else
    (let ((count-seq (string-append "\\" counter-name)))
      (cond
       ((begin (set! *it* (section-ctl-seq-p count-seq)) *it*)
-       (let ((n *it*))
-         (table-put! n *section-counters*
-          (if addp
-              (+ new-value (table-get n *section-counters* 0))
-              new-value))))
+       (table-put! *it* *section-counters*
+        (if addp
+            (+ new-value (table-get *it* *section-counters* 0))
+            new-value)))
       ((find-count count-seq)
        (tex-gdef-count count-seq
         (if addp (+ new-value (get-gcount count-seq)) new-value)))
       (else false))))))
 
 (define (do-tex-prim z)
- (let ((y false))
+ (let ((y (find-def z)) (it false))
    (cond
-    ((begin (set! *it* (find-def z)) *it*) (set! y *it*)
-     (cond
-      ((begin (set! *it* (tdef*-defer y)) *it*) (set! y *it*)
-       (toss-back-string y))
-      ((begin (set! *it* (tdef*-thunk y)) *it*) (set! y *it*) (y))
-      (else
-       (expand-tex-macro (tdef*-optarg y) (tdef*-argpat y) (tdef*-expansion y)
-        (tdef*-catcodes y)))))
+    (y
+     (cond ((begin (set! it (tdef*-defer y)) it) (toss-back-string it))
+           ((begin (set! it (tdef*-thunk y)) it) (it))
+           (else
+            (expand-tex-macro (tdef*-optarg y) (tdef*-argpat y)
+             (tdef*-expansion y) (tdef*-catcodes y)))))
     (*math-mode-p* (do-math-ctl-seq z))
     (else (trace-if (> (the-count "\\tracingcommands") 0) "Ignoring " z)))))
 
@@ -8444,10 +8407,8 @@
 (define (do-tex-ctl-seq z) (trace-if (> (the-count "\\tracingmacros") 0) z)
  (cond
   ((begin (set! *it* (resolve-defs z)) *it*)
-   (let ((s *it*))
-     (trace-if (> (the-count "\\tracingmacros") 0) "    --> " s)
-     (toss-back-char *invisible-space*)
-     (toss-back-string s)))
+   (trace-if (> (the-count "\\tracingmacros") 0) "    --> " *it*)
+   (toss-back-char *invisible-space*) (toss-back-string *it*))
   ((and (inside-false-world-p) (not (if-aware-ctl-seq-p z))) false)
   ((string=? z "\\enddocument") (probably-latex) ':encountered-bye)
   ((member z '("\\bye" "\\TIIPbye")) ':encountered-bye)
@@ -8461,28 +8422,27 @@
   (else (do-tex-prim z))))
 
 (define (generate-html)
- (fluid-let ((*outer-p* true))
-  (let* ((%loop-returned false)
-         (%loop-result 0)
-         (return
-          (lambda %args
-            (set! %loop-returned true)
-            (set! %loop-result (and (pair? %args) (car %args))))))
-    (let %loop
-      ()
-      (let ((c (snoop-actual-char)))
-        (cond ((not c) (return true))
-              ((begin (set! *it* (resolve-cdefs c)) *it*)
-               (let ((s *it*))
-                 (toss-back-char *invisible-space*)
-                 (toss-back-string s)))
-              ((= (catcode c) **escape**)
-               (case (do-tex-ctl-seq (get-ctl-seq))
-                 ((:encountered-endinput) (return true))
-                 ((:encountered-bye) (return ':encountered-bye))
-                 (else true)))
-              (else (get-actual-char) (do-tex-char c))))
-      (if %loop-returned %loop-result (%loop))))))
+ (let ((%fluid-var-*outer-p* true) (it false))
+   (fluid-let ((*outer-p* %fluid-var-*outer-p*))
+    (let* ((%loop-returned false)
+           (%loop-result 0)
+           (return
+            (lambda %args
+              (set! %loop-returned true)
+              (set! %loop-result (and (pair? %args) (car %args))))))
+      (let %loop
+        ()
+        (let ((c (snoop-actual-char)))
+          (cond ((not c) (return true))
+                ((begin (set! it (resolve-cdefs c)) it)
+                 (toss-back-char *invisible-space*) (toss-back-string it))
+                ((= (catcode c) **escape**)
+                 (case (do-tex-ctl-seq (get-ctl-seq))
+                   ((:encountered-endinput) (return true))
+                   ((:encountered-bye) (return ':encountered-bye))
+                   (else true)))
+                (else (get-actual-char) (do-tex-char c))))
+        (if %loop-returned %loop-result (%loop)))))))
 
 (define (check-input-file-timestamp-p f)
  (cond
@@ -8512,7 +8472,7 @@
 (define (tex2page-file-if-exists f) (when (file-exists? f) (tex2page-file f)))
 
 (define (ignorable-tex-file-p f)
- (let ((e (or (file-extension f) "")))
+ (let ((e (or (file-extension f) "")) (it false))
    (when (string-ci=? e ".tex")
      (set! f (substring f 0 (- (string-length f) 4))))
    (cond ((string=? f "opmac") (tex-gdef-0arg "\\TZPopmac" "1") true)
@@ -8521,8 +8481,8 @@
          ((string-ci=? f "miniltx") (catcode #\@ **letter**) true)
          ((string-ci=? f "texinfo")
           (cond
-           ((begin (set! *it* (actual-tex-filename "texi2p")) *it*)
-            (tex2page-file *it*))
+           ((begin (set! it (actual-tex-filename "texi2p")) it)
+            (tex2page-file it))
            (else (terror 'do-input "File texi2p.tex not found")))
           true)
          ((string-ci=? e ".sty") true)
@@ -8531,19 +8491,21 @@
 (define (do-input) (ignorespaces)
  (let ((f (get-filename-possibly-braced)))
    (let ((boilerplate-index *inputting-boilerplate-p*))
-     (when (eqv? *inputting-boilerplate-p* 0)
-       (set! *inputting-boilerplate-p* false))
-     (fluid-let
-      ((*inputting-boilerplate-p*
-        (and boilerplate-index (add1 boilerplate-index))))
-      (cond ((ignorable-tex-file-p f) false)
-            ((begin
-              (set! *it*
-               (actual-tex-filename f (check-input-file-timestamp-p f)))
-              *it*)
-             (tex2page-file *it*))
-            (else (write-log #\() (write-log f) (write-log ':separation-space)
-             (write-log "not found)") (write-log ':separation-space)))))))
+     (let ((it false))
+       (when (eqv? *inputting-boilerplate-p* 0)
+         (set! *inputting-boilerplate-p* false))
+       (fluid-let
+        ((*inputting-boilerplate-p*
+          (and boilerplate-index (add1 boilerplate-index))))
+        (cond ((ignorable-tex-file-p f) false)
+              ((begin
+                (set! it
+                 (actual-tex-filename f (check-input-file-timestamp-p f)))
+                it)
+               (tex2page-file it))
+              (else (write-log #\() (write-log f)
+               (write-log ':separation-space) (write-log "not found)")
+               (write-log ':separation-space))))))))
 
 (define (do-includeonly) (ignorespaces)
  (when (eq? *includeonly-list* true) (set! *includeonly-list* null))
@@ -10685,7 +10647,8 @@ Try the commands
   (quasiquote (!index (unquote *index-count*) (unquote *html-page-count*))))
  (let ((tag
         (string-append *html-node-prefix* "index_"
-         (write-to-string *index-count*))))
+         (write-to-string *index-count*)))
+       (it false))
    (emit-anchor tag)
    (unless *index-stream*
      (let ((idx-file
@@ -10696,10 +10659,9 @@ Try the commands
    (cond
     ((or (substring? "|see{" idx-entry) (substring? "|seealso{" idx-entry))
      (display-index-entry idx-entry *index-stream*))
-    ((begin (set! *it* (substring? "|(" idx-entry)) *it*)
-     (let ((i *it*))
-       (display-index-entry (substring idx-entry 0 i) *index-stream*)
-       (display "|expandhtmlindex" *index-stream*)))
+    ((begin (set! it (substring? "|(" idx-entry)) it)
+     (display-index-entry (substring idx-entry 0 it) *index-stream*)
+     (display "|expandhtmlindex" *index-stream*))
     (else (display-index-entry idx-entry *index-stream*)
      (display "|expandhtmlindex" *index-stream*)))
    (display "}{" *index-stream*)

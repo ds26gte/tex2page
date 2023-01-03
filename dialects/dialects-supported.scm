@@ -1,4 +1,4 @@
-; last change 2022-12-27
+; last change 2023-01-02
 abcl ;v 1.9.0; WORKS!
 allegro ;v 9.0; WORKS!
 ; bigloo
@@ -9,6 +9,7 @@ chicken ;v 5.3.1; WORKS!
 clisp ;v 2.49; WORKS!
 clozure ;v 1.12.1; WORKS!
 cmucl ;v 20d; WORKS!
+; cyclone
 ecl ;v 21.2.1; WORKS!
 gambit ;v 4.9.3; WORKS!
 gauche ;v 0.9.10; WORKS!

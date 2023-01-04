@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20230103") ;last change
+(defparameter *tex2page-version* "20230104") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -352,7 +352,6 @@
 (defvar *inputting-boilerplate-p* nil)
 (defvar *inside-appendix-p* nil)
 (defvar *inside-eplain-verbatim-p* nil)
-(defvar *it*)
 
 (defvar *jobname* nil)
 
@@ -1139,30 +1138,31 @@
 
 (defun get-number-corresp-to-ctl-seq (x)
   (declare (string x))
-  (cond ((string= x "\\the") (get-number-corresp-to-ctl-seq (get-ctl-seq)))
-        ((string= x "\\active") **active**)
-        ;((string= x "\\pageno") *html-page-count*)
-        ((string= x "\\inputlineno") *input-line-no*)
-        ((string= x "\\footnotenumber") (get-gcount "\\footnotenumber"))
-        ((string= x "\\figurenumber")
-         (counter*-value (gethash "figure" *dotted-counters*)))
-        ((string= x "\\sectiondnumber")
-         (gethash (read-from-string (ungroup (get-token)))
-                  *section-counters*
-                  0))
-        ((string= x "\\magstep") (get-number-or-false))
-        ((find-chardef x))
-        ((setq *it* (find-countdef x))
-         (find-count *it*))
-        ((setq *it* (find-dimendef x))
-         (find-dimen *it*))
-        ((find-count x))
-        ((find-dimen x))
-        ;not sure about following
-        ((setq *it* (resolve-defs x))
-         (char-code (char *it* 0)))
-        ((= (string-length x) 2) (char-code (char x 1)))
-        (t (string->number x))))
+  (let (it)
+    (cond ((string= x "\\the") (get-number-corresp-to-ctl-seq (get-ctl-seq)))
+          ((string= x "\\active") **active**)
+          ;((string= x "\\pageno") *html-page-count*)
+          ((string= x "\\inputlineno") *input-line-no*)
+          ((string= x "\\footnotenumber") (get-gcount "\\footnotenumber"))
+          ((string= x "\\figurenumber")
+           (counter*-value (gethash "figure" *dotted-counters*)))
+          ((string= x "\\sectiondnumber")
+           (gethash (read-from-string (ungroup (get-token)))
+                    *section-counters*
+                    0))
+          ((string= x "\\magstep") (get-number-or-false))
+          ((find-chardef x))
+          ((setq it (find-countdef x))
+           (find-count it))
+          ((setq it (find-dimendef x))
+           (find-dimen it))
+          ((find-count x))
+          ((find-dimen x))
+          ;not sure about following
+          ((setq it (resolve-defs x))
+           (char-code (char it 0)))
+          ((= (string-length x) 2) (char-code (char x 1)))
+          (t (string->number x)))))
 
 (defun get-number-or-false ()
   (ignorespaces)
@@ -1488,10 +1488,10 @@
   (perform-aftergroups)
   (pop *tex-env*)
   ; (format t "egroup ~a~%" (length *tex-env*))
-  (cond ((setq *it* (top-texframe))
-         (setq *catcodes* (texframe*-catcodes *it*)))
-        (t (terror 'egroup "This can't happen.")))
-  )
+  (let (it)
+    (cond ((setq it (top-texframe))
+           (setq *catcodes* (texframe*-catcodes it)))
+          (t (terror 'egroup "This can't happen.")))))
 
 ; (trace bgroup egroup)
 
@@ -1869,9 +1869,10 @@
       (gethash num (texframe*-dimens *primitive-texframe*))))
 
 (defun the-dimen (ctlseq)
-  (cond ((setq *it* (find-dimendef ctlseq))
-         (find-dimen *it*))
-        (t (terror 'the-dimen "Missing dimen register."))))
+  (let (it)
+    (cond ((setq it (find-dimendef ctlseq))
+           (find-dimen it))
+          (t (terror 'the-dimen "Missing dimen register.")))))
 
 ; (trace the-dimen)
 
@@ -2071,9 +2072,10 @@
       (gethash num (texframe*-tokses *primitive-texframe*))))
 
 (defun the-toks (ctlseq)
-  (cond ((setq *it* (find-toksdef ctlseq))
-         (find-toks *it*))
-        (t (terror 'the-toks "Missing toks register."))))
+  (let (it)
+    (cond ((setq it (find-toksdef ctlseq))
+           (find-toks it))
+          (t (terror 'the-toks "Missing toks register.")))))
 
 ;(trace the-toks)
 
@@ -2141,15 +2143,16 @@
 
 (defun deactivate-cdef (c)
   (declare (character c))
-  (cond ((setq *it* (find-cdef-in-top-frame c))
-         ;if c is active in current group, deactivate it
-         (setf (cdef*-active *it*) nil))
-        ((setq *it* (find-cdef c))
-         ;if c is active in an enclosing group, create a shadowing
-         ;unactive def for it in the current group
-         (let ((d (ensure-cdef c (top-texframe))))
-           (kopy-cdef d *it*)
-           (setf (cdef*-active d) nil)))))
+  (let (it)
+    (cond ((setq it (find-cdef-in-top-frame c))
+           ;if c is active in current group, deactivate it
+           (setf (cdef*-active it) nil))
+          ((setq it (find-cdef c))
+           ;if c is active in an enclosing group, create a shadowing
+           ;unactive def for it in the current group
+           (let ((d (ensure-cdef c (top-texframe))))
+             (kopy-cdef d it)
+             (setf (cdef*-active d) nil))))))
 
 (defun do-undefcsactive ()
   (ignorespaces)
@@ -6304,10 +6307,10 @@
 
 (defun expand-the ()
   (let ((ctlseq (get-ctl-seq)) it)
-    (cond ((progn (setq it (find-dimendef ctlseq)) it)
+    (cond ((setq it (find-dimendef ctlseq))
            (scaled-point-to-tex-point (find-dimen it)))
           ((get-number-corresp-to-ctl-seq ctlseq))
-          ((progn (setq it (find-toksdef ctlseq)) it)
+          ((setq it (find-toksdef ctlseq))
            (find-toks it))
           (t (trace-if nil "expand-the failed")))))
 
@@ -6326,9 +6329,9 @@
 (defun do-arabic ()
   (let* ((counter-name (ungroup (get-group)))
          (counter (gethash counter-name *dotted-counters*))
-         it)
-    (cond ((setq it (counter*-value counter)) (emit it))
-          (t (trace-if nil "do-arabic failed")))))
+         (n (counter*-value counter)))
+    (if n (emit n)
+        (trace-if nil "do-arabic failed"))))
 
 (defun find-corresp-prim (ctlseq)
   ;is this really necessary?  Why not make resolve-defs take over this
@@ -7557,17 +7560,18 @@
 
 (defun scm-get-type (s)
   (declare (string s))
-  (cond ((gethash s *scm-special-symbols*) :special-symbol)
-        ((gethash s *scm-keywords*) :keyword)
-        ((gethash s *scm-builtins*) :builtin)
-        ((gethash s *scm-variables*) :variable)
-        ((string-is-flanked-by-stars-p s) :global)
-        ((setq *it* (string-index s #\:))
-         (if (= *it* 0) :selfeval :variable))
-        ((string-is-all-dots-p s) :background) ;for Scheme's ellipsis
-        ((char= (char s 0) #\#) :selfeval)
-        ((string->number s) :selfeval)
-        (t :variable)))
+  (let (it)
+    (cond ((gethash s *scm-special-symbols*) :special-symbol)
+          ((gethash s *scm-keywords*) :keyword)
+          ((gethash s *scm-builtins*) :builtin)
+          ((gethash s *scm-variables*) :variable)
+          ((string-is-flanked-by-stars-p s) :global)
+          ((setq it (string-index s #\:))
+           (if (= it 0) :selfeval :variable))
+          ((string-is-all-dots-p s) :background) ;for Scheme's ellipsis
+          ((char= (char s 0) #\#) :selfeval)
+          ((string->number s) :selfeval)
+          (t :variable))))
 
 (defun eat-star ()
   (let ((c (snoop-actual-char)))
@@ -7749,25 +7753,26 @@
 
 (defun set-latex-counter-aux (counter-name addp new-value)
   (declare (string counter-name) (number new-value))
-  (cond ((setq *it* (gethash counter-name *dotted-counters*))
-         (if addp
-             (incf (counter*-value *it*) new-value)
-             (setf (counter*-value *it*) new-value)))
-        (t
-          (let ((count-seq (string-append "\\" counter-name)))
-            (cond ((setq *it* (section-ctl-seq-p count-seq))
-                   (setf (gethash *it* *section-counters*)
-                         (if addp
-                             (+ new-value (gethash *it* *section-counters* 0))
-                             new-value)))
-                  ((find-count count-seq)
-                   ;typically \secnumdepth, \tocdepth
-                   (tex-gdef-count count-seq
-                                   (if addp
-                                       (+ new-value (get-gcount count-seq))
-                                       new-value)))
-                  (t ;error?
-                    nil))))))
+  (let (it)
+    (cond ((setq it (gethash counter-name *dotted-counters*))
+           (if addp
+               (incf (counter*-value it) new-value)
+               (setf (counter*-value it) new-value)))
+          (t
+            (let ((count-seq (string-append "\\" counter-name)))
+              (cond ((setq it (section-ctl-seq-p count-seq))
+                     (setf (gethash it *section-counters*)
+                           (if addp
+                               (+ new-value (gethash it *section-counters* 0))
+                               new-value)))
+                    ((find-count count-seq)
+                     ;typically \secnumdepth, \tocdepth
+                     (tex-gdef-count count-seq
+                                     (if addp
+                                         (+ new-value (get-gcount count-seq))
+                                         new-value)))
+                    (t ;error?
+                      nil)))))))
 
 (defun do-tex-prim (z)
   (let ((y (find-def z)) it)
@@ -7898,11 +7903,12 @@
 
 (defun do-tex-ctl-seq-completely (x)
   (declare (string x))
-  (cond ((setq *it* (resolve-defs x))
-         (tex2page-string *it*))
-        ((setq *it* (do-tex-prim (find-corresp-prim x)))
-         (when (eq *it* :encountered-undefined-command)
-           (emit x)))))
+  (let (it)
+    (cond ((setq it (resolve-defs x))
+           (tex2page-string it))
+          ((setq it (do-tex-prim (find-corresp-prim x)))
+           (when (eq it :encountered-undefined-command)
+             (emit x))))))
 
 (defun inside-false-world-p ()
   (or (member nil *tex-if-stack*) (member 'skip *tex-if-stack*)))
@@ -7914,33 +7920,34 @@
   ;process ctl seq z.  Return :encountered-bye if z is \bye;
   ;:encountered-endinput if z is \endinput
   (trace-if (> (the-count "\\tracingmacros") 0) z)
-  (cond ((setq *it* (resolve-defs z))
-         ;macro body could contain \fi
-         (trace-if (> (the-count "\\tracingmacros") 0)
-                   "    --> " *it*)
-         (toss-back-char *invisible-space*)
-         (toss-back-string *it*))
-        ((and (inside-false-world-p)
-              (not (if-aware-ctl-seq-p z)))
-         nil)
-        ((string= z "\\enddocument")
-         (probably-latex)
-         :encountered-bye)
-        ((member z '("\\bye" "\\TIIPbye") :test #'string=)
-         :encountered-bye)
-        ((member z '("\\endinput" "\\TIIPendinput") :test #'string=)
-         (let ((next-token (get-token)))
-           (when (and next-token
-                      (string= next-token "\\fi"))
-             (do-fi)))
-         :encountered-endinput)
-        ((setq *it* (find-countdef z))
-         (do-count= *it* nil))
-        ((setq *it* (find-dimendef z))
-         (do-dimen= *it* nil))
-        ((setq *it* (find-toksdef z))
-         (do-toks= *it* nil))
-        (t (do-tex-prim z)))
+  (let (it)
+    (cond ((setq it (resolve-defs z))
+           ;macro body could contain \fi
+           (trace-if (> (the-count "\\tracingmacros") 0)
+                     "    --> " it)
+           (toss-back-char *invisible-space*)
+           (toss-back-string it))
+          ((and (inside-false-world-p)
+                (not (if-aware-ctl-seq-p z)))
+           nil)
+          ((string= z "\\enddocument")
+           (probably-latex)
+           :encountered-bye)
+          ((member z '("\\bye" "\\TIIPbye") :test #'string=)
+           :encountered-bye)
+          ((member z '("\\endinput" "\\TIIPendinput") :test #'string=)
+           (let ((next-token (get-token)))
+             (when (and next-token
+                        (string= next-token "\\fi"))
+               (do-fi)))
+           :encountered-endinput)
+          ((setq it (find-countdef z))
+           (do-count= it nil))
+          ((setq it (find-dimendef z))
+           (do-dimen= it nil))
+          ((setq it (find-toksdef z))
+           (do-toks= it nil))
+          (t (do-tex-prim z))))
   ; (format t "do-tex-ctl-seq end catat is ~s~%" (catcode #\@))
 
   )
@@ -8832,11 +8839,12 @@ Try the commands
   (emit "</span>"))
 
 (defun do-math-ctl-seq (s)
-  (cond ((setq *it* (find-math-def s))
-         (funcall (tdef*-thunk *it*)))
-        (t (unless *math-needs-image-p*
-             (setq *math-needs-image-p* t))
-           (emit (subseq s 1)))))
+  (let (it)
+    (cond ((setq it (find-math-def s))
+           (funcall (tdef*-thunk it)))
+          (t (unless *math-needs-image-p*
+               (setq *math-needs-image-p* t))
+             (emit (subseq s 1))))))
 
 (defun tex-def-math-prim (cs thunk)
   (declare (string cs) (function thunk))

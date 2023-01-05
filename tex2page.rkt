@@ -272,7 +272,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221226, ecl.
 
 
-(define *tex2page-version* "20230104")
+(define *tex2page-version* "20230105")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -4858,13 +4858,11 @@
  (emit-newline) (emit "(running on ") (emit *scheme-version*) (emit ")")
  (emit-newline) (emit *tex2page-website*) (emit-newline) (emit "-->")
  (emit-newline) (emit "<head>") (emit-newline)
- (emit "<meta charset=\"utf-8\">") (emit-newline) (output-external-title)
- (link-stylesheets) (link-scripts)
+ (emit "<meta charset=\"utf-8\">") (emit-newline)
  (emit "<meta name=\"generator\" content=\"tex2page ")
- (emit *tex2page-version*) (emit "\">") (emit-newline)
- (emit "<meta name=\"robots\" content=\"index,follow\">") (emit-newline)
- (for-each emit *html-head*) (emit-newline) (emit "</head>") (emit-newline)
- (emit "<body>") (emit-newline) (emit "<div")
+ (emit *tex2page-version*) (emit "\">") (emit-newline) (output-external-title)
+ (link-stylesheets) (link-scripts) (for-each emit *html-head*) (emit-newline)
+ (emit "</head>") (emit-newline) (emit "<body>") (emit-newline) (emit "<div")
  (when
      (or (tex2page-flag-boolean "\\TIIPslides")
          (tex2page-flag-boolean "\\TZPslides"))

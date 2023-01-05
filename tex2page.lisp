@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20230104") ;last change
+(defparameter *tex2page-version* "20230105") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -4496,15 +4496,13 @@
   (emit-newline)
   (emit "<meta charset=\"utf-8\">")
   (emit-newline)
-  (output-external-title)
-  (link-stylesheets)
-  (link-scripts)
   (emit "<meta name=\"generator\" content=\"tex2page ")
   (emit *tex2page-version*)
   (emit "\">")
   (emit-newline)
-  (emit "<meta name=\"robots\" content=\"index,follow\">")
-  (emit-newline)
+  (output-external-title)
+  (link-stylesheets)
+  (link-scripts)
   (mapc #'emit *html-head*)
   (emit-newline)
   (emit "</head>")

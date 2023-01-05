@@ -4860,7 +4860,9 @@
  (emit-newline) (emit "<head>") (emit-newline)
  (emit "<meta charset=\"utf-8\">") (emit-newline) (output-external-title)
  (link-stylesheets) (link-scripts)
- (emit "<meta name=robots content=\"index,follow\">") (emit-newline)
+ (emit "<meta name=\"generator\" content=\"tex2page ")
+ (emit *tex2page-version*) (emit "\">") (emit-newline)
+ (emit "<meta name=\"robots\" content=\"index,follow\">") (emit-newline)
  (for-each emit *html-head*) (emit-newline) (emit "</head>") (emit-newline)
  (emit "<body>") (emit-newline) (emit "<div")
  (when

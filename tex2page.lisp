@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20230105") ;last change
+(defparameter *tex2page-version* "20240429") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -9678,49 +9678,61 @@ Try the commands
 (tex-def-prim "\\futurenonspacelet" #'do-futurenonspacelet)
 
 (defun do-scm-set-keywords ()
-  (call-with-input-string/buffered (ungroup (get-group))
-    (lambda ()
-      (let (c)
-        (loop
-          (ignorespaces :all)
-          (setq c (snoop-actual-char))
-          (when (not c) (return))
-          (let ((s (scm-get-token)))
-            (setf (gethash s *scm-builtins*) nil
-                  (gethash s *scm-variables*) nil
-                  (gethash s *scm-keywords*) t)))))))
+  (bgroup)
+  (catcode #\% 11)
+  (prog1
+    (call-with-input-string/buffered (ungroup (get-group))
+      (lambda ()
+        (let (c)
+          (loop
+            (ignorespaces :all)
+            (setq c (snoop-actual-char))
+            (when (not c) (return))
+            (let ((s (scm-get-token)))
+              (setf (gethash s *scm-builtins*) nil
+                    (gethash s *scm-variables*) nil
+                    (gethash s *scm-keywords*) t)))))))
+  (egroup))
 
 (tex-def-prim "\\scmkeyword" #'do-scm-set-keywords)
 
 (defun do-scm-set-builtins ()
-  (call-with-input-string/buffered (ungroup (get-group))
-    (lambda ()
-      (let (c)
-        (loop
-          (ignorespaces :all)
-          (setq c (snoop-actual-char))
-          (when (not c) (return))
-          (let ((s (scm-get-token)))
-            (setf (gethash s *scm-keywords*) nil
-                  (gethash s *scm-variables*) nil
-                  (gethash s *scm-builtins*) t)))))))
+  (bgroup)
+  (catcode #\% 11)
+  (prog1
+    (call-with-input-string/buffered (ungroup (get-group))
+      (lambda ()
+        (let (c)
+          (loop
+            (ignorespaces :all)
+            (setq c (snoop-actual-char))
+            (when (not c) (return))
+            (let ((s (scm-get-token)))
+              (setf (gethash s *scm-keywords*) nil
+                    (gethash s *scm-variables*) nil
+                    (gethash s *scm-builtins*) t)))))))
+  (egroup))
 
 (tex-def-prim "\\scmbuiltin" #'do-scm-set-builtins)
 
 (tex-let-prim "\\scmconstant" "\\scmbuiltin")
 
 (defun do-scm-set-variables ()
-  (call-with-input-string/buffered (ungroup (get-group))
-    (lambda ()
-      (let (c)
-        (loop
-          (ignorespaces :all)
-          (setq c (snoop-actual-char))
-          (when (not c) (return))
-          (let ((s (scm-get-token)))
-            (setf (gethash s *scm-builtins*) nil
-                  (gethash s *scm-keywords*) nil
-                  (gethash s *scm-variables*) t)))))))
+  (bgroup)
+  (catcode #\% 11)
+  (prog1
+    (call-with-input-string/buffered (ungroup (get-group))
+      (lambda ()
+        (let (c)
+          (loop
+            (ignorespaces :all)
+            (setq c (snoop-actual-char))
+            (when (not c) (return))
+            (let ((s (scm-get-token)))
+              (setf (gethash s *scm-builtins*) nil
+                    (gethash s *scm-keywords*) nil
+                    (gethash s *scm-variables*) t)))))))
+  (egroup))
 
 (tex-def-prim "\\scmvariable" #'do-scm-set-variables)
 

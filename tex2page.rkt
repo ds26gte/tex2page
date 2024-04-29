@@ -272,7 +272,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221226, ecl.
 
 
-(define *tex2page-version* "20230105")
+(define *tex2page-version* "20240429")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -10487,77 +10487,86 @@ Try the commands
 
 (tex-def-prim "\\futurenonspacelet" do-futurenonspacelet)
 
-(define (do-scm-set-keywords)
- (call-with-input-string/buffered (ungroup (get-group))
-  (lambda ()
-    (let ((c false))
-      (let* ((%loop-returned false)
-             (%loop-result 0)
-             (return
-              (lambda %args
-                (set! %loop-returned true)
-                (set! %loop-result (and (pair? %args) (car %args))))))
-        (let %loop
-          ()
-          (ignorespaces ':all)
-          (set! c (snoop-actual-char))
-          (when (not c) (return))
-          (unless %loop-returned
-            (let ((s (scm-get-token)))
-              (table-put! s *scm-builtins* false)
-              (table-put! s *scm-variables* false)
-              (table-put! s *scm-keywords* true)))
-          (if %loop-returned %loop-result (%loop))))))))
+(define (do-scm-set-keywords) (bgroup) (catcode #\% 11)
+ (let ((%prog1-first-value
+        (call-with-input-string/buffered (ungroup (get-group))
+         (lambda ()
+           (let ((c false))
+             (let* ((%loop-returned false)
+                    (%loop-result 0)
+                    (return
+                     (lambda %args
+                       (set! %loop-returned true)
+                       (set! %loop-result (and (pair? %args) (car %args))))))
+               (let %loop
+                 ()
+                 (ignorespaces ':all)
+                 (set! c (snoop-actual-char))
+                 (when (not c) (return))
+                 (unless %loop-returned
+                   (let ((s (scm-get-token)))
+                     (table-put! s *scm-builtins* false)
+                     (table-put! s *scm-variables* false)
+                     (table-put! s *scm-keywords* true)))
+                 (if %loop-returned %loop-result (%loop)))))))))
+   %prog1-first-value)
+ (egroup))
 
 (tex-def-prim "\\scmkeyword" do-scm-set-keywords)
 
-(define (do-scm-set-builtins)
- (call-with-input-string/buffered (ungroup (get-group))
-  (lambda ()
-    (let ((c false))
-      (let* ((%loop-returned false)
-             (%loop-result 0)
-             (return
-              (lambda %args
-                (set! %loop-returned true)
-                (set! %loop-result (and (pair? %args) (car %args))))))
-        (let %loop
-          ()
-          (ignorespaces ':all)
-          (set! c (snoop-actual-char))
-          (when (not c) (return))
-          (unless %loop-returned
-            (let ((s (scm-get-token)))
-              (table-put! s *scm-keywords* false)
-              (table-put! s *scm-variables* false)
-              (table-put! s *scm-builtins* true)))
-          (if %loop-returned %loop-result (%loop))))))))
+(define (do-scm-set-builtins) (bgroup) (catcode #\% 11)
+ (let ((%prog1-first-value
+        (call-with-input-string/buffered (ungroup (get-group))
+         (lambda ()
+           (let ((c false))
+             (let* ((%loop-returned false)
+                    (%loop-result 0)
+                    (return
+                     (lambda %args
+                       (set! %loop-returned true)
+                       (set! %loop-result (and (pair? %args) (car %args))))))
+               (let %loop
+                 ()
+                 (ignorespaces ':all)
+                 (set! c (snoop-actual-char))
+                 (when (not c) (return))
+                 (unless %loop-returned
+                   (let ((s (scm-get-token)))
+                     (table-put! s *scm-keywords* false)
+                     (table-put! s *scm-variables* false)
+                     (table-put! s *scm-builtins* true)))
+                 (if %loop-returned %loop-result (%loop)))))))))
+   %prog1-first-value)
+ (egroup))
 
 (tex-def-prim "\\scmbuiltin" do-scm-set-builtins)
 
 (tex-let-prim "\\scmconstant" "\\scmbuiltin")
 
-(define (do-scm-set-variables)
- (call-with-input-string/buffered (ungroup (get-group))
-  (lambda ()
-    (let ((c false))
-      (let* ((%loop-returned false)
-             (%loop-result 0)
-             (return
-              (lambda %args
-                (set! %loop-returned true)
-                (set! %loop-result (and (pair? %args) (car %args))))))
-        (let %loop
-          ()
-          (ignorespaces ':all)
-          (set! c (snoop-actual-char))
-          (when (not c) (return))
-          (unless %loop-returned
-            (let ((s (scm-get-token)))
-              (table-put! s *scm-builtins* false)
-              (table-put! s *scm-keywords* false)
-              (table-put! s *scm-variables* true)))
-          (if %loop-returned %loop-result (%loop))))))))
+(define (do-scm-set-variables) (bgroup) (catcode #\% 11)
+ (let ((%prog1-first-value
+        (call-with-input-string/buffered (ungroup (get-group))
+         (lambda ()
+           (let ((c false))
+             (let* ((%loop-returned false)
+                    (%loop-result 0)
+                    (return
+                     (lambda %args
+                       (set! %loop-returned true)
+                       (set! %loop-result (and (pair? %args) (car %args))))))
+               (let %loop
+                 ()
+                 (ignorespaces ':all)
+                 (set! c (snoop-actual-char))
+                 (when (not c) (return))
+                 (unless %loop-returned
+                   (let ((s (scm-get-token)))
+                     (table-put! s *scm-builtins* false)
+                     (table-put! s *scm-keywords* false)
+                     (table-put! s *scm-variables* true)))
+                 (if %loop-returned %loop-result (%loop)))))))))
+   %prog1-first-value)
+ (egroup))
 
 (tex-def-prim "\\scmvariable" do-scm-set-variables)
 

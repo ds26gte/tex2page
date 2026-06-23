@@ -35,7 +35,7 @@
         *load-verbose* nil
         *compile-verbose* nil))
 
-(defparameter *tex2page-version* "20240429") ;last change
+(defparameter *tex2page-version* "2026-06-23") ;last change
 
 (defparameter *tex2page-website*
   ;for details, please see
@@ -8919,6 +8919,8 @@ Try the commands
 (tex-def-prim "\\ifmmode" #'do-ifmmode)
 (tex-def-prim "\\ifnum" #'do-ifnum)
 (tex-def-prim "\\ifodd" #'do-ifodd)
+(tex-def-prim "\\ifPDFTeX" #'do-iffalse)
+(tex-def-prim "\\ifpdf" #'do-iffalse)
 (tex-def-prim "\\iftrue" #'do-iftrue)
 (tex-def-prim "\\ifx" #'do-ifx)
 (tex-def-prim "\\ignorespaces" #'ignorespaces)

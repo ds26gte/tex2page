@@ -272,7 +272,7 @@
 ;Translated from Common Lisp source tex2page.lisp by CLiiScm v. 20221226, ecl.
 
 
-(define *tex2page-version* "20240429")
+(define *tex2page-version* "2026-06-23")
 
 (define *tex2page-website* "http://ds26gte.github.io/tex2page/index.html")
 
@@ -9427,6 +9427,10 @@ Try the commands
 (tex-def-prim "\\ifnum" do-ifnum)
 
 (tex-def-prim "\\ifodd" do-ifodd)
+
+(tex-def-prim "\\ifPDFTeX" do-iffalse)
+
+(tex-def-prim "\\ifpdf" do-iffalse)
 
 (tex-def-prim "\\iftrue" do-iftrue)
 
